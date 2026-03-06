@@ -1,11 +1,10 @@
+import { NextResponse } from "next/server";
 import { fetchAllRepos, groupReposByYear } from "@/app/lib/github";
-import ClientPage from "@/app/components/ClientPage";
 
 export const revalidate = 3600;
 
-export default async function Home() {
+export async function GET() {
   const repos = await fetchAllRepos();
   const grouped = groupReposByYear(repos);
-
-  return <ClientPage grouped={grouped} />;
+  return NextResponse.json(grouped);
 }
