@@ -67,7 +67,7 @@ const contactLinks = [
 
 export default function AboutTab() {
   return (
-    <div className="space-y-10">
+    <div className="space-y-16">
       {/* Bio */}
       <FadeInOnScroll>
         <GlassCard className="p-8" hoverable={false}>
@@ -94,7 +94,7 @@ export default function AboutTab() {
 
       {/* Skills */}
       <FadeInOnScroll delay={0.1}>
-        <div>
+        <GlassCard className="p-8" hoverable={false}>
           <h2 className="text-2xl font-bold text-text-primary mb-6 flex items-center gap-3">
             <span className="w-8 h-0.5 bg-accent" />
             Skills & Technologies
@@ -104,7 +104,7 @@ export default function AboutTab() {
               <SkillBadge key={skill} skill={skill} />
             ))}
           </div>
-        </div>
+        </GlassCard>
       </FadeInOnScroll>
 
       {/* Resume & Contact */}
