@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
-import { fetchAllRepos, groupReposByYear } from "@/app/lib/github";
+import { fetchAllRepos, buildTimelineData } from "@/app/lib/github";
 
 export const revalidate = 3600;
 
 export async function GET() {
   const repos = await fetchAllRepos();
-  const grouped = groupReposByYear(repos);
-  return NextResponse.json(grouped);
+  const timelineData = buildTimelineData(repos);
+  return NextResponse.json(timelineData);
 }

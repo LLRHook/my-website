@@ -1,6 +1,17 @@
-import { GitHubRepo, RepoCardData, GroupedRepos } from "./types";
+import {
+  GitHubRepo,
+  RepoCardData,
+  TimelineData,
+  TimelineYear,
+  TimelineMonth,
+  TimelineDay,
+} from "./types";
 
 const GITHUB_API = "https://api.github.com";
+
+function monthName(index: number): string {
+  return new Date(2000, index).toLocaleString("en-US", { month: "long" });
+}
 
 function getHeaders(): HeadersInit {
   const headers: HeadersInit = {
@@ -36,40 +47,92 @@ export async function fetchAllRepos(): Promise<RepoCardData[]> {
   }
 
   return repos
-    .filter((r) => !r.fork)
+    .filter((r) => !r.fork && !r.private)
     .map((r): RepoCardData => ({
       id: r.id,
       name: r.name,
-      description: r.private ? null : r.description,
+      description: r.description,
       htmlUrl: r.html_url,
-      homepage: r.private ? null : r.homepage,
+      homepage: r.homepage,
       language: r.language,
       stars: r.stargazers_count,
-      fork: r.fork,
-      isPrivate: r.private,
       pushedAt: r.pushed_at,
       createdAt: r.created_at,
       owner: r.owner.login,
     }));
 }
 
-export function groupReposByYear(repos: RepoCardData[]): GroupedRepos {
-  const grouped: GroupedRepos = {};
+export function buildTimelineData(repos: RepoCardData[]): TimelineData {
+  const now = new Date();
+  const currentYear = now.getFullYear();
+  const currentMonth = now.getMonth();
+
+  // Group by year → month → (day if current month)
+  const yearMap = new Map<number, Map<number, RepoCardData[]>>();
 
   for (const repo of repos) {
-    const year = new Date(repo.pushedAt).getFullYear().toString();
-    if (!grouped[year]) grouped[year] = [];
-    grouped[year].push(repo);
+    const d = new Date(repo.pushedAt);
+    const y = d.getFullYear();
+    const m = d.getMonth();
+
+    if (!yearMap.has(y)) yearMap.set(y, new Map());
+    const monthMap = yearMap.get(y)!;
+    if (!monthMap.has(m)) monthMap.set(m, []);
+    monthMap.get(m)!.push(repo);
   }
 
-  // Sort repos within each year by most recently pushed
-  for (const year of Object.keys(grouped)) {
-    grouped[year].sort(
-      (a, b) => new Date(b.pushedAt).getTime() - new Date(a.pushedAt).getTime()
-    );
-  }
+  // Sort years descending
+  const sortedYears = [...yearMap.keys()].sort((a, b) => b - a);
 
-  return grouped;
+  const timeline: TimelineData = sortedYears.map((y): TimelineYear => {
+    const monthMap = yearMap.get(y)!;
+    // Sort months descending
+    const sortedMonths = [...monthMap.keys()].sort((a, b) => b - a);
+
+    const months: TimelineMonth[] = sortedMonths.map((m): TimelineMonth => {
+      const monthRepos = monthMap.get(m)!;
+      // Sort repos within month by pushed date descending
+      monthRepos.sort(
+        (a, b) => new Date(b.pushedAt).getTime() - new Date(a.pushedAt).getTime()
+      );
+
+      const isCurrentMonth = y === currentYear && m === currentMonth;
+
+      if (isCurrentMonth) {
+        // Group by day
+        const dayMap = new Map<number, RepoCardData[]>();
+        for (const repo of monthRepos) {
+          const day = new Date(repo.pushedAt).getDate();
+          if (!dayMap.has(day)) dayMap.set(day, []);
+          dayMap.get(day)!.push(repo);
+        }
+
+        const days: TimelineDay[] = [...dayMap.keys()]
+          .sort((a, b) => b - a)
+          .map((day): TimelineDay => ({
+            day: day.toString(),
+            date: new Date(y, m, day).toISOString(),
+            repos: dayMap.get(day)!,
+          }));
+
+        return {
+          month: monthName(m),
+          monthIndex: m,
+          days,
+        };
+      }
+
+      return {
+        month: monthName(m),
+        monthIndex: m,
+        repos: monthRepos,
+      };
+    });
+
+    return { year: y.toString(), months };
+  });
+
+  return timeline;
 }
 
 export async function fetchReadme(

@@ -24,15 +24,27 @@ export interface RepoCardData {
   homepage: string | null;
   language: string | null;
   stars: number;
-  fork: boolean;
-  isPrivate: boolean;
   pushedAt: string;
   createdAt: string;
   owner: string;
 }
 
-export interface GroupedRepos {
-  [year: string]: RepoCardData[];
+export interface TimelineDay {
+  day: string;
+  date: string;
+  repos: RepoCardData[];
 }
 
-export type ActiveTab = "work" | "about";
+export interface TimelineMonth {
+  month: string;
+  monthIndex: number;
+  days?: TimelineDay[];
+  repos?: RepoCardData[];
+}
+
+export interface TimelineYear {
+  year: string;
+  months: TimelineMonth[];
+}
+
+export type TimelineData = TimelineYear[];
