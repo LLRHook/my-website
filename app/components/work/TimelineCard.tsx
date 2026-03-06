@@ -29,21 +29,21 @@ export default function TimelineCard({ repo, side, index }: TimelineCardProps) {
 
   return (
     <div
-      className={`relative flex items-start w-full mb-8 ${
+      className={`relative flex items-start w-full mb-10 ${
         isLeft ? "md:justify-start" : "md:justify-end"
       }`}
     >
       {/* Dot on the stem */}
-      <div className="timeline-dot top-5" />
+      <div className="timeline-dot top-7" />
 
       {/* Branch connector - desktop only */}
       <div
         className="timeline-branch hidden md:block"
         style={{
-          top: "1.6rem",
+          top: "2rem",
           ...(isLeft
-            ? { right: "50%", left: "auto", width: "calc(50% - 45% + 6px)" }
-            : { left: "50%", right: "auto", width: "calc(50% - 45% + 6px)" }),
+            ? { right: "50%", left: "auto", width: "calc(5% + 6px)" }
+            : { left: "50%", right: "auto", width: "calc(5% + 6px)" }),
         }}
       />
 
@@ -51,28 +51,28 @@ export default function TimelineCard({ repo, side, index }: TimelineCardProps) {
       <div
         className="timeline-branch md:hidden"
         style={{
-          left: "26px",
-          width: "20px",
-          top: "1.6rem",
+          left: "30px",
+          width: "24px",
+          top: "2rem",
         }}
       />
 
       {/* Card */}
       <div
-        className={`w-full md:w-[45%] ${
+        className={`w-[calc(100%-70px)] ml-[60px] md:ml-0 md:w-[43%] ${
           isLeft ? "md:pr-8" : "md:pl-8"
-        } pl-14 md:pl-0`}
+        }`}
       >
         <FadeInOnScroll
           direction={isLeft ? "left" : "right"}
           delay={index * 0.05}
         >
           <div
-            className="glass glass-hover p-5 cursor-pointer transition-all duration-300"
+            className="glass glass-hover glass-shimmer p-6 sm:p-7 cursor-pointer transition-all duration-300"
             onClick={() => setExpanded(!expanded)}
           >
             {/* Meta row */}
-            <div className="flex items-center gap-3 mb-2 flex-wrap">
+            <div className="flex items-center gap-3 mb-3 flex-wrap">
               {repo.language && <LanguageBadge language={repo.language} />}
               {repo.stars > 0 && (
                 <span className="flex items-center gap-1 text-sm text-text-secondary">
@@ -89,13 +89,13 @@ export default function TimelineCard({ repo, side, index }: TimelineCardProps) {
             </div>
 
             {/* Project name */}
-            <h3 className="display-heading text-lg text-text-primary mb-1">
+            <h3 className="display-heading text-lg text-text-primary mb-2">
               {repo.name}
             </h3>
 
             {/* Description */}
             {repo.description && (
-              <p className="text-sm text-text-secondary line-clamp-2 mb-3">
+              <p className="text-sm text-text-secondary line-clamp-2 mb-4 leading-relaxed">
                 {repo.description}
               </p>
             )}

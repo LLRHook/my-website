@@ -16,7 +16,7 @@ export default function Navbar() {
           Victor Ivanov
         </motion.span>
 
-        <div className="flex items-center gap-8">
+        <div className="flex items-center gap-4 sm:gap-8">
           {NAV_LINKS.map((link) => (
             <a
               key={link.label}

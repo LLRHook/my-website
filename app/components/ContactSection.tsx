@@ -4,7 +4,7 @@ import FadeInOnScroll from "@/app/components/ui/FadeInOnScroll";
 
 export default function ContactSection() {
   return (
-    <section id="contact" className="py-32 sm:py-40 max-w-5xl mx-auto px-4 sm:px-6 text-center">
+    <section id="contact" className="py-32 sm:py-40 max-w-5xl mx-auto section-padding text-center">
       <FadeInOnScroll>
         <h2 className="text-5xl sm:text-6xl lg:text-7xl display-heading text-text-primary">
           Have a Project in Mind?
@@ -17,7 +17,7 @@ export default function ContactSection() {
       <FadeInOnScroll delay={0.2}>
         <div className="flex flex-wrap justify-center gap-6 mt-16">
           <a
-            href="mailto:vivanov@paradigmtesting.com"
+            href="mailto:victor.n.ivanov@gmail.com"
             className="btn-outline"
           >
             Get in Touch

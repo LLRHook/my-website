@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import { Inter, Syne } from "next/font/google";
 import "./globals.css";
-import MeshGradient from "./components/ui/MeshGradient";
+import AuroraBackground from "./components/ui/AuroraBackground";
+import NoiseOverlay from "./components/ui/NoiseOverlay";
+import ParticlesBackground from "./components/ui/ParticlesBackground";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -28,8 +30,12 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${inter.variable} ${syne.variable}`}>
       <body>
-        <MeshGradient />
-        {children}
+        <AuroraBackground />
+        <NoiseOverlay />
+        <ParticlesBackground />
+        <main className="relative z-[5]">
+          {children}
+        </main>
       </body>
     </html>
   );

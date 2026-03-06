@@ -17,7 +17,7 @@ export default function StatementSection({ text }: StatementSectionProps) {
   const opacity = useTransform(scrollYProgress, [0, 0.3, 0.7, 1], [0, 1, 1, 0]);
 
   return (
-    <section ref={ref} className="py-40 sm:py-52 px-4 sm:px-6">
+    <section ref={ref} className="py-40 sm:py-52 section-padding">
       <motion.p
         className="text-4xl sm:text-5xl lg:text-6xl display-heading text-center text-text-primary max-w-4xl mx-auto"
         style={{ opacity }}
