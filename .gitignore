@@ -8,3 +8,6 @@ out/
 .agents/
 skills-lock.json
 tsconfig.tsbuildinfo
+/test-results/
+/playwright-report/
+/playwright/.cache/
