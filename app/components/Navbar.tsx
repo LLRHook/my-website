@@ -5,8 +5,8 @@ import { NAV_LINKS } from "@/app/lib/constants";
 
 export default function Navbar() {
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 glass border-t-0 rounded-none border-l-0 border-r-0">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 h-20 flex items-center justify-between">
+    <nav data-testid="navbar" className="fixed top-0 left-0 right-0 z-50 glass border-t-0 rounded-none border-l-0 border-r-0">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
         <motion.span
           className="font-bold text-text-primary"
           initial={{ opacity: 0, x: -20 }}

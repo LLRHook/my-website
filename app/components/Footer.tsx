@@ -5,7 +5,7 @@ import Container from "@/app/components/ui/Container";
 
 export default function Footer() {
   return (
-    <Container as="footer" className="py-20">
+    <Container as="footer" className="py-20" data-testid="footer">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-12 mb-16">
         <div>
           <h3 className="text-text-primary font-bold text-lg mb-3">

@@ -27,7 +27,7 @@ const skills = [
 
 export default function AboutSection() {
   return (
-    <Container as="section" id="about" className="py-32">
+    <Container as="section" id="about" className="py-32" data-testid="about">
       <FadeInOnScroll>
         <h2 className="text-4xl sm:text-5xl display-heading text-text-primary mb-16">
           About

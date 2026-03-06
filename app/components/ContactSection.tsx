@@ -5,7 +5,7 @@ import Container from "@/app/components/ui/Container";
 
 export default function ContactSection() {
   return (
-    <Container as="section" id="contact" className="py-32 sm:py-40 text-center">
+    <Container as="section" id="contact" className="py-32 sm:py-40" innerClassName="text-center" data-testid="contact">
       <FadeInOnScroll>
         <h2 className="text-5xl sm:text-6xl lg:text-7xl display-heading text-text-primary">
           Have a Project in Mind?

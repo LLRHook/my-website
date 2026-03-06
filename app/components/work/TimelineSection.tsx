@@ -22,7 +22,7 @@ function renderCard(repo: RepoCardData, globalIndex: number) {
 export default function TimelineSection({ data }: TimelineSectionProps) {
   if (!data || data.length === 0) {
     return (
-      <Container as="section" id="work" className="py-24 text-center">
+      <Container as="section" id="work" className="py-24" innerClassName="text-center" data-testid="work">
         <p className="text-text-muted text-lg">No projects to display.</p>
       </Container>
     );
@@ -31,7 +31,7 @@ export default function TimelineSection({ data }: TimelineSectionProps) {
   let globalIndex = 0;
 
   return (
-    <Container as="section" id="work" className="py-24">
+    <Container as="section" id="work" className="py-24" data-testid="work">
       <div className="relative">
         {/* Vertical stem */}
         <div className="timeline-stem" />
