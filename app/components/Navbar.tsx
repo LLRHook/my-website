@@ -31,7 +31,7 @@ export default function Navbar({ activeTab, onTabChange }: NavbarProps) {
             <button
               key={tab.id}
               onClick={() => onTabChange(tab.id)}
-              className="relative px-4 py-1.5 text-sm font-medium transition-colors rounded-full"
+              className="relative px-4 py-2 text-sm font-medium transition-colors rounded-full"
               style={{
                 color:
                   activeTab === tab.id

@@ -55,7 +55,7 @@ export default function ProjectCard({ repo }: { repo: RepoCardData }) {
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={(e) => e.stopPropagation()}
-                className="text-sm text-accent hover:underline"
+                className="text-sm text-accent hover:underline px-3 py-1.5 rounded-full bg-accent-subtle"
               >
                 Live Demo
               </a>
@@ -64,7 +64,7 @@ export default function ProjectCard({ repo }: { repo: RepoCardData }) {
         </div>
 
         <button
-          className="mt-1 p-1 text-text-muted hover:text-text-primary transition-colors shrink-0"
+          className="mt-1 p-2 text-text-muted hover:text-text-primary transition-colors shrink-0"
           aria-label={expanded ? "Collapse" : "Expand"}
         >
           <svg

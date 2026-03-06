@@ -2,8 +2,12 @@
 
 import { useEffect, useState } from "react";
 import Markdown from "react-markdown";
+import rehypeRaw from "rehype-raw";
 import remarkGfm from "remark-gfm";
 import { motion } from "motion/react";
+
+const remarkPlugins = [remarkGfm];
+const rehypePlugins = [rehypeRaw];
 
 interface ProjectCardExpandedProps {
   owner: string;
@@ -49,7 +53,7 @@ export default function ProjectCardExpanded({
           </div>
         ) : (
           <div className="markdown-content text-sm">
-            <Markdown remarkPlugins={[remarkGfm]}>{readme}</Markdown>
+            <Markdown remarkPlugins={remarkPlugins} rehypePlugins={rehypePlugins}>{readme}</Markdown>
           </div>
         )}
 
@@ -58,7 +62,7 @@ export default function ProjectCardExpanded({
             href={htmlUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-accent text-white text-sm font-medium hover:opacity-90 transition-opacity"
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-accent text-white text-sm font-medium hover:opacity-90 transition-opacity"
           >
             View on GitHub
             <svg
