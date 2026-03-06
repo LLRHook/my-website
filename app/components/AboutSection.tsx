@@ -5,21 +5,19 @@ import Container from "@/app/components/ui/Container";
 import SkillBadge from "@/app/components/about/SkillBadge";
 
 const skills = [
+  "Java",
+  "Spring Boot",
   "TypeScript",
   "React",
   "Next.js",
   "Node.js",
   "Python",
-  "C++",
-  "Java",
-  "Rust",
   "PostgreSQL",
-  "MongoDB",
+  "Redis",
   "Docker",
   "AWS",
   "Git",
   "REST APIs",
-  "GraphQL",
   "Tailwind CSS",
   "Linux",
   "CI/CD",
@@ -37,16 +35,25 @@ export default function AboutSection() {
       <FadeInOnScroll delay={0.1}>
         <div className="space-y-6 mb-20">
           <p className="text-xl sm:text-2xl text-text-secondary leading-relaxed">
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do
-            eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim
-            ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut
-            aliquip ex ea commodo consequat.
+            Lead full-stack engineer at Paradigm Testing, based in Lausanne,
+            Switzerland. I studied computer science at UMBC after switching
+            from biochemistry mid-undergrad — spent too much time behind a
+            screen to pretend I belonged in a lab. Currently finishing a
+            master&apos;s in AI at Georgia Tech.
           </p>
           <p className="text-xl sm:text-2xl text-text-secondary leading-relaxed">
-            Duis aute irure dolor in reprehenderit in voluptate velit esse
-            cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat
-            cupidatat non proident, sunt in culpa qui officia deserunt mollit
-            anim id est laborum.
+            I build APIs, data pipelines, and full-stack applications — mostly
+            with Java/Spring Boot, React, PostgreSQL, and Redis. My philosophy
+            is simple: build fast, break things, but always test. A solid test
+            suite is non-negotiable, especially on the backend. With AI in the
+            workflow now, there&apos;s no excuse not to have one.
+          </p>
+          <p className="text-xl sm:text-2xl text-text-secondary leading-relaxed">
+            Outside of work, I rock climb every other day. It&apos;s
+            programming for athletes — full-body problem solving that keeps me
+            sharp. I&apos;m also deep into agentic AI workflows, deployment
+            automation, and building tools that make the development cycle
+            faster.
           </p>
         </div>
       </FadeInOnScroll>
