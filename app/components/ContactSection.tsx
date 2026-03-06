@@ -1,10 +1,11 @@
 "use client";
 
 import FadeInOnScroll from "@/app/components/ui/FadeInOnScroll";
+import Container from "@/app/components/ui/Container";
 
 export default function ContactSection() {
   return (
-    <section id="contact" className="py-32 sm:py-40 max-w-5xl mx-auto section-padding text-center">
+    <Container as="section" id="contact" className="py-32 sm:py-40 text-center">
       <FadeInOnScroll>
         <h2 className="text-5xl sm:text-6xl lg:text-7xl display-heading text-text-primary">
           Have a Project in Mind?
@@ -32,6 +33,6 @@ export default function ContactSection() {
           </a>
         </div>
       </FadeInOnScroll>
-    </section>
+    </Container>
   );
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import FadeInOnScroll from "@/app/components/ui/FadeInOnScroll";
+import Container from "@/app/components/ui/Container";
 import SkillBadge from "@/app/components/about/SkillBadge";
 
 const skills = [
@@ -26,7 +27,7 @@ const skills = [
 
 export default function AboutSection() {
   return (
-    <section id="about" className="py-32 max-w-5xl mx-auto section-padding">
+    <Container as="section" id="about" className="py-32">
       <FadeInOnScroll>
         <h2 className="text-4xl sm:text-5xl display-heading text-text-primary mb-16">
           About
@@ -68,6 +69,6 @@ export default function AboutSection() {
           Download Resume
         </a>
       </FadeInOnScroll>
-    </section>
+    </Container>
   );
 }

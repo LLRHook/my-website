@@ -2,6 +2,7 @@
 
 import type { TimelineData, TimelineMonth, TimelineDay, RepoCardData } from "@/app/lib/types";
 import TimelineCard from "./TimelineCard";
+import Container from "@/app/components/ui/Container";
 
 interface TimelineSectionProps {
   data: TimelineData;
@@ -21,19 +22,17 @@ function renderCard(repo: RepoCardData, globalIndex: number) {
 export default function TimelineSection({ data }: TimelineSectionProps) {
   if (!data || data.length === 0) {
     return (
-      <section id="work" className="py-24 px-4 sm:px-6">
-        <div className="max-w-6xl mx-auto text-center">
-          <p className="text-text-muted text-lg">No projects to display.</p>
-        </div>
-      </section>
+      <Container as="section" id="work" className="py-24 text-center">
+        <p className="text-text-muted text-lg">No projects to display.</p>
+      </Container>
     );
   }
 
   let globalIndex = 0;
 
   return (
-    <section id="work" className="py-24 section-padding">
-      <div className="max-w-5xl mx-auto relative">
+    <Container as="section" id="work" className="py-24">
+      <div className="relative">
         {/* Vertical stem */}
         <div className="timeline-stem" />
 
@@ -74,6 +73,6 @@ export default function TimelineSection({ data }: TimelineSectionProps) {
           </div>
         ))}
       </div>
-    </section>
+    </Container>
   );
 }

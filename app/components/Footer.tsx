@@ -1,10 +1,11 @@
 "use client";
 
 import { NAV_LINKS, SOCIAL_LINKS } from "@/app/lib/constants";
+import Container from "@/app/components/ui/Container";
 
 export default function Footer() {
   return (
-    <footer className="py-20 max-w-5xl mx-auto section-padding">
+    <Container as="footer" className="py-20">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-12 mb-16">
         <div>
           <h3 className="text-text-primary font-bold text-lg mb-3">
@@ -59,6 +60,6 @@ export default function Footer() {
           &copy; {new Date().getFullYear()} Victor Ivanov
         </span>
       </div>
-    </footer>
+    </Container>
   );
 }
