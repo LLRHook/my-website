@@ -4,7 +4,7 @@ import { NAV_LINKS, SOCIAL_LINKS } from "@/app/lib/constants";
 
 export default function Footer() {
   return (
-    <footer className="py-20 max-w-7xl mx-auto px-4 sm:px-6">
+    <footer className="py-20 max-w-5xl mx-auto section-padding">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-12 mb-16">
         <div>
           <h3 className="text-text-primary font-bold text-lg mb-3">

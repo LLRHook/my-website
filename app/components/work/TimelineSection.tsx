@@ -21,7 +21,7 @@ function renderCard(repo: RepoCardData, globalIndex: number) {
 export default function TimelineSection({ data }: TimelineSectionProps) {
   if (!data || data.length === 0) {
     return (
-      <section id="work" className="py-24 px-6">
+      <section id="work" className="py-24 px-4 sm:px-6">
         <div className="max-w-6xl mx-auto text-center">
           <p className="text-text-muted text-lg">No projects to display.</p>
         </div>
@@ -32,24 +32,24 @@ export default function TimelineSection({ data }: TimelineSectionProps) {
   let globalIndex = 0;
 
   return (
-    <section id="work" className="py-24 px-6">
-      <div className="max-w-6xl mx-auto relative">
+    <section id="work" className="py-24 section-padding">
+      <div className="max-w-5xl mx-auto relative">
         {/* Vertical stem */}
         <div className="timeline-stem" />
 
         {data.map((yearGroup) => (
           <div key={yearGroup.year} className="relative">
             {/* Year marker */}
-            <div className="flex justify-center mb-12 relative z-10">
-              <span className="text-6xl font-bold text-text-muted/20 select-none">
+            <div className="flex justify-center mb-16 relative z-10">
+              <span className="text-6xl sm:text-7xl font-bold text-text-muted/20 select-none">
                 {yearGroup.year}
               </span>
             </div>
 
             {yearGroup.months.map((month: TimelineMonth) => (
-              <div key={`${yearGroup.year}-${month.monthIndex}`} className="relative mb-12">
+              <div key={`${yearGroup.year}-${month.monthIndex}`} className="relative mb-16">
                 {/* Month label */}
-                <div className="flex justify-center mb-8 relative z-10">
+                <div className="flex justify-center mb-10 relative z-10">
                   <span className="text-xs uppercase tracking-widest text-text-muted bg-bg px-4 py-1">
                     {month.month}
                   </span>
@@ -58,7 +58,7 @@ export default function TimelineSection({ data }: TimelineSectionProps) {
                 {/* Day-grouped repos (current month) */}
                 {month.days?.map((day: TimelineDay) => (
                   <div key={day.date} className="relative">
-                    <div className="flex justify-center mb-4 relative z-10">
+                    <div className="flex justify-center mb-6 relative z-10">
                       <span className="text-[10px] uppercase tracking-wider text-text-muted/60 bg-bg px-3 py-0.5">
                         {day.day}
                       </span>

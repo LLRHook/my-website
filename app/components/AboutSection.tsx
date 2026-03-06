@@ -26,7 +26,7 @@ const skills = [
 
 export default function AboutSection() {
   return (
-    <section id="about" className="py-32 max-w-7xl mx-auto px-4 sm:px-6">
+    <section id="about" className="py-32 max-w-5xl mx-auto section-padding">
       <FadeInOnScroll>
         <h2 className="text-4xl sm:text-5xl display-heading text-text-primary mb-16">
           About

@@ -17,7 +17,7 @@ export default function GlassCard({
 }: GlassCardProps) {
   return (
     <motion.div
-      className={`glass ${hoverable ? "glass-hover" : ""} ${className}`}
+      className={`glass ${hoverable ? "glass-hover glass-shimmer" : ""} ${className}`}
       onClick={onClick}
       whileHover={hoverable ? { y: -4, transition: { duration: 0.2 } } : undefined}
       style={onClick ? { cursor: "pointer" } : undefined}

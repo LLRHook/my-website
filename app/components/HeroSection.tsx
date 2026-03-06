@@ -8,7 +8,7 @@ export default function HeroSection() {
   const opacity = useTransform(scrollY, [0, 400], [1, 0]);
 
   return (
-    <section className="min-h-screen flex flex-col items-center justify-center relative px-4">
+    <section className="min-h-screen flex flex-col items-center justify-center relative section-padding">
       <motion.div
         className="text-center"
         style={{ y, opacity }}
