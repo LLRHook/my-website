@@ -37,15 +37,16 @@ export default function AboutSection() {
       <FadeInOnScroll delay={0.1}>
         <div className="space-y-6 mb-20">
           <p className="text-xl sm:text-2xl text-text-secondary leading-relaxed">
-            I&apos;m a software engineer with a passion for building clean,
-            performant applications. I enjoy working across the full stack —
-            from crafting responsive UIs to designing scalable backend services.
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do
+            eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim
+            ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut
+            aliquip ex ea commodo consequat.
           </p>
           <p className="text-xl sm:text-2xl text-text-secondary leading-relaxed">
-            When I&apos;m not coding, you can find me exploring new
-            technologies, contributing to open source, or diving into a good
-            book. I believe in writing code that&apos;s not just functional, but
-            maintainable and elegant.
+            Duis aute irure dolor in reprehenderit in voluptate velit esse
+            cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat
+            cupidatat non proident, sunt in culpa qui officia deserunt mollit
+            anim id est laborum.
           </p>
         </div>
       </FadeInOnScroll>
