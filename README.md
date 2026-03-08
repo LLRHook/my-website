@@ -17,7 +17,7 @@ Personal portfolio site built with Next.js, featuring ambient animations and a g
 - **Noise Overlay** — SVG feTurbulence film grain texture at 3% opacity
 - **Floating Particles** — 50 interactive dots with grab interaction (desktop only)
 - **Shimmer Card Borders** — Rotating conic-gradient light on glass cards, red accent on hover
-- **Timeline** — Chronological project showcase with alternating left/right cards
+- **Timeline** — Chronological project showcase with alternating left/right cards, paginated (6 at a time) with "Show More" lazy loading
 - **Scroll Animations** — Parallax hero, fade-in sections, opacity-driven statement text
 - **Glassmorphism** — Frosted glass cards with backdrop blur and hover glow
 

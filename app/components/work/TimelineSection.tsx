@@ -1,8 +1,11 @@
 "use client";
 
+import { useState, useMemo } from "react";
 import type { TimelineData, TimelineMonth, TimelineDay, RepoCardData } from "@/app/lib/types";
 import TimelineCard from "./TimelineCard";
 import Container from "@/app/components/ui/Container";
+
+const PAGE_SIZE = 6;
 
 interface TimelineSectionProps {
   data: TimelineData;
@@ -20,6 +23,62 @@ function renderCard(repo: RepoCardData, globalIndex: number) {
 }
 
 export default function TimelineSection({ data }: TimelineSectionProps) {
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+
+  const totalRepos = useMemo(() => {
+    let count = 0;
+    for (const year of data) {
+      for (const month of year.months) {
+        if (month.days) {
+          for (const day of month.days) count += day.repos.length;
+        }
+        count += (month.repos?.length ?? 0);
+      }
+    }
+    return count;
+  }, [data]);
+
+  const visibleData = useMemo(() => {
+    let remaining = visibleCount;
+    const result: TimelineData = [];
+
+    for (const yearGroup of data) {
+      if (remaining <= 0) break;
+      const months: TimelineMonth[] = [];
+
+      for (const month of yearGroup.months) {
+        if (remaining <= 0) break;
+
+        if (month.days) {
+          const days: TimelineDay[] = [];
+          for (const day of month.days) {
+            if (remaining <= 0) break;
+            const repos = day.repos.slice(0, remaining);
+            remaining -= repos.length;
+            days.push({ ...day, repos });
+          }
+          if (days.length > 0) {
+            months.push({ ...month, days });
+          }
+        }
+
+        if (month.repos) {
+          const repos = month.repos.slice(0, remaining);
+          remaining -= repos.length;
+          if (repos.length > 0) {
+            months.push({ ...month, repos, days: undefined });
+          }
+        }
+      }
+
+      if (months.length > 0) {
+        result.push({ ...yearGroup, months });
+      }
+    }
+
+    return result;
+  }, [data, visibleCount]);
+
   if (!data || data.length === 0) {
     return (
       <Container as="section" id="work" className="py-24" innerClassName="text-center" data-testid="work">
@@ -38,7 +97,7 @@ export default function TimelineSection({ data }: TimelineSectionProps) {
         {/* Vertical stem */}
         <div className="timeline-stem" />
 
-        {data.map((yearGroup) => (
+        {visibleData.map((yearGroup) => (
           <div key={yearGroup.year} className="relative">
             {/* Year marker */}
             <div className="flex justify-center mb-16 relative z-10">
@@ -75,6 +134,17 @@ export default function TimelineSection({ data }: TimelineSectionProps) {
           </div>
         ))}
       </div>
+
+      {visibleCount < totalRepos && (
+        <div className="flex justify-center mt-16">
+          <button
+            onClick={() => setVisibleCount((c) => c + PAGE_SIZE)}
+            className="btn-outline"
+          >
+            Show More Projects
+          </button>
+        </div>
+      )}
     </Container>
   );
 }
