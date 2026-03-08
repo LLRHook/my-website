@@ -23,6 +23,7 @@ export default function TimelineSection({ data }: TimelineSectionProps) {
   if (!data || data.length === 0) {
     return (
       <Container as="section" id="work" className="py-24" innerClassName="text-center" data-testid="work">
+        <h2 className="sr-only">Work</h2>
         <p className="text-text-muted text-lg">No projects to display.</p>
       </Container>
     );
@@ -32,6 +33,7 @@ export default function TimelineSection({ data }: TimelineSectionProps) {
 
   return (
     <Container as="section" id="work" className="py-24" data-testid="work">
+      <h2 className="sr-only">Work</h2>
       <div className="relative">
         {/* Vertical stem */}
         <div className="timeline-stem" />

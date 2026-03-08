@@ -44,6 +44,41 @@
         "No sitemap.xml (returns 404)"
       ],
       "estimatedScoreAfter": 30
+    },
+    {
+      "date": "2026-03-08",
+      "change": "Metadata overhaul in app/layout.tsx — added metadataBase, canonical URL, Open Graph, Twitter Card, keyword-rich title and description",
+      "details": "Set metadataBase to https://victorivanov.engineer enabling relative URLs. Added canonical '/' to prevent duplicate content with Vercel deployment URL. Added full Open Graph tags (title, description, url, siteName, locale, type) and Twitter Card (summary). Updated title to 'Victor Ivanov | Software Engineer' and description to keyword-rich copy.",
+      "issuesResolved": [
+        "No metadataBase in Next.js metadata config",
+        "No canonical URL (duplicate content risk with Vercel URL)",
+        "No Open Graph metadata (social sharing broken)",
+        "No Twitter Card metadata",
+        "Generic title: 'Victor Ivanov -- Portfolio'",
+        "Generic description: 'Software engineer portfolio -- projects, skills, and experience.'"
+      ],
+      "estimatedScoreAfter": 42
+    },
+    {
+      "date": "2026-03-08",
+      "change": "Added JSON-LD structured data (Person + WebSite schemas) via app/components/JsonLd.tsx",
+      "details": "Person schema includes name, url, jobTitle, and sameAs links (GitHub, LinkedIn, X). WebSite schema includes site name and url. Both rendered as <script type=\"application/ld+json\"> in the document body.",
+      "issuesResolved": [
+        "No JSON-LD structured data (Person, WebSite)"
+      ],
+      "estimatedScoreAfter": 52
+    },
+    {
+      "date": "2026-03-08",
+      "change": "Fixed heading hierarchy, added SVG favicon, and created web app manifest",
+      "details": "Changed StatementSection from <p> to <h2> for proper heading semantics. Fixed duplicate <h2> in ContactSection by demoting second heading to <p>. Added sr-only <h2>Work</h2> to TimelineSection. Created app/icon.svg favicon with VI initials. Created app/manifest.ts with site metadata.",
+      "issuesResolved": [
+        "Broken heading hierarchy (missing h2 for Work section, duplicate h2 in Contact)",
+        "Statement sections use <p> instead of heading tags",
+        "No favicon anywhere in the project",
+        "No web app manifest"
+      ],
+      "estimatedScoreAfter": 60
     }
   ]
 }

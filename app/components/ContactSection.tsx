@@ -10,9 +10,9 @@ export default function ContactSection() {
         <h2 className="text-5xl sm:text-6xl lg:text-7xl display-heading text-text-primary">
           Have a Project in Mind?
         </h2>
-        <h2 className="text-5xl sm:text-6xl lg:text-7xl display-heading text-text-primary mt-4">
+        <p className="text-5xl sm:text-6xl lg:text-7xl display-heading text-text-primary mt-4">
           Let&apos;s Build Something Together.
-        </h2>
+        </p>
       </FadeInOnScroll>
 
       <FadeInOnScroll delay={0.2}>
