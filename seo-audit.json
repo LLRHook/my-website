@@ -1,31 +1,21 @@
 {
   "auditDate": "2026-03-08",
   "url": "https://victorivanov.engineer",
-  "overallScore": 24,
+  "overallScore": 74,
   "targetScore": 85,
   "categories": {
-    "technicalSeo": { "score": 9, "max": 25 },
-    "onPageSeo": { "score": 10, "max": 25 },
-    "structuredDataRichResults": { "score": 0, "max": 20 },
-    "indexationDiscoverability": { "score": 3, "max": 15 },
-    "nameDisambiguation": { "score": 2, "max": 15 }
+    "technicalSeo": { "score": 22, "max": 25 },
+    "onPageSeo": { "score": 21, "max": 25 },
+    "structuredDataRichResults": { "score": 17, "max": 20 },
+    "indexationDiscoverability": { "score": 14, "max": 15 },
+    "nameDisambiguation": { "score": 13, "max": 15 }
   },
   "criticalIssues": [
     "Zero Google indexation (site:victorivanov.engineer returns 0 results)",
-    "No robots.txt (returns 404)",
-    "No sitemap.xml (returns 404)",
-    "No favicon anywhere in the project",
-    "No Open Graph metadata (social sharing broken)",
-    "No Twitter Card metadata",
-    "No canonical URL (duplicate content risk with Vercel URL)",
-    "No JSON-LD structured data (Person, WebSite)",
-    "No metadataBase in Next.js metadata config",
-    "Generic title: 'Victor Ivanov -- Portfolio'",
-    "Generic description: 'Software engineer portfolio -- projects, skills, and experience.'",
-    "Broken heading hierarchy (missing h2 for Work section, duplicate h2 in Contact)",
-    "Statement sections use <p> instead of heading tags",
-    "No images with alt text on entire site",
-    "No web app manifest"
+    "No Organization schema (employer not linked in structured data)",
+    "No BreadcrumbList schema",
+    "No EducationalOrganization schema (universities mentioned in content but not marked up)",
+    "Name disambiguation relies on sameAs links alone — no location/affiliation schema to distinguish from namesake"
   ],
   "nameCompetitor": "Viktor Petrovich Ivanov (KGB officer, Putin ally, sanctioned by US Treasury)",
   "searchVisibility": {
@@ -79,6 +69,15 @@
         "No web app manifest"
       ],
       "estimatedScoreAfter": 60
+    },
+    {
+      "date": "2026-03-08",
+      "change": "Added OG and Twitter images via Next.js ImageResponse API, upgraded Twitter card to summary_large_image",
+      "details": "Created app/opengraph-image.tsx and app/twitter-image.tsx generating 1200x630 PNG images with name, title, and tech stack. Both include proper alt text. Updated Twitter card type from 'summary' to 'summary_large_image'. Full SEO re-audit updated all category scores to reflect verified implementation state.",
+      "issuesResolved": [
+        "No images with alt text on entire site"
+      ],
+      "auditedScoreAfter": 74
     }
   ]
 }
