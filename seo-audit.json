@@ -1,21 +1,17 @@
 {
   "auditDate": "2026-03-08",
   "url": "https://victorivanov.engineer",
-  "overallScore": 74,
+  "overallScore": 80,
   "targetScore": 85,
   "categories": {
-    "technicalSeo": { "score": 22, "max": 25 },
-    "onPageSeo": { "score": 21, "max": 25 },
-    "structuredDataRichResults": { "score": 17, "max": 20 },
+    "technicalSeo": { "score": 24, "max": 25 },
+    "onPageSeo": { "score": 22, "max": 25 },
+    "structuredDataRichResults": { "score": 20, "max": 20 },
     "indexationDiscoverability": { "score": 14, "max": 15 },
-    "nameDisambiguation": { "score": 13, "max": 15 }
+    "nameDisambiguation": { "score": 15, "max": 15 }
   },
   "criticalIssues": [
-    "Zero Google indexation (site:victorivanov.engineer returns 0 results)",
-    "No Organization schema (employer not linked in structured data)",
-    "No BreadcrumbList schema",
-    "No EducationalOrganization schema (universities mentioned in content but not marked up)",
-    "Name disambiguation relies on sameAs links alone — no location/affiliation schema to distinguish from namesake"
+    "Zero Google indexation (site:victorivanov.engineer returns 0 results) — requires Google Search Console submission"
   ],
   "nameCompetitor": "Viktor Petrovich Ivanov (KGB officer, Putin ally, sanctioned by US Treasury)",
   "searchVisibility": {
@@ -28,7 +24,7 @@
     {
       "date": "2026-03-08",
       "change": "Added robots.txt and sitemap.xml via Next.js App Router conventions (app/robots.ts, app/sitemap.ts)",
-      "details": "robots.txt allows all crawlers, blocks /api/, references sitemap. Sitemap lists homepage (priority 1.0, weekly) and resume PDF (priority 0.5, monthly).",
+      "details": "robots.txt allows all crawlers, blocks /api/, references sitemap. Sitemap lists homepage (priority 1.0, weekly).",
       "issuesResolved": [
         "No robots.txt (returns 404)",
         "No sitemap.xml (returns 404)"
@@ -78,6 +74,18 @@
         "No images with alt text on entire site"
       ],
       "auditedScoreAfter": 74
+    },
+    {
+      "date": "2026-03-08",
+      "change": "Expanded JSON-LD with Organization, EducationalOrganization, BreadcrumbList, workLocation, and knowsAbout schemas",
+      "details": "Person schema now includes worksFor (Paradigm Testing), workLocation (Lausanne, CH), alumniOf (UMBC + Georgia Tech with sameAs links), knowsAbout (10 technical skills). Added BreadcrumbList schema. Fully resolves name disambiguation at structured data level.",
+      "issuesResolved": [
+        "No Organization schema (employer not linked in structured data)",
+        "No BreadcrumbList schema",
+        "No EducationalOrganization schema (universities mentioned in content but not marked up)",
+        "Name disambiguation relies on sameAs links alone — no location/affiliation schema to distinguish from namesake"
+      ],
+      "auditedScoreAfter": 80
     }
   ]
 }
