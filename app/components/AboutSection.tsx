@@ -69,14 +69,6 @@ export default function AboutSection() {
         </div>
       </FadeInOnScroll>
 
-      <FadeInOnScroll delay={0.3}>
-        <a
-          href="/Victor_Ivanov_Resume.pdf"
-          className="btn-outline"
-        >
-          Download Resume
-        </a>
-      </FadeInOnScroll>
     </Container>
   );
 }
