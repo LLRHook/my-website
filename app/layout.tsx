@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter, Syne } from "next/font/google";
 import "./globals.css";
 import AuroraBackground from "./components/ui/AuroraBackground";
+import JsonLd from "./components/JsonLd";
 import NoiseOverlay from "./components/ui/NoiseOverlay";
 import ParticlesBackground from "./components/ui/ParticlesBackground";
 
@@ -16,10 +17,33 @@ const syne = Syne({
   variable: "--font-syne",
 });
 
+import {
+  SITE_URL,
+  SITE_NAME,
+  SITE_TITLE,
+  SITE_DESCRIPTION,
+} from "./lib/constants";
+
 export const metadata: Metadata = {
-  title: "Victor Ivanov — Portfolio",
-  description:
-    "Software engineer portfolio — projects, skills, and experience.",
+  metadataBase: new URL(SITE_URL),
+  title: SITE_TITLE,
+  description: SITE_DESCRIPTION,
+  alternates: {
+    canonical: "/",
+  },
+  openGraph: {
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
+    url: "/",
+    siteName: SITE_NAME,
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary",
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
+  },
 };
 
 export default function RootLayout({
@@ -30,6 +54,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${inter.variable} ${syne.variable}`}>
       <body>
+        <JsonLd />
         <AuroraBackground />
         <NoiseOverlay />
         <ParticlesBackground />
