@@ -1,0 +1,49 @@
+{
+  "auditDate": "2026-03-08",
+  "url": "https://victorivanov.engineer",
+  "overallScore": 24,
+  "targetScore": 85,
+  "categories": {
+    "technicalSeo": { "score": 9, "max": 25 },
+    "onPageSeo": { "score": 10, "max": 25 },
+    "structuredDataRichResults": { "score": 0, "max": 20 },
+    "indexationDiscoverability": { "score": 3, "max": 15 },
+    "nameDisambiguation": { "score": 2, "max": 15 }
+  },
+  "criticalIssues": [
+    "Zero Google indexation (site:victorivanov.engineer returns 0 results)",
+    "No robots.txt (returns 404)",
+    "No sitemap.xml (returns 404)",
+    "No favicon anywhere in the project",
+    "No Open Graph metadata (social sharing broken)",
+    "No Twitter Card metadata",
+    "No canonical URL (duplicate content risk with Vercel URL)",
+    "No JSON-LD structured data (Person, WebSite)",
+    "No metadataBase in Next.js metadata config",
+    "Generic title: 'Victor Ivanov -- Portfolio'",
+    "Generic description: 'Software engineer portfolio -- projects, skills, and experience.'",
+    "Broken heading hierarchy (missing h2 for Work section, duplicate h2 in Contact)",
+    "Statement sections use <p> instead of heading tags",
+    "No images with alt text on entire site",
+    "No web app manifest"
+  ],
+  "nameCompetitor": "Viktor Petrovich Ivanov (KGB officer, Putin ally, sanctioned by US Treasury)",
+  "searchVisibility": {
+    "victorIvanov": "Not visible - KGB figure dominates",
+    "victorIvanovSoftwareEngineer": "Top 3 via ZoomInfo/LinkedIn (not the actual site)",
+    "victorIvanovEngineer": "Position 5-6 via aggregators",
+    "siteVictorivanoveEngineer": "Zero pages indexed"
+  },
+  "improvementHistory": [
+    {
+      "date": "2026-03-08",
+      "change": "Added robots.txt and sitemap.xml via Next.js App Router conventions (app/robots.ts, app/sitemap.ts)",
+      "details": "robots.txt allows all crawlers, blocks /api/, references sitemap. Sitemap lists homepage (priority 1.0, weekly) and resume PDF (priority 0.5, monthly).",
+      "issuesResolved": [
+        "No robots.txt (returns 404)",
+        "No sitemap.xml (returns 404)"
+      ],
+      "estimatedScoreAfter": 30
+    }
+  ]
+}
