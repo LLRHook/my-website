@@ -19,12 +19,12 @@ export default function StatementSection({ text }: StatementSectionProps) {
   return (
     <section ref={ref} data-testid="statement" className="py-40 sm:py-52">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-        <motion.p
+        <motion.h2
           className="text-4xl sm:text-5xl lg:text-6xl display-heading text-center text-text-primary max-w-4xl mx-auto"
           style={{ opacity }}
         >
           {text}
-        </motion.p>
+        </motion.h2>
       </div>
     </section>
   );
