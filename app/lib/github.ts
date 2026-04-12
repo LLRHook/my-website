@@ -8,6 +8,7 @@ import {
 } from "./types";
 
 const GITHUB_API = "https://api.github.com";
+const GITHUB_USERNAME = "LLRHook";
 
 function monthName(index: number): string {
   return new Date(2000, index).toLocaleString("en-US", { month: "long" });
@@ -23,20 +24,26 @@ function getHeaders(): HeadersInit {
   return headers;
 }
 
-export async function fetchAllRepos(): Promise<RepoCardData[]> {
+async function fetchPaginatedRepos(url: string): Promise<GitHubRepo[]> {
   const repos: GitHubRepo[] = [];
   let page = 1;
 
   while (true) {
+    const separator = url.includes("?") ? "&" : "?";
     const res = await fetch(
-      `${GITHUB_API}/user/repos?per_page=100&page=${page}&sort=pushed&affiliation=owner`,
+      `${url}${separator}per_page=100&page=${page}&sort=pushed`,
       {
         headers: getHeaders(),
         next: { revalidate: 3600 },
       }
     );
 
-    if (!res.ok) break;
+    if (!res.ok) {
+      console.error(
+        `[github] ${url} responded ${res.status} ${res.statusText} (page ${page})`
+      );
+      return repos; // return whatever was collected so far
+    }
 
     const batch: GitHubRepo[] = await res.json();
     if (batch.length === 0) break;
@@ -44,6 +51,32 @@ export async function fetchAllRepos(): Promise<RepoCardData[]> {
     repos.push(...batch);
     if (batch.length < 100) break;
     page++;
+  }
+
+  return repos;
+}
+
+export async function fetchAllRepos(): Promise<RepoCardData[]> {
+  let repos: GitHubRepo[];
+
+  if (process.env.GITHUB_TOKEN) {
+    // Authenticated: can list all owned repos including private
+    repos = await fetchPaginatedRepos(
+      `${GITHUB_API}/user/repos?affiliation=owner`
+    );
+  } else {
+    // Fallback: list public repos for the known username
+    console.warn(
+      "[github] GITHUB_TOKEN is not set — falling back to public repos for",
+      GITHUB_USERNAME
+    );
+    repos = await fetchPaginatedRepos(
+      `${GITHUB_API}/users/${GITHUB_USERNAME}/repos?type=owner`
+    );
+  }
+
+  if (repos.length === 0) {
+    console.warn("[github] No repos returned from GitHub API");
   }
 
   return repos
