@@ -6,6 +6,7 @@ import type { RepoCardData } from "@/app/lib/types";
 import FadeInOnScroll from "@/app/components/ui/FadeInOnScroll";
 import LanguageBadge from "./LanguageBadge";
 import ProjectCardExpanded from "./ProjectCardExpanded";
+import Chevron from "@/app/components/ui/Chevron";
 
 interface TimelineCardProps {
   repo: RepoCardData;
@@ -33,10 +34,8 @@ export default function TimelineCard({ repo, side, index }: TimelineCardProps) {
         isLeft ? "md:justify-start" : "md:justify-end"
       }`}
     >
-      {/* Dot on the stem */}
       <div className="timeline-dot top-7" />
 
-      {/* Branch connector - desktop only */}
       <div
         className="timeline-branch hidden md:block"
         style={{
@@ -47,7 +46,6 @@ export default function TimelineCard({ repo, side, index }: TimelineCardProps) {
         }}
       />
 
-      {/* Mobile branch connector */}
       <div
         className="timeline-branch md:hidden"
         style={{
@@ -57,7 +55,6 @@ export default function TimelineCard({ repo, side, index }: TimelineCardProps) {
         }}
       />
 
-      {/* Card */}
       <div
         className={`w-[calc(100%-70px)] ml-[60px] md:ml-0 md:w-[43%] ${
           isLeft ? "md:pr-8" : "md:pl-8"
@@ -67,45 +64,52 @@ export default function TimelineCard({ repo, side, index }: TimelineCardProps) {
           direction={isLeft ? "left" : "right"}
           delay={index * 0.05}
         >
-          <div
-            className="glass glass-hover glass-shimmer p-6 sm:p-7 cursor-pointer transition-all duration-300"
-            onClick={() => setExpanded(!expanded)}
-          >
-            {/* Meta row */}
-            <div className="flex items-center gap-3 mb-3 flex-wrap">
-              {repo.language && <LanguageBadge language={repo.language} />}
-              {repo.stars > 0 && (
-                <span className="flex items-center gap-1 text-sm text-text-secondary">
-                  <svg
-                    className="w-4 h-4"
-                    fill="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                  </svg>
-                  {repo.stars}
-                </span>
+          <div className="glass glass-hover glass-shimmer transition-all duration-300">
+            <button
+              type="button"
+              onClick={() => setExpanded(!expanded)}
+              aria-expanded={expanded}
+              aria-label={`${expanded ? "Collapse" : "Expand"} ${repo.name} details`}
+              className="block w-full text-left p-6 sm:p-7"
+            >
+              <div className="flex items-center gap-3 mb-3 flex-wrap">
+                {repo.language && <LanguageBadge language={repo.language} />}
+                {repo.stars > 0 && (
+                  <span className="flex items-center gap-1 text-sm text-text-secondary" aria-label={`${repo.stars} stars`}>
+                    <svg
+                      className="w-4 h-4"
+                      fill="currentColor"
+                      viewBox="0 0 24 24"
+                      aria-hidden="true"
+                    >
+                      <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                    </svg>
+                    {repo.stars}
+                  </span>
+                )}
+              </div>
+
+              <div className="flex items-start justify-between gap-3 mb-2">
+                <h3 className="display-heading text-lg text-text-primary">
+                  {repo.name}
+                </h3>
+                <Chevron
+                  direction="down"
+                  className={`w-4 h-4 mt-1 text-text-muted shrink-0 transition-transform duration-300 ${expanded ? "rotate-180" : ""}`}
+                />
+              </div>
+
+              {repo.description && (
+                <p className="text-sm text-text-secondary line-clamp-2 mb-4 leading-relaxed">
+                  {repo.description}
+                </p>
               )}
-            </div>
 
-            {/* Project name */}
-            <h3 className="display-heading text-lg text-text-primary mb-2">
-              {repo.name}
-            </h3>
-
-            {/* Description */}
-            {repo.description && (
-              <p className="text-sm text-text-secondary line-clamp-2 mb-4 leading-relaxed">
-                {repo.description}
+              <p className="text-xs text-text-muted">
+                Updated {formatDate(repo.pushedAt)}
               </p>
-            )}
+            </button>
 
-            {/* Pushed date */}
-            <p className="text-xs text-text-muted">
-              Updated {formatDate(repo.pushedAt)}
-            </p>
-
-            {/* Expanded content */}
             <AnimatePresence>
               {expanded && (
                 <ProjectCardExpanded

@@ -54,11 +54,12 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${inter.variable} ${syne.variable}`}>
       <body>
+        <a href="#main" className="skip-link">Skip to content</a>
         <JsonLd />
         <AuroraBackground />
         <NoiseOverlay />
         <ParticlesBackground />
-        <main className="relative z-[5]">
+        <main id="main" className="relative z-[5]">
           {children}
         </main>
       </body>
