@@ -1,9 +1,9 @@
-"use client";
-
 import { NAV_LINKS, SOCIAL_LINKS } from "@/app/lib/constants";
 import Container from "@/app/components/ui/Container";
 
 export default function Footer() {
+  const year = new Date().getFullYear();
+
   return (
     <Container as="footer" className="py-20" data-testid="footer">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-12 mb-16">
@@ -16,7 +16,7 @@ export default function Footer() {
           </p>
         </div>
 
-        <div>
+        <nav aria-label="Footer navigation">
           <h4 className="text-text-secondary text-sm uppercase tracking-widest mb-4">
             Navigation
           </h4>
@@ -32,9 +32,9 @@ export default function Footer() {
               </li>
             ))}
           </ul>
-        </div>
+        </nav>
 
-        <div>
+        <nav aria-label="Social links">
           <h4 className="text-text-secondary text-sm uppercase tracking-widest mb-4">
             Connect
           </h4>
@@ -48,16 +48,19 @@ export default function Footer() {
                   className="text-text-muted hover:text-text-secondary transition-colors text-sm"
                 >
                   {link.label}
+                  {link.external ? (
+                    <span className="sr-only"> (opens in new tab)</span>
+                  ) : null}
                 </a>
               </li>
             ))}
           </ul>
-        </div>
+        </nav>
       </div>
 
       <div className="border-t border-border pt-8 text-center">
         <span className="text-text-muted text-sm">
-          &copy; {new Date().getFullYear()} Victor Ivanov
+          &copy; {year} Victor Ivanov
         </span>
       </div>
     </Container>

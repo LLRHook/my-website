@@ -46,7 +46,7 @@ export default function ProjectCardExpanded({
       transition={{ duration: 0.3, ease: "easeInOut" }}
       className="overflow-hidden"
     >
-      <div className="pt-4 mt-4 border-t border-border">
+      <div className="px-6 sm:px-7 pb-6 sm:pb-7 pt-4 border-t border-border">
         {loading ? (
           <div className="flex items-center justify-center py-8">
             <div className="w-6 h-6 border-2 border-accent border-t-transparent rounded-full animate-spin" />

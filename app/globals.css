@@ -309,3 +309,43 @@
   background-color: white;
   color: black;
 }
+
+/* Skip to content (a11y) */
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  z-index: 100;
+  background: var(--color-bg);
+  color: var(--color-text-primary);
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+}
+
+.skip-link:focus {
+  left: 1rem;
+  top: 1rem;
+}
+
+/* Respect users who prefer reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .glass-shimmer {
+    animation: none !important;
+    background: var(--color-surface) padding-box,
+      linear-gradient(rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.08)) border-box !important;
+  }
+}

@@ -11,15 +11,7 @@ export default function NoiseOverlay() {
             baseFrequency="0.8"
             numOctaves="4"
             stitchTiles="stitch"
-          >
-            <animate
-              attributeName="seed"
-              from="0"
-              to="100"
-              dur="12s"
-              repeatCount="indefinite"
-            />
-          </feTurbulence>
+          />
         </filter>
         <rect width="100%" height="100%" filter="url(#noise)" />
       </svg>

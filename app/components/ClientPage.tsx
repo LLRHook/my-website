@@ -6,8 +6,8 @@ import HeroSection from "./HeroSection";
 import TimelineSection from "./work/TimelineSection";
 import AboutSection from "./AboutSection";
 import ContactSection from "./ContactSection";
-import Footer from "./Footer";
 import ScrollProgress from "./ui/ScrollProgress";
+import BackToTop from "./ui/BackToTop";
 
 export default function ClientPage({
   timelineData,
@@ -22,7 +22,7 @@ export default function ClientPage({
       <TimelineSection data={timelineData} />
       <AboutSection />
       <ContactSection />
-      <Footer />
+      <BackToTop />
     </>
   );
 }
