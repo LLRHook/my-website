@@ -1,6 +1,13 @@
 "use client";
 
-import { startTransition, useDeferredValue, useEffect, useMemo, useState } from "react";
+import {
+  startTransition,
+  useDeferredValue,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
+import { AnimatePresence, motion } from "motion/react";
 import type { RepoCardData } from "@/app/lib/types";
 import {
   EMAIL_HREF,
@@ -10,26 +17,37 @@ import {
 } from "@/app/lib/constants";
 import RepoReadmePanel from "./RepoReadmePanel";
 
-type DemoTrackKey = "backend" | "fullstack" | "ai" | "lead";
-type FunnelStage = "saved" | "applied" | "interview" | "offer";
+type AppKey = "about" | "work" | "contact";
 
-interface DemoTrack {
-  key: DemoTrackKey;
-  label: string;
-  thesis: string;
-  bullets: string[];
-}
-
-interface DemoEntry {
+const APP_TABS: Array<{
+  key: AppKey;
   id: string;
-  company: string;
-  source: string;
-  stage: FunnelStage;
-  track: DemoTrackKey;
-  note: string;
-}
-
-const FEATURED_PRIORITY = ["applybase", "mailit", "claude-guide", "my-website"];
+  label: string;
+  path: string;
+  summary: string;
+}> = [
+  {
+    key: "about",
+    id: "app-tab-about",
+    label: "About",
+    path: "~/profile/about",
+    summary: "Bio, working style, and current focus.",
+  },
+  {
+    key: "work",
+    id: "app-tab-work",
+    label: "Projects",
+    path: "~/workspace/projects",
+    summary: "Repo archive with live README inspection.",
+  },
+  {
+    key: "contact",
+    id: "app-tab-contact",
+    label: "Contact",
+    path: "~/network/contact",
+    summary: "How to reach me and what I like building.",
+  },
+];
 
 const PRINCIPLES = [
   "Build fast, but keep the test surface real.",
@@ -38,7 +56,7 @@ const PRINCIPLES = [
 ];
 
 const CURRENT_FOCUS = [
-  "Leading full-stack engineering at Paradigm Testing.",
+  "Lead full-stack engineering at Paradigm Testing.",
   "Finishing a master's in AI at Georgia Tech.",
   "Building agentic workflows, deployment automation, and internal tools.",
 ];
@@ -48,77 +66,6 @@ const CONTACT_INTERESTS = [
   "AI-enabled internal tooling",
   "Developer experience and automation",
   "System design and platform work",
-];
-
-const DEMO_TRACKS: DemoTrack[] = [
-  {
-    key: "backend",
-    label: "Backend",
-    thesis: "A resume lane for systems-heavy roles where reliability, APIs, and data design carry the weight.",
-    bullets: ["Distributed systems", "PostgreSQL + Redis", "Observability"],
-  },
-  {
-    key: "fullstack",
-    label: "Full-stack",
-    thesis: "Balanced product engineering with frontend polish, application depth, and shipping speed.",
-    bullets: ["TypeScript + React", "API + UI ownership", "Fast iteration"],
-  },
-  {
-    key: "ai",
-    label: "AI systems",
-    thesis: "Applied AI work where models are part of the product, but the surrounding system still has to be solid.",
-    bullets: ["Agent workflows", "Evaluations", "Operational safeguards"],
-  },
-  {
-    key: "lead",
-    label: "Lead",
-    thesis: "A lane for roles that need architecture, execution, and a teammate who can unblock the whole team.",
-    bullets: ["Roadmapping", "Cross-functional delivery", "Quality bar"],
-  },
-];
-
-const DEMO_STAGES: Array<{ key: FunnelStage; label: string }> = [
-  { key: "saved", label: "Saved" },
-  { key: "applied", label: "Applied" },
-  { key: "interview", label: "Interview" },
-  { key: "offer", label: "Offer" },
-];
-
-const DEMO_SOURCES = ["Referral", "Outbound", "Inbound", "Recruiter"];
-
-const INITIAL_DEMO_ENTRIES: DemoEntry[] = [
-  {
-    id: "baseline-1",
-    company: "Linear",
-    source: "Referral",
-    stage: "interview",
-    track: "fullstack",
-    note: "Product-minded engineering role with strong frontend ownership.",
-  },
-  {
-    id: "baseline-2",
-    company: "Anthropic",
-    source: "Inbound",
-    stage: "applied",
-    track: "ai",
-    note: "Agent tooling role anchored in applied AI systems work.",
-  },
-  {
-    id: "baseline-3",
-    company: "Vercel",
-    source: "Outbound",
-    stage: "saved",
-    track: "backend",
-    note: "Platform-leaning role queued for a backend resume pass.",
-  },
-  {
-    id: "baseline-4",
-    company: "Retool",
-    source: "Recruiter",
-    stage: "offer",
-    track: "lead",
-    note: "Leadership-tilted product engineering conversation.",
-  },
 ];
 
 function formatDayStamp(dateString: string) {
@@ -136,17 +83,49 @@ function formatLongDate(dateString: string) {
   });
 }
 
+function formatTime(now: Date) {
+  return new Intl.DateTimeFormat("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+  }).format(now);
+}
+
 function makeSocialLabel(link: SocialLink) {
   return link.label.toUpperCase();
 }
 
-function findFeaturedRepo(repos: RepoCardData[]) {
-  for (const name of FEATURED_PRIORITY) {
-    const match = repos.find((repo) => repo.name === name);
-    if (match) return match;
-  }
+interface WindowFrameProps {
+  label: string;
+  path: string;
+  meta?: string;
+  children: React.ReactNode;
+  className?: string;
+}
 
-  return repos[0] ?? null;
+function WindowFrame({
+  label,
+  path,
+  meta,
+  children,
+  className = "",
+}: WindowFrameProps) {
+  return (
+    <section className={`window-frame ${className}`}>
+      <div className="window-titlebar">
+        <div className="window-controls" aria-hidden="true">
+          <span />
+          <span />
+          <span />
+        </div>
+        <div className="window-copy">
+          <span className="window-label mono">{label}</span>
+          <span className="window-path mono">{path}</span>
+        </div>
+        {meta ? <span className="window-meta mono">{meta}</span> : null}
+      </div>
+      <div className="window-body">{children}</div>
+    </section>
+  );
 }
 
 export default function ClientPage({ repos }: { repos: RepoCardData[] }) {
@@ -158,42 +137,40 @@ export default function ClientPage({ repos }: { repos: RepoCardData[] }) {
       ),
     [repos]
   );
-
-  const featuredRepo = useMemo(() => findFeaturedRepo(sortedRepos), [sortedRepos]);
-  const archivePool = useMemo(
-    () =>
-      sortedRepos.filter((repo) => repo.id !== featuredRepo?.id),
-    [featuredRepo, sortedRepos]
+  const [activeApp, setActiveApp] = useState<AppKey>("work");
+  const [selectedRepoName, setSelectedRepoName] = useState(
+    sortedRepos[0]?.name ?? ""
   );
-
-  const [selectedRepoName, setSelectedRepoName] = useState("");
   const [query, setQuery] = useState("");
+  const [now, setNow] = useState(() => new Date());
   const deferredQuery = useDeferredValue(query);
 
-  const [demoTrack, setDemoTrack] = useState<DemoTrackKey>("fullstack");
-  const [demoCompany, setDemoCompany] = useState("Cursor");
-  const [demoSource, setDemoSource] = useState("Referral");
-  const [demoStage, setDemoStage] = useState<FunnelStage>("applied");
-  const [demoEntries, setDemoEntries] = useState<DemoEntry[]>(INITIAL_DEMO_ENTRIES);
+  useEffect(() => {
+    const hash = window.location.hash.replace("#", "");
+    if (APP_TABS.some((app) => app.key === hash)) {
+      setActiveApp(hash as AppKey);
+    }
+  }, []);
 
   useEffect(() => {
-    if (!archivePool.length && featuredRepo && selectedRepoName !== featuredRepo.name) {
-      setSelectedRepoName(featuredRepo.name);
-      return;
-    }
+    window.history.replaceState({}, "", `#${activeApp}`);
+  }, [activeApp]);
 
-    if (!archivePool.length) return;
-    if (archivePool.some((repo) => repo.name === selectedRepoName)) return;
-    setSelectedRepoName(archivePool[0].name);
-  }, [archivePool, featuredRepo, selectedRepoName]);
+  useEffect(() => {
+    const timer = window.setInterval(() => setNow(new Date()), 60_000);
+    return () => window.clearInterval(timer);
+  }, []);
+
+  useEffect(() => {
+    if (!sortedRepos.length || selectedRepoName) return;
+    setSelectedRepoName(sortedRepos[0].name);
+  }, [selectedRepoName, sortedRepos]);
 
   const filteredRepos = useMemo(() => {
-    const pool = archivePool.length ? archivePool : featuredRepo ? [featuredRepo] : [];
     const normalized = deferredQuery.trim().toLowerCase();
+    if (!normalized) return sortedRepos;
 
-    if (!normalized) return pool;
-
-    return pool.filter((repo) => {
+    return sortedRepos.filter((repo) => {
       const haystack = [
         repo.name,
         repo.description ?? "",
@@ -205,7 +182,7 @@ export default function ClientPage({ repos }: { repos: RepoCardData[] }) {
 
       return haystack.includes(normalized);
     });
-  }, [archivePool, deferredQuery, featuredRepo]);
+  }, [deferredQuery, sortedRepos]);
 
   useEffect(() => {
     if (!filteredRepos.length) return;
@@ -216,7 +193,6 @@ export default function ClientPage({ repos }: { repos: RepoCardData[] }) {
   const selectedRepo =
     filteredRepos.find((repo) => repo.name === selectedRepoName) ??
     filteredRepos[0] ??
-    featuredRepo ??
     null;
 
   const languageSummary = useMemo(() => {
@@ -238,588 +214,498 @@ export default function ClientPage({ repos }: { repos: RepoCardData[] }) {
   );
 
   const latestUpdate = sortedRepos[0]?.pushedAt;
-  const featuredTrack = DEMO_TRACKS.find((track) => track.key === demoTrack) ?? DEMO_TRACKS[1];
+  const activeTab = APP_TABS.find((tab) => tab.key === activeApp) ?? APP_TABS[1];
 
-  const stageCounts = useMemo(
-    () =>
-      DEMO_STAGES.map((stage) => ({
-        ...stage,
-        count: demoEntries.filter((entry) => entry.stage === stage.key).length,
-      })),
-    [demoEntries]
-  );
-
-  const totalTracked = demoEntries.length;
-  const activeTracks = new Set(demoEntries.map((entry) => entry.track)).size;
-  const featuredProjectName = featuredRepo?.name ?? "featured build";
-  const featuredHeadline =
-    featuredRepo?.name === "applybase"
-      ? "A live slice of applybase's core loop."
-      : "A live slice of a real workflow from the archive.";
-  const featuredCopy =
-    featuredRepo?.name === "applybase"
-      ? "Pick a resume lane, log an application, and watch the funnel move. The point is the same as the real product: keep the workflow tight, local, and visible."
-      : "This interactive area is how I want the portfolio to feel: less brochure, more product. Touch the workflow first, then inspect the code.";
-
-  const selectRepo = (repoName: string) => {
-    startTransition(() => setSelectedRepoName(repoName));
+  const openApp = (nextApp: AppKey) => {
+    startTransition(() => setActiveApp(nextApp));
   };
 
-  const submitDemoEntry = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-
-    const trimmedCompany = demoCompany.trim();
-    if (!trimmedCompany) return;
-
-    const note =
-      demoTrack === "ai"
-        ? "AI systems role routed to the applied workflows lane."
-        : demoTrack === "lead"
-          ? "Leadership-leaning opening logged with a broader systems resume."
-          : demoTrack === "backend"
-            ? "Backend-heavy role queued with systems and API emphasis."
-            : "Product engineering role logged with the full-stack lane.";
-
-    setDemoEntries((entries) => [
-      {
-        id: `${Date.now()}`,
-        company: trimmedCompany,
-        source: demoSource,
-        stage: demoStage,
-        track: demoTrack,
-        note,
-      },
-      ...entries,
-    ]);
-
-    setDemoCompany("");
-    startTransition(() => setDemoStage("saved"));
+  const selectRepo = (nextRepo: string) => {
+    startTransition(() => setSelectedRepoName(nextRepo));
   };
 
   return (
-    <div className="portfolio-page" data-testid="portfolio-page">
-      <div className="portfolio-wallpaper" aria-hidden="true" />
-      <div className="portfolio-grain" aria-hidden="true" />
+    <div className="shell-page" data-testid="shell-page">
+      <div className="shell-wallpaper" aria-hidden="true" />
 
-      <header className="site-header">
-        <a href="#top" className="site-brand">
-          <span className="site-mark mono">VI</span>
-          <span className="site-brand-copy">
-            <span className="site-brand-name">Victor Ivanov</span>
-            <span className="site-brand-role">Software Engineer</span>
-          </span>
-        </a>
-
-        <nav className="site-nav" aria-label="Primary">
-          <a href="#featured">Featured</a>
-          <a href="#archive">Archive</a>
-          <a href="#about">About</a>
-          <a href="#contact">Contact</a>
-        </nav>
-
-        <a href={EMAIL_HREF} className="header-link mono">
-          EMAIL
-        </a>
-      </header>
-
-      <main className="portfolio-main" id="top">
-        <section className="section hero-section">
-          <div className="hero-copy">
-            <span className="section-eyebrow mono">
-              Lead full-stack engineer · Georgia Tech MSAI · Lausanne, CH
+      <div className="shell-frame">
+        <header className="shell-statusbar">
+          <div className="shell-statusgroup">
+            <span className="status-pill">Victor Ivanov</span>
+            <span className="status-pill status-pill--muted">
+              Software Engineer
             </span>
-            <h1 className="hero-title">
-              Build useful systems. Let people touch the work.
-            </h1>
-            <p className="hero-lede">
-              I design and ship product engineering, AI-enabled internal tools,
-              and platform work that still feels understandable after it ships.
-            </p>
-
-            <div className="action-row">
-              <a href="#featured" className="shell-button">
-                Try the featured workflow
-              </a>
-              <a href="#archive" className="shell-button shell-button--ghost">
-                Browse the archive
-              </a>
-            </div>
-
-            <div className="hero-rhythm" aria-label="Current snapshot">
-              <div className="hero-rhythm-row">
-                <span className="hero-rhythm-label mono">Current role</span>
-                <span>Lead full-stack engineering at Paradigm Testing</span>
-              </div>
-              <div className="hero-rhythm-row">
-                <span className="hero-rhythm-label mono">Current focus</span>
-                <span>Agentic workflows, product systems, and internal tooling</span>
-              </div>
-              <div className="hero-rhythm-row">
-                <span className="hero-rhythm-label mono">Archive</span>
-                <span>
-                  {sortedRepos.length} public repos · {totalStars} stars · last updated{" "}
-                  {latestUpdate ? formatLongDate(latestUpdate) : "recently"}
-                </span>
-              </div>
-            </div>
           </div>
 
-          <aside className="hero-aside">
-            <div className="aside-block">
-              <span className="section-eyebrow mono">Why this shape</span>
-              <p className="aside-copy">
-                The portfolio should feel like a product surface, not a stack of
-                cards. One featured build gets a real interaction model; the rest
-                stay searchable and inspectable.
-              </p>
-            </div>
-
-            <div className="aside-block">
-              <span className="section-eyebrow mono">Current focus</span>
-              <ul className="line-list">
-                {CURRENT_FOCUS.map((item) => (
-                  <li key={item}>{item}</li>
-                ))}
-              </ul>
-            </div>
-          </aside>
-        </section>
-
-        {featuredRepo ? (
-          <section className="section feature-section" id="featured">
-            <div className="section-heading">
-              <span className="section-eyebrow mono">Featured work</span>
-              <h2 className="section-title">{featuredHeadline}</h2>
-              <p className="section-copy">{featuredCopy}</p>
-            </div>
-
-            <div className="feature-layout">
-              <div className="feature-story">
-                <span className="feature-kicker mono">{featuredProjectName}</span>
-                <h3 className="feature-title">
-                  A flagship project should be usable before it is explainable.
-                </h3>
-                <p className="feature-copy">
-                  {featuredRepo.description ??
-                    "A representative build from the archive, highlighted here with a live interaction model."}
-                </p>
-
-                <div className="feature-stats">
-                  <div className="feature-stat">
-                    <span className="feature-stat-label mono">Language</span>
-                    <strong>{featuredRepo.language ?? "Mixed stack"}</strong>
-                  </div>
-                  <div className="feature-stat">
-                    <span className="feature-stat-label mono">Updated</span>
-                    <strong>{formatLongDate(featuredRepo.pushedAt)}</strong>
-                  </div>
-                  <div className="feature-stat">
-                    <span className="feature-stat-label mono">Tracked entries</span>
-                    <strong>{totalTracked}</strong>
-                  </div>
-                  <div className="feature-stat">
-                    <span className="feature-stat-label mono">Resume lanes</span>
-                    <strong>{activeTracks}</strong>
-                  </div>
-                </div>
-
-                <div className="feature-notes">
-                  <div className="feature-note">
-                    <span className="feature-note-index mono">01</span>
-                    <p>Choose the right category fast instead of tailoring from scratch every time.</p>
-                  </div>
-                  <div className="feature-note">
-                    <span className="feature-note-index mono">02</span>
-                    <p>Keep the application funnel visible so follow-ups and conversion quality are obvious.</p>
-                  </div>
-                  <div className="feature-note">
-                    <span className="feature-note-index mono">03</span>
-                    <p>Make the workflow local-first, practical, and clear enough that it keeps getting used.</p>
-                  </div>
-                </div>
-
-                <div className="action-row">
-                  <a
-                    href={featuredRepo.htmlUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="shell-button"
-                  >
-                    Open repository
-                  </a>
-                  <a href="#archive" className="shell-button shell-button--ghost">
-                    Open the archive
-                  </a>
-                </div>
-              </div>
-
-              <section className="feature-demo" data-testid="featured-demo">
-                <div className="demo-topline">
-                  <span className="mono">interactive slice</span>
-                  <span>Modeled on {featuredProjectName}</span>
-                </div>
-
-                <div className="demo-trackbar" role="tablist" aria-label="Resume lanes">
-                  {DEMO_TRACKS.map((track) => {
-                    const isActive = track.key === demoTrack;
-                    return (
-                      <button
-                        key={track.key}
-                        type="button"
-                        role="tab"
-                        aria-selected={isActive}
-                        className={`track-button ${isActive ? "track-button--active" : ""}`}
-                        onClick={() => startTransition(() => setDemoTrack(track.key))}
-                      >
-                        {track.label}
-                      </button>
-                    );
-                  })}
-                </div>
-
-                <div className="demo-grid">
-                  <div className="demo-panel">
-                    <span className="section-eyebrow mono">Resume lane</span>
-                    <h3 className="demo-title">{featuredTrack.label}</h3>
-                    <p className="demo-copy">{featuredTrack.thesis}</p>
-
-                    <ul className="line-list line-list--compact">
-                      {featuredTrack.bullets.map((item) => (
-                        <li key={item}>{item}</li>
-                      ))}
-                    </ul>
-                  </div>
-
-                  <form className="demo-form" onSubmit={submitDemoEntry}>
-                    <label className="form-field">
-                      <span className="mono">company</span>
-                      <input
-                        aria-label="Company"
-                        name="company"
-                        value={demoCompany}
-                        onChange={(event) => setDemoCompany(event.target.value)}
-                        placeholder="Add a company"
-                      />
-                    </label>
-
-                    <div className="form-row">
-                      <label className="form-field">
-                        <span className="mono">source</span>
-                        <select
-                          aria-label="Source"
-                          name="source"
-                          value={demoSource}
-                          onChange={(event) => setDemoSource(event.target.value)}
-                        >
-                          {DEMO_SOURCES.map((source) => (
-                            <option key={source} value={source}>
-                              {source}
-                            </option>
-                          ))}
-                        </select>
-                      </label>
-
-                      <label className="form-field">
-                        <span className="mono">stage</span>
-                        <select
-                          aria-label="Stage"
-                          name="stage"
-                          value={demoStage}
-                          onChange={(event) => setDemoStage(event.target.value as FunnelStage)}
-                        >
-                          {DEMO_STAGES.map((stage) => (
-                            <option key={stage.key} value={stage.key}>
-                              {stage.label}
-                            </option>
-                          ))}
-                        </select>
-                      </label>
-                    </div>
-
-                    <button type="submit" className="shell-button">
-                      Log to funnel
-                    </button>
-                  </form>
-                </div>
-
-                <div className="demo-stagebar">
-                  {stageCounts.map((stage) => (
-                    <div key={stage.key} className="stage-meter">
-                      <span className="stage-meter-label mono">{stage.label}</span>
-                      <strong
-                        className="stage-meter-value"
-                        data-testid={`stage-count-${stage.key}`}
-                      >
-                        {stage.count}
-                      </strong>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="demo-feed" data-testid="demo-feed">
-                  {demoEntries.slice(0, 6).map((entry) => (
-                    <div key={entry.id} className="demo-entry">
-                      <div className="demo-entry-top">
-                        <strong>{entry.company}</strong>
-                        <span className="mono">
-                          {
-                            DEMO_STAGES.find((stage) => stage.key === entry.stage)?.label
-                          }
-                        </span>
-                      </div>
-                      <p>{entry.note}</p>
-                      <div className="demo-entry-meta mono">
-                        <span>
-                          {DEMO_TRACKS.find((track) => track.key === entry.track)?.label}
-                        </span>
-                        <span>{entry.source}</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </section>
-            </div>
-          </section>
-        ) : null}
-
-        <section className="section archive-section" id="archive">
-          <div className="section-heading">
-            <span className="section-eyebrow mono">Archive</span>
-            <h2 className="section-title">
-              Everything else stays searchable and inspectable.
-            </h2>
-            <p className="section-copy">
-              Ordered by recent activity, filtered live, and opened as readable
-              documentation instead of project cards.
-            </p>
+          <div className="shell-statusgroup shell-statusgroup--right">
+            <span className="status-readout">Lausanne, CH</span>
+            <span className="status-readout mono">{formatTime(now)}</span>
           </div>
+        </header>
 
-          <div className="archive-layout">
-            <div className="archive-browser">
-              <label className="search-field">
-                <span className="mono">query</span>
-                <input
-                  type="search"
-                  name="project-search"
-                  value={query}
-                  onChange={(event) => setQuery(event.target.value)}
-                  placeholder="Search by repo, language, or keyword"
-                />
-              </label>
+        <div className="shell-main">
+          <nav
+            aria-label="Portfolio views"
+            className="shell-launchpad"
+            role="tablist"
+          >
+            {APP_TABS.map((tab, index) => {
+              const selected = activeApp === tab.key;
+              return (
+                <button
+                  key={tab.key}
+                  id={tab.id}
+                  type="button"
+                  role="tab"
+                  aria-controls={`panel-${tab.key}`}
+                  aria-selected={selected}
+                  className={`launcher-button ${
+                    selected ? "launcher-button--active" : ""
+                  }`}
+                  onClick={() => openApp(tab.key)}
+                >
+                  <span className="launcher-index mono">
+                    {String(index + 1).padStart(2, "0")}
+                  </span>
+                  <span className="launcher-label">{tab.label}</span>
+                </button>
+              );
+            })}
 
-              <div className="archive-list" role="list" data-testid="archive-list">
-                {filteredRepos.length === 0 ? (
-                  <div className="empty-state">No repos match that query yet.</div>
-                ) : (
-                  filteredRepos.map((repo) => {
-                    const isSelected = repo.name === selectedRepo?.name;
+            <a
+              className="launcher-button launcher-button--link"
+              href={GITHUB_HREF}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <span className="launcher-index mono">GH</span>
+              <span className="launcher-label">GitHub</span>
+            </a>
+          </nav>
 
-                    return (
-                      <button
-                        key={repo.id}
-                        type="button"
-                        className={`archive-row ${isSelected ? "archive-row--selected" : ""}`}
-                        onClick={() => selectRepo(repo.name)}
-                      >
-                        <div className="archive-row-top">
-                          <span className="mono">{formatDayStamp(repo.pushedAt)}</span>
-                          <span>{repo.language ?? "Mixed stack"}</span>
-                          <span>{repo.stars} stars</span>
+          <div className="shell-stage">
+            <WindowFrame
+              label={activeTab.label}
+              path={activeTab.path}
+              meta={activeApp === "work" ? `${filteredRepos.length} repos` : "live"}
+              className="window-frame--primary"
+            >
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={activeApp}
+                  id={`panel-${activeApp}`}
+                  role="tabpanel"
+                  aria-labelledby={activeTab.id}
+                  className="app-screen"
+                  initial={{ opacity: 0, y: 16 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -16 }}
+                  transition={{ duration: 0.25, ease: "easeOut" }}
+                >
+                  {activeApp === "work" ? (
+                    <div className="workspace workspace--repos">
+                      <section className="panel panel--browser">
+                        <div className="panel-head">
+                          <span className="panel-eyebrow mono">Project index</span>
+                          <h1 className="panel-title">Selected work</h1>
+                          <p className="panel-copy">
+                            A running archive of public repos, ordered by recent
+                            activity and opened as documents instead of cards.
+                          </p>
                         </div>
-                        <div className="archive-row-title">{repo.name}</div>
-                        <p className="archive-row-copy">
-                          {repo.description ??
-                            "Repository with shipped work, implementation notes, and source."}
-                        </p>
-                      </button>
-                    );
-                  })
-                )}
-              </div>
-            </div>
 
-            <div className="archive-reading">
-              {selectedRepo ? (
-                <>
-                  <div className="archive-reading-head">
-                    <span className="section-eyebrow mono">Selected repo</span>
-                    <h3 className="archive-title" data-testid="archive-title">
-                      {selectedRepo.name}
-                    </h3>
-                    <p className="archive-summary">
-                      {selectedRepo.description ??
-                        "A shipped engineering project with implementation details in the repository README."}
-                    </p>
+                        <label className="search-field">
+                          <span className="mono">query</span>
+                          <input
+                            type="search"
+                            name="project-search"
+                            value={query}
+                            onChange={(event) => setQuery(event.target.value)}
+                            placeholder="Search by repo, language, or keyword"
+                          />
+                        </label>
 
-                    <div className="archive-meta">
-                      <div className="archive-meta-item">
-                        <span className="archive-meta-label mono">Language</span>
-                        <span>{selectedRepo.language ?? "Mixed"}</span>
-                      </div>
-                      <div className="archive-meta-item">
-                        <span className="archive-meta-label mono">Stars</span>
-                        <span>{selectedRepo.stars}</span>
-                      </div>
-                      <div className="archive-meta-item">
-                        <span className="archive-meta-label mono">Owner</span>
-                        <span>{selectedRepo.owner}</span>
-                      </div>
-                      <div className="archive-meta-item">
-                        <span className="archive-meta-label mono">Updated</span>
-                        <span>{formatLongDate(selectedRepo.pushedAt)}</span>
-                      </div>
+                        <div className="repo-list" role="list">
+                          {filteredRepos.length === 0 ? (
+                            <div className="empty-state">
+                              No repos match that query yet.
+                            </div>
+                          ) : (
+                            filteredRepos.map((repo) => {
+                              const isSelected = repo.name === selectedRepo?.name;
+                              return (
+                                <button
+                                  key={repo.id}
+                                  type="button"
+                                  className={`repo-row ${
+                                    isSelected ? "repo-row--selected" : ""
+                                  }`}
+                                  onClick={() => selectRepo(repo.name)}
+                                >
+                                  <div className="repo-row-top">
+                                    <span className="mono">
+                                      {formatDayStamp(repo.pushedAt)}
+                                    </span>
+                                    <span>{repo.language ?? "Mixed stack"}</span>
+                                  </div>
+                                  <div className="repo-row-title">{repo.name}</div>
+                                  <p className="repo-row-copy">
+                                    {repo.description ??
+                                      "Repository with shipped work, implementation notes, and source."}
+                                  </p>
+                                </button>
+                              );
+                            })
+                          )}
+                        </div>
+                      </section>
+
+                      <section className="panel panel--document">
+                        {selectedRepo ? (
+                          <>
+                            <div className="project-hero">
+                              <span className="panel-eyebrow mono">
+                                {formatLongDate(selectedRepo.pushedAt)}
+                              </span>
+                              <h2 className="project-title">{selectedRepo.name}</h2>
+                              <p className="project-copy">
+                                {selectedRepo.description ??
+                                  "A shipped engineering project with implementation details in the repository README."}
+                              </p>
+
+                              <div className="project-meta">
+                                <div className="meta-item">
+                                  <span className="meta-label mono">Language</span>
+                                  <span>{selectedRepo.language ?? "Mixed"}</span>
+                                </div>
+                                <div className="meta-item">
+                                  <span className="meta-label mono">Stars</span>
+                                  <span>{selectedRepo.stars}</span>
+                                </div>
+                                <div className="meta-item">
+                                  <span className="meta-label mono">Owner</span>
+                                  <span>{selectedRepo.owner}</span>
+                                </div>
+                                <div className="meta-item">
+                                  <span className="meta-label mono">Updated</span>
+                                  <span>{formatDayStamp(selectedRepo.pushedAt)}</span>
+                                </div>
+                              </div>
+
+                              <div className="action-row">
+                                <a
+                                  href={selectedRepo.htmlUrl}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="shell-button"
+                                >
+                                  Open repository
+                                </a>
+                                {selectedRepo.homepage ? (
+                                  <a
+                                    href={selectedRepo.homepage}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="shell-button shell-button--ghost"
+                                  >
+                                    Open live site
+                                  </a>
+                                ) : null}
+                              </div>
+                            </div>
+
+                            <RepoReadmePanel
+                              owner={selectedRepo.owner}
+                              repo={selectedRepo.name}
+                              description={selectedRepo.description}
+                            />
+                          </>
+                        ) : (
+                          <div className="empty-state empty-state--large">
+                            Choose a project from the archive to inspect its
+                            README and shipping context.
+                          </div>
+                        )}
+                      </section>
                     </div>
+                  ) : null}
 
-                    <div className="action-row">
-                      <a
-                        href={selectedRepo.htmlUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="shell-button"
-                      >
-                        Open repository
-                      </a>
-                      {selectedRepo.homepage ? (
-                        <a
-                          href={selectedRepo.homepage}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="shell-button shell-button--ghost"
-                        >
-                          Open live site
-                        </a>
-                      ) : null}
+                  {activeApp === "about" ? (
+                    <div className="workspace workspace--split">
+                      <section className="panel panel--narrative">
+                        <span className="panel-eyebrow mono">Overview</span>
+                        <h1 className="panel-title panel-title--xl">
+                          Software engineer building reliable systems, sharp
+                          tooling, and product work that ships.
+                        </h1>
+                        <p className="panel-copy panel-copy--large">
+                          I lead full-stack engineering at Paradigm Testing,
+                          build across Java, TypeScript, PostgreSQL, and Redis,
+                          and keep one foot in applied AI through my master&apos;s
+                          work at Georgia Tech.
+                        </p>
+                        <p className="panel-copy">
+                          The common thread in my work is simple: move fast, keep
+                          the standards high, and make the system easier to
+                          understand after you touch it.
+                        </p>
+
+                        <div className="action-row">
+                          <button
+                            type="button"
+                            className="shell-button"
+                            onClick={() => openApp("work")}
+                          >
+                            Browse projects
+                          </button>
+                          <button
+                            type="button"
+                            className="shell-button shell-button--ghost"
+                            onClick={() => openApp("contact")}
+                          >
+                            Start a conversation
+                          </button>
+                        </div>
+                      </section>
+
+                      <section className="panel panel--notes">
+                        <div className="note-block">
+                          <span className="panel-eyebrow mono">Operating principles</span>
+                          <ul className="note-list">
+                            {PRINCIPLES.map((item) => (
+                              <li key={item}>{item}</li>
+                            ))}
+                          </ul>
+                        </div>
+
+                        <div className="note-block">
+                          <span className="panel-eyebrow mono">Current focus</span>
+                          <ul className="note-list">
+                            {CURRENT_FOCUS.map((item) => (
+                              <li key={item}>{item}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      </section>
+                    </div>
+                  ) : null}
+
+                  {activeApp === "contact" ? (
+                    <div className="workspace workspace--split">
+                      <section className="panel panel--narrative">
+                        <span className="panel-eyebrow mono">Contact</span>
+                        <h1 className="panel-title panel-title--xl">
+                          Let&apos;s build something useful.
+                        </h1>
+                        <p className="panel-copy panel-copy--large">
+                          I enjoy product engineering, AI-enabled internal tools,
+                          automation, and systems work where technical quality is
+                          part of the outcome.
+                        </p>
+
+                        <div className="contact-interest-grid">
+                          {CONTACT_INTERESTS.map((item) => (
+                            <span key={item} className="signal-pill">
+                              {item}
+                            </span>
+                          ))}
+                        </div>
+
+                        <div className="action-row">
+                          <a href={EMAIL_HREF} className="shell-button">
+                            Send an email
+                          </a>
+                          <a
+                            href={GITHUB_HREF}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="shell-button shell-button--ghost"
+                          >
+                            View GitHub
+                          </a>
+                        </div>
+                      </section>
+
+                      <section className="panel panel--notes">
+                        <div className="note-block">
+                          <span className="panel-eyebrow mono">Best channels</span>
+                          <div className="contact-links">
+                            {SOCIAL_LINKS.map((link) => (
+                              <a
+                                key={link.label}
+                                href={link.href}
+                                target={link.external ? "_blank" : undefined}
+                                rel={link.external ? "noopener noreferrer" : undefined}
+                                className="contact-link"
+                              >
+                                <span>{link.label}</span>
+                                <span className="mono">
+                                  {link.external ? "open" : "direct"}
+                                </span>
+                              </a>
+                            ))}
+                          </div>
+                        </div>
+                      </section>
+                    </div>
+                  ) : null}
+                </motion.div>
+              </AnimatePresence>
+            </WindowFrame>
+
+            <WindowFrame
+              label="Console"
+              path="~/system/summary"
+              meta={activeApp === "work" ? "selected repo" : "snapshot"}
+              className="window-frame--secondary"
+            >
+              {activeApp === "work" ? (
+                <div className="inspector-stack">
+                  <div className="inspector-block">
+                    <span className="panel-eyebrow mono">Archive stats</span>
+                    <div className="stat-grid">
+                      <div className="stat-card">
+                        <span className="stat-value">{sortedRepos.length}</span>
+                        <span className="stat-label mono">public repos</span>
+                      </div>
+                      <div className="stat-card">
+                        <span className="stat-value">{totalStars}</span>
+                        <span className="stat-label mono">stars</span>
+                      </div>
                     </div>
                   </div>
 
-                  <RepoReadmePanel
-                    owner={selectedRepo.owner}
-                    repo={selectedRepo.name}
-                    description={selectedRepo.description}
-                  />
-                </>
-              ) : (
-                <div className="empty-state empty-state--large">
-                  Choose a repository from the archive to inspect its README and
-                  implementation context.
+                  <div className="inspector-block">
+                    <span className="panel-eyebrow mono">Top languages</span>
+                    <div className="language-stack">
+                      {languageSummary.map(([language, count]) => (
+                        <div key={language} className="language-row">
+                          <span>{language}</span>
+                          <span className="mono">{count}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {selectedRepo ? (
+                    <div className="inspector-block">
+                      <span className="panel-eyebrow mono">Selection</span>
+                      <div className="selection-card">
+                        <h2>{selectedRepo.name}</h2>
+                        <p>
+                          {selectedRepo.description ??
+                            "Repository selected for inspection."}
+                        </p>
+                        <div className="selection-meta mono">
+                          <span>{selectedRepo.language ?? "Mixed"}</span>
+                          <span>{formatDayStamp(selectedRepo.pushedAt)}</span>
+                        </div>
+                      </div>
+                    </div>
+                  ) : null}
                 </div>
-              )}
-            </div>
-          </div>
-        </section>
+              ) : null}
 
-        <section className="section about-section" id="about">
-          <div className="section-heading">
-            <span className="section-eyebrow mono">About</span>
-            <h2 className="section-title">
-              Product-minded engineering with a systems habit.
-            </h2>
-          </div>
+              {activeApp === "about" ? (
+                <div className="inspector-stack">
+                  <div className="inspector-block">
+                    <span className="panel-eyebrow mono">Profile</span>
+                    <div className="stat-grid">
+                      <div className="stat-card">
+                        <span className="stat-value">Lead</span>
+                        <span className="stat-label mono">role</span>
+                      </div>
+                      <div className="stat-card">
+                        <span className="stat-value">MSAI</span>
+                        <span className="stat-label mono">in progress</span>
+                      </div>
+                    </div>
+                  </div>
 
-          <div className="about-layout">
-            <div className="about-copy">
-              <p>
-                I like work that has real edges to it: product decisions that need
-                technical judgment, infrastructure that has to stay reliable, and
-                interfaces that should feel deliberate instead of thrown together.
-              </p>
-              <p>
-                Most of my work lives at the seam between shipping quickly and
-                keeping the system easy to reason about. That usually means owning
-                both the application layer and the underlying platform choices.
-              </p>
-            </div>
+                  <div className="inspector-block">
+                    <span className="panel-eyebrow mono">Stack</span>
+                    <div className="signal-grid">
+                      {languageSummary.map(([language]) => (
+                        <span key={language} className="signal-pill">
+                          {language}
+                        </span>
+                      ))}
+                      <span className="signal-pill">PostgreSQL</span>
+                      <span className="signal-pill">Redis</span>
+                      <span className="signal-pill">Automation</span>
+                    </div>
+                  </div>
 
-            <div className="about-rail">
-              <div className="rail-block">
-                <span className="section-eyebrow mono">Operating principles</span>
-                <ul className="line-list">
-                  {PRINCIPLES.map((item) => (
-                    <li key={item}>{item}</li>
-                  ))}
-                </ul>
-              </div>
-
-              <div className="rail-block">
-                <span className="section-eyebrow mono">Stack signals</span>
-                <div className="signal-grid">
-                  {languageSummary.map(([language]) => (
-                    <span key={language} className="signal-pill">
-                      {language}
-                    </span>
-                  ))}
-                  <span className="signal-pill">PostgreSQL</span>
-                  <span className="signal-pill">Redis</span>
-                  <span className="signal-pill">Automation</span>
+                  <div className="inspector-block">
+                    <span className="panel-eyebrow mono">Latest update</span>
+                    <p className="inspector-copy">
+                      {latestUpdate
+                        ? `GitHub archive refreshed through ${formatLongDate(
+                            latestUpdate
+                          )}.`
+                        : "GitHub archive not available."}
+                    </p>
+                  </div>
                 </div>
-              </div>
-            </div>
+              ) : null}
+
+              {activeApp === "contact" ? (
+                <div className="inspector-stack">
+                  <div className="inspector-block">
+                    <span className="panel-eyebrow mono">Contact posture</span>
+                    <div className="signal-grid">
+                      <span className="signal-pill">Open to interesting builds</span>
+                      <span className="signal-pill">Product + systems</span>
+                      <span className="signal-pill">Automation friendly</span>
+                    </div>
+                  </div>
+
+                  <div className="inspector-block">
+                    <span className="panel-eyebrow mono">Social routes</span>
+                    <div className="contact-links">
+                      {SOCIAL_LINKS.map((link) => (
+                        <a
+                          key={link.label}
+                          href={link.href}
+                          target={link.external ? "_blank" : undefined}
+                          rel={link.external ? "noopener noreferrer" : undefined}
+                          className="contact-link"
+                        >
+                          <span>{link.label}</span>
+                          <span className="mono">{makeSocialLabel(link)}</span>
+                        </a>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              ) : null}
+            </WindowFrame>
           </div>
-        </section>
+        </div>
 
-        <section className="section contact-section" id="contact">
-          <div className="contact-copy">
-            <span className="section-eyebrow mono">Contact</span>
-            <h2 className="section-title">Let&apos;s build something useful.</h2>
-            <p className="section-copy">
-              I enjoy product engineering, AI-enabled internal tools, developer
-              infrastructure, and systems work where technical quality is part of
-              the outcome.
-            </p>
-
-            <div className="signal-grid">
-              {CONTACT_INTERESTS.map((item) => (
-                <span key={item} className="signal-pill">
-                  {item}
-                </span>
-              ))}
-            </div>
-          </div>
-
-          <div className="contact-rail">
+        <footer className="shell-dock" aria-label="Quick links">
+          <div className="dock-cluster">
             {SOCIAL_LINKS.map((link) => (
               <a
                 key={link.label}
                 href={link.href}
                 target={link.external ? "_blank" : undefined}
                 rel={link.external ? "noopener noreferrer" : undefined}
-                className="contact-link"
+                className="dock-link mono"
               >
-                <span>{link.label}</span>
-                <span className="mono">{makeSocialLabel(link)}</span>
+                {makeSocialLabel(link)}
               </a>
             ))}
           </div>
-        </section>
-      </main>
 
-      <footer className="site-footer">
-        <span className="site-footer-status">
-          Latest repo update {latestUpdate ? formatDayStamp(latestUpdate) : "unavailable"}
-        </span>
-
-        <div className="site-footer-links">
-          {SOCIAL_LINKS.map((link) => (
-            <a
-              key={link.label}
-              href={link.href}
-              target={link.external ? "_blank" : undefined}
-              rel={link.external ? "noopener noreferrer" : undefined}
-              className="footer-link mono"
-            >
-              {makeSocialLabel(link)}
-            </a>
-          ))}
-          <a
-            href={GITHUB_HREF}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="footer-link mono"
-          >
-            GITHUB
-          </a>
-        </div>
-      </footer>
+          <div className="dock-cluster dock-cluster--right">
+            <span className="dock-status">
+              Latest repo update{" "}
+              {latestUpdate ? formatDayStamp(latestUpdate) : "unavailable"}
+            </span>
+          </div>
+        </footer>
+      </div>
     </div>
   );
 }
