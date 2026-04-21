@@ -1,16 +1,20 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Inter, Syne } from "next/font/google";
 import "./globals.css";
+import AuroraBackground from "./components/ui/AuroraBackground";
 import JsonLd from "./components/JsonLd";
+import NoiseOverlay from "./components/ui/NoiseOverlay";
+import ParticlesBackground from "./components/ui/ParticlesBackground";
 
-const geist = Geist({
+const inter = Inter({
   subsets: ["latin"],
-  variable: "--font-geist",
+  variable: "--font-inter",
 });
 
-const geistMono = Geist_Mono({
+const syne = Syne({
   subsets: ["latin"],
-  variable: "--font-geist-mono",
+  weight: ["800"],
+  variable: "--font-syne",
 });
 
 import {
@@ -48,11 +52,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${geist.variable} ${geistMono.variable}`}>
+    <html lang="en" className={`${inter.variable} ${syne.variable}`}>
       <body>
         <a href="#main" className="skip-link">Skip to content</a>
         <JsonLd />
-        <main id="main">
+        <AuroraBackground />
+        <NoiseOverlay />
+        <ParticlesBackground />
+        <main id="main" className="relative z-[5]">
           {children}
         </main>
       </body>
