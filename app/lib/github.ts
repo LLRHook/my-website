@@ -80,8 +80,8 @@ async function fetchCommitActivity(
   // GitHub returns 202 the first time stats are requested (it computes them
   // in the background). Retry a few times so the dashboard populates on the
   // same build instead of waiting an hour for the next ISR revalidation.
-  const MAX_ATTEMPTS = 4;
-  const BACKOFF_MS = 1500;
+  const MAX_ATTEMPTS = 8;
+  const BACKOFF_MS = 2500;
 
   for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
     try {
