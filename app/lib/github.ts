@@ -1,5 +1,6 @@
 import {
   GitHubRepo,
+  LanguageSlice,
   RepoCardData,
   TimelineData,
   TimelineYear,
@@ -56,6 +57,72 @@ async function fetchPaginatedRepos(url: string): Promise<GitHubRepo[]> {
   return repos;
 }
 
+async function fetchLanguages(
+  owner: string,
+  repo: string
+): Promise<Record<string, number>> {
+  try {
+    const res = await fetch(
+      `${GITHUB_API}/repos/${owner}/${repo}/languages`,
+      { headers: getHeaders(), next: { revalidate: 3600 } }
+    );
+    if (!res.ok) return {};
+    return (await res.json()) as Record<string, number>;
+  } catch {
+    return {};
+  }
+}
+
+async function fetchCommitActivity(
+  owner: string,
+  repo: string
+): Promise<number[]> {
+  // GitHub returns 202 the first time stats are requested (it computes them
+  // in the background). Retry a few times so the dashboard populates on the
+  // same build instead of waiting an hour for the next ISR revalidation.
+  const MAX_ATTEMPTS = 4;
+  const BACKOFF_MS = 1500;
+
+  for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
+    try {
+      const res = await fetch(
+        `${GITHUB_API}/repos/${owner}/${repo}/stats/commit_activity`,
+        {
+          headers: getHeaders(),
+          // Bypass Next's fetch cache so each retry actually re-hits GitHub;
+          // fetchAllRepos is gated by the page-level ISR revalidate window.
+          cache: "no-store",
+        }
+      );
+      if (res.status === 202) {
+        await new Promise((r) => setTimeout(r, BACKOFF_MS));
+        continue;
+      }
+      if (!res.ok) return [];
+      const data = await res.json();
+      if (!Array.isArray(data)) return [];
+      return data.map((w: { total: number }) => w.total);
+    } catch {
+      return [];
+    }
+  }
+  return [];
+}
+
+function toLanguageSlices(
+  langs: Record<string, number>
+): LanguageSlice[] {
+  const total = Object.values(langs).reduce((a, b) => a + b, 0);
+  if (total === 0) return [];
+  return Object.entries(langs)
+    .map(([name, bytes]) => ({
+      name,
+      bytes,
+      percent: (bytes / total) * 100,
+    }))
+    .sort((a, b) => b.bytes - a.bytes);
+}
+
 export async function fetchAllRepos(): Promise<RepoCardData[]> {
   let repos: GitHubRepo[];
 
@@ -79,20 +146,30 @@ export async function fetchAllRepos(): Promise<RepoCardData[]> {
     console.warn("[github] No repos returned from GitHub API");
   }
 
-  return repos
-    .filter((r) => !r.fork && !r.private)
-    .map((r): RepoCardData => ({
-      id: r.id,
-      name: r.name,
-      description: r.description,
-      htmlUrl: r.html_url,
-      homepage: r.homepage,
-      language: r.language,
-      stars: r.stargazers_count,
-      pushedAt: r.pushed_at,
-      createdAt: r.created_at,
-      owner: r.owner.login,
-    }));
+  const filtered = repos.filter((r) => !r.fork && !r.private);
+
+  return Promise.all(
+    filtered.map(async (r): Promise<RepoCardData> => {
+      const [langs, commits] = await Promise.all([
+        fetchLanguages(r.owner.login, r.name),
+        fetchCommitActivity(r.owner.login, r.name),
+      ]);
+      return {
+        id: r.id,
+        name: r.name,
+        description: r.description,
+        htmlUrl: r.html_url,
+        homepage: r.homepage,
+        language: r.language,
+        stars: r.stargazers_count,
+        pushedAt: r.pushed_at,
+        createdAt: r.created_at,
+        owner: r.owner.login,
+        languages: toLanguageSlices(langs),
+        commitActivity: commits,
+      };
+    })
+  );
 }
 
 export function buildTimelineData(repos: RepoCardData[]): TimelineData {
