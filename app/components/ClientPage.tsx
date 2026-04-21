@@ -6,7 +6,6 @@ import HeroSection from "./HeroSection";
 import TimelineSection from "./work/TimelineSection";
 import AboutSection from "./AboutSection";
 import ContactSection from "./ContactSection";
-import ScrollProgress from "./ui/ScrollProgress";
 import BackToTop from "./ui/BackToTop";
 
 export default function ClientPage({
@@ -17,7 +16,6 @@ export default function ClientPage({
   return (
     <>
       <Navbar />
-      <ScrollProgress />
       <HeroSection />
       <TimelineSection data={timelineData} />
       <AboutSection />

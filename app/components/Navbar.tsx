@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { NAV_LINKS } from "@/app/lib/constants";
+import ScrollProgress from "@/app/components/ui/ScrollProgress";
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
@@ -117,6 +118,8 @@ export default function Navbar() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      <ScrollProgress />
     </nav>
   );
 }
