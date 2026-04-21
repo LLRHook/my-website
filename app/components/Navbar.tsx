@@ -37,6 +37,7 @@ export default function Navbar() {
       data-testid="navbar"
       aria-label="Primary"
       className="fixed top-0 left-0 right-0 z-50 glass border-t-0 rounded-none border-l-0 border-r-0"
+      style={{ background: "rgba(5, 5, 5, 0.85)" }}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
         <motion.a
