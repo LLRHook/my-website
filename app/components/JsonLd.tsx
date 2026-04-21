@@ -14,8 +14,9 @@ const personJson = JSON.stringify({
     "@type": "Place",
     address: {
       "@type": "PostalAddress",
-      addressLocality: "Lausanne",
-      addressCountry: "CH",
+      addressLocality: "Tysons",
+      addressRegion: "VA",
+      addressCountry: "US",
     },
   },
   alumniOf: [
