@@ -16,6 +16,12 @@ export interface GitHubRepo {
   };
 }
 
+export interface LanguageSlice {
+  name: string;
+  bytes: number;
+  percent: number;
+}
+
 export interface RepoCardData {
   id: number;
   name: string;
@@ -27,6 +33,8 @@ export interface RepoCardData {
   pushedAt: string;
   createdAt: string;
   owner: string;
+  languages: LanguageSlice[];
+  commitActivity: number[];
 }
 
 export interface TimelineDay {
