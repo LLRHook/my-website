@@ -73,40 +73,50 @@ async function fetchLanguages(
   }
 }
 
+// The /stats/commit_activity endpoint returns 202 on first hit while GitHub
+// computes stats in the background, and for many inactive repos the compute
+// never produces data within a reasonable ISR window. Use /commits directly —
+// no async compute, no 202 — and bucket the dates into weekly totals.
+const WEEKS = 26;
+const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
+
 async function fetchCommitActivity(
   owner: string,
   repo: string
 ): Promise<number[]> {
-  // GitHub returns 202 the first time stats are requested (it computes them
-  // in the background). Retry a few times so the dashboard populates on the
-  // same build instead of waiting an hour for the next ISR revalidation.
-  const MAX_ATTEMPTS = 8;
-  const BACKOFF_MS = 2500;
+  const since = new Date(Date.now() - WEEKS * WEEK_MS).toISOString();
+  const dates: string[] = [];
+  const MAX_PAGES = 4;
 
-  for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
+  for (let page = 1; page <= MAX_PAGES; page++) {
     try {
       const res = await fetch(
-        `${GITHUB_API}/repos/${owner}/${repo}/stats/commit_activity`,
-        {
-          headers: getHeaders(),
-          // Bypass Next's fetch cache so each retry actually re-hits GitHub;
-          // fetchAllRepos is gated by the page-level ISR revalidate window.
-          cache: "no-store",
-        }
+        `${GITHUB_API}/repos/${owner}/${repo}/commits?since=${since}&per_page=100&page=${page}`,
+        { headers: getHeaders(), next: { revalidate: 3600 } }
       );
-      if (res.status === 202) {
-        await new Promise((r) => setTimeout(r, BACKOFF_MS));
-        continue;
+      if (!res.ok) break;
+      const batch = await res.json();
+      if (!Array.isArray(batch) || batch.length === 0) break;
+      for (const c of batch) {
+        const d = c?.commit?.author?.date ?? c?.commit?.committer?.date;
+        if (d) dates.push(d);
       }
-      if (!res.ok) return [];
-      const data = await res.json();
-      if (!Array.isArray(data)) return [];
-      return data.map((w: { total: number }) => w.total);
+      if (batch.length < 100) break;
     } catch {
-      return [];
+      break;
     }
   }
-  return [];
+
+  if (dates.length === 0) return [];
+
+  const now = Date.now();
+  const weeks: number[] = new Array(WEEKS).fill(0);
+  for (const d of dates) {
+    const diff = now - new Date(d).getTime();
+    const idx = WEEKS - 1 - Math.floor(diff / WEEK_MS);
+    if (idx >= 0 && idx < WEEKS) weeks[idx]++;
+  }
+  return weeks;
 }
 
 function toLanguageSlices(
