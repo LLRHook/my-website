@@ -10,6 +10,7 @@ import {
 
 const GITHUB_API = "https://api.github.com";
 const GITHUB_USERNAME = "LLRHook";
+const FETCH_TIMEOUT_MS = 8000;
 
 function monthName(index: number): string {
   return new Date(2000, index).toLocaleString("en-US", { month: "long" });
@@ -25,13 +26,31 @@ function getHeaders(): HeadersInit {
   return headers;
 }
 
+async function fetchWithTimeout(
+  input: string,
+  init: RequestInit = {},
+  timeoutMs = FETCH_TIMEOUT_MS
+): Promise<Response> {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), timeoutMs);
+
+  try {
+    return await fetch(input, {
+      ...init,
+      signal: controller.signal,
+    });
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
 async function fetchPaginatedRepos(url: string): Promise<GitHubRepo[]> {
   const repos: GitHubRepo[] = [];
   let page = 1;
 
   while (true) {
     const separator = url.includes("?") ? "&" : "?";
-    const res = await fetch(
+    const res = await fetchWithTimeout(
       `${url}${separator}per_page=100&page=${page}&sort=pushed`,
       {
         headers: getHeaders(),
@@ -62,7 +81,7 @@ async function fetchLanguages(
   repo: string
 ): Promise<Record<string, number>> {
   try {
-    const res = await fetch(
+    const res = await fetchWithTimeout(
       `${GITHUB_API}/repos/${owner}/${repo}/languages`,
       { headers: getHeaders(), next: { revalidate: 3600 } }
     );
@@ -77,36 +96,23 @@ async function fetchCommitActivity(
   owner: string,
   repo: string
 ): Promise<number[]> {
-  // GitHub returns 202 the first time stats are requested (it computes them
-  // in the background). Retry a few times so the dashboard populates on the
-  // same build instead of waiting an hour for the next ISR revalidation.
-  const MAX_ATTEMPTS = 8;
-  const BACKOFF_MS = 2500;
+  try {
+    const res = await fetchWithTimeout(
+      `${GITHUB_API}/repos/${owner}/${repo}/stats/commit_activity`,
+      {
+        headers: getHeaders(),
+        next: { revalidate: 3600 },
+      },
+      1500
+    );
 
-  for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
-    try {
-      const res = await fetch(
-        `${GITHUB_API}/repos/${owner}/${repo}/stats/commit_activity`,
-        {
-          headers: getHeaders(),
-          // Bypass Next's fetch cache so each retry actually re-hits GitHub;
-          // fetchAllRepos is gated by the page-level ISR revalidate window.
-          cache: "no-store",
-        }
-      );
-      if (res.status === 202) {
-        await new Promise((r) => setTimeout(r, BACKOFF_MS));
-        continue;
-      }
-      if (!res.ok) return [];
-      const data = await res.json();
-      if (!Array.isArray(data)) return [];
-      return data.map((w: { total: number }) => w.total);
-    } catch {
-      return [];
-    }
+    if (!res.ok || res.status === 202) return [];
+    const data = await res.json();
+    if (!Array.isArray(data)) return [];
+    return data.map((w: { total: number }) => w.total);
+  } catch {
+    return [];
   }
-  return [];
 }
 
 function toLanguageSlices(
