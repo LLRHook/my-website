@@ -69,9 +69,9 @@ starts the production server).
 | Layer | Tool | Files | Cases |
 |-------|------|-------|-------|
 | Unit/component | (none yet — FEAT-1781501122) | 0 | 0 |
-| E2E | Playwright (chromium) | 1 (`e2e/centering.spec.ts`) | 20 (4 viewports × 5 sections) |
+| E2E | Playwright (chromium) | 3 | 19 |
 
-> **Known red (BUG-1781501121):** 4 of the 20 E2E cases (`statement inner div is centered` × 4 viewports) currently fail — `StatementSection` is orphaned (not rendered by `ClientPage`). This is a hard Stage 2 block until BUG-1781501121 is resolved.
+E2E breakdown: `centering.spec.ts` 16 (4 viewports × 4 sections), `smooth-scroll.spec.ts` 2 (Lenis activation + anchor nav), `card-tabs.spec.ts` 1 (tab render + switch). BUG-1781501121 (orphaned `StatementSection`) is resolved — the 4 `statement` cases were removed.
 
 - **2a — Per-ticket acceptance verification.** For each ticket shipped since the last `Verified` SHA, locate the test(s) proving its acceptance criteria. BUG-1781501120 (projects render): proven by Stage 3 smoke (`/api/repos` returns repos; `/` lacks "No projects to display"). A regression-guarding **unit** test for the fallback path is tracked by FEAT-1781501122 — its absence is a known coverage gap, not a fresh block.
 - **2b — Coverage of the change.** No coverage tool is wired (FEAT-1781501122 would add Vitest coverage). Fall back to 2a per-ticket mapping; note the gap.
@@ -86,6 +86,7 @@ API smoke first (against the DUT or production domain):
 - [ ] 3.1 `GET /` → 200, HTML does **not** contain "No projects to display" (regression guard for BUG-1781501120).
 - [ ] 3.2 `GET /api/repos` → 200, JSON timeline array is non-empty (≥ 1 year-group, total repos ≥ 1).
 - [ ] 3.3 `GET /api/readme/LLRHook/my-website` → 200, returns markdown (not the "*No README available.*" fallback).
+- [ ] 3.3b `GET /api/source/LLRHook/my-website?lang=TypeScript` → 200, JSON `{ html, path }`; `html` is non-null for repos with a resolvable source file and graceful null otherwise (FEAT-1781502132).
 - [ ] 3.4 `GET /sitemap.xml`, `/robots.txt`, `/manifest.webmanifest`, `/opengraph-image`, `/twitter-image` → 200.
 
 UI walkthrough (manual, on the prod artifact):

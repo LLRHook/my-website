@@ -14,12 +14,23 @@ under each release/date heading.
 
 ### Verified
 
+- 2026-06-15 V&V pass on Vercel prod (SHA 6fde137): 0 unit, 19 E2E (3 specs), all automated + prod-smoke stages green. Coverage caveat: FEAT-1781502130 and the FEAT-1781502131/132 data layers lack dedicated unit tests (tracked by FEAT-1781501122) — verified via E2E + live prod smoke.
+
 ### Added
+
+- [FEAT-1781502127] Centralize animation/UI constants in `app/lib/animationConfig.ts`. [patch]
+- [FEAT-1781502128] Consolidate inline SVG icons, dedupe skills + date utils, remove dead `GlassCard`. [patch]
+- [FEAT-1781502129] Momentum smooth scrolling via Lenis (reduced-motion-guarded). [minor]
+- [FEAT-1781502130] Section/element transitions + site-wide reduced-motion respect (MotionConfig). [minor]
+- [FEAT-1781502131] Project card: repo topics + recent commits (Activity tab). [minor]
+- [FEAT-1781502132] Project card: lazy server-side syntax-highlighted source peek (shiki). [minor]
+- [FEAT-1781502133] Faceted README/Code/Activity project card with skeleton loader. [minor]
 
 ### Changed
 
 ### Fixed
 
+- [BUG-1781501121] Removed orphaned `StatementSection` and its 4 stale E2E `statement` assertions; E2E suite green. [patch]
 - [BUG-1781501120] Projects now render in production — replaced the stale Vercel `GITHUB_TOKEN` and hardened `app/lib/github.ts` (try/catch around the paginated repos fetch so a timeout can't crash the render, fallback to the public repos endpoint when the authenticated request yields nothing, and a timeout + graceful fallback in `fetchReadme`). Fixes the always-empty "No projects to display" Work timeline. [patch]
 
 ### Removed
