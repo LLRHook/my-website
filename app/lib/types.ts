@@ -11,6 +11,7 @@ export interface GitHubRepo {
   private: boolean;
   pushed_at: string;
   created_at: string;
+  topics: string[];
   owner: {
     login: string;
   };
@@ -20,6 +21,12 @@ export interface LanguageSlice {
   name: string;
   bytes: number;
   percent: number;
+}
+
+export interface CommitInfo {
+  message: string;
+  date: string;
+  url: string;
 }
 
 export interface RepoCardData {
@@ -35,6 +42,8 @@ export interface RepoCardData {
   owner: string;
   languages: LanguageSlice[];
   commitActivity: number[];
+  topics: string[];
+  recentCommits: CommitInfo[];
 }
 
 export interface TimelineDay {

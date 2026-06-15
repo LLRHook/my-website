@@ -1,6 +1,7 @@
 import {
   GitHubRepo,
   LanguageSlice,
+  CommitInfo,
   RepoCardData,
   TimelineData,
   TimelineYear,
@@ -120,6 +121,33 @@ async function fetchCommitActivity(
   }
 }
 
+async function fetchRecentCommits(
+  owner: string,
+  repo: string
+): Promise<CommitInfo[]> {
+  try {
+    const res = await fetchWithTimeout(
+      `${GITHUB_API}/repos/${owner}/${repo}/commits?per_page=5`,
+      { headers: getHeaders(), next: { revalidate: 3600 } }
+    );
+    if (!res.ok) return [];
+    const data = await res.json();
+    if (!Array.isArray(data)) return [];
+    return data.map(
+      (c: {
+        commit: { message: string; author: { date: string } | null };
+        html_url: string;
+      }) => ({
+        message: c.commit.message.split("\n")[0],
+        date: c.commit.author?.date ?? "",
+        url: c.html_url,
+      })
+    );
+  } catch {
+    return [];
+  }
+}
+
 function toLanguageSlices(
   langs: Record<string, number>
 ): LanguageSlice[] {
@@ -171,9 +199,10 @@ export async function fetchAllRepos(): Promise<RepoCardData[]> {
 
   return Promise.all(
     filtered.map(async (r): Promise<RepoCardData> => {
-      const [langs, commits] = await Promise.all([
+      const [langs, commits, recentCommits] = await Promise.all([
         fetchLanguages(r.owner.login, r.name),
         fetchCommitActivity(r.owner.login, r.name),
+        fetchRecentCommits(r.owner.login, r.name),
       ]);
       return {
         id: r.id,
@@ -188,6 +217,8 @@ export async function fetchAllRepos(): Promise<RepoCardData[]> {
         owner: r.owner.login,
         languages: toLanguageSlices(langs),
         commitActivity: commits,
+        topics: r.topics ?? [],
+        recentCommits,
       };
     })
   );
@@ -285,5 +316,143 @@ export async function fetchReadme(
     return res.text();
   } catch {
     return "*No README available.*";
+  }
+}
+
+// --- Source peek (key-file selection) ---------------------------------------
+
+// GitHub primary language -> shiki language id.
+const SHIKI_LANG: Record<string, string> = {
+  JavaScript: "javascript",
+  TypeScript: "typescript",
+  Python: "python",
+  Go: "go",
+  Rust: "rust",
+  Java: "java",
+  "C#": "csharp",
+  Swift: "swift",
+  Dart: "dart",
+  Shell: "bash",
+  HTML: "html",
+  CSS: "css",
+  Astro: "astro",
+  Ruby: "ruby",
+  PHP: "php",
+  Kotlin: "kotlin",
+  "C++": "cpp",
+  C: "c",
+};
+
+export function shikiLang(language: string | null): string {
+  return (language && SHIKI_LANG[language]) || "text";
+}
+
+// Preferred root-level entry file names per language.
+const ENTRYPOINTS: Record<string, string[]> = {
+  Python: ["main.py", "app.py", "__main__.py", "cli.py"],
+  JavaScript: ["index.js", "main.js", "app.js", "server.js"],
+  TypeScript: ["index.ts", "main.ts"],
+  Go: ["main.go"],
+  Swift: ["main.swift", "Package.swift"],
+  "C#": ["Program.cs"],
+  Astro: ["astro.config.mjs"],
+};
+
+const EXT_FOR_LANG: Record<string, string> = {
+  JavaScript: ".js",
+  TypeScript: ".ts",
+  Python: ".py",
+  Go: ".go",
+  Rust: ".rs",
+  Java: ".java",
+  "C#": ".cs",
+  Swift: ".swift",
+  Dart: ".dart",
+  Shell: ".sh",
+  Ruby: ".rb",
+  PHP: ".php",
+  Kotlin: ".kt",
+  "C++": ".cpp",
+  C: ".c",
+  Astro: ".astro",
+};
+
+const MAX_PEEK_BYTES = 50_000;
+const MAX_PEEK_LINES = 80;
+
+interface ContentEntry {
+  type: string;
+  name: string;
+  path: string;
+  size: number;
+  download_url: string | null;
+}
+
+async function listDir(
+  owner: string,
+  repo: string,
+  path = ""
+): Promise<ContentEntry[]> {
+  const url = path
+    ? `${GITHUB_API}/repos/${owner}/${repo}/contents/${path}`
+    : `${GITHUB_API}/repos/${owner}/${repo}/contents`;
+  const res = await fetchWithTimeout(url, {
+    headers: getHeaders(),
+    next: { revalidate: 3600 },
+  });
+  if (!res.ok) return [];
+  const data = await res.json();
+  return Array.isArray(data) ? (data as ContentEntry[]) : [];
+}
+
+function pickCandidate(
+  files: ContentEntry[],
+  language: string | null
+): ContentEntry | null {
+  const names = (language && ENTRYPOINTS[language]) || [];
+  const byName = files.find((f) => names.includes(f.name));
+  if (byName) return byName;
+  const ext = language ? EXT_FOR_LANG[language] : undefined;
+  if (ext) return files.find((f) => f.name.endsWith(ext)) ?? null;
+  return null;
+}
+
+// Best-effort: find a representative source file in the repo root (or src/) and
+// return a capped snippet. Returns null when nothing suitable is found.
+export async function fetchKeyFile(
+  owner: string,
+  repo: string,
+  language: string | null
+): Promise<{ path: string; code: string } | null> {
+  try {
+    const root = await listDir(owner, repo);
+    if (root.length === 0) return null;
+
+    let chosen = pickCandidate(
+      root.filter((e) => e.type === "file"),
+      language
+    );
+
+    if (!chosen && root.some((e) => e.type === "dir" && e.name === "src")) {
+      const src = await listDir(owner, repo, "src");
+      chosen = pickCandidate(
+        src.filter((e) => e.type === "file"),
+        language
+      );
+    }
+
+    if (!chosen || !chosen.download_url || chosen.size > MAX_PEEK_BYTES) {
+      return null;
+    }
+
+    const fileRes = await fetchWithTimeout(chosen.download_url, {
+      next: { revalidate: 3600 },
+    });
+    if (!fileRes.ok) return null;
+    const text = await fileRes.text();
+    const code = text.split("\n").slice(0, MAX_PEEK_LINES).join("\n");
+    return { path: chosen.path, code };
+  } catch {
+    return null;
   }
 }

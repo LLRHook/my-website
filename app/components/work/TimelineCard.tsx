@@ -111,13 +111,7 @@ export default function TimelineCard({ repo, side, index }: TimelineCardProps) {
             </button>
 
             <AnimatePresence>
-              {expanded && (
-                <ProjectCardExpanded
-                  owner={repo.owner}
-                  repo={repo.name}
-                  htmlUrl={repo.htmlUrl}
-                />
-              )}
+              {expanded && <ProjectCardExpanded repo={repo} />}
             </AnimatePresence>
           </div>
         </FadeInOnScroll>

@@ -147,7 +147,7 @@ the end of their section, sorted by id on read.
 - **Status:** shipped-pending-migration
 
 ### [FEAT-1781502131] Card facet: repo topics + recent commits
-- [ ] **Priority:** high
+- [x] **Priority:** high
 - **Area:** frontend, github-api
 - **File(s):** app/lib/types.ts, app/lib/github.ts, app/components/work/ProjectCardExpanded.tsx, app/components/work/TimelineCard.tsx
 - **Why:** SRS FR-6 (6a, 6b). Make each project card richer from GitHub data we can fetch (the chosen "mini-demo" direction).
@@ -156,11 +156,12 @@ the end of their section, sorted by id on read.
 - **Acceptance criteria:** topics + recent commits show where present; absent data hidden cleanly; `/api/repos` and `/` still render if these calls fail (graceful empty — upholds the BUG-1781501120 resilience invariant); no perf regression.
 - **Test plan:** unit-test the new `github.ts` mapping if the unit layer (FEAT-1781501122) exists; manual card QA; E2E green.
 - **Out of scope:** commit pagination; commit diffs.
+- **Implementation:** Added `topics` + `recentCommits` (typed `CommitInfo`) to `RepoCardData`; `github.ts` maps `r.topics` (free from the repos response) and fetches `/commits?per_page=5` per repo (timeout-guarded, graceful, batched into the existing Promise.all). Rendered in the Activity tab as topic chips + a recent-commits list. (Topics are empty until repos are tagged on GitHub — graceful-hidden.) Build + E2E (19/19) green.
 - **Bump:** minor
-- **Status:** open
+- **Status:** shipped-pending-migration
 
 ### [FEAT-1781502132] Card facet: syntax-highlighted source peek
-- [ ] **Priority:** high
+- [x] **Priority:** high
 - **Area:** frontend, github-api
 - **File(s):** app/lib/types.ts, app/lib/github.ts, app/components/work/SourcePeek.tsx (new), app/components/work/ProjectCardExpanded.tsx, package.json
 - **Why:** SRS FR-6 (6c). Show a highlighted peek at the project's key source file — the centerpiece of the richer card.
@@ -169,11 +170,12 @@ the end of their section, sorted by id on read.
 - **Acceptance criteria:** highlighted source peek for repos where a file resolves; hidden cleanly otherwise; client bundle within agreed budget; graceful on fetch failure.
 - **Test plan:** unit-test the file-selection heuristic if the unit layer exists; manual QA across a Python, a JS/TS, and a Go repo; E2E green.
 - **Out of scope:** full file browser; editing; multi-file view.
+- **Implementation:** Added `shiki@4.2.0`; new `app/api/source/[owner]/[repo]/route.ts` picks a representative source file via `github.ts` `fetchKeyFile` (root/src entrypoint+extension heuristic, size- and line-capped, graceful null) and highlights it server-side (`github-dark`) — zero client bundle cost (First Load stayed flat). The Code tab lazy-loads it on open and renders the shiki-escaped HTML; degrades to "No source preview available." Build + E2E green.
 - **Bump:** minor
-- **Status:** open
+- **Status:** shipped-pending-migration
 
 ### [FEAT-1781502133] Faceted/tabbed expanded card + skeleton loader
-- [ ] **Priority:** high
+- [x] **Priority:** high
 - **Area:** frontend
 - **File(s):** app/components/work/ProjectCardExpanded.tsx, app/components/work/TimelineCard.tsx, app/globals.css
 - **Why:** SRS FR-6 (6d). Organize the richer facets (README / Code / Activity) into a clean tabbed layout and replace the README spinner with a content-shaped skeleton.
@@ -182,8 +184,9 @@ the end of their section, sorted by id on read.
 - **Acceptance criteria:** tabbed card with README/Code/Activity; skeleton replaces the spinner; keyboard-accessible tabs; reduced-motion respected; E2E green.
 - **Test plan:** manual QA + a11y keyboard check; extend Playwright to assert tab presence; `npx tsc --noEmit`.
 - **Out of scope:** persisting the selected tab across cards; deep-linking to a tab.
+- **Implementation:** Restructured `ProjectCardExpanded` into accessible README / Code / Activity tabs (role=tablist/tab/tabpanel, aria-selected, aria-live). Activity uses already-loaded data (language bar, 52-week sparkline, recent commits, topics) — instant; README + Code lazy-load per tab. Replaced the spinner with a content-shaped skeleton. `TimelineCard` now passes the full `repo`. New `e2e/card-tabs.spec.ts` verifies tabs render + switch (19/19 E2E green).
 - **Bump:** minor
-- **Status:** open
+- **Status:** shipped-pending-migration
 
 ---
 
