@@ -119,7 +119,7 @@ the end of their section, sorted by id on read.
 - **Status:** shipped-pending-migration
 
 ### [FEAT-1781502129] Momentum smooth scrolling (Lenis)
-- [ ] **Priority:** high
+- [x] **Priority:** high
 - **Area:** animation
 - **File(s):** app/components/ui/SmoothScroll.tsx (new), app/layout.tsx, package.json
 - **Why:** SRS FR-4. Native smooth-scroll feels basic; momentum/eased scrolling gives a premium feel.
@@ -128,11 +128,12 @@ the end of their section, sorted by id on read.
 - **Acceptance criteria:** eased momentum on desktop; reduced-motion → native; anchors, scroll-spy, parallax, progress bar all still work; no Lighthouse perf regression; no mobile long-tasks.
 - **Test plan:** manual scroll QA across viewports; Playwright (anchors still navigate); Lighthouse perf.
 - **Out of scope:** scroll-jacking / section-snapping; horizontal scroll.
+- **Implementation:** Added `lenis@1.3.23`; new `app/components/ui/SmoothScroll.tsx` wraps the app in `ReactLenis root` (lerp 0.1, smoothWheel, `anchors: true`), guarded so `prefers-reduced-motion` users get native scroll (Lenis never initialized). Removed CSS `scroll-behavior: smooth` and added Lenis's recommended CSS to `globals.css`; wired `<SmoothScroll>` into `layout.tsx`. E2E (`e2e/smooth-scroll.spec.ts`) proves Lenis activates (`html.lenis`) and anchor nav scrolls; centering suite still green; build green.
 - **Bump:** minor
-- **Status:** open
+- **Status:** shipped-pending-migration
 
 ### [FEAT-1781502130] Section & element transitions
-- [ ] **Priority:** med
+- [x] **Priority:** med
 - **Area:** animation
 - **File(s):** app/components/ClientPage.tsx, app/components/work/TimelineSection.tsx, app/components/AboutSection.tsx, app/components/HeroSection.tsx, app/globals.css
 - **Why:** SRS FR-5. Beyond the current fade-ins, add fluid load/section/element transitions.
@@ -141,8 +142,9 @@ the end of their section, sorted by id on read.
 - **Acceptance criteria:** smooth, consistent transitions; reduced-motion respected; no CLS introduced; E2E green.
 - **Test plan:** manual QA; Playwright centering still passes; check CLS in Lighthouse.
 - **Out of scope:** full route-level page transitions (single-page site).
+- **Implementation:** Staggered skill-badge entrance via motion `variants` container/item (AboutSection; `SKILL_STAGGER_STEP` in animationConfig; SkillBadge now accepts `variants`). Added `MotionConfig reducedMotion="user"` in SmoothScroll so motion-driven transform/parallax animations respect `prefers-reduced-motion` site-wide (NFR-1 — previously only CSS animations did). "Show More" card reveals and hero/section entrances already animate via the existing FadeInOnScroll/whileInView (verified unchanged). View Transitions API deferred per plan. Build + E2E (18/18) green.
 - **Bump:** minor
-- **Status:** open
+- **Status:** shipped-pending-migration
 
 ### [FEAT-1781502131] Card facet: repo topics + recent commits
 - [ ] **Priority:** high

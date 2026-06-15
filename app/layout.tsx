@@ -5,6 +5,7 @@ import AuroraBackground from "./components/ui/AuroraBackground";
 import JsonLd from "./components/JsonLd";
 import NoiseOverlay from "./components/ui/NoiseOverlay";
 import ParticlesBackground from "./components/ui/ParticlesBackground";
+import SmoothScroll from "./components/ui/SmoothScroll";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -59,9 +60,11 @@ export default function RootLayout({
         <AuroraBackground />
         <NoiseOverlay />
         <ParticlesBackground />
-        <main id="main" className="relative z-[5]">
-          {children}
-        </main>
+        <SmoothScroll>
+          <main id="main" className="relative z-[5]">
+            {children}
+          </main>
+        </SmoothScroll>
       </body>
     </html>
   );
