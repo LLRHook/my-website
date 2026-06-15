@@ -50,13 +50,21 @@ async function fetchPaginatedRepos(url: string): Promise<GitHubRepo[]> {
 
   while (true) {
     const separator = url.includes("?") ? "&" : "?";
-    const res = await fetchWithTimeout(
-      `${url}${separator}per_page=100&page=${page}&sort=pushed`,
-      {
-        headers: getHeaders(),
-        next: { revalidate: 3600 },
-      }
-    );
+    let res: Response;
+    try {
+      res = await fetchWithTimeout(
+        `${url}${separator}per_page=100&page=${page}&sort=pushed`,
+        {
+          headers: getHeaders(),
+          next: { revalidate: 3600 },
+        }
+      );
+    } catch (err) {
+      // A timeout/abort or network error must not crash the page render.
+      // Return whatever was collected so far and degrade to the empty state.
+      console.error(`[github] ${url} request failed (page ${page}):`, err);
+      return repos;
+    }
 
     if (!res.ok) {
       console.error(
@@ -130,6 +138,7 @@ function toLanguageSlices(
 }
 
 export async function fetchAllRepos(): Promise<RepoCardData[]> {
+  const publicReposUrl = `${GITHUB_API}/users/${GITHUB_USERNAME}/repos?type=owner`;
   let repos: GitHubRepo[];
 
   if (process.env.GITHUB_TOKEN) {
@@ -137,15 +146,24 @@ export async function fetchAllRepos(): Promise<RepoCardData[]> {
     repos = await fetchPaginatedRepos(
       `${GITHUB_API}/user/repos?affiliation=owner`
     );
+
+    if (repos.length === 0) {
+      // The token may be expired, missing scopes, or the request was rate
+      // limited. Fall back to the public endpoint so the portfolio still
+      // renders its public repos instead of an empty "No projects" state.
+      console.warn(
+        "[github] Authenticated repo fetch returned nothing — falling back to public repos for",
+        GITHUB_USERNAME
+      );
+      repos = await fetchPaginatedRepos(publicReposUrl);
+    }
   } else {
     // Fallback: list public repos for the known username
     console.warn(
       "[github] GITHUB_TOKEN is not set — falling back to public repos for",
       GITHUB_USERNAME
     );
-    repos = await fetchPaginatedRepos(
-      `${GITHUB_API}/users/${GITHUB_USERNAME}/repos?type=owner`
-    );
+    repos = await fetchPaginatedRepos(publicReposUrl);
   }
 
   if (repos.length === 0) {
@@ -255,16 +273,20 @@ export async function fetchReadme(
   owner: string,
   repo: string
 ): Promise<string> {
-  const res = await fetch(
-    `${GITHUB_API}/repos/${owner}/${repo}/readme`,
-    {
-      headers: {
-        ...getHeaders(),
-        Accept: "application/vnd.github.v3.raw",
-      },
-    }
-  );
+  try {
+    const res = await fetchWithTimeout(
+      `${GITHUB_API}/repos/${owner}/${repo}/readme`,
+      {
+        headers: {
+          ...getHeaders(),
+          Accept: "application/vnd.github.v3.raw",
+        },
+      }
+    );
 
-  if (!res.ok) return "*No README available.*";
-  return res.text();
+    if (!res.ok) return "*No README available.*";
+    return res.text();
+  } catch {
+    return "*No README available.*";
+  }
 }
