@@ -48,8 +48,8 @@ the end of their section, sorted by id on read.
 - [ ] **Priority:** med
 - **Area:** tests, frontend
 - **File(s):** package.json, vitest.config.ts (new), app/lib/github.test.ts (new), app/components/work/__tests__/* (new)
-- **Why:** The project has only E2E (Playwright) coverage. Pure logic — `buildTimelineData`, `toLanguageSlices`, the `fetchAllRepos` fallback path, pagination — has no fast unit coverage, so regressions in the data layer (the class of bug that took the projects offline) are only caught by a full browser run, if at all.
-- **Approach:** Add Vitest with `@testing-library/react` + `jsdom`. Unit-test `app/lib/github.ts` pure transforms with `fetch` mocked (success, non-OK, empty, token→public fallback). Component-test `TimelineSection` empty-state vs populated. Add `"test": "vitest run"` and `"test:watch": "vitest"` scripts.
+- **Why:** The project has only E2E (Playwright) coverage. Pure logic — `buildTimelineData`, `toLanguageSlices`, the `fetchAllRepos` fallback path, pagination, the `recentCommits`/`fetchKeyFile` additions, and the FEAT-1781502130 reduced-motion/stagger behaviour — has no fast unit coverage (the V&V 2a/2b gap), so data-layer and animation regressions are only caught by a full browser run, if at all.
+- **Approach:** Add Vitest with `@testing-library/react` + `jsdom`. Unit-test `app/lib/github.ts` pure transforms with `fetch` mocked (success, non-OK, empty, token→public fallback, recentCommits, fetchKeyFile heuristic). Component-test `TimelineSection` empty-state vs populated. Add `"test": "vitest run"` and `"test:watch": "vitest"` scripts.
 - **Library / dependency notes:** **Vitest** (native ESM/TS, fast, Vite-aligned — recommended over Jest for a Next 15 + TS 5.9 project). `@testing-library/react`, `@testing-library/jest-dom`, `jsdom`. Confirm latest stable versions before installing.
 - **Acceptance criteria:**
   - `npm test` runs Vitest and passes.
@@ -89,6 +89,23 @@ the end of their section, sorted by id on read.
 - **Out of scope:** deploy steps (Vercel handles deploy via its Git integration).
 - **Bump:** minor
 - **Status:** open
+
+### [FEAT-1781505473] Refine source-peek key-file heuristic
+- [ ] **Priority:** low
+- **Area:** github-api, frontend
+- **File(s):** app/lib/github.ts
+- **Why:** The source peek (FEAT-1781502132) sometimes selects a config/generated file (e.g. `next-env.d.ts`, `eslint.config.js`) when a repo has no clearly-named entrypoint at root/src — it works but isn't the most representative code. Surfaced by the 2026-06-15 V&V prod smoke.
+- **Approach:** In `pickCandidate`, deprioritize obvious config/generated/dotfiles (`*.config.*`, `*-env.d.ts`, `*.lock`, dotfiles) and prefer a real source file matching the language; keep the entrypoint-name match first and the graceful-null fallback.
+- **Library / dependency notes:** none.
+- **Acceptance criteria:** for repos like `my-website`/`citybase`, the peek selects an app/source file rather than a config file where one exists; graceful null still returned when nothing suitable.
+- **Test plan:** unit-test `pickCandidate` once the unit layer (FEAT-1781501122) exists; manual prod smoke against a few repos.
+- **Out of scope:** recursing beyond root/src; ranking by code "interestingness".
+- **Bump:** patch
+- **Status:** open
+
+---
+
+## Shipped
 
 ### [FEAT-1781502127] Centralize animation/UI constants
 - [x] **Priority:** low
@@ -156,21 +173,21 @@ the end of their section, sorted by id on read.
 - **Acceptance criteria:** topics + recent commits show where present; absent data hidden cleanly; `/api/repos` and `/` still render if these calls fail (graceful empty — upholds the BUG-1781501120 resilience invariant); no perf regression.
 - **Test plan:** unit-test the new `github.ts` mapping if the unit layer (FEAT-1781501122) exists; manual card QA; E2E green.
 - **Out of scope:** commit pagination; commit diffs.
-- **Implementation:** Added `topics` + `recentCommits` (typed `CommitInfo`) to `RepoCardData`; `github.ts` maps `r.topics` (free from the repos response) and fetches `/commits?per_page=5` per repo (timeout-guarded, graceful, batched into the existing Promise.all). Rendered in the Activity tab as topic chips + a recent-commits list. (Topics are empty until repos are tagged on GitHub — graceful-hidden.) Build + E2E (19/19) green.
+- **Implementation:** Added `topics` + `recentCommits` (typed `CommitInfo`) to `RepoCardData`; `github.ts` maps `r.topics` (free from the repos response) and fetches `/commits?per_page=5` per repo (timeout-guarded, graceful, batched into the existing Promise.all). Rendered in the Activity tab as topic chips + a recent-commits list. (Topics are empty until repos are tagged on GitHub — graceful-hidden.) Build + E2E (19/19) green; prod smoke shows 35/36 repos with recent commits.
 - **Bump:** minor
 - **Status:** shipped-pending-migration
 
 ### [FEAT-1781502132] Card facet: syntax-highlighted source peek
 - [x] **Priority:** high
 - **Area:** frontend, github-api
-- **File(s):** app/lib/types.ts, app/lib/github.ts, app/components/work/SourcePeek.tsx (new), app/components/work/ProjectCardExpanded.tsx, package.json
+- **File(s):** app/lib/types.ts, app/lib/github.ts, app/api/source/[owner]/[repo]/route.ts (new), app/components/work/ProjectCardExpanded.tsx, package.json
 - **Why:** SRS FR-6 (6c). Show a highlighted peek at the project's key source file — the centerpiece of the richer card.
-- **Approach:** Pick the key file by heuristic — language entrypoint (`main.py` / `index.ts` / `main.go` / `Cargo.toml` …) → first fenced code block in the README → the repo's most prominent file. Fetch its contents (timeout-guarded, size-capped, graceful-empty). Render with `shiki` at build/SSR time (no client highlighter cost). Add a typed field to `RepoCardData`.
-- **Library / dependency notes:** Evaluate `shiki` vs `rehype-pretty-code` vs `highlight.js` — confirm latest stable + bundle impact; prefer SSR/build-time highlighting (default: `shiki`). Per repo policy, web-search latest before install.
+- **Approach:** Pick the key file by heuristic — language entrypoint (`main.py` / `index.ts` / `main.go` …) → root/src extension match → graceful null. Fetch its contents (timeout-guarded, size-capped). Highlight with `shiki` server-side in a lazy API route (no client highlighter cost).
+- **Library / dependency notes:** Evaluated `shiki` vs `rehype-pretty-code` vs `highlight.js` — chose `shiki@4.2.0`, server-side only.
 - **Acceptance criteria:** highlighted source peek for repos where a file resolves; hidden cleanly otherwise; client bundle within agreed budget; graceful on fetch failure.
 - **Test plan:** unit-test the file-selection heuristic if the unit layer exists; manual QA across a Python, a JS/TS, and a Go repo; E2E green.
 - **Out of scope:** full file browser; editing; multi-file view.
-- **Implementation:** Added `shiki@4.2.0`; new `app/api/source/[owner]/[repo]/route.ts` picks a representative source file via `github.ts` `fetchKeyFile` (root/src entrypoint+extension heuristic, size- and line-capped, graceful null) and highlights it server-side (`github-dark`) — zero client bundle cost (First Load stayed flat). The Code tab lazy-loads it on open and renders the shiki-escaped HTML; degrades to "No source preview available." Build + E2E green.
+- **Implementation:** Added `shiki@4.2.0`; new `app/api/source/[owner]/[repo]/route.ts` picks a representative source file via `github.ts` `fetchKeyFile` (root/src entrypoint+extension heuristic, size- and line-capped, graceful null) and highlights it server-side (`github-dark`) — zero client bundle cost (First Load stayed flat). The Code tab lazy-loads it on open and renders the shiki-escaped HTML; degrades to "No source preview available." Build + E2E green; prod smoke renders highlighted source for 4/6 sampled repos (graceful null for the rest). Heuristic refinement filed as FEAT-1781505473.
 - **Bump:** minor
 - **Status:** shipped-pending-migration
 
@@ -187,7 +204,3 @@ the end of their section, sorted by id on read.
 - **Implementation:** Restructured `ProjectCardExpanded` into accessible README / Code / Activity tabs (role=tablist/tab/tabpanel, aria-selected, aria-live). Activity uses already-loaded data (language bar, 52-week sparkline, recent commits, topics) — instant; README + Code lazy-load per tab. Replaced the spinner with a content-shaped skeleton. `TimelineCard` now passes the full `repo`. New `e2e/card-tabs.spec.ts` verifies tabs render + switch (19/19 E2E green).
 - **Bump:** minor
 - **Status:** shipped-pending-migration
-
----
-
-## Shipped
