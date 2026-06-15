@@ -90,6 +90,97 @@ the end of their section, sorted by id on read.
 - **Bump:** minor
 - **Status:** open
 
+### [FEAT-1781502127] Centralize animation/UI constants
+- [ ] **Priority:** low
+- **Area:** frontend
+- **File(s):** app/lib/animationConfig.ts (new), app/components/HeroSection.tsx, app/components/ui/BackToTop.tsx, app/components/ui/FadeInOnScroll.tsx, app/components/work/TimelineCard.tsx, app/components/ui/ParticlesBackground.tsx
+- **Why:** SRS FR-2. Animation magic numbers are scattered (scroll thresholds 600/400, reveal offset 40px, viewport margin -80px, stagger 0.05, particle distance/speed), making tuning error-prone and the transition work (FEAT-1781502130) harder.
+- **Approach:** Create `app/lib/animationConfig.ts` exporting named constants; replace literals with imports. Pure refactor — values identical, no behavior change.
+- **Library / dependency notes:** none.
+- **Acceptance criteria:** literals replaced by named constants; values match prior behavior; `npm run build` + `npx tsc --noEmit` clean; E2E green.
+- **Test plan:** existing Playwright suite (no visual change); `npx tsc --noEmit`.
+- **Out of scope:** changing any animation values or behavior.
+- **Bump:** patch
+- **Status:** open
+
+### [FEAT-1781502128] Consolidate icons, dedupe skills/month-util, remove unused GlassCard
+- [ ] **Priority:** low
+- **Area:** frontend
+- **File(s):** app/components/ui/icons.tsx (new), app/lib/constants.ts (new), app/lib/dateUtils.ts (new), app/components/ContactSection.tsx, app/components/work/TimelineCard.tsx, app/components/work/ProjectCardExpanded.tsx, app/components/AboutSection.tsx, app/components/JsonLd.tsx, app/lib/github.ts, app/components/ui/GlassCard.tsx (delete)
+- **Why:** SRS FR-3. Inline SVGs duplicated across components; skills array duplicated in AboutSection and JsonLd; month-name helper buried in github.ts; `GlassCard` is dead code.
+- **Approach:** Extract icons to a single `icons.tsx`; move skills to `constants.ts` imported by both consumers; extract month-name to `dateUtils.ts`; delete `GlassCard` after confirming no imports.
+- **Library / dependency notes:** none.
+- **Acceptance criteria:** one icon module; skills defined once; `GlassCard` gone with no broken imports; build/tsc/E2E green; no visual change.
+- **Test plan:** `git grep` for removed symbols; Playwright; `npx tsc --noEmit`.
+- **Out of scope:** restyling icons; changing skill content.
+- **Bump:** patch
+- **Status:** open
+
+### [FEAT-1781502129] Momentum smooth scrolling (Lenis)
+- [ ] **Priority:** high
+- **Area:** animation
+- **File(s):** app/components/ui/SmoothScroll.tsx (new), app/layout.tsx, package.json
+- **Why:** SRS FR-4. Native smooth-scroll feels basic; momentum/eased scrolling gives a premium feel.
+- **Approach:** Wrap the app in Lenis (`lenis/react` `ReactLenis`). Disable when `prefers-reduced-motion: reduce` (fall back to native). Integrate with `motion` `useScroll` (Hero parallax, ScrollProgress) and preserve anchor nav + navbar IntersectionObserver scroll-spy. Use animationConfig constants (FEAT-1781502127) where applicable.
+- **Library / dependency notes:** Evaluate `lenis` / `lenis/react` — confirm latest stable + `motion` compatibility before install; reject if it conflicts with `useScroll` or janks on mobile.
+- **Acceptance criteria:** eased momentum on desktop; reduced-motion → native; anchors, scroll-spy, parallax, progress bar all still work; no Lighthouse perf regression; no mobile long-tasks.
+- **Test plan:** manual scroll QA across viewports; Playwright (anchors still navigate); Lighthouse perf.
+- **Out of scope:** scroll-jacking / section-snapping; horizontal scroll.
+- **Bump:** minor
+- **Status:** open
+
+### [FEAT-1781502130] Section & element transitions
+- [ ] **Priority:** med
+- **Area:** animation
+- **File(s):** app/components/ClientPage.tsx, app/components/work/TimelineSection.tsx, app/components/AboutSection.tsx, app/components/HeroSection.tsx, app/globals.css
+- **Why:** SRS FR-5. Beyond the current fade-ins, add fluid load/section/element transitions.
+- **Approach:** Staggered initial page-load entrance; animate newly-revealed cards on "Show More" (not just mount); skill-badge stagger via `motion` variants container/item; optionally View Transitions API for card expand/collapse (CSS `@supports`-guarded progressive enhancement). All reduced-motion gated. Depends on FEAT-1781502129 (scroll) and FEAT-1781502127 (constants).
+- **Library / dependency notes:** reuse `motion`; View Transitions need no dependency.
+- **Acceptance criteria:** smooth, consistent transitions; reduced-motion respected; no CLS introduced; E2E green.
+- **Test plan:** manual QA; Playwright centering still passes; check CLS in Lighthouse.
+- **Out of scope:** full route-level page transitions (single-page site).
+- **Bump:** minor
+- **Status:** open
+
+### [FEAT-1781502131] Card facet: repo topics + recent commits
+- [ ] **Priority:** high
+- **Area:** frontend, github-api
+- **File(s):** app/lib/types.ts, app/lib/github.ts, app/components/work/ProjectCardExpanded.tsx, app/components/work/TimelineCard.tsx
+- **Why:** SRS FR-6 (6a, 6b). Make each project card richer from GitHub data we can fetch (the chosen "mini-demo" direction).
+- **Approach:** Add `topics: string[]` and a typed `recentCommits` to `RepoCardData`; populate in `fetchAllRepos` (topics from the repos response; commits via `/repos/{owner}/{repo}/commits?per_page=5`). Batch into the existing `Promise.all`, timeout-guarded, graceful-empty. Display topic chips + recent commits (message + relative date) in the expanded card; hide facets when empty.
+- **Library / dependency notes:** none (GitHub REST).
+- **Acceptance criteria:** topics + recent commits show where present; absent data hidden cleanly; `/api/repos` and `/` still render if these calls fail (graceful empty — upholds the BUG-1781501120 resilience invariant); no perf regression.
+- **Test plan:** unit-test the new `github.ts` mapping if the unit layer (FEAT-1781501122) exists; manual card QA; E2E green.
+- **Out of scope:** commit pagination; commit diffs.
+- **Bump:** minor
+- **Status:** open
+
+### [FEAT-1781502132] Card facet: syntax-highlighted source peek
+- [ ] **Priority:** high
+- **Area:** frontend, github-api
+- **File(s):** app/lib/types.ts, app/lib/github.ts, app/components/work/SourcePeek.tsx (new), app/components/work/ProjectCardExpanded.tsx, package.json
+- **Why:** SRS FR-6 (6c). Show a highlighted peek at the project's key source file — the centerpiece of the richer card.
+- **Approach:** Pick the key file by heuristic — language entrypoint (`main.py` / `index.ts` / `main.go` / `Cargo.toml` …) → first fenced code block in the README → the repo's most prominent file. Fetch its contents (timeout-guarded, size-capped, graceful-empty). Render with `shiki` at build/SSR time (no client highlighter cost). Add a typed field to `RepoCardData`.
+- **Library / dependency notes:** Evaluate `shiki` vs `rehype-pretty-code` vs `highlight.js` — confirm latest stable + bundle impact; prefer SSR/build-time highlighting (default: `shiki`). Per repo policy, web-search latest before install.
+- **Acceptance criteria:** highlighted source peek for repos where a file resolves; hidden cleanly otherwise; client bundle within agreed budget; graceful on fetch failure.
+- **Test plan:** unit-test the file-selection heuristic if the unit layer exists; manual QA across a Python, a JS/TS, and a Go repo; E2E green.
+- **Out of scope:** full file browser; editing; multi-file view.
+- **Bump:** minor
+- **Status:** open
+
+### [FEAT-1781502133] Faceted/tabbed expanded card + skeleton loader
+- [ ] **Priority:** high
+- **Area:** frontend
+- **File(s):** app/components/work/ProjectCardExpanded.tsx, app/components/work/TimelineCard.tsx, app/globals.css
+- **Why:** SRS FR-6 (6d). Organize the richer facets (README / Code / Activity) into a clean tabbed layout and replace the README spinner with a content-shaped skeleton.
+- **Approach:** Restructure `ProjectCardExpanded` into tabs — README (existing render), Code (source peek, FEAT-1781502132), Activity (sparkline + recent commits + topics, FEAT-1781502131). Content-shaped skeleton during fetch; `aria-live` for async announcements. Depends on FEAT-1781502131 and FEAT-1781502132.
+- **Library / dependency notes:** reuse `motion` for tab transitions.
+- **Acceptance criteria:** tabbed card with README/Code/Activity; skeleton replaces the spinner; keyboard-accessible tabs; reduced-motion respected; E2E green.
+- **Test plan:** manual QA + a11y keyboard check; extend Playwright to assert tab presence; `npx tsc --noEmit`.
+- **Out of scope:** persisting the selected tab across cards; deep-linking to a tab.
+- **Bump:** minor
+- **Status:** open
+
 ---
 
 ## Shipped
