@@ -22,10 +22,6 @@
     padding: 0;
   }
 
-  html {
-    scroll-behavior: smooth;
-  }
-
   body {
     background-color: var(--color-bg);
     color: var(--color-text-primary);
@@ -139,6 +135,28 @@
 
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.25);
+}
+
+/* Lenis smooth scroll (FEAT-1781502129) */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+.lenis.lenis-smooth iframe {
+  pointer-events: none;
 }
 
 /* Markdown content styles */

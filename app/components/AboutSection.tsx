@@ -1,9 +1,21 @@
 "use client";
 
+import { motion, type Variants } from "motion/react";
 import FadeInOnScroll from "@/app/components/ui/FadeInOnScroll";
 import Container from "@/app/components/ui/Container";
 import SkillBadge from "@/app/components/about/SkillBadge";
 import { SKILLS } from "@/app/lib/constants";
+import { SKILL_STAGGER_STEP, REVEAL_VIEWPORT_MARGIN } from "@/app/lib/animationConfig";
+
+const skillsContainer: Variants = {
+  hidden: {},
+  show: { transition: { staggerChildren: SKILL_STAGGER_STEP } },
+};
+
+const skillItem: Variants = {
+  hidden: { opacity: 0, y: 8 },
+  show: { opacity: 1, y: 0 },
+};
 
 export default function AboutSection() {
   return (
@@ -44,11 +56,17 @@ export default function AboutSection() {
         <h3 className="text-lg uppercase tracking-widest text-text-muted mb-8">
           Skills
         </h3>
-        <div className="flex flex-wrap gap-3 mb-16">
+        <motion.div
+          className="flex flex-wrap gap-3 mb-16"
+          variants={skillsContainer}
+          initial="hidden"
+          whileInView="show"
+          viewport={{ once: true, margin: REVEAL_VIEWPORT_MARGIN }}
+        >
           {SKILLS.map((skill) => (
-            <SkillBadge key={skill} skill={skill} />
+            <SkillBadge key={skill} skill={skill} variants={skillItem} />
           ))}
-        </div>
+        </motion.div>
       </FadeInOnScroll>
 
     </Container>

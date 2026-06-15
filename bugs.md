@@ -49,6 +49,16 @@ the end of their section, sorted by id on read.
 - **Bump:** patch
 - **Status:** fixed-pending-migration
 
+### [BUG-1781504214] Dependency CVEs: Next.js (high) + postcss (moderate)
+- [ ] **Severity:** high
+- **Area:** ci, deploy
+- **File(s):** package.json, package-lock.json
+- **Observation:** `npm audit` reports a high-severity set of Next.js advisories on the installed Next 15.5.x (HTTP request smuggling in rewrites, several DoS vectors, middleware/proxy bypass, cache poisoning, XSS in App Router CSP nonces, image-optimization DoS, SSRF via WebSocket upgrades), plus a moderate postcss XSS (`<8.5.10`). Surfaced during the motion batch (`npm i lenis`); **not** introduced by Lenis (its dependency tree is clean).
+- **Expected:** No high/moderate dependency CVEs; dependencies on patched versions.
+- **Repro / Notes:** `npm audit`. Fix is a Next.js upgrade to a patched release plus a postcss bump (`npm audit fix` proposes it). Deliberately deferred from the motion batch (out of scope; bumping Next mid-feature is risky). Handle via a focused dependency-bump run + re-run `VERIFICATION.md`; good candidate for `/security-audit`.
+- **Bump:** patch
+- **Status:** open
+
 ---
 
 ## Migrated to changelog

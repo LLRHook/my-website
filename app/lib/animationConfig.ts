@@ -24,3 +24,6 @@ export const PARTICLE_COUNT = 50;
 export const PARTICLE_LINK_DISTANCE = 150;
 export const PARTICLE_GRAB_DISTANCE = 200;
 export const PARTICLE_SPEED = 0.8;
+
+// Skill-badge entrance stagger (FEAT-1781502130).
+export const SKILL_STAGGER_STEP = 0.04;
