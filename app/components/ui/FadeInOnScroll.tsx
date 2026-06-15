@@ -1,6 +1,11 @@
 "use client";
 
 import { motion } from "motion/react";
+import {
+  REVEAL_OFFSET,
+  REVEAL_VIEWPORT_MARGIN,
+  REVEAL_DURATION,
+} from "@/app/lib/animationConfig";
 
 interface FadeInOnScrollProps {
   children: React.ReactNode;
@@ -10,10 +15,10 @@ interface FadeInOnScrollProps {
 }
 
 const offsets = {
-  up: { y: 40 },
-  down: { y: -40 },
-  left: { x: 40 },
-  right: { x: -40 },
+  up: { y: REVEAL_OFFSET },
+  down: { y: -REVEAL_OFFSET },
+  left: { x: REVEAL_OFFSET },
+  right: { x: -REVEAL_OFFSET },
 };
 
 export default function FadeInOnScroll({
@@ -27,8 +32,8 @@ export default function FadeInOnScroll({
       className={className}
       initial={{ opacity: 0, ...offsets[direction] }}
       whileInView={{ opacity: 1, x: 0, y: 0 }}
-      viewport={{ once: true, margin: "-80px" }}
-      transition={{ duration: 0.5, delay, ease: "easeOut" }}
+      viewport={{ once: true, margin: REVEAL_VIEWPORT_MARGIN }}
+      transition={{ duration: REVEAL_DURATION, delay, ease: "easeOut" }}
     >
       {children}
     </motion.div>

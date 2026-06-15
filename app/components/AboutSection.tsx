@@ -3,25 +3,7 @@
 import FadeInOnScroll from "@/app/components/ui/FadeInOnScroll";
 import Container from "@/app/components/ui/Container";
 import SkillBadge from "@/app/components/about/SkillBadge";
-
-const skills = [
-  "Java",
-  "Spring Boot",
-  "TypeScript",
-  "React",
-  "Next.js",
-  "Node.js",
-  "Python",
-  "PostgreSQL",
-  "Redis",
-  "Docker",
-  "AWS",
-  "Git",
-  "REST APIs",
-  "Tailwind CSS",
-  "Linux",
-  "CI/CD",
-];
+import { SKILLS } from "@/app/lib/constants";
 
 export default function AboutSection() {
   return (
@@ -63,7 +45,7 @@ export default function AboutSection() {
           Skills
         </h3>
         <div className="flex flex-wrap gap-3 mb-16">
-          {skills.map((skill) => (
+          {SKILLS.map((skill) => (
             <SkillBadge key={skill} skill={skill} />
           ))}
         </div>

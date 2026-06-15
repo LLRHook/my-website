@@ -39,14 +39,15 @@ the end of their section, sorted by id on read.
 ## Open
 
 ### [BUG-1781501121] Orphaned StatementSection breaks 4 E2E "statement" tests
-- [ ] **Severity:** med
+- [x] **Severity:** med
 - **Area:** tests, ui
 - **File(s):** app/components/StatementSection.tsx, app/components/ClientPage.tsx, e2e/centering.spec.ts
 - **Observation:** `e2e/centering.spec.ts` asserts a `[data-testid="statement"] > div` is centered across all 4 viewports, but `ClientPage.tsx` never imports or renders `StatementSection`. The component is orphaned (nothing references it). The 4 `statement` centering tests therefore time out / fail.
 - **Expected:** Either the statement section is part of the page (README advertises "opacity-driven statement text" as a feature) and should be rendered, or it has been intentionally retired and both the component and its E2E coverage should be removed. The E2E suite must be green.
 - **Repro / Notes:** `npm run test:e2e` — the 4 `statement inner div is centered` cases fail. Decide product intent during the fix: re-add `<StatementSection text=... />` to `ClientPage`, or delete the component + remove the `statement` assertions from the spec.
+- **Fix:** Deleted the orphaned `app/components/StatementSection.tsx` and removed the 4 `statement` centering assertions from `e2e/centering.spec.ts`. E2E suite is now green (16/16, was 4 red).
 - **Bump:** patch
-- **Status:** open
+- **Status:** fixed-pending-migration
 
 ---
 

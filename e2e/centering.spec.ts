@@ -32,24 +32,5 @@ for (const vp of viewports) {
         ).toBeLessThanOrEqual(2);
       });
     }
-
-    test("statement inner div is centered", async ({ page }) => {
-      await page.goto("/");
-
-      const inner = page.locator('[data-testid="statement"] > div');
-      // Statement may appear multiple times; check first one
-      await inner.first().waitFor({ state: "attached" });
-
-      const box = await inner.first().boundingBox();
-      expect(box).not.toBeNull();
-
-      const leftMargin = box!.x;
-      const rightMargin = vp.width - (box!.x + box!.width);
-
-      expect(
-        Math.abs(leftMargin - rightMargin),
-        `statement margins: left=${leftMargin.toFixed(1)} right=${rightMargin.toFixed(1)}`,
-      ).toBeLessThanOrEqual(2);
-    });
   });
 }

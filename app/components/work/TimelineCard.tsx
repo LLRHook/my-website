@@ -9,20 +9,14 @@ import LanguageBar from "./LanguageBar";
 import ActivitySparkline from "./ActivitySparkline";
 import ProjectCardExpanded from "./ProjectCardExpanded";
 import Chevron from "@/app/components/ui/Chevron";
+import { StarIcon } from "@/app/components/ui/icons";
+import { formatDate } from "@/app/lib/dateUtils";
+import { TIMELINE_STAGGER_STEP } from "@/app/lib/animationConfig";
 
 interface TimelineCardProps {
   repo: RepoCardData;
   side: "left" | "right";
   index: number;
-}
-
-function formatDate(dateString: string): string {
-  const date = new Date(dateString);
-  return date.toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  });
 }
 
 export default function TimelineCard({ repo, side, index }: TimelineCardProps) {
@@ -64,7 +58,7 @@ export default function TimelineCard({ repo, side, index }: TimelineCardProps) {
       >
         <FadeInOnScroll
           direction={isLeft ? "left" : "right"}
-          delay={index * 0.05}
+          delay={index * TIMELINE_STAGGER_STEP}
         >
           <div className="glass glass-hover glass-shimmer transition-all duration-300">
             <button
@@ -79,14 +73,7 @@ export default function TimelineCard({ repo, side, index }: TimelineCardProps) {
                   {repo.language && <LanguageBadge language={repo.language} />}
                   {repo.stars > 0 && (
                     <span className="flex items-center gap-1 text-sm text-text-secondary" aria-label={`${repo.stars} stars`}>
-                      <svg
-                        className="w-4 h-4"
-                        fill="currentColor"
-                        viewBox="0 0 24 24"
-                        aria-hidden="true"
-                      >
-                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                      </svg>
+                      <StarIcon className="w-4 h-4" />
                       {repo.stars}
                     </span>
                   )}

@@ -7,14 +7,11 @@ import {
   TimelineMonth,
   TimelineDay,
 } from "./types";
+import { monthName } from "./dateUtils";
 
 const GITHUB_API = "https://api.github.com";
 const GITHUB_USERNAME = "LLRHook";
 const FETCH_TIMEOUT_MS = 8000;
-
-function monthName(index: number): string {
-  return new Date(2000, index).toLocaleString("en-US", { month: "long" });
-}
 
 function getHeaders(): HeadersInit {
   const headers: HeadersInit = {

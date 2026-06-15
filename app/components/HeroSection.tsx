@@ -2,11 +2,17 @@
 
 import { motion, useScroll, useTransform } from "motion/react";
 import Chevron from "@/app/components/ui/Chevron";
+import {
+  HERO_PARALLAX_SCROLL_RANGE,
+  HERO_PARALLAX_Y_RANGE,
+  HERO_FADE_SCROLL_RANGE,
+  HERO_FADE_OPACITY_RANGE,
+} from "@/app/lib/animationConfig";
 
 export default function HeroSection() {
   const { scrollY } = useScroll();
-  const y = useTransform(scrollY, [0, 600], [0, -150]);
-  const opacity = useTransform(scrollY, [0, 400], [1, 0]);
+  const y = useTransform(scrollY, HERO_PARALLAX_SCROLL_RANGE, HERO_PARALLAX_Y_RANGE);
+  const opacity = useTransform(scrollY, HERO_FADE_SCROLL_RANGE, HERO_FADE_OPACITY_RANGE);
 
   return (
     <section

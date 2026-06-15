@@ -91,7 +91,7 @@ the end of their section, sorted by id on read.
 - **Status:** open
 
 ### [FEAT-1781502127] Centralize animation/UI constants
-- [ ] **Priority:** low
+- [x] **Priority:** low
 - **Area:** frontend
 - **File(s):** app/lib/animationConfig.ts (new), app/components/HeroSection.tsx, app/components/ui/BackToTop.tsx, app/components/ui/FadeInOnScroll.tsx, app/components/work/TimelineCard.tsx, app/components/ui/ParticlesBackground.tsx
 - **Why:** SRS FR-2. Animation magic numbers are scattered (scroll thresholds 600/400, reveal offset 40px, viewport margin -80px, stagger 0.05, particle distance/speed), making tuning error-prone and the transition work (FEAT-1781502130) harder.
@@ -100,11 +100,12 @@ the end of their section, sorted by id on read.
 - **Acceptance criteria:** literals replaced by named constants; values match prior behavior; `npm run build` + `npx tsc --noEmit` clean; E2E green.
 - **Test plan:** existing Playwright suite (no visual change); `npx tsc --noEmit`.
 - **Out of scope:** changing any animation values or behavior.
+- **Implementation:** Added `app/lib/animationConfig.ts`; replaced hard-coded scroll thresholds, reveal offset/margin/duration, stagger step, and particle tunables across HeroSection, BackToTop, FadeInOnScroll, TimelineCard, ParticlesBackground with named imports. Values unchanged; tsc + build + E2E (16/16) green.
 - **Bump:** patch
-- **Status:** open
+- **Status:** shipped-pending-migration
 
 ### [FEAT-1781502128] Consolidate icons, dedupe skills/month-util, remove unused GlassCard
-- [ ] **Priority:** low
+- [x] **Priority:** low
 - **Area:** frontend
 - **File(s):** app/components/ui/icons.tsx (new), app/lib/constants.ts (new), app/lib/dateUtils.ts (new), app/components/ContactSection.tsx, app/components/work/TimelineCard.tsx, app/components/work/ProjectCardExpanded.tsx, app/components/AboutSection.tsx, app/components/JsonLd.tsx, app/lib/github.ts, app/components/ui/GlassCard.tsx (delete)
 - **Why:** SRS FR-3. Inline SVGs duplicated across components; skills array duplicated in AboutSection and JsonLd; month-name helper buried in github.ts; `GlassCard` is dead code.
@@ -113,8 +114,9 @@ the end of their section, sorted by id on read.
 - **Acceptance criteria:** one icon module; skills defined once; `GlassCard` gone with no broken imports; build/tsc/E2E green; no visual change.
 - **Test plan:** `git grep` for removed symbols; Playwright; `npx tsc --noEmit`.
 - **Out of scope:** restyling icons; changing skill content.
+- **Implementation:** Added `app/components/ui/icons.tsx` (StarIcon, ExternalLinkIcon, SOCIAL_ICON_PATHS, SocialIconSvg) consumed by ContactSection/TimelineCard/ProjectCardExpanded; added `SKILLS` to `constants.ts` (AboutSection imports it; `JsonLd.knowsAbout` left as its curated SEO subset); added `app/lib/dateUtils.ts` (monthName + formatDate) used by github.ts and TimelineCard; deleted unused `GlassCard.tsx`. No visual change; tsc + build + E2E (16/16) green.
 - **Bump:** patch
-- **Status:** open
+- **Status:** shipped-pending-migration
 
 ### [FEAT-1781502129] Momentum smooth scrolling (Lenis)
 - [ ] **Priority:** high
