@@ -23,13 +23,17 @@ const PARTICLE_OPTIONS: ISourceOptions = {
       density: { enable: true, width: 800, height: 800 },
     },
     color: { value: "#ffffff" },
-    opacity: { value: 0.2 },
-    size: { value: { min: 1, max: 3 } },
+    // Twinkling stars: each particle drifts between a min/max opacity.
+    opacity: {
+      value: { min: 0.2, max: 0.6 },
+      animation: { enable: true, speed: 0.6, sync: false },
+    },
+    size: { value: { min: 1, max: 2.5 } },
     links: {
       enable: true,
       distance: PARTICLE_LINK_DISTANCE,
       color: "#ffffff",
-      opacity: 0.05,
+      opacity: 0.18,
       width: 1,
     },
     move: {
@@ -40,13 +44,15 @@ const PARTICLE_OPTIONS: ISourceOptions = {
     },
   },
   interactivity: {
+    // Detect hover on the window so the canvas can stay pointer-events:none.
+    detectsOn: "window",
     events: {
       onHover: { enable: true, mode: "grab" },
     },
     modes: {
       grab: {
         distance: PARTICLE_GRAB_DISTANCE,
-        links: { opacity: 0.15 },
+        links: { opacity: 0.5 },
       },
     },
   },

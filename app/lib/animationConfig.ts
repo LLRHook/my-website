@@ -20,7 +20,7 @@ export const REVEAL_DURATION = 0.5;
 export const TIMELINE_STAGGER_STEP = 0.05;
 
 // ParticlesBackground tunables.
-export const PARTICLE_COUNT = 50;
+export const PARTICLE_COUNT = 70;
 export const PARTICLE_LINK_DISTANCE = 150;
 export const PARTICLE_GRAB_DISTANCE = 200;
 export const PARTICLE_SPEED = 0.8;
