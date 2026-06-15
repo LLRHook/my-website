@@ -14,59 +14,68 @@ const Particles = dynamic(() => import("@tsparticles/react").then((m) => m.defau
   ssr: false,
 });
 
-const PARTICLE_OPTIONS: ISourceOptions = {
-  fullScreen: false,
-  fpsLimit: 60,
-  particles: {
-    number: {
-      value: PARTICLE_COUNT,
-      density: { enable: true, width: 800, height: 800 },
-    },
-    color: { value: "#ffffff" },
-    // Twinkling stars: each particle drifts between a min/max opacity.
-    opacity: {
-      value: { min: 0.2, max: 0.6 },
-      animation: { enable: true, speed: 0.6, sync: false },
-    },
-    size: { value: { min: 1, max: 2.5 } },
-    links: {
-      enable: true,
-      distance: PARTICLE_LINK_DISTANCE,
-      color: "#ffffff",
-      opacity: 0.18,
-      width: 1,
-    },
-    move: {
-      enable: true,
-      speed: PARTICLE_SPEED,
-      direction: "none",
-      outModes: { default: "out" },
-    },
-  },
-  interactivity: {
-    // Detect hover on the window so the canvas can stay pointer-events:none.
-    detectsOn: "window",
-    events: {
-      onHover: { enable: true, mode: "grab" },
-    },
-    modes: {
-      grab: {
-        distance: PARTICLE_GRAB_DISTANCE,
-        links: { opacity: 0.5 },
+// Build options adapted to the environment so the background renders everywhere:
+// - reduced motion → a STATIC star-field (no drift, no twinkle, no hover) that
+//   still shows the constellation but respects prefers-reduced-motion.
+// - mobile → fewer particles for performance, animation kept.
+// - desktop + motion → full animated, interactive field.
+function buildOptions(reduced: boolean, mobile: boolean): ISourceOptions {
+  const count = mobile ? Math.round(PARTICLE_COUNT / 2) : PARTICLE_COUNT;
+  return {
+    fullScreen: false,
+    fpsLimit: 60,
+    particles: {
+      number: {
+        value: count,
+        density: { enable: true, width: 800, height: 800 },
+      },
+      color: { value: "#ffffff" },
+      opacity: reduced
+        ? { value: 0.45 }
+        : {
+            value: { min: 0.2, max: 0.6 },
+            animation: { enable: true, speed: 0.6, sync: false },
+          },
+      size: { value: { min: 1, max: 2.5 } },
+      links: {
+        enable: true,
+        distance: PARTICLE_LINK_DISTANCE,
+        color: "#ffffff",
+        opacity: 0.18,
+        width: 1,
+      },
+      move: {
+        enable: !reduced,
+        speed: PARTICLE_SPEED,
+        direction: "none",
+        outModes: { default: "out" },
       },
     },
-  },
-  detectRetina: true,
-  pauseOnBlur: true,
-};
+    interactivity: {
+      detectsOn: "window",
+      events: {
+        onHover: { enable: !reduced, mode: "grab" },
+      },
+      modes: {
+        grab: {
+          distance: PARTICLE_GRAB_DISTANCE,
+          links: { opacity: 0.5 },
+        },
+      },
+    },
+    detectRetina: true,
+    pauseOnBlur: true,
+  };
+}
 
 export default function ParticlesBackground() {
-  const [ready, setReady] = useState(false);
+  const [options, setOptions] = useState<ISourceOptions | null>(null);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    if (window.innerWidth < 768) return;
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const mobile = window.innerWidth < 768;
 
     let cancelled = false;
     (async () => {
@@ -77,7 +86,7 @@ export default function ParticlesBackground() {
       await initParticlesEngine(async (engine) => {
         await loadSlim(engine);
       });
-      if (!cancelled) setReady(true);
+      if (!cancelled) setOptions(buildOptions(reduced, mobile));
     })();
 
     return () => {
@@ -85,11 +94,11 @@ export default function ParticlesBackground() {
     };
   }, []);
 
-  if (!ready) return null;
+  if (!options) return null;
 
   return (
     <div className="fixed inset-0 z-[2] pointer-events-none" aria-hidden="true">
-      <Particles id="tsparticles" options={PARTICLE_OPTIONS} />
+      <Particles id="tsparticles" options={options} />
     </div>
   );
 }
