@@ -14,13 +14,10 @@ const Particles = dynamic(() => import("@tsparticles/react").then((m) => m.defau
   ssr: false,
 });
 
-// Build options adapted to the environment so the background renders everywhere:
-// - reduced motion → a STATIC star-field (no drift, no twinkle, no hover) that
-//   still shows the constellation but respects prefers-reduced-motion.
-// - mobile → fewer particles for performance, animation kept.
-// - desktop + motion → full animated, interactive field.
-function buildOptions(reduced: boolean, mobile: boolean): ISourceOptions {
-  const count = mobile ? Math.round(PARTICLE_COUNT / 2) : PARTICLE_COUNT;
+// The full animated, hover-interactive star-field — as the original early
+// implementation did it (no reduced-motion gate, no static fallback). Mobile
+// gets a lighter field for performance, but it is still animated + live.
+function buildOptions(count: number): ISourceOptions {
   return {
     fullScreen: false,
     fpsLimit: 60,
@@ -30,12 +27,11 @@ function buildOptions(reduced: boolean, mobile: boolean): ISourceOptions {
         density: { enable: true, width: 800, height: 800 },
       },
       color: { value: "#ffffff" },
-      opacity: reduced
-        ? { value: 0.45 }
-        : {
-            value: { min: 0.2, max: 0.6 },
-            animation: { enable: true, speed: 0.6, sync: false },
-          },
+      // Drifting stars that gently twinkle.
+      opacity: {
+        value: { min: 0.2, max: 0.6 },
+        animation: { enable: true, speed: 0.6, sync: false },
+      },
       size: { value: { min: 1, max: 2.5 } },
       links: {
         enable: true,
@@ -45,16 +41,18 @@ function buildOptions(reduced: boolean, mobile: boolean): ISourceOptions {
         width: 1,
       },
       move: {
-        enable: !reduced,
+        enable: true,
         speed: PARTICLE_SPEED,
         direction: "none",
         outModes: { default: "out" },
       },
     },
     interactivity: {
+      // Detect on the window so hover-grab works through the pointer-events:none
+      // canvas (this is what makes it "interactable").
       detectsOn: "window",
       events: {
-        onHover: { enable: !reduced, mode: "grab" },
+        onHover: { enable: true, mode: "grab" },
       },
       modes: {
         grab: {
@@ -74,8 +72,9 @@ export default function ParticlesBackground() {
   useEffect(() => {
     if (typeof window === "undefined") return;
 
-    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const mobile = window.innerWidth < 768;
+    // Lighter field on small screens; otherwise the full count. No other gates —
+    // the interactive field renders for everyone (matching the early version).
+    const count = window.innerWidth < 768 ? Math.round(PARTICLE_COUNT / 2) : PARTICLE_COUNT;
 
     let cancelled = false;
     (async () => {
@@ -86,7 +85,7 @@ export default function ParticlesBackground() {
       await initParticlesEngine(async (engine) => {
         await loadSlim(engine);
       });
-      if (!cancelled) setOptions(buildOptions(reduced, mobile));
+      if (!cancelled) setOptions(buildOptions(count));
     })();
 
     return () => {
