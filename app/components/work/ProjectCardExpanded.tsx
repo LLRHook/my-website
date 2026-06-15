@@ -5,6 +5,7 @@ import Markdown from "react-markdown";
 import rehypeRaw from "rehype-raw";
 import remarkGfm from "remark-gfm";
 import { motion } from "motion/react";
+import { ExternalLinkIcon } from "@/app/components/ui/icons";
 
 const remarkPlugins = [remarkGfm];
 const rehypePlugins = [rehypeRaw];
@@ -65,19 +66,7 @@ export default function ProjectCardExpanded({
             className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-accent text-white text-sm font-medium hover:opacity-90 transition-opacity"
           >
             View on GitHub
-            <svg
-              className="w-4 h-4"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth={2}
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
-              />
-            </svg>
+            <ExternalLinkIcon className="w-4 h-4" />
           </a>
         </div>
       </div>
