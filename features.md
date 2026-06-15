@@ -103,6 +103,20 @@ the end of their section, sorted by id on read.
 - **Bump:** patch
 - **Status:** open
 
+### [FEAT-1781507205] Restore prominent interactive star/aurora background
+- [x] **Priority:** med
+- **Area:** ui, animation
+- **File(s):** app/components/ui/ParticlesBackground.tsx, app/components/ui/AuroraBackground.tsx, app/lib/animationConfig.ts
+- **Why:** The particle "stars" + aurora background rendered but was so faint (dots opacity 0.2, links 0.05, aurora 0.05–0.07) it read as missing — user reported it "gone". Diagnosis (headless probe) confirmed the engine + canvas were fine; the issue was visual prominence, not absence.
+- **Approach:** Twinkling stars (animated opacity 0.2–0.6), visible constellation links (0.18), crisp hover-grab (links 0.5, `detectsOn: window`), 70 particles; bolder aurora opacities. Desktop (>=768px) + reduced-motion guards preserved.
+- **Library / dependency notes:** none (existing tsParticles + CSS aurora).
+- **Acceptance criteria:** stars + links clearly visible on desktop; hover grabs nearby particles; reduced-motion/mobile still skip it; no console errors; build + E2E green.
+- **Test plan:** headless screenshot probe (visual confirm); existing Playwright suite (no regression).
+- **Out of scope:** new background concepts (WebGL shaders, etc.); changing the z-index stack.
+- **Implementation:** Reworked `ParticlesBackground` options — animated star twinkle, links opacity 0.05→0.18, grab links 0.15→0.5, `detectsOn: window`, count 50→70 (animationConfig); raised aurora layer opacities (0.07/0.06/0.05 → 0.12/0.10/0.09). Verified via headless screenshot: constellation + aurora clearly visible; no console errors; build green.
+- **Bump:** minor
+- **Status:** shipped-pending-migration
+
 ---
 
 ## Shipped
