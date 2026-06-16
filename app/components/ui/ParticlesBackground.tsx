@@ -77,7 +77,7 @@ export default function ParticlesBackground() {
     const count = window.innerWidth < 768 ? Math.round(PARTICLE_COUNT / 2) : PARTICLE_COUNT;
 
     let cancelled = false;
-    (async () => {
+    const init = async () => {
       const [{ initParticlesEngine }, { loadSlim }] = await Promise.all([
         import("@tsparticles/react"),
         import("@tsparticles/slim"),
@@ -86,10 +86,18 @@ export default function ParticlesBackground() {
         await loadSlim(engine);
       });
       if (!cancelled) setOptions(buildOptions(count));
-    })();
+    };
+
+    // Defer engine init to idle time so it doesn't compete with first paint.
+    const hasRIC = typeof window.requestIdleCallback === "function";
+    const handle = hasRIC
+      ? window.requestIdleCallback(() => init(), { timeout: 2500 })
+      : window.setTimeout(() => init(), 200);
 
     return () => {
       cancelled = true;
+      if (hasRIC) window.cancelIdleCallback(handle);
+      else window.clearTimeout(handle);
     };
   }, []);
 
