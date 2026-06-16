@@ -117,6 +117,20 @@ the end of their section, sorted by id on read.
 - **Bump:** minor
 - **Status:** shipped-pending-migration
 
+### [FEAT-1781586642] Performance: lazy-load expanded card + defer particles; leak-harden card
+- [x] **Priority:** high
+- **Area:** frontend, animation
+- **File(s):** app/components/work/TimelineCard.tsx, app/components/ui/ParticlesBackground.tsx, app/components/work/ProjectCardExpanded.tsx
+- **Why:** Cut initial load (react-markdown + remark-gfm + rehype-raw shipped in the homepage bundle though only needed once a card is opened) and remove memory-leak risk in the interactive components.
+- **Approach:** Lazy-load `ProjectCardExpanded` via `next/dynamic` (markdown chunk out of the initial bundle); defer the tsParticles engine init to `requestIdleCallback`; replace cancelled-flag fetch guards with `AbortController` so in-flight requests abort on unmount/tab-switch.
+- **Library / dependency notes:** none (uses `next/dynamic` + platform `AbortController` / `requestIdleCallback`).
+- **Acceptance criteria:** First Load JS for `/` drops materially; E2E green (lazy card still works); no setState-after-unmount; build + tsc clean.
+- **Test plan:** build First Load JS before/after; Playwright suite.
+- **Out of scope:** live interactive per-project embeds (infeasible for the ~23 non-web / non-deployed repos; a StackBlitz opt-in for the ~13 web repos would be a separate ticket).
+- **Implementation:** Lazy-loaded `ProjectCardExpanded` → First Load JS `/` **251 kB → 155 kB** (route JS 148 → 52.4 kB); deferred particle init to idle with `cancelIdleCallback` cleanup; `AbortController` on README + source fetches. tsc clean, E2E 19/19.
+- **Bump:** patch
+- **Status:** shipped-pending-migration
+
 ---
 
 ## Shipped

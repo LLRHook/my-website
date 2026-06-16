@@ -7,11 +7,17 @@ import FadeInOnScroll from "@/app/components/ui/FadeInOnScroll";
 import LanguageBadge from "./LanguageBadge";
 import LanguageBar from "./LanguageBar";
 import ActivitySparkline from "./ActivitySparkline";
-import ProjectCardExpanded from "./ProjectCardExpanded";
+import dynamic from "next/dynamic";
 import Chevron from "@/app/components/ui/Chevron";
 import { StarIcon } from "@/app/components/ui/icons";
 import { formatDate } from "@/app/lib/dateUtils";
 import { TIMELINE_STAGGER_STEP } from "@/app/lib/animationConfig";
+
+// Lazy-load the expanded card so react-markdown + its plugins stay out of the
+// initial bundle — they're only needed once a project is actually opened.
+const ProjectCardExpanded = dynamic(() => import("./ProjectCardExpanded"), {
+  ssr: false,
+});
 
 interface TimelineCardProps {
   repo: RepoCardData;
