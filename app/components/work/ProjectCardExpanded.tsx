@@ -14,7 +14,17 @@ import LanguageBar from "./LanguageBar";
 const remarkPlugins = [remarkGfm];
 const rehypePlugins = [rehypeRaw];
 
-type Tab = "readme" | "code" | "activity";
+// Primary languages whose repos can boot live in StackBlitz (WebContainers).
+const RUNNABLE_LANGS = new Set([
+  "JavaScript",
+  "TypeScript",
+  "Astro",
+  "Vue",
+  "Svelte",
+  "HTML",
+]);
+
+type Tab = "readme" | "run" | "code" | "activity";
 
 interface SourcePeek {
   html: string | null;
@@ -76,8 +86,16 @@ export default function ProjectCardExpanded({ repo }: { repo: RepoCardData }) {
     return () => ctrl.abort();
   }, [tab, source, repo.owner, repo.name, repo.language]);
 
+  const isRunnable = !!repo.language && RUNNABLE_LANGS.has(repo.language);
+  // ctl=1 = click-to-load: StackBlitz shows a Run button and does NOT boot a
+  // WebContainer until the user clicks it (keeps the page light + leak-safe).
+  const stackblitzUrl =
+    `https://stackblitz.com/github/${repo.owner}/${repo.name}` +
+    `?embed=1&ctl=1&hideNavigation=1&view=preview`;
+
   const tabs: { id: Tab; label: string }[] = [
     { id: "readme", label: "README" },
+    ...(isRunnable ? [{ id: "run" as Tab, label: "Run" }] : []),
     { id: "code", label: "Code" },
     { id: "activity", label: "Activity" },
   ];
@@ -131,6 +149,24 @@ export default function ProjectCardExpanded({ repo }: { repo: RepoCardData }) {
                 </Markdown>
               </div>
             )}
+          </div>
+        )}
+
+        {tab === "run" && isRunnable && (
+          <div role="tabpanel">
+            <p className="text-[10px] uppercase tracking-wider text-text-muted mb-2">
+              Live in StackBlitz — press ▶ Run inside the editor to boot it
+            </p>
+            {/* Mounted only while this tab is active: switching tabs or closing
+                the card unmounts the iframe and tears down the WebContainer. */}
+            <iframe
+              key={`stackblitz-${repo.id}`}
+              title={`${repo.name} live demo`}
+              src={stackblitzUrl}
+              loading="lazy"
+              className="w-full h-[28rem] rounded-lg border border-border bg-black/20"
+              allow="cross-origin-isolated"
+            />
           </div>
         )}
 

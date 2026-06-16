@@ -131,6 +131,20 @@ the end of their section, sorted by id on read.
 - **Bump:** patch
 - **Status:** shipped-pending-migration
 
+### [FEAT-1781587502] Live "Run" tab: StackBlitz embed for web repos
+- [x] **Priority:** med
+- **Area:** frontend
+- **File(s):** app/components/work/ProjectCardExpanded.tsx, e2e/card-tabs.spec.ts
+- **Why:** Deliver a genuinely runnable per-project demo (the "fully functional mini demo" ask) for browser-runnable repos, beyond the metadata/code/activity card.
+- **Approach:** Add a "Run" tab (shown only for JS/TS/Astro/Vue/Svelte/HTML repos) embedding `stackblitz.com/github/<owner>/<repo>` via an iframe with `ctl=1` (click-to-load — no WebContainer boots until the user clicks). The iframe is mounted only while the Run tab is active, so switching tabs / collapsing the card unmounts it and tears down the runtime (leak-safe). Non-runnable repos never get the tab.
+- **Library / dependency notes:** none — plain iframe (no `@stackblitz/sdk` dep) for full React-controlled mount/unmount.
+- **Acceptance criteria:** Run tab appears for web repos only; clicking it mounts the StackBlitz iframe; switching tabs unmounts it (no lingering iframe/WebContainer); no client-bundle growth; build/tsc/E2E green.
+- **Test plan:** `e2e/card-tabs.spec.ts` asserts mount on Run + unmount on switch (leak-safe); manual prod check of a live boot.
+- **Out of scope:** auto-booting the runtime; embeds for non-web repos; the `@stackblitz/sdk`.
+- **Implementation:** Added "Run" tab to `ProjectCardExpanded` gated on `RUNNABLE_LANGS`; StackBlitz click-to-load iframe (`ctl=1&view=preview`), mounted only while active → leak-safe unmount on tab-switch/collapse. First Load JS unchanged (155 kB; embed lives in the iframe). tsc clean, E2E 20/20 (incl. the leak-safe mount/unmount test).
+- **Bump:** minor
+- **Status:** shipped-pending-migration
+
 ---
 
 ## Shipped
