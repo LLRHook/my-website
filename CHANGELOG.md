@@ -14,13 +14,7 @@ under each release/date heading.
 
 ### Verified
 
-- 2026-06-18 V&V pass at SHA 63ea219 (local DUT build/test/E2E + Vercel prod smoke): 8 unit (2 files, Vitest) + 20 E2E (3 specs, run twice with no flake), all automated + prod-smoke stages green. This release is dev-infra only (FEAT-1781501122/123/124 — Vitest, ESLint, CI test/lint gates); the app runtime is byte-identical to the v0.3.0 Verified build, so the Stage 3–5 functional/adversarial/perf results carry forward (Lighthouse not re-run). The FEAT-1781501122 unit-coverage gap flagged in the prior Verified entries is now closed for the `github.ts` data layer (0 → 8 unit tests).
-
 ### Added
-
-- [FEAT-1781501122] Unit/component test layer — Vitest 4 + Testing Library + jsdom; 8 tests over the `github.ts` data layer (incl. the BUG-1781501120 fallback) and `TimelineSection`. [minor]
-- [FEAT-1781501123] ESLint 9 flat config (`next/core-web-vitals` + `next/typescript`) wired to `npm run lint`. [minor]
-- [FEAT-1781501124] CI runs lint + unit tests + build + Playwright E2E (was build-only); data-driven build/E2E authenticated via `secrets.GITHUB_TOKEN`. [minor]
 
 ### Changed
 
@@ -29,6 +23,18 @@ under each release/date heading.
 ### Removed
 
 ### Security
+
+## [v0.4.0] - 2026-06-18
+
+### Verified
+
+- 2026-06-18 V&V pass at SHA 63ea219 (local DUT build/test/E2E + Vercel prod smoke): 8 unit (2 files, Vitest) + 20 E2E (3 specs, run twice with no flake), all automated + prod-smoke stages green. This release is dev-infra only (FEAT-1781501122/123/124 — Vitest, ESLint, CI test/lint gates); the app runtime is byte-identical to the v0.3.0 Verified build, so the Stage 3–5 functional/adversarial/perf results carry forward (Lighthouse not re-run). The FEAT-1781501122 unit-coverage gap flagged in the prior Verified entries is now closed for the `github.ts` data layer (0 → 8 unit tests).
+
+### Added
+
+- [FEAT-1781501122] Unit/component test layer — Vitest 4 + Testing Library + jsdom; 8 tests over the `github.ts` data layer (incl. the BUG-1781501120 fallback) and `TimelineSection`. [minor]
+- [FEAT-1781501123] ESLint 9 flat config (`next/core-web-vitals` + `next/typescript`) wired to `npm run lint`. [minor]
+- [FEAT-1781501124] CI runs lint + unit tests + build + Playwright E2E (was build-only); data-driven build/E2E authenticated via `secrets.GITHUB_TOKEN`. [minor]
 
 ## [v0.3.0] - 2026-06-16
 
