@@ -69,9 +69,9 @@ starts the production server).
 | Layer | Tool | Files | Cases |
 |-------|------|-------|-------|
 | Unit/component | (none yet — FEAT-1781501122) | 0 | 0 |
-| E2E | Playwright (chromium) | 3 | 19 |
+| E2E | Playwright (chromium) | 3 | 20 |
 
-E2E breakdown: `centering.spec.ts` 16 (4 viewports × 4 sections), `smooth-scroll.spec.ts` 2 (Lenis activation + anchor nav), `card-tabs.spec.ts` 1 (tab render + switch). BUG-1781501121 (orphaned `StatementSection`) is resolved — the 4 `statement` cases were removed.
+E2E breakdown: `centering.spec.ts` 16 (4 viewports × 4 sections), `smooth-scroll.spec.ts` 2 (Lenis activation + anchor nav), `card-tabs.spec.ts` 2 (tab render/switch + Run-tab leak-safe mount/unmount). BUG-1781501121 (orphaned `StatementSection`) is resolved — the 4 `statement` cases were removed.
 
 - **2a — Per-ticket acceptance verification.** For each ticket shipped since the last `Verified` SHA, locate the test(s) proving its acceptance criteria. BUG-1781501120 (projects render): proven by Stage 3 smoke (`/api/repos` returns repos; `/` lacks "No projects to display"). A regression-guarding **unit** test for the fallback path is tracked by FEAT-1781501122 — its absence is a known coverage gap, not a fresh block.
 - **2b — Coverage of the change.** No coverage tool is wired (FEAT-1781501122 would add Vitest coverage). Fall back to 2a per-ticket mapping; note the gap.

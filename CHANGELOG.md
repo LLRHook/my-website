@@ -14,7 +14,13 @@ under each release/date heading.
 
 ### Verified
 
+- 2026-06-16 V&V pass on Vercel prod (SHA 3c64a56): 0 unit, 20 E2E (3 specs), all automated + prod-smoke stages green. Coverage caveat: the particle field (FEAT-1781507205) and the perf lazy-load (FEAT-1781586642) lack dedicated unit tests (tracked by FEAT-1781501122) — verified via E2E + live prod smoke + the Run-tab leak-safety E2E.
+
 ### Added
+
+- [FEAT-1781507205] Restore the full interactive star/aurora background for all visitors (now renders under reduce-motion + mobile). [minor]
+- [FEAT-1781586642] Performance: lazy-load the expanded card + defer particles to idle; leak-harden card fetches — First Load JS 251 → 155 kB (-38%). [patch]
+- [FEAT-1781587502] Live "Run" tab — StackBlitz embed for web repos (click-to-load, leak-safe). [minor]
 
 ### Changed
 
