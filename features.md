@@ -45,7 +45,7 @@ the end of their section, sorted by id on read.
 ## Open
 
 ### [FEAT-1781501122] Add a unit/component test layer (Vitest + Testing Library)
-- [ ] **Priority:** med
+- [x] **Priority:** med
 - **Area:** tests, frontend
 - **File(s):** package.json, vitest.config.ts (new), app/lib/github.test.ts (new), app/components/work/__tests__/* (new)
 - **Why:** The project has only E2E (Playwright) coverage. Pure logic — `buildTimelineData`, `toLanguageSlices`, the `fetchAllRepos` fallback path, pagination, the `recentCommits`/`fetchKeyFile` additions, and the FEAT-1781502130 reduced-motion/stagger behaviour — has no fast unit coverage (the V&V 2a/2b gap), so data-layer and animation regressions are only caught by a full browser run, if at all.
@@ -58,10 +58,11 @@ the end of their section, sorted by id on read.
 - **Test plan:** the tests themselves; count recorded in `VERIFICATION.md § 2`.
 - **Out of scope:** rewriting the Playwright E2E layer; visual-regression snapshots.
 - **Bump:** minor
-- **Status:** open
+- **Implementation:** Added Vitest 4 + `@testing-library/react` + `jsdom` + `vite-tsconfig-paths`. `vitest.config.ts` (jsdom env, `setupFiles`, scoped `include: app/**/*.test.{ts,tsx}` so Playwright keeps `e2e/`); `vitest.setup.ts` adds jest-dom matchers + IntersectionObserver/matchMedia stubs jsdom lacks. Tests: `app/lib/github.test.ts` (shikiLang, buildTimelineData, fetchAllRepos public / empty→public-fallback / non-ok — 6) and `app/components/work/TimelineSection.test.tsx` (empty + populated — 2). `npm test` → 8/8 green. Added `test` + `test:watch` scripts.
+- **Status:** shipped-pending-migration
 
 ### [FEAT-1781501123] Add ESLint (next/core-web-vitals) config
-- [ ] **Priority:** low
+- [x] **Priority:** low
 - **Area:** ci, frontend
 - **File(s):** eslint.config.mjs (new), package.json
 - **Why:** No linter is configured, so `next build` performs no lint pass and Stage 1 (static review) has nothing to run. A linter catches accessibility regressions, unused code, and React-hook misuse before they ship.
@@ -73,10 +74,11 @@ the end of their section, sorted by id on read.
 - **Test plan:** n/a (lint is the check); wire into CI via FEAT-1781501124.
 - **Out of scope:** Prettier/formatting enforcement.
 - **Bump:** minor
-- **Status:** open
+- **Implementation:** Added ESLint 9 flat config `eslint.config.mjs` via `@eslint/eslintrc` FlatCompat extending `next/core-web-vitals` + `next/typescript`, ignoring `.next`/`node_modules`/`playwright-report`/`test-results`/`out`/`next-env.d.ts`. `lint` script = `eslint .`. `npm run lint` runs clean. Pinned `eslint` `^9` + `eslint-config-next` `^15.5` to match Next 15.5 (avoids the 16.x/eslint-10 mismatch).
+- **Status:** shipped-pending-migration
 
 ### [FEAT-1781501124] CI runs tests + lint, not just build
-- [ ] **Priority:** med
+- [x] **Priority:** med
 - **Area:** ci
 - **File(s):** .github/workflows/ci.yml
 - **Why:** CI only runs `next build` on push/PR to main. It never runs the Playwright E2E suite or any lint/unit tests, so a red test suite (e.g. the current orphaned-statement failures, BUG-1781501121) can ship undetected.
@@ -88,7 +90,8 @@ the end of their section, sorted by id on read.
 - **Test plan:** verify by pushing a branch with a deliberately failing test and confirming CI goes red.
 - **Out of scope:** deploy steps (Vercel handles deploy via its Git integration).
 - **Bump:** minor
-- **Status:** open
+- **Implementation:** Rewrote `.github/workflows/ci.yml` into one `verify` job (Node 22, `permissions: contents: read`): `npm ci` → Lint (`npm run lint`) → Unit tests (`npm test`) → Build → install Playwright chromium → E2E (`npm run test:e2e`) → upload `playwright-report` artifact (`if: ${{ !cancelled() }}`, covers the "on failure" criterion). Build + E2E steps pass `GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}` so the data-driven build authenticates the GitHub API (the unauthenticated 60/hr limit otherwise empties the timeline and breaks the card E2E). Each check is its own step, so a red lint/unit/E2E fails the job. Live CI-red confirmation deferred to the first pushed run (GitHub Actions can't execute locally); each command verified to exit non-zero on failure locally.
+- **Status:** shipped-pending-migration
 
 ### [FEAT-1781505473] Refine source-peek key-file heuristic
 - [ ] **Priority:** low
