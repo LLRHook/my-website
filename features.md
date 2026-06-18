@@ -44,55 +44,6 @@ the end of their section, sorted by id on read.
 
 ## Open
 
-### [FEAT-1781501122] Add a unit/component test layer (Vitest + Testing Library)
-- [x] **Priority:** med
-- **Area:** tests, frontend
-- **File(s):** package.json, vitest.config.ts (new), app/lib/github.test.ts (new), app/components/work/__tests__/* (new)
-- **Why:** The project has only E2E (Playwright) coverage. Pure logic — `buildTimelineData`, `toLanguageSlices`, the `fetchAllRepos` fallback path, pagination, the `recentCommits`/`fetchKeyFile` additions, and the FEAT-1781502130 reduced-motion/stagger behaviour — has no fast unit coverage (the V&V 2a/2b gap), so data-layer and animation regressions are only caught by a full browser run, if at all.
-- **Approach:** Add Vitest with `@testing-library/react` + `jsdom`. Unit-test `app/lib/github.ts` pure transforms with `fetch` mocked (success, non-OK, empty, token→public fallback, recentCommits, fetchKeyFile heuristic). Component-test `TimelineSection` empty-state vs populated. Add `"test": "vitest run"` and `"test:watch": "vitest"` scripts.
-- **Library / dependency notes:** **Vitest** (native ESM/TS, fast, Vite-aligned — recommended over Jest for a Next 15 + TS 5.9 project). `@testing-library/react`, `@testing-library/jest-dom`, `jsdom`. Confirm latest stable versions before installing.
-- **Acceptance criteria:**
-  - `npm test` runs Vitest and passes.
-  - `github.ts` transforms + fallback covered (success / non-OK / empty / fallback).
-  - `TimelineSection` empty vs populated rendering covered.
-- **Test plan:** the tests themselves; count recorded in `VERIFICATION.md § 2`.
-- **Out of scope:** rewriting the Playwright E2E layer; visual-regression snapshots.
-- **Bump:** minor
-- **Implementation:** Added Vitest 4 + `@testing-library/react` + `jsdom` + `vite-tsconfig-paths`. `vitest.config.ts` (jsdom env, `setupFiles`, scoped `include: app/**/*.test.{ts,tsx}` so Playwright keeps `e2e/`); `vitest.setup.ts` adds jest-dom matchers + IntersectionObserver/matchMedia stubs jsdom lacks. Tests: `app/lib/github.test.ts` (shikiLang, buildTimelineData, fetchAllRepos public / empty→public-fallback / non-ok — 6) and `app/components/work/TimelineSection.test.tsx` (empty + populated — 2). `npm test` → 8/8 green. Added `test` + `test:watch` scripts.
-- **Status:** shipped-pending-migration
-
-### [FEAT-1781501123] Add ESLint (next/core-web-vitals) config
-- [x] **Priority:** low
-- **Area:** ci, frontend
-- **File(s):** eslint.config.mjs (new), package.json
-- **Why:** No linter is configured, so `next build` performs no lint pass and Stage 1 (static review) has nothing to run. A linter catches accessibility regressions, unused code, and React-hook misuse before they ship.
-- **Approach:** Add `eslint` + `eslint-config-next` with the flat-config (`eslint.config.mjs`) using `next/core-web-vitals`. Add `"lint": "next lint"` (or `eslint .`). Fix any findings the first run surfaces (file as separate BUGs if non-trivial).
-- **Library / dependency notes:** `eslint`, `eslint-config-next` (matched to Next 15). Confirm latest stable.
-- **Acceptance criteria:**
-  - `npm run lint` runs clean (or remaining findings are filed as BUGs).
-  - Stage 1 of `VERIFICATION.md` references the lint command.
-- **Test plan:** n/a (lint is the check); wire into CI via FEAT-1781501124.
-- **Out of scope:** Prettier/formatting enforcement.
-- **Bump:** minor
-- **Implementation:** Added ESLint 9 flat config `eslint.config.mjs` via `@eslint/eslintrc` FlatCompat extending `next/core-web-vitals` + `next/typescript`, ignoring `.next`/`node_modules`/`playwright-report`/`test-results`/`out`/`next-env.d.ts`. `lint` script = `eslint .`. `npm run lint` runs clean. Pinned `eslint` `^9` + `eslint-config-next` `^15.5` to match Next 15.5 (avoids the 16.x/eslint-10 mismatch).
-- **Status:** shipped-pending-migration
-
-### [FEAT-1781501124] CI runs tests + lint, not just build
-- [x] **Priority:** med
-- **Area:** ci
-- **File(s):** .github/workflows/ci.yml
-- **Why:** CI only runs `next build` on push/PR to main. It never runs the Playwright E2E suite or any lint/unit tests, so a red test suite (e.g. the current orphaned-statement failures, BUG-1781501121) can ship undetected.
-- **Approach:** Extend `ci.yml`: after build, run `npm run lint` (FEAT-1781501123) and `npm test` (FEAT-1781501122), and a Playwright job (`npx playwright install --with-deps chromium` then `npm run test:e2e`). Upload the Playwright HTML report as an artifact.
-- **Library / dependency notes:** none new (GitHub Actions + existing tooling).
-- **Acceptance criteria:**
-  - CI fails when a unit, lint, or E2E check fails.
-  - Playwright report uploaded as an artifact on failure.
-- **Test plan:** verify by pushing a branch with a deliberately failing test and confirming CI goes red.
-- **Out of scope:** deploy steps (Vercel handles deploy via its Git integration).
-- **Bump:** minor
-- **Implementation:** Rewrote `.github/workflows/ci.yml` into one `verify` job (Node 22, `permissions: contents: read`): `npm ci` → Lint (`npm run lint`) → Unit tests (`npm test`) → Build → install Playwright chromium → E2E (`npm run test:e2e`) → upload `playwright-report` artifact (`if: ${{ !cancelled() }}`, covers the "on failure" criterion). Build + E2E steps pass `GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}` so the data-driven build authenticates the GitHub API (the unauthenticated 60/hr limit otherwise empties the timeline and breaks the card E2E). Each check is its own step, so a red lint/unit/E2E fails the job. Live CI-red confirmation deferred to the first pushed run (GitHub Actions can't execute locally); each command verified to exit non-zero on failure locally.
-- **Status:** shipped-pending-migration
-
 ### [FEAT-1781505473] Refine source-peek key-file heuristic
 - [ ] **Priority:** low
 - **Area:** github-api, frontend
@@ -248,4 +199,53 @@ the end of their section, sorted by id on read.
 - **Out of scope:** persisting the selected tab across cards; deep-linking to a tab.
 - **Implementation:** Restructured `ProjectCardExpanded` into accessible README / Code / Activity tabs (role=tablist/tab/tabpanel, aria-selected, aria-live). Activity uses already-loaded data (language bar, 52-week sparkline, recent commits, topics) — instant; README + Code lazy-load per tab. Replaced the spinner with a content-shaped skeleton. `TimelineCard` now passes the full `repo`. New `e2e/card-tabs.spec.ts` verifies tabs render + switch (19/19 E2E green).
 - **Bump:** minor
+- **Status:** shipped-pending-migration
+
+### [FEAT-1781501122] Add a unit/component test layer (Vitest + Testing Library)
+- [x] **Priority:** med
+- **Area:** tests, frontend
+- **File(s):** package.json, vitest.config.ts (new), app/lib/github.test.ts (new), app/components/work/__tests__/* (new)
+- **Why:** The project has only E2E (Playwright) coverage. Pure logic — `buildTimelineData`, `toLanguageSlices`, the `fetchAllRepos` fallback path, pagination, the `recentCommits`/`fetchKeyFile` additions, and the FEAT-1781502130 reduced-motion/stagger behaviour — has no fast unit coverage (the V&V 2a/2b gap), so data-layer and animation regressions are only caught by a full browser run, if at all.
+- **Approach:** Add Vitest with `@testing-library/react` + `jsdom`. Unit-test `app/lib/github.ts` pure transforms with `fetch` mocked (success, non-OK, empty, token→public fallback, recentCommits, fetchKeyFile heuristic). Component-test `TimelineSection` empty-state vs populated. Add `"test": "vitest run"` and `"test:watch": "vitest"` scripts.
+- **Library / dependency notes:** **Vitest** (native ESM/TS, fast, Vite-aligned — recommended over Jest for a Next 15 + TS 5.9 project). `@testing-library/react`, `@testing-library/jest-dom`, `jsdom`. Confirm latest stable versions before installing.
+- **Acceptance criteria:**
+  - `npm test` runs Vitest and passes.
+  - `github.ts` transforms + fallback covered (success / non-OK / empty / fallback).
+  - `TimelineSection` empty vs populated rendering covered.
+- **Test plan:** the tests themselves; count recorded in `VERIFICATION.md § 2`.
+- **Out of scope:** rewriting the Playwright E2E layer; visual-regression snapshots.
+- **Bump:** minor
+- **Implementation:** Added Vitest 4 + `@testing-library/react` + `jsdom` + `vite-tsconfig-paths`. `vitest.config.ts` (jsdom env, `setupFiles`, scoped `include: app/**/*.test.{ts,tsx}` so Playwright keeps `e2e/`); `vitest.setup.ts` adds jest-dom matchers + IntersectionObserver/matchMedia stubs jsdom lacks. Tests: `app/lib/github.test.ts` (shikiLang, buildTimelineData, fetchAllRepos public / empty→public-fallback / non-ok — 6) and `app/components/work/TimelineSection.test.tsx` (empty + populated — 2). `npm test` → 8/8 green. Added `test` + `test:watch` scripts.
+- **Status:** shipped-pending-migration
+
+### [FEAT-1781501123] Add ESLint (next/core-web-vitals) config
+- [x] **Priority:** low
+- **Area:** ci, frontend
+- **File(s):** eslint.config.mjs (new), package.json
+- **Why:** No linter is configured, so `next build` performs no lint pass and Stage 1 (static review) has nothing to run. A linter catches accessibility regressions, unused code, and React-hook misuse before they ship.
+- **Approach:** Add `eslint` + `eslint-config-next` with the flat-config (`eslint.config.mjs`) using `next/core-web-vitals`. Add `"lint": "next lint"` (or `eslint .`). Fix any findings the first run surfaces (file as separate BUGs if non-trivial).
+- **Library / dependency notes:** `eslint`, `eslint-config-next` (matched to Next 15). Confirm latest stable.
+- **Acceptance criteria:**
+  - `npm run lint` runs clean (or remaining findings are filed as BUGs).
+  - Stage 1 of `VERIFICATION.md` references the lint command.
+- **Test plan:** n/a (lint is the check); wire into CI via FEAT-1781501124.
+- **Out of scope:** Prettier/formatting enforcement.
+- **Bump:** minor
+- **Implementation:** Added ESLint 9 flat config `eslint.config.mjs` via `@eslint/eslintrc` FlatCompat extending `next/core-web-vitals` + `next/typescript`, ignoring `.next`/`node_modules`/`playwright-report`/`test-results`/`out`/`next-env.d.ts`. `lint` script = `eslint .`. `npm run lint` runs clean. Pinned `eslint` `^9` + `eslint-config-next` `^15.5` to match Next 15.5 (avoids the 16.x/eslint-10 mismatch).
+- **Status:** shipped-pending-migration
+
+### [FEAT-1781501124] CI runs tests + lint, not just build
+- [x] **Priority:** med
+- **Area:** ci
+- **File(s):** .github/workflows/ci.yml
+- **Why:** CI only runs `next build` on push/PR to main. It never runs the Playwright E2E suite or any lint/unit tests, so a red test suite (e.g. the current orphaned-statement failures, BUG-1781501121) can ship undetected.
+- **Approach:** Extend `ci.yml`: after build, run `npm run lint` (FEAT-1781501123) and `npm test` (FEAT-1781501122), and a Playwright job (`npx playwright install --with-deps chromium` then `npm run test:e2e`). Upload the Playwright HTML report as an artifact.
+- **Library / dependency notes:** none new (GitHub Actions + existing tooling).
+- **Acceptance criteria:**
+  - CI fails when a unit, lint, or E2E check fails.
+  - Playwright report uploaded as an artifact on failure.
+- **Test plan:** verify by pushing a branch with a deliberately failing test and confirming CI goes red.
+- **Out of scope:** deploy steps (Vercel handles deploy via its Git integration).
+- **Bump:** minor
+- **Implementation:** Rewrote `.github/workflows/ci.yml` into one `verify` job (Node 22, `permissions: contents: read`): `npm ci` → Lint (`npm run lint`) → Unit tests (`npm test`) → Build → install Playwright chromium → E2E (`npm run test:e2e`) → upload `playwright-report` artifact (`if: ${{ !cancelled() }}`, covers the "on failure" criterion). Build + E2E steps pass `GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}` so the data-driven build authenticates the GitHub API (the unauthenticated 60/hr limit otherwise empties the timeline and breaks the card E2E). Each check is its own step, so a red lint/unit/E2E fails the job. Live CI-red confirmation deferred to the first pushed run (GitHub Actions can't execute locally); each command verified to exit non-zero on failure locally.
 - **Status:** shipped-pending-migration

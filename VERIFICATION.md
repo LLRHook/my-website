@@ -44,14 +44,14 @@ starts the production server).
 - [ ] 0.5 Port 3000 free.
 - [ ] 0.6 Determinism posture: data comes from a live external API (GitHub). Repo counts vary as repos are pushed; assertions must test **structure/non-emptiness**, not exact counts.
 
-> **Protocol vs CI.** CI (`.github/workflows/ci.yml`) runs `npm ci` + `next build` on every push/PR to main — build only. This protocol is the deeper release-readiness gate at a chosen SHA. **CI gap:** CI runs neither the test suite nor a linter (see FEAT-1781501124 / FEAT-1781501123) — until those land, this protocol is the only place tests run.
+> **Protocol vs CI.** CI (`.github/workflows/ci.yml`) runs `npm ci` → lint → unit tests → build → Playwright E2E on every push/PR to main (FEAT-1781501124), uploading the Playwright report as an artifact. This protocol is the deeper release-readiness gate at a chosen SHA — it adds the prod smoke, adversarial, and product-constraint stages CI does not.
 
-**Command fidelity.** CI's canonical commands are `npm ci` and `npm run build`. Run those verbatim in Stages 1–2. (No lint/test invocations exist in CI yet to mirror.)
+**Command fidelity.** CI's canonical commands are `npm ci`, `npm run lint`, `npm test`, `npm run build`, and `npm run test:e2e`. Run those verbatim in Stages 1–2. CI authenticates the data-driven build + E2E via `secrets.GITHUB_TOKEN`; locally, set `GITHUB_TOKEN` for a populated run, or accept that the two `card-tabs` E2E cases skip when the unauthenticated build is rate-limited.
 
 ## Stage 1 — Static / spec compliance review
 
 - [ ] 1.1 Type-check: `npx tsc --noEmit` → no errors. (`next build` also type-checks; this is the isolated check.)
-- [ ] 1.2 Lint: `npm run lint` → **NOT YET AVAILABLE** — no ESLint is configured (FEAT-1781501123). Flag and skip until that ships; do not paraphrase a lint command that doesn't exist.
+- [ ] 1.2 Lint: `npm run lint` (ESLint 9 flat config — `next/core-web-vitals` + `next/typescript`, FEAT-1781501123) → clean, no errors.
 - [ ] 1.3 Secrets scan: confirm no token/secret is committed. `git grep -nE "gh[ps]_[A-Za-z0-9]{20,}|github_pat_"` → no matches. Confirm `.env*.local` and `.vercel` are git-ignored (`.gitignore`).
 - [ ] 1.4 Provider abstraction intact: all GitHub access goes through `app/lib/github.ts` (no raw `api.github.com` `fetch` calls scattered in components). `git grep -n "api.github.com" -- app` → only `app/lib/github.ts`.
 - [ ] 1.5 Resilience invariant (regression guard for BUG-1781501120): `app/lib/github.ts` `fetchPaginatedRepos` wraps its fetch in try/catch (a timeout/abort must not throw through the Server Component), and `fetchAllRepos` falls back to the public endpoint when the authenticated request yields nothing.
@@ -61,20 +61,20 @@ starts the production server).
 ## Stage 2 — Automated builds & tests
 
 - [ ] 2.1 Production build (CI-fidelity command): `npm run build` → "Compiled successfully", static pages generated, no errors. Record the route table.
-- [ ] 2.2 Unit/component tests: `npm test` → **NOT YET AVAILABLE** — no unit layer (FEAT-1781501122). Flag and skip until it ships.
+- [ ] 2.2 Unit/component tests: `npm test` (Vitest, jsdom — FEAT-1781501122) → all pass. Covers `github.ts` transforms + the `fetchAllRepos` fallback path, and `TimelineSection` empty vs populated.
 - [ ] 2.3 E2E (Playwright): `npm run test:e2e` (config builds + starts the prod server, runs chromium). Record results.
 
 **Baseline test counts (update on drift — § 3.1.1):**
 
 | Layer | Tool | Files | Cases |
 |-------|------|-------|-------|
-| Unit/component | (none yet — FEAT-1781501122) | 0 | 0 |
+| Unit/component | Vitest (jsdom) | 2 | 8 |
 | E2E | Playwright (chromium) | 3 | 20 |
 
 E2E breakdown: `centering.spec.ts` 16 (4 viewports × 4 sections), `smooth-scroll.spec.ts` 2 (Lenis activation + anchor nav), `card-tabs.spec.ts` 2 (tab render/switch + Run-tab leak-safe mount/unmount). BUG-1781501121 (orphaned `StatementSection`) is resolved — the 4 `statement` cases were removed.
 
-- **2a — Per-ticket acceptance verification.** For each ticket shipped since the last `Verified` SHA, locate the test(s) proving its acceptance criteria. BUG-1781501120 (projects render): proven by Stage 3 smoke (`/api/repos` returns repos; `/` lacks "No projects to display"). A regression-guarding **unit** test for the fallback path is tracked by FEAT-1781501122 — its absence is a known coverage gap, not a fresh block.
-- **2b — Coverage of the change.** No coverage tool is wired (FEAT-1781501122 would add Vitest coverage). Fall back to 2a per-ticket mapping; note the gap.
+- **2a — Per-ticket acceptance verification.** For each ticket shipped since the last `Verified` SHA, locate the test(s) proving its acceptance criteria. BUG-1781501120 (projects render): proven by Stage 3 smoke (`/api/repos` returns repos; `/` lacks "No projects to display") **and** by the `fetchAllRepos` unit tests in `app/lib/github.test.ts` (public path / empty→public fallback / non-ok→[]) — the former coverage gap is now closed (FEAT-1781501122 shipped).
+- **2b — Coverage of the change.** Vitest is wired (FEAT-1781501122) but coverage reporting (`vitest --coverage`) is not yet configured. Fall back to 2a per-ticket mapping; note the gap.
 - **2c — Trust the green (flake check).** Run the E2E suite twice; any case that flips is quarantined and filed as a `BUG` (area `tests`). Playwright `retries` is 0 locally / 2 in CI — a case that only passes on retry is suspect.
 
 Regression stays whole-platform: run the full E2E suite, not just the changed flow.
@@ -123,8 +123,7 @@ UI walkthrough (manual, on the prod artifact):
 - [ ] 6.5 if all green, migrate pending-migration tickets and append a `Verified` entry to `CHANGELOG.md / Unreleased`
 
 A build is **release-ready** only if all six stages tick. A failed step in Stages 1,
-2, or 5 is a hard block (this currently includes the 4 failing E2E `statement` cases —
-BUG-1781501121). In Stage 4, a crit/high performance failure also blocks.
+2, or 5 is a hard block. In Stage 4, a crit/high performance failure also blocks.
 
 ### 6.3 Summary table
 
