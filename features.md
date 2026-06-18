@@ -103,6 +103,10 @@ the end of their section, sorted by id on read.
 - **Bump:** patch
 - **Status:** open
 
+---
+
+## Shipped
+
 ### [FEAT-1781507205] Restore prominent interactive star/aurora background
 - [x] **Priority:** med
 - **Area:** ui, animation
@@ -144,10 +148,6 @@ the end of their section, sorted by id on read.
 - **Implementation:** Added "Run" tab to `ProjectCardExpanded` gated on `RUNNABLE_LANGS`; StackBlitz click-to-load iframe (`ctl=1&view=preview`), mounted only while active → leak-safe unmount on tab-switch/collapse. First Load JS unchanged (155 kB; embed lives in the iframe). tsc clean, E2E 20/20 (incl. the leak-safe mount/unmount test).
 - **Bump:** minor
 - **Status:** shipped-pending-migration
-
----
-
-## Shipped
 
 ### [FEAT-1781502127] Centralize animation/UI constants
 - [x] **Priority:** low
