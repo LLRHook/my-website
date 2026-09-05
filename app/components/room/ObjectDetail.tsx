@@ -55,8 +55,8 @@ const OBJECTS: Record<ObjectId, RoomObject> = {
     facts: [["The details", "Chalk bag & carabiner"], ["In the room", "Beside the game shelf"]], crop: "1306 326 49 56", app: "interests", appLabel: "More off the clock",
   },
   wings: {
-    title: "Wings after a long week.", category: "A FAVORITE COMFORT",
-    description: "A small gold carton is the room’s nod to Buffalo Wild Wings. The familiar things deserve a place here alongside the projects and books.",
+    title: "Buffalo Wild Wings.", category: "THE GOLD CARTON",
+    description: "A spot for Buffalo Wild Wings on the bottom shelf. Look for the gold takeout carton with the winged buffalo on the front, just below the card boxes and Poké Ball.",
     facts: [["A nod to", "Buffalo Wild Wings"], ["In the room", "Bottom shelf"]], crop: "1127 451 79 71", app: "interests", appLabel: "Explore my interests",
   },
   window: {
@@ -130,7 +130,7 @@ export default function ObjectDetail({ selected, onClose, onOpenApp, returnFocus
         </div>
         <div className="object-detail-story"><p className="eyebrow">{object.category}</p><h2 id="object-detail-title">{object.title}</h2><p className="detail-description">{object.description}</p><dl>{object.facts.map(([label, value]) => <div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}</dl><div className="detail-actions">{object.app && <button className="primary-link" onClick={() => { dialog.current?.close(); onOpenApp(object.app!); }}>{object.appLabel} <Icon name="arrow" /></button>}{object.photo && <a href={object.photo.src} target="_blank" rel="noopener noreferrer">View original photo <span aria-hidden="true">↗</span></a>}</div></div>
       </div>
-      <footer className="object-detail-footer">A closer look at Victor’s workspace.<span>ESC to return to the room</span></footer>
+      <footer className="object-detail-footer">ESC to return to the room</footer>
     </div>}
   </dialog>;
 }

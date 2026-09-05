@@ -1,0 +1,81 @@
+/* Photos stay pinned to the wall on larger screens. The scene has one coordinate
+   system, matching the 1440 × 850 drawing and its animated overlays. */
+.room-photo-strip { display: contents; }
+.room-scene { position: absolute; inset: 0; container-type: inline-size; isolation: isolate; }
+
+@media (max-width: 700px) {
+  .room-stage { aspect-ratio: auto; margin: 9px auto 0; }
+  .room-photo-strip { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); align-items: start; gap: 14px; width: 84%; max-width: 450px; margin: 0 auto 5px; padding: 8px 0 10px; position: relative; z-index: 2; }
+  .room-photo-strip .photo-note { position: relative; inset: auto; width: 100%; padding: 5px 5px 7px; box-shadow: 1px 3px 7px #4b4b3021; transform: rotate(-4deg); }
+  .room-photo-strip .note-work { transform: rotate(3deg); margin-top: 5px; }
+  .room-photo-strip .note-travel { transform: rotate(-2deg); margin-top: 1px; }
+  .room-photo-strip .photo-note:hover { transform: rotate(0deg) translateY(-2px); }
+  .room-photo-strip .photo-note > img { display: block; width: 100%; aspect-ratio: 1; object-fit: cover; }
+  .room-photo-strip .note-travel > img { object-position: 49% center; }
+  .room-photo-strip .photo-note > span:last-child { font-size: 11px; line-height: 1.16; white-space: normal; margin: 5px 0 0; min-height: 25px; text-wrap: balance; }
+  .room-photo-strip .note-tape { top: -4px; height: 9px; }
+
+  .room-scene { position: relative; inset: auto; width: 100%; aspect-ratio: 1440 / 850; }
+  .room-scene .room-art,.room-scene .room-night-wash,.room-scene .room-breeze { inset: 0; width: 100%; height: 100%; }
+  .room-scene .room-art { mask-image: linear-gradient(to bottom, transparent, black 9%); }
+  .room-scene .room-caption { display: none; }
+
+  /* A miniature monitor belongs on the desk. Its screen opens the readable
+     computer view instead of trying to fit five tiny app targets on a phone. */
+  .room-scene > .computer { top: 33.18%; left: 33.89%; width: 33.47%; aspect-ratio: 482 / 355; }
+  .room-scene > .computer .monitor-body { height: 88%; padding: 1cqw 1cqw 0; border-radius: 1.2cqw 1.2cqw .85cqw .85cqw; }
+  .room-scene > .computer .monitor-screen { height: calc(100% - 26px); min-height: 0; border-width: .35cqw; border-radius: .47cqw; }
+  .room-scene > .computer .monitor-chin { height: 26px; padding: 0; }
+  .room-scene > .computer .monitor-inspect { width: 26px; min-height: 26px; justify-content: center; font-size: 0; gap: 0; letter-spacing: 0; }
+  .room-scene > .computer .monitor-inspect svg { width: 8px; height: 8px; }
+  .room-scene > .computer .power-button { width: 26px; min-height: 26px; padding: 0; gap: 3px; }
+  .room-scene > .computer .power-button svg { width: 9px; height: 9px; }
+  .room-scene > .computer .power-led { width: 2px; height: 2px; }
+  .room-scene > .computer .screen-off { min-height: 0; padding: 3px; }
+  .room-scene > .computer .screen-off > svg { width: 11px; height: 11px; margin-bottom: 3px; }
+  .room-scene > .computer .screen-off > span:not(.screen-reflection) { display: none; }
+  .room-scene > .computer .screen-off strong { padding: 0; margin: 0; font-size: 0; background: none; }
+  .room-scene > .computer .screen-off strong::after { content: "Power on ↗"; font-size: 9px; line-height: 1; }
+  .room-scene > .computer .desktop-menubar,.room-scene > .computer .desktop-welcome,.room-scene > .computer .desktop-folders,.room-scene > .computer .desktop-status > span { display: none; }
+  .room-scene > .computer .desktop-status { inset: 0; padding: 0; }
+  .room-scene > .computer .desktop-status button { display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 4px; width: 100%; height: 100%; color: #465e3d; }
+  .room-scene > .computer .desktop-status button::before { content: "viOS"; font: 16px/1 var(--font-room-serif), Georgia, serif; }
+  .room-scene > .computer .desktop-status button::after { content: "Open computer ↗"; font-size: 8px; }
+  .room-scene > .computer .desktop-status button svg { display: none; }
+  .room-scene > .computer .boot-lines { display: none; }
+  .room-scene > .computer .boot-screen { padding: 3px 5px; }
+  .room-scene > .computer .bios-logo { font-size: 11px; margin: 0; }
+  .room-scene > .computer .bios-logo span { font-size: 8px; }
+  .room-scene > .computer .boot-progress { bottom: 26px; left: 5px; right: 5px; height: 2px; }
+  .room-scene > .computer .skip-boot { min-height: 24px; bottom: 0; right: 4px; font-size: 7px; }
+
+  .room-scene .keyboard { top: 76.2%; left: 42%; width: 17.5%; height: 5.6%; }
+  .room-scene .desk-mouse { top: 76.5%; left: 61.7%; width: 2.6%; height: 4.5%; }
+  .room-scene .window-cat { top: 47.2%; left: 9%; width: 14%; min-height: 24px; }
+  /* The rotated paper needs a small margin around its square touch area. */
+  .room-scene .sticky-reminder { left: 69.6%; top: 48%; width: max(6.2%, 27px); min-height: 27px; font-size: 8px; }
+
+  /* Targets follow the illustrated objects, with at least 24px on each axis. */
+  .room-scene .object-target { min-width: 24px; min-height: 24px; }
+  .room-scene .target-window { left: 4.8%; top: 17%; width: 21.5%; height: 29%; }
+  .room-scene .target-lamp { left: 25%; top: 49.5%; width: 7.3%; height: 26%; }
+  .room-scene .target-poker { left: 68%; top: 68%; width: 8%; height: 9%; }
+  .room-scene .target-wings { left: 78.8%; top: 53.5%; width: 5%; height: 7%; }
+  .room-scene .target-plants { left: 85%; top: 73%; width: 10%; height: 19%; }
+  .room-toolbar { margin-top: 8px; }
+}
+
+@media (max-width: 360px) {
+  .room-photo-strip { width: 85%; gap: 11px; }
+  .room-photo-strip .photo-note { padding: 4px 4px 6px; }
+  .room-photo-strip .photo-note > span:last-child { font-size: 10px; }
+  .room-scene > .computer .desktop-status button { gap: 2px; }
+  .room-scene > .computer .desktop-status button::before { font-size: 13px; }
+  .room-scene > .computer .desktop-status button::after { font-size: 7px; }
+}
+
+@media (max-width: 950px) and (max-height: 500px) and (pointer: coarse) {
+  .room-intro { padding-top: 16px; padding-bottom: 4px; }
+  .room-intro h1 { font-size: 35px; margin: 8px 0; }
+  .room-intro .eyebrow { font-size: 8px; }
+}

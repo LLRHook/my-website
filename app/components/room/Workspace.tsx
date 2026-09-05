@@ -10,8 +10,11 @@ import DesktopWindow from "./DesktopWindow";
 import ComputerFocus from "./ComputerFocus";
 import ObjectDetail, { type ObjectId } from "./ObjectDetail";
 import RoomBreeze from "./RoomBreeze";
+import RoomAtmosphere from "./RoomAtmosphere";
+import useRoomMotion from "./useRoomMotion";
 import RoomAudio from "./RoomAudio";
 import "./room-details.css";
+import "./room-mobile.css";
 
 export type AppId = "about" | "projects" | "resume" | "interests" | "contact";
 export const APPS: { id: AppId; label: string; icon: IconName; file: string }[] = [
@@ -45,8 +48,10 @@ export default function Workspace({ repos }: { repos: RepoCardData[] }) {
   const lastTrigger = useRef<HTMLElement | null>(null);
   const computerTrigger = useRef<HTMLElement | null>(null);
   const detailTrigger = useRef<HTMLElement | null>(null);
+  const stageRef = useRef<HTMLElement | null>(null);
   const ambientMotion = !paused && !reducedMotion && visible;
   const moving = ambientMotion && !app && !detail && !computerFocused;
+  useRoomMotion(stageRef, moving);
 
   useEffect(() => {
     const media = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -162,13 +167,8 @@ export default function Workspace({ repos }: { repos: RepoCardData[] }) {
         <p>I&apos;m Victor. I build software, climb rocks, and make tools for the way I work.</p>
       </section>
 
-      <section className="room-stage" aria-label="Victor's interactive workspace">
-        <Image className="room-art" src="/room-studio.svg" width={1440} height={850} priority fetchPriority="high" unoptimized alt="" aria-hidden="true" />
-        <RoomBreeze />
-        <div className="room-night-wash" aria-hidden="true" />
-        <div className="window-sunbeam" aria-hidden="true" />
-        <div className="room-caption"><span className="tiny-dot" /> TYSONS, VIRGINIA<small>A good place to build things.</small></div>
-
+      <section className="room-stage" ref={stageRef} aria-label="Victor's interactive workspace">
+        <div className="room-photo-strip">
         <button className="photo-note note-profile" onClick={(event) => inspectObject("profile", event.currentTarget)} aria-label="Hello, I'm Victor. Open profile note">
           <span className="note-tape" />
           <Image src="/victor-profile.jpg" width={160} height={160} alt="Victor's illustrated GitHub profile portrait" sizes="100px" />
@@ -178,9 +178,16 @@ export default function Workspace({ repos }: { repos: RepoCardData[] }) {
           <span className="note-tape" /><Image src="/conference-photo.jpg" width={160} height={160} alt="A moment at the conference podium" sizes="100px" /><span>away from the desk.</span>
         </button>
         <button className="photo-note note-travel" onClick={(event) => inspectObject("peru", event.currentTarget)} aria-label="Peru, September 2026. Open travel photo">
-          <span className="note-tape" /><Image src="/peru-travel.webp" width={180} height={135} alt="A river through a mountain town in Peru" sizes="(max-width: 700px) 15vw, 9.4vw" /><span>Peru, September 2026 ↗</span>
+          <span className="note-tape" /><Image src="/peru-travel.webp" width={180} height={135} alt="A river through a mountain town in Peru" sizes="(max-width: 700px) 28vw, 9.4vw" /><span>Peru, September 2026 ↗</span>
         </button>
-        <button className="sticky-reminder" onClick={(event) => openApp("projects", event.currentTarget)}>one more<br />commit.<span>↗ explore projects</span></button>
+        </div>
+        <div className="room-scene">
+        <Image className="room-art" src="/room-studio.svg" width={1440} height={850} priority fetchPriority="high" unoptimized alt="" aria-hidden="true" />
+        <RoomAtmosphere />
+        <RoomBreeze />
+        <div className="room-night-wash" aria-hidden="true" />
+        <div className="room-caption"><span className="tiny-dot" /> TYSONS, VIRGINIA<small>A good place to build things.</small></div>
+        <button className="sticky-reminder" aria-label="one more commit. Explore projects" onClick={(event) => openApp("projects", event.currentTarget)}>one more<br />commit.</button>
 
         <ComputerFocus active={computerFocused} onClose={() => setComputerFocused(false)} returnFocus={computerTrigger} fallbackFocus={powerButton}>
         <div className={`computer computer-${power}`} data-testid="computer" data-power={power}>
@@ -192,7 +199,7 @@ export default function Workspace({ repos }: { repos: RepoCardData[] }) {
                 const [label, dots, status] = line.split(/(\.{2,})/);
                 return <p className={dots ? "boot-line-check" : undefined} key={line}>{dots ? <><span>{label}</span><span className="boot-leader">{dots}</span><span>{status}</span></> : line}</p>;
               })}<span className="boot-cursor">▌</span></div><div className="boot-progress" role="progressbar" aria-label="Starting computer" aria-valuenow={Math.round(((bootStep + 1) / BOOT_LINES.length) * 100)} aria-valuemin={0} aria-valuemax={100}><span style={{ width: `${((bootStep + 1) / BOOT_LINES.length) * 100}%` }} /></div><button className="skip-boot" onClick={finishBoot}>Skip startup <Icon name="arrow" /></button></div>}
-              {power === "on" && <div className="mini-desktop" data-testid="desktop"><div className="desktop-menubar"><strong>viOS</strong><span>Personal space · v2.0</span><Icon name="sun" /></div><div className="desktop-welcome"><span>WELCOME TO MY DESK</span><h2>Hello, I&apos;m Victor<span>.</span></h2><p>Engineer by trade. Curious by default.</p></div><div className="desktop-folders">{APPS.map((item) => <button key={item.id} onClick={(event) => openApp(item.id, event.currentTarget)} aria-label={`Open ${item.label}`}><span className={`app-icon icon-${item.id}`}><Icon name={item.icon} /></span><span>{item.label}</span></button>)}</div><div className="desktop-status"><span><i /> All systems cozy</span><button onClick={(event) => focusComputer(event.currentTarget)} disabled={computerFocused} aria-label="Expand computer screen"><Icon name="expand" /></button></div></div>}
+              {power === "on" && <div className="mini-desktop" data-testid="desktop"><div className="desktop-menubar"><strong>viOS</strong><span>Personal space · v2.0</span><Icon name="sun" /></div><div className="desktop-welcome"><span>WELCOME TO MY DESK</span><h2>Hello, I&apos;m Victor<span>.</span></h2><p>Engineer by trade. Curious by default.</p></div><div className="desktop-folders">{APPS.map((item) => <button key={item.id} onClick={(event) => openApp(item.id, event.currentTarget)} aria-label={`Open ${item.label}`}><span className={`app-icon icon-${item.id}`}><Icon name={item.icon} /></span><span>{item.label}</span></button>)}</div><div className="desktop-status"><span><i /> All systems cozy</span><button onClick={(event) => focusComputer(event.currentTarget)} disabled={computerFocused} aria-label="viOS. Open computer. Expand computer screen"><Icon name="expand" /></button></div></div>}
             </div>
             <div className="monitor-chin"><button className="monitor-inspect" onClick={(event) => focusComputer(event.currentTarget)} disabled={computerFocused} aria-label="VI / PERSONAL COMPUTER. Take a closer look">VI / PERSONAL COMPUTER <Icon name="expand" /></button><button ref={powerButton} onClick={(event) => togglePower(event.currentTarget)} aria-label={power === "off" ? "Power on computer" : "Shut down computer"} className="power-button"><span className="power-led" /><Icon name="power" /></button></div>
           </div>
@@ -202,24 +209,22 @@ export default function Workspace({ repos }: { repos: RepoCardData[] }) {
 
         <div className="keyboard" aria-hidden="true">{Array.from({ length: 46 }, (_, index) => <i key={index} />)}<b /></div>
         <div className="desk-mouse" aria-hidden="true"><span /></div>
-        <WindowCat moving={moving} />
-        <button className="room-hotspot hobby-hotspot" onClick={(event) => inspectObject("games", event.currentTarget)} aria-label="Explore Magic, Pokémon, and other interests"><span>＋</span><span className="hotspot-label">The game shelf, up close</span></button>
-        <button className="room-hotspot climb-hotspot" onClick={(event) => inspectObject("climbing", event.currentTarget)} aria-label="Read about rock climbing"><span>＋</span><span className="hotspot-label">A different kind of problem solving</span></button>
-        <button className="object-target target-poker" onClick={(event) => inspectObject("poker", event.currentTarget)} aria-label="Take a closer look at the poker cards and chips"><span>Poker night ↗</span></button>
-        <button className="object-target target-wings" onClick={(event) => inspectObject("wings", event.currentTarget)} aria-label="Take a closer look at the Buffalo Wild Wings carton"><span>A familiar favorite ↗</span></button>
-        <button className="object-target target-window" onClick={(event) => inspectObject("window", event.currentTarget)} aria-label="Take a closer look out the window"><span>A little fresh air ↗</span></button>
-        <button className="object-target target-lamp" onClick={(event) => inspectObject("lamp", event.currentTarget)} aria-label="Take a closer look at the desk lamp"><span>On the workbench ↗</span></button>
-        <button className="object-target target-plants" onClick={(event) => inspectObject("plants", event.currentTarget)} aria-label="Take a closer look at the plants"><span>The green corner ↗</span></button>
-        <button className="room-hotspot cat-detail-hotspot" onClick={(event) => inspectObject("cat", event.currentTarget)} aria-label="Meet the window cat up close"><span>＋</span><span className="hotspot-label">Meet the resident ↗</span></button>
-        <div className="power-hint" aria-hidden="true">{power === "off" ? "Start here. Make yourself comfortable." : power === "booting" ? "Waking up the workspace…" : "Pick a folder. Stay a while."}<svg viewBox="0 0 60 35"><path d="M2 25C30 37 52 24 48 5m-8 7 8-8 8 7" /></svg></div>
+        <WindowCat moving={moving} onInspect={(trigger) => inspectObject("cat", trigger)} />
+        <button className="object-target hobby-hotspot" onClick={(event) => inspectObject("games", event.currentTarget)} aria-label="Explore Magic, Pokémon, and other interests" />
+        <button className="object-target climb-hotspot" onClick={(event) => inspectObject("climbing", event.currentTarget)} aria-label="Read about rock climbing" />
+        <button className="object-target target-poker" onClick={(event) => inspectObject("poker", event.currentTarget)} aria-label="Take a closer look at the poker cards and chips" />
+        <button className="object-target target-wings" onClick={(event) => inspectObject("wings", event.currentTarget)} aria-label="Take a closer look at the Buffalo Wild Wings carton" />
+        <button className="object-target target-window" onClick={(event) => inspectObject("window", event.currentTarget)} aria-label="Take a closer look out the window" />
+        <button className="object-target target-lamp" onClick={(event) => inspectObject("lamp", event.currentTarget)} aria-label="Take a closer look at the desk lamp" />
+        <button className="object-target target-plants" onClick={(event) => inspectObject("plants", event.currentTarget)} aria-label="Take a closer look at the plants" />
+        </div>
       </section>
 
       <div className="room-toolbar">
-        <p><span className="toolbar-spark">✳</span> A room full of things I care about. <span className="desktop-only">Click around.</span></p>
         <div className="room-controls"><button onClick={() => setNight((value) => !value)} aria-label={night ? "Evening. Switch to daylight" : "Daylight. Switch to evening"} aria-pressed={night}><Icon name={night ? "moon" : "sun"} /><span>{night ? "Evening" : "Daylight"}</span></button><span className="control-divider" /><button onClick={() => setPaused((value) => !value)} aria-label={paused ? "Motion off. Resume ambient motion" : "Pause motion"} aria-pressed={paused}><Icon name={paused ? "play" : "pause"} /><span>{paused ? "Motion off" : "Pause motion"}</span></button><RoomAudio /></div>
       </div>
       <nav className="quick-access" aria-label="Open a desktop app">{APPS.map((item) => <button key={item.id} onClick={(event) => openApp(item.id, event.currentTarget)}><Icon name={item.icon} /><span>{item.label}</span><span className="quick-arrow" aria-hidden="true">↗</span></button>)}</nav>
-      <footer className="room-footer"><span>Made with intention. And a sleeping cat.</span><span>© {new Date().getFullYear()} Victor Ivanov <span className="footer-dot">·</span> <a href="https://github.com/LLRHook/my-website" target="_blank" rel="noopener noreferrer">View source ↗</a></span></footer>
+      <footer className="room-footer"><span>© {new Date().getFullYear()} Victor Ivanov</span></footer>
       <span className="sr-only" role="status" aria-live="polite">{power === "booting" ? "Computer is starting. You can skip startup." : power === "on" ? "Computer ready. Choose a desktop app." : "Computer is off."}</span>
       <DesktopWindow app={app} onNavigate={setApp} onClose={closeApp} repos={repos} />
       <ObjectDetail selected={detail} onClose={() => setDetail(null)} onOpenApp={(id) => openApp(id, detailTrigger.current)} returnFocus={detailTrigger} moving={ambientMotion} />

@@ -1,6 +1,6 @@
 # Workspace release verification
 
-This checklist covers the interactive room and the version 0.6.0 close-ups and sound. It
+This checklist covers the interactive room and version 0.7.0 mobile composition, motion, and sound. It
 supersedes the old timeline and Lenis UI checks. The GitHub API tests and public
 route contracts remain in scope.
 
@@ -16,8 +16,10 @@ route contracts remain in scope.
 5. For a deployed build, set `PLAYWRIGHT_BASE_URL` to the HTTPS deployment URL
    and run the same E2E command. This skips local startup.
 
-Current baseline: 55 Vitest cases across 7 files; 34 Playwright cases across
-5 files. Test runners provide the authoritative counts. Run `npx playwright
+Current baseline: 63 Vitest cases across 8 files; 54 Playwright cases across
+7 files (44 Chromium and 10 WebKit). Playwright runs the complete suite in
+Chromium and the mobile/motion suites in WebKit. Test runners provide
+the authoritative browser counts. Run `npx playwright
 test --list` when updating the baseline.
 
 ## Acceptance coverage
@@ -39,6 +41,14 @@ test --list` when updating the baseline.
   also work. JavaScript-disabled users get a summary and contact/project links.
 - Resume print mode shows readable professional content without room controls.
 - Daylight/evening and pause controls work; reduced motion is respected.
+- True touch/DPR emulation covers 320, 375, 390, 393, 412, and 430px phone widths
+  plus landscape. Photos stay clear of the monitor; the keyboard, lamp, cards,
+  and wings carton remain exposed. Check dialog bounds again after shrinking the
+  viewport height to represent browser controls expanding.
+- Pointer and touch response stays small, settles without a JavaScript frame
+  loop, and resets when paused, hidden, under a dialog, or using reduced motion.
+- The official winged-buffalo mark appears on the gold carton and in Interests.
+  The footer contains only copyright; no construction or inspiration copy remains.
 - The computer zooms into a readable startup and returns with its power state
   intact. All eleven photo/object close-ups respond to ordinary pointer clicks
   at 320, 390, and 1440px, contain Tab focus, and restore their launcher's focus.
@@ -127,3 +137,49 @@ Additional touch-target checks use axe 4.12.1 and actual pointer clicks at 320,
 390, and 412px. All eleven details, the physical power switch, and the project
 reminder pass, with no target-size violations. The browser suite also checks a
 clear 24px square inside the power switch and reminder before opening them.
+
+## September 5 version 0.7.0 evidence
+
+The final production build, lint/type checks, 63 unit tests, and all 54 browser
+tests passed. The seven touch configurations are 320×568 and 375×667 at DPR2;
+390×844, 393×852, 412×915, 430×932, and 844×390 at DPR3. Both Chromium and WebKit
+check these layouts, real taps, photo/screen separation, exposed desk objects,
+zoomed computer/resume flows, and dialog bounds after the viewport becomes 96px
+shorter. The Playwright report contains a composition screenshot for each case.
+
+The room contains no plus badges, object-name tooltips, or startup arrow. Names
+and stories appear after a click or tap. The cat itself opens its detail, whose
+wake/sleep interaction is covered. The official BWW vector is used on the gold
+carton and in Interests. Original source resume files remain unchanged.
+
+Motion tests observe real browser animation-frame scheduling: the page has zero
+queued JavaScript frames at rest, and pause, modal display, and reduced-motion
+preferences cancel the response. Chromium performs a native 120px touch drag to
+verify scrolling. Playwright's mobile WebKit interface supports native taps but
+not drag gestures; its scroll check uses browser scrolling. These are emulated
+devices, not a physical iPhone/Safari test.
+
+Native Chromium audio checks pass for independent layers, volume, hidden-page
+suspension, and repeated context closure. An 84-second offline render measured
+the largest adjacent one-second music RMS change falling from 19.10dB to 1.83dB;
+the default combined peak fell from −28.58 to −33.54dBFS. At most 14 voices were
+retained, below the 24-voice cap. Layer changes fade over 450ms and cancel their
+release timers on hide or close. Audio was measured; physical Safari playback
+and subjective listening were not verified in this environment.
+
+Axe 4.12.1 reported zero violations for the powered-off room, powered-on room,
+BWW close-up, and Interests at 320, 390, and 430px. The audit caught and corrected
+contrast in small labels and a keyboard-scroll issue in the content pane. A
+rotated sticky note also gained 2px to preserve a clear 24px touch square.
+
+With ambient motion enabled, ten warm cycles followed by 100 cycles each opening
+an object and the computer retained 2 documents, 1,219 DOM nodes, and 364 listeners.
+Forced-GC heap samples were 3,902,136 bytes at baseline, 3,932,608 at 50 cycles, and
+3,995,900 at 100 cycles (net 93,764 bytes). No dialogs or scroll locks remained.
+This bounded measurement does not prove the absence of every possible leak.
+
+The final local mobile Lighthouse run measured Performance 97, Accessibility
+100, Best Practices 100, and SEO 100: LCP 2.4s, TBT 10ms, CLS 0.001. The room SVG
+is 30,092 bytes and the homepage's initial JavaScript is 129kB. A separate smoke
+checked public routes, all app views, photos, close-ups, sound settings, and the
+no-JavaScript fallback without page exceptions or horizontal overflow.

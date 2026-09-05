@@ -1,0 +1,26 @@
+.room-atmosphere { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: -2; overflow: hidden; }
+.atmosphere-light { translate: calc(var(--room-look-x, 0) * 22px) calc(var(--room-look-y, 0) * 14px); }
+.atmosphere-light-breath { opacity: .6; animation: room-light-breathe 17s ease-in-out infinite alternate; }
+.atmosphere-canopy { transform-origin: 300px 355px; translate: calc(var(--room-look-x, 0) * 13px) calc(var(--room-look-y, 0) * 8px); rotate: calc(var(--room-look-x, 0) * .2deg); animation: room-canopy-breathe 23s ease-in-out infinite alternate; }
+.atmosphere-motes { translate: calc(var(--room-look-x, 0) * 10px) calc(var(--room-look-y, 0) * 6px); }
+.room-mote { opacity: 0; animation: room-mote-drift 17s ease-in-out infinite; }
+.mote-two { animation-duration: 21s; animation-delay: -7s; }
+.mote-three { animation-duration: 19s; animation-delay: -13s; }
+.mote-four { animation-duration: 24s; animation-delay: -3s; }
+.mote-five { animation-duration: 16s; animation-delay: -10s; }
+.mote-six { animation-duration: 22s; animation-delay: -17s; }
+.room-stage .photo-note { translate: calc(var(--room-look-x, 0) * 1.8px) calc(var(--room-look-y, 0) * 1.3px); rotate: calc(var(--room-look-x, 0) * .18deg); }
+.room-scene .sticky-reminder { translate: calc(var(--room-look-x, 0) * 1.2px) calc(var(--room-look-y, 0) * .8px); rotate: calc(var(--room-look-x, 0) * .12deg); }
+.room-scene > .computer { translate: calc(var(--room-look-x, 0) * .9px) calc(var(--room-look-y, 0) * .6px); }
+.room-scene .keyboard,.room-scene .desk-mouse { translate: calc(var(--room-look-x, 0) * -.65px) calc(var(--room-look-y, 0) * -.4px); }
+.workspace[data-night=true] .room-atmosphere { opacity: .22; }
+.room-stage[data-room-motion=still] .room-atmosphere * { animation-play-state: paused !important; }
+@keyframes room-light-breathe { from { opacity: .42; } 45% { opacity: .68; } to { opacity: .53; } }
+@keyframes room-canopy-breathe { from { opacity: .75; scale: 1 .99; } 40% { opacity: .9; scale: 1.01 1.01; } to { opacity: .64; scale: .99 1.025; } }
+@keyframes room-mote-drift { 0% { opacity: 0; translate: -5px 9px; } 18% { opacity: .4; } 48% { opacity: .64; } 78% { opacity: .2; } 100% { opacity: 0; translate: 12px -19px; } }
+@media (prefers-reduced-motion: reduce) {
+  .room-atmosphere * { animation: none !important; }
+  .atmosphere-motes { display: none; }
+  .room-stage .photo-note,.room-scene .sticky-reminder,.room-scene > .computer,.room-scene .keyboard,.room-scene .desk-mouse,.atmosphere-light,.atmosphere-canopy,.atmosphere-motes { translate: none; rotate: none; }
+}
+@media print { .room-atmosphere { display: none; } }

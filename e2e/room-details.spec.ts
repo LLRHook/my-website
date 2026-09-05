@@ -7,7 +7,7 @@ const objects = [
   [".hobby-hotspot", "There’s always another deck."],
   [".target-poker", "A seat at the table."],
   [".climb-hotspot", "One more attempt."],
-  [".target-wings", "Wings after a long week."],
+  [".target-wings", "Buffalo Wild Wings."],
   [".target-window", "Let a little outside in."],
   [".target-lamp", "A little pool of light."],
   [".target-plants", "Room to grow."],
