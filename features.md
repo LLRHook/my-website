@@ -44,6 +44,20 @@ the end of their section, sorted by id on read.
 
 ## Open
 
+### [FEAT-1788611335] Room close-ups, poker details, and optional ambient sound
+- [x] **Priority:** high
+- **Area:** frontend, animation, accessibility
+- **File(s):** app/components/room/*, app/lib/room-audio*, app/layout.tsx, app/room.css, public/room-studio.svg, public/peru-travel.webp, e2e/*
+- **Why:** Give the room more personal detail and let visitors inspect its computer, objects, and photographs.
+- **Approach:** Enlarge the existing computer; add native object dialogs with vector crops or original photos; replace coffee with poker chips/cards; animate a gentle breeze; synthesize quiet music and nature sounds on request.
+- **Library / dependency notes:** Existing React, CSS, and browser Web Audio APIs; no new dependency or downloaded music.
+- **Acceptance criteria:** Eleven accessible object close-ups; readable computer zoom; verified photo context; poker artwork; subtle optional sound with layer/volume controls; responsive touch layouts; bounded and cleaned-up audio resources; deployed browser validation.
+- **Test plan:** Unit audio scheduling/lifecycle tests, native browser audio signal and suspension tests, desktop/mobile pointer and keyboard flows, production smoke, Lighthouse, repeated dialog cycles.
+- **Out of scope:** Inventing personal anecdotes or changing the source resume.
+- **Implementation:** Added a focused monitor, eleven native object dialogs, a verified Peru postcard, poker artwork, CSS breeze, and opt-in Web Audio with bounded voices and teardown. Mobile pointer/focus, native audio, accessibility, and production-build checks pass; see VERIFICATION.md.
+- **Bump:** minor
+- **Status:** shipped-pending-migration
+
 ### [FEAT-1788624000] Interactive cozy workspace portfolio
 - [ ] **Priority:** high
 - **Area:** frontend, animation, accessibility

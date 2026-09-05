@@ -14,7 +14,6 @@
     <linearGradient id="pot" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#A15E46"/><stop offset=".38" stop-color="#C17C5D"/><stop offset="1" stop-color="#A8644D"/></linearGradient>
     <linearGradient id="sagePot" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#747B60"/><stop offset=".4" stop-color="#9C9F7E"/><stop offset="1" stop-color="#787F60"/></linearGradient>
     <linearGradient id="lamp" x1="358" y1="437" x2="458" y2="478" gradientUnits="userSpaceOnUse"><stop stop-color="#607463"/><stop offset=".55" stop-color="#83927D"/><stop offset="1" stop-color="#425B4B"/></linearGradient>
-    <linearGradient id="mug" x1="1011" y1="579" x2="1053" y2="622" gradientUnits="userSpaceOnUse"><stop stop-color="#F2E9CE"/><stop offset=".52" stop-color="#DED0AD"/><stop offset="1" stop-color="#BCAF8D"/></linearGradient>
     <radialGradient id="ambient" cx="0" cy="0" r="1" gradientTransform="translate(920 697) scale(538 117)" gradientUnits="userSpaceOnUse"><stop stop-color="#554D3D" stop-opacity=".2"/><stop offset="1" stop-color="#554D3D" stop-opacity="0"/></radialGradient>
     <radialGradient id="deskShadow"><stop stop-color="#574E3E" stop-opacity=".23"/><stop offset="1" stop-color="#574E3E" stop-opacity="0"/></radialGradient>
     <pattern id="parquet" width="144" height="64" patternUnits="userSpaceOnUse" patternTransform="matrix(1 .05 -.58 .65 0 639)"><path d="M0 0H144V64H0V0ZM72 0V64" stroke="#8C7258" stroke-opacity=".22"/><path d="M4 12H67M6 16H55M82 42H139M86 46H138M11 52H62M79 9H137" stroke="#9B8063" stroke-opacity=".16" stroke-width="1.2"/></pattern>
@@ -80,8 +79,7 @@
   <path d="M36 141c19 8 32 8 57 0-5 58-8 110-8 155 0 63-19 126-31 176L29 496c5-122 9-233 7-355Z" fill="url(#curtain)"/>
   <path d="M42 144c5 77-3 205-7 300M58 147c0 95-5 197-15 298M79 149c-6 86-5 148-13 205" stroke="#C9C2AB" stroke-opacity=".5" stroke-width="1.2"/>
   <path d="m28 474 36-8 3 9-38 9-1-10Z" fill="#A79F7F"/>
-  <path d="M34 487c-3 44-3 93-10 146 7 7 14 0 20 4 7 4 16-5 22-1 7 4 11 0 14-5-17-56-21-108-22-149l-24 5Z" fill="url(#curtain)"/>
-  <path d="m38 490-5 131M48 490l4 140M57 504l13 124" stroke="#C5BDA5" stroke-opacity=".45"/>
+  <!-- The lower curtain is a matching RoomBreeze overlay so motion can be paused. -->
   <path d="M41 140v-8M58 144v-12M78 143v-11" stroke="#BBAA8C" stroke-width="3" stroke-linecap="round"/>
 
   <!-- Wall print and little pinned ephemera live above the computer. -->
@@ -238,19 +236,56 @@
   <path d="m397 477-20 132h113l-35-128-58-4Z" fill="#FFF3CB" fill-opacity=".09"/>
   <path d="M374 633c-13 3-31 3-41 11" stroke="#5F614F" stroke-width="1.5" stroke-linecap="round"/>
 
-  <!-- A notebook, pencil and ceramic mug sit within arm's reach. -->
-  <ellipse cx="1031" cy="632" rx="41" ry="8" fill="url(#deskShadow)"/>
-  <ellipse cx="1034" cy="628" rx="34" ry="8" fill="#A99A78"/>
-  <ellipse cx="1034" cy="626" rx="32" ry="7" fill="#C4B491"/>
-  <path d="M1054 587c28-7 30 31 2 28" stroke="#C8BA96" stroke-width="8"/>
-  <path d="M1055 587c19-5 24 19 7 24" stroke="#E4D8B7" stroke-width="2" stroke-linecap="round"/>
-  <path d="M1010 582h48l-4 36c-3 11-36 11-40 0l-4-36Z" fill="url(#mug)"/>
-  <ellipse cx="1034" cy="583" rx="24" ry="7" fill="#F3E7C9"/>
-  <ellipse cx="1034" cy="583" rx="19.5" ry="4.5" fill="#918467"/>
-  <ellipse cx="1034" cy="584" rx="18" ry="3.5" fill="#83745A"/>
-  <path d="M1017 591c-1 12 1 20 2 23" stroke="#FCF3DC" stroke-opacity=".75" stroke-width="2" stroke-linecap="round"/>
-  <path d="M1024 604c4 4 13 4 17 0" stroke="#93916C" stroke-width="1.2" stroke-linecap="round"/>
-  <circle cx="1026" cy="599" r="1.1" fill="#93916C"/><circle cx="1040" cy="599" r="1.1" fill="#93916C"/>
+  <!-- Playing cards and clay poker chips sit beside a notebook and pencil. -->
+  <g id="poker-cards">
+    <ellipse cx="1038" cy="634" rx="53" ry="10" fill="url(#deskShadow)"/>
+    <!-- Two cards on the desk, with a fine linen border and visible corner ranks. -->
+    <g transform="rotate(-13 1013 628)">
+      <rect x="988" y="609" width="39" height="29" rx="2.5" fill="#816F54" fill-opacity=".2"/>
+      <rect x="987" y="607" width="39" height="29" rx="2.5" fill="#F7F0DE" stroke="#D2C8AD" stroke-width=".8"/>
+      <rect x="989.5" y="609.5" width="34" height="24" rx="1.5" stroke="#D8CFB8" stroke-width=".45"/>
+      <path d="m992 615 2-5 2 5m-3.3-1.5h2.6" stroke="#445C4B" stroke-width=".9" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M993.9 616c-2.6 2.5-3.3 3.8-1.8 4.3.8.3 1.3-.1 1.8-.8.5.7 1 1.1 1.8.8 1.5-.5.8-1.8-1.8-4.3Z" fill="#445C4B"/>
+      <path d="M993.9 619v2.5" stroke="#445C4B" stroke-width=".8"/>
+      <path d="M1007 614c-6.7 6.5-8.4 10-4.5 11.4 2.1.7 3.5-.4 4.5-2.3 1.1 1.9 2.4 3 4.5 2.3 3.9-1.4 2.2-4.9-4.5-11.4Z" fill="#445C4B"/>
+      <path d="m1007 622-1.6 6.5h3.2l-1.6-6.5Z" fill="#445C4B"/>
+      <path d="m1017 629 2 5 2-5m-3.3 1.5h2.6" stroke="#445C4B" stroke-width=".9" stroke-linecap="round" stroke-linejoin="round"/>
+    </g>
+    <g transform="rotate(9 1030 630)">
+      <rect x="1009" y="610" width="40" height="29" rx="2.5" fill="#816F54" fill-opacity=".16"/>
+      <rect x="1008" y="608" width="40" height="29" rx="2.5" fill="#FBF5E5" stroke="#D2C8AD" stroke-width=".8"/>
+      <rect x="1010.5" y="610.5" width="35" height="24" rx="1.5" stroke="#D8CFB8" stroke-width=".45"/>
+      <path d="M1013 612v5m3-5-3 2.5 3 2.5" stroke="#A65E4D" stroke-width=".9" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M1014.5 622c-3.8-2.2-3.3-5.2-1.1-4.6.5.1.9.6 1.1.9.2-.3.6-.8 1.1-.9 2.2-.6 2.7 2.4-1.1 4.6Z" fill="#A65E4D"/>
+      <rect x="1020" y="613" width="16" height="19" rx="1" fill="#E6D6B2" stroke="#AF9273" stroke-width=".55"/>
+      <path d="m1023 617 2 2 3-3 3 3 2-2-1 5h-8l-1-5Z" fill="#AA8F57"/>
+      <path d="m1026 623 2-1 2 1v3h-4v-3Z" fill="#A96750"/>
+      <path d="m1022 630 5-5h2l5 5h-12Z" fill="#687B60"/>
+      <path d="M1042 634v-5m-3 5 3-2.5-3-2.5" stroke="#A65E4D" stroke-width=".9" stroke-linecap="round" stroke-linejoin="round"/>
+    </g>
+    <!-- Sage and terracotta stacks use visible edge stripes at close range. -->
+    <path d="M1040 602v20c0 8 35 8 35 0v-20h-35Z" fill="#66795E"/>
+    <path d="M1040 607c0 8 35 8 35 0m-35 5c0 8 35 8 35 0m-35 5c0 8 35 8 35 0m-35 5c0 8 35 8 35 0" stroke="#405842" stroke-width="1.1"/>
+    <path d="m1044 606 0 19m9-17v19m12-20v19m8-21v18" stroke="#E2D8BB" stroke-width="3.4" stroke-dasharray="3 2"/>
+    <ellipse cx="1057.5" cy="602" rx="17.5" ry="6.6" fill="#8B9B78" stroke="#526B4E" stroke-width=".8"/>
+    <ellipse cx="1057.5" cy="602" rx="11.5" ry="4.4" stroke="#E7E0C6" stroke-width=".8"/>
+    <path d="m1040.5 601 4.5.5m28.5 1-4.5-.5m-13-6 .3 2.2m2 8-.3-2.2m-12.8-7.1 3 1.7m18.4 6.9-3.1-1.7" stroke="#E7E0C6" stroke-width="1.8"/>
+    <ellipse cx="1057.5" cy="602" rx="6.5" ry="2.5" fill="#6C805D"/>
+    <path d="M1019 592v16c0 7 32 7 32 0v-16h-32Z" fill="#A65E4D"/>
+    <path d="M1019 597c0 7 32 7 32 0m-32 5c0 7 32 7 32 0m-32 6c0 7 32 7 32 0" stroke="#7E453D" stroke-width="1.1"/>
+    <path d="m1023 596v15m8-13v15m11-15v14m7-17v15" stroke="#EADDBF" stroke-width="3" stroke-dasharray="3 2"/>
+    <ellipse cx="1035" cy="592" rx="16" ry="6" fill="#C28268" stroke="#935644" stroke-width=".8"/>
+    <ellipse cx="1035" cy="592" rx="10.5" ry="4" stroke="#EDE2C6" stroke-width=".8"/>
+    <path d="m1019.5 591 4 .5m27 1-4-.5m-12.8-5.8.3 2m1.5 7.9-.1-2.1m-10.7-7 2.8 1.6m16.6 6.6-2.8-1.6" stroke="#EDE2C6" stroke-width="1.7"/>
+    <ellipse cx="1035" cy="592" rx="6" ry="2.3" fill="#A96854"/>
+    <g transform="rotate(-9 1070 636)">
+      <ellipse cx="1070" cy="636" rx="15" ry="5.5" fill="#9A885F"/>
+      <ellipse cx="1070" cy="634" rx="15" ry="5.5" fill="#E4D7B2" stroke="#B9A77D" stroke-width=".7"/>
+      <ellipse cx="1070" cy="634" rx="10" ry="3.6" stroke="#9A8760" stroke-width=".7"/>
+      <path d="m1055.5 633.5 3.7.2m25.2.6-3.7-.2m-11.7-5.2.2 2m1.6 7.3-.2-2" stroke="#8A8060" stroke-width="1.8"/>
+      <ellipse cx="1070" cy="634" rx="5.5" ry="2" fill="#C1B28B"/>
+    </g>
+  </g>
   <g transform="rotate(-7 1121 640)">
     <path d="M1074 623h87l23 32h-91l-19-32Z" fill="#596F5C"/>
     <path d="M1076 621h87l19 29h-87l-19-29Z" fill="#879981"/>

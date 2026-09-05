@@ -4,6 +4,7 @@ async function startComputer(page: Page) {
   await page.getByRole("button", { name: /Turn on Victor's computer/ }).click();
   await page.getByRole("button", { name: "Skip startup", exact: true }).click();
   await expect(page.getByTestId("computer")).toHaveAttribute("data-power", "on");
+  await page.getByRole("dialog", { name: "Your seat at my desk." }).getByRole("button", { name: "Back to room" }).click();
 }
 
 test("computer begins off, completes every boot stage, and can shut down and restart", async ({ page }) => {
@@ -30,10 +31,15 @@ test("computer begins off, completes every boot stage, and can shut down and res
   expect(errors).toEqual([]);
 });
 
-test("opening a note while powered off starts the computer and preserves the chosen app", async ({ page }) => {
+test("a photo opens its close-up and its experience link starts the requested app", async ({ page }) => {
   await page.goto("/");
   const note = page.getByRole("button", { name: /Open experience note$/ });
   await note.click();
+  const photo = page.getByRole("dialog", { name: "Away from the desk." });
+  await expect(photo).toBeVisible();
+  await expect(photo.getByRole("img", { name: "A moment at the conference podium" })).toBeVisible();
+  await expect(page.getByTestId("computer")).toHaveAttribute("data-power", "off");
+  await photo.getByRole("button", { name: "Explore my experience" }).click();
   await expect(page.getByTestId("boot-screen")).toBeVisible();
   await page.getByRole("button", { name: "Skip startup", exact: true }).click();
   await expect(page.getByRole("dialog", { name: "Resume", exact: true })).toBeVisible();

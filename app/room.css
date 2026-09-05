@@ -259,6 +259,8 @@ button:disabled { cursor: default; }
 .mana-mark i:nth-child(2) { background: #8caab0; }.mana-mark i:nth-child(3) { background: #6b7464; }.mana-mark i:nth-child(4) { background: #bb8168; }.mana-mark i:nth-child(5) { background: #8d9e70; }
 .wings-mark { flex-direction: column; font: 24px var(--font-room-serif), Georgia, serif; color: #887031; background: #efdfab; }
 .wings-mark span { font: 7px var(--font-inter), sans-serif; letter-spacing: 2px; margin-top: 2px; }
+.poker-mark { font: 54px Georgia, serif; background: #e5dcc6; color: #4d644b; }
+.travel-mark { font: 47px Georgia, serif; background: #dce6df; color: #547669; }
 .contact-app { padding: 18px 0; }
 .contact-stamp { display: flex; width: 60px; height: 70px; background: #e1e8d5; border: 5px solid #eef2e6; outline: 1px dashed #9fb18c; align-items: center; justify-content: center; transform: rotate(8deg); margin-bottom: 38px; color: #8da176; }
 .contact-stamp svg { height: 30px; width: 30px; }

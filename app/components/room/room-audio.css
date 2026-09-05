@@ -1,0 +1,19 @@
+.room-audio { display: flex; align-items: center; gap: 12px; position: relative; color: var(--ink); }
+.room-audio .room-sound-toggle { white-space: nowrap; }
+.room-sound-settings { position: relative; font-size: 12px; }
+.room-sound-settings summary { cursor: pointer; min-height: 44px; display: flex; align-items: center; gap: 6px; padding: 0 6px; color: #54634c; border-radius: 4px; }
+.room-sound-settings summary::after { content: '+'; font-size: 16px; }
+.room-sound-settings[open] summary::after { content: '−'; }
+.room-sound-settings summary::-webkit-details-marker { display: none; }
+.room-sound-settings summary:hover, .room-sound-settings[open] summary { background: #e8ecdd; }
+.room-sound-panel { position: absolute; bottom: calc(100% + 12px); right: 0; z-index: 10; width: min(290px, calc(100vw - 40px)); padding: 20px; border: 1px solid #b9c3ab; border-radius: 12px; background: #faf9f1; box-shadow: 0 12px 36px #253c2e29; }
+.room-sound-panel p { font-family: var(--font-room-serif), Georgia, serif; font-size: 20px; line-height: 1.4; margin: 0 0 18px; }
+.room-sound-panel label { display: flex; align-items: center; gap: 9px; font-size: 14px; line-height: 1.5; min-height: 40px; }
+.room-sound-panel label output { margin-left: auto; font-variant-numeric: tabular-nums; color: #5c6e51; }
+.room-sound-panel input[type=range] { width: 100%; min-height: 32px; accent-color: #657e62; margin-bottom: 10px; }
+.room-sound-panel input[type=checkbox] { width: 18px; height: 18px; accent-color: #657e62; flex-shrink: 0; }
+.room-sound-panel small { display: block; margin-top: 12px; color: #5b6853; font-size: 12px; line-height: 1.6; }
+.room-sound-error { position: absolute; right: 0; top: 100%; width: 250px; font-size: 12px; background: #faf9f1; color: #824832; padding: 10px; z-index: 10; border-radius: 5px; }
+@media (max-width: 1100px) { .room-toolbar { flex-wrap: wrap; justify-content: center; gap: 8px 20px; } .room-controls { flex-wrap: wrap; justify-content: center; } }
+@media (max-width: 700px) { .room-controls { gap: 4px 14px; } .room-audio { gap: 8px; } .room-sound-settings { font-size: 11px; position: static; } .room-sound-panel, .room-sound-error { left: 50%; right: auto; transform: translateX(-50%); } .room-sound-error { width: min(250px, calc(100vw - 40px)); } }
+@media print { .room-audio { display: none; } }

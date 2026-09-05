@@ -7,8 +7,13 @@ watch viOS start, and open the profile, projects, resume, interests, or contact
 apps. The window cat mostly sleeps, with occasional looks around and grooming.
 
 The room has a daylight/evening switch, photo notes, and small nods to climbing,
-Magic: The Gathering, Pokémon, and Buffalo Wild Wings. Phones have a larger
-computer and direct app buttons; reading windows fill the available viewport.
+Magic: The Gathering, Pokémon, poker, and Buffalo Wild Wings. Click the computer
+for a larger monitor, or inspect eleven room details for sharp artwork, original
+photos, and a short story. Phones have larger tap targets and full reading windows.
+
+A curtain catches a gentle breeze. Optional sound adds quiet music, bird calls,
+insects, and wind, with separate music/nature controls and a volume slider. Sound
+starts only after the visitor turns it on.
 
 ## Run locally
 
@@ -37,7 +42,7 @@ To exercise a deployment, set `PLAYWRIGHT_BASE_URL` to its URL before running
 ## Implementation
 
 Next.js 15 App Router, React 19, TypeScript, and Tailwind CSS 4. The illustrated
-room is a 24 KB SVG. CSS handles ambient animation; React owns the computer's
+room is a 27 KB SVG. CSS handles ambient animation; React owns the computer's
 off, booting, and on states. No WebGL engine or particle canvas runs on the
 homepage. The Markdown reader loads only when a visitor opens a project.
 
@@ -46,13 +51,20 @@ homepage. The Markdown reader loads only when a visitor opens a project.
 - `app/components/room/ProjectReadme.tsx`: lazy Markdown rendering with safe links,
   GitHub tables, an abortable request, and a bounded display length.
 - `app/components/room/WindowCat.tsx`: cat SVG and temporary greeting state.
+- `app/components/room/ComputerFocus.tsx`: enlarged monitor and keyboard focus.
+- `app/components/room/ObjectDetail.tsx`: photo and vector close-ups with captions.
+- `app/components/room/RoomBreeze.tsx`: animated curtain, air, and falling leaf.
+- `app/components/room/RoomAudio.tsx`: opt-in sound and layer controls.
+- `app/lib/room-audio.ts`: original procedural Web Audio soundscape.
 - `app/room.css`: scene, responsive reading windows, animations, print styles.
 - `public/room-studio.svg`: original vector scenery.
 - `app/lib/github.ts`: existing public project data and API abstraction.
 
-Ambient motion pauses when the page is hidden, a reading window is open, or the
-visitor chooses Pause motion. Reduced-motion settings disable animation and skip
-the timed startup. Effects remove listeners and clear timers on teardown.
+Ambient room motion pauses when the page is hidden, a reading window or close-up
+is open, or the visitor chooses Pause motion. Reduced-motion settings disable
+animation and skip the timed startup. Effects remove listeners and clear timers
+on teardown. Audio suspends when hidden, limits concurrent voices, disconnects
+finished nodes, and closes its context when disabled or unmounted.
 
 ## Content and resume
 
@@ -64,7 +76,9 @@ source differences.
 
 The portrait illustration comes from the linked public GitHub profile. The
 conference photo was supplied through the owner's local photo collection and
-authorized for publication. Public copies have no EXIF or XMP metadata.
+authorized for publication. The Peru postcard is the owner's photograph from his
+September 2026 trip, shared in Discord and authorized for this site. Public copies
+have no EXIF or XMP metadata. Captions avoid unverified venue/date claims.
 
 Old links to `/#work`, `/#about`, and `/#contact` open their matching apps;
 `/#resume` and `/#interests` also work. A no-JavaScript fallback contains the
