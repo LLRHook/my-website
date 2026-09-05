@@ -44,6 +44,20 @@ the end of their section, sorted by id on read.
 
 ## Open
 
+### [FEAT-1788629556] Uncrowded phone room with subtle discovery and softer ambience
+- [x] **Priority:** high
+- **Area:** frontend, accessibility, performance, tests
+- **File(s):** app/components/room/Workspace.tsx, WindowCat.tsx, RoomAtmosphere.tsx, useRoomMotion.ts, room-mobile.css, room-motion.css, app/lib/room-audio.ts, public/room-studio.svg, public/bww-logo.svg, e2e/room-mobile.spec.ts, e2e/room-motion.spec.ts, playwright.config.ts
+- **Why:** The phone screenshot exposed visual overlap despite passing earlier viewport checks. The room should feel alive while leaving its stories for a visitor to discover.
+- **Approach:** Separate phone photos from the original scene proportions; replace plus badges and object labels with restrained hover/focus responses; use the official Buffalo Wild Wings mark; add bounded pointer/touch light motion and soften procedural audio.
+- **Library / dependency notes:** No new packages. Existing Playwright adds WebKit mobile/motion coverage in CI. The logo is sourced from Buffalo Wild Wings' own website.
+- **Acceptance criteria:** Exposed desk objects and readable close-ups on short/high-density phones; direct object and cat taps; no plus badges or footer construction copy; calm motion and audio; accessible controls; bounded resources; live domain validation.
+- **Test plan:** Unit lifecycle regressions, true touch/DPR geometry and tap flows in Chromium/WebKit, native Chromium touch drag and audio signal checks, axe, screenshots, Lighthouse, repeated-interaction resource measurements, and exact-commit deployment checks.
+- **Out of scope:** Resume content rewriting or publishing additional private data.
+- **Bump:** minor (0.7.0)
+- **Implementation:** Separated phone photos from the native scene, removed plus badges and object labels, made the cat itself open its detail, embedded the official BWW mark, added bounded light/pointer motion, and softened/faded the soundscape. Final production build and all 63 unit/54 browser tests pass; mobile axe checks are clean and local Lighthouse meets all budgets. Resource and emulated-device evidence is recorded in VERIFICATION.md. Publication uses the existing main/Vercel integration.
+- **Status:** shipped-pending-migration
+
 ### [FEAT-1788611335] Room close-ups, poker details, and optional ambient sound
 - [x] **Priority:** high
 - **Area:** frontend, animation, accessibility

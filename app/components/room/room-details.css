@@ -3,16 +3,17 @@
 .note-travel > span:last-child { font-size: .75cqw; }
 .monitor-inspect { display: flex; align-items: center; gap: .55cqw; min-height: 25px; font-size: inherit; letter-spacing: inherit; }
 .monitor-inspect svg { width: .75cqw; height: .75cqw; opacity: .7; }
-.object-target { position: absolute; z-index: 1; border-radius: 10%; background: transparent; }
-.object-target:hover { background: #fffbe90d; box-shadow: inset 0 0 0 1px #eff0d675; }
-.object-target > span { position: absolute; left: 50%; bottom: 100%; transform: translateX(-50%); white-space: nowrap; padding: 8px 11px; font-size: 11px; background: #faf7e9; border: 1px solid #cbd1ba; border-radius: 5px; color: #506045; opacity: 0; pointer-events: none; }
-.object-target:hover > span,.object-target:focus-visible > span { opacity: 1; }
+.object-target { position: absolute; z-index: 1; min-width: 24px; min-height: 24px; border-radius: 10%; background: transparent; transition: background .18s ease, box-shadow .18s ease; }
+.object-target:hover,.object-target:focus-visible { background: #fff4c51a; box-shadow: inset 0 0 0 1px #c6b58066; }
+.workspace .object-target:focus-visible { outline: 2px solid #846d46; outline-offset: 3px; }
+.room-scene .window-cat:hover,.room-scene .window-cat:focus-visible { filter: drop-shadow(0 2px 3px #dbc48070); }
+.hobby-hotspot { left: 78.26%; top: 37.41%; width: 12.4%; height: 8.47%; z-index: 4; }
+.climb-hotspot { left: 92.4%; top: 38.35%; width: 3.4%; height: 6.59%; transform: translateX(-50%); z-index: 4; }
 .target-poker { left: 68%; top: 68%; width: 8%; height: 9%; z-index: 4; }
 .target-wings { left: 78.8%; top: 53.5%; width: 5%; height: 7%; z-index: 4; }
 .target-window { left: 4.8%; top: 17%; width: 21.5%; height: 42%; }
 .target-lamp { left: 24%; top: 49.5%; width: 8.5%; height: 26%; }
 .target-plants { left: 85%; top: 69%; width: 10%; height: 23%; }
-.cat-detail-hotspot { left: 22.5%; top: 53%; }
 
 .computer-focus,.object-detail { color: #33442f; padding: 0; margin: auto; border: 1px solid #acb89c; max-width: none; max-height: calc(100dvh - 32px); }
 .computer-focus::backdrop,.object-detail::backdrop { background: #243a31bd; backdrop-filter: blur(8px); }
@@ -82,16 +83,16 @@
 .detail-illustration > svg { display: block; width: 100%; max-height: 340px; overflow: hidden; border-radius: 8px; }
 .detail-visual-tag { position: absolute; bottom: 15px; left: 0; right: 0; text-align: center; font-size: 8px; color: #607052; letter-spacing: 1.5px; }
 .object-detail-story { align-self: center; padding: 38px 34px; }
-.object-detail-story > .eyebrow { font-size: 8px; color: #637c55; letter-spacing: 1.6px; }
+.object-detail-story > .eyebrow { font-size: 8px; color: #586d4b; letter-spacing: 1.6px; }
 .object-detail-story h2 { font: 40px/1.13 var(--font-room-serif), Georgia, serif; letter-spacing: -1px; margin: 15px 0 22px; }
 .detail-description { font-size: 14px; color: #64735a; line-height: 1.85; }
 .object-detail-story dl { margin-top: 27px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px; padding-top: 21px; border-top: 1px solid #d9dfcd; }
-.object-detail-story dt { text-transform: uppercase; letter-spacing: 1.2px; font-size: 8px; color: #67795b; margin-bottom: 7px; }
+.object-detail-story dt { text-transform: uppercase; letter-spacing: 1.2px; font-size: 8px; color: #586b4b; margin-bottom: 7px; }
 .object-detail-story dd { font-size: 12px; color: #526645; line-height: 1.6; }
 .detail-actions { margin-top: 26px; display: flex; flex-wrap: wrap; align-items: center; gap: 14px; }
 .detail-actions > a { color: #576e49; font-size: 11px; display: inline-flex; align-items: center; gap: 12px; min-height: 44px; text-underline-offset: 4px; }
 .detail-actions > a:hover { text-decoration: underline; }
-.object-detail-footer { padding: 16px 24px; border-top: 1px solid #d9dfcf; display: flex; justify-content: space-between; gap: 16px; color: #6a7a5d; font-size: 9px; }
+.object-detail-footer { padding: 16px 24px; border-top: 1px solid #d9dfcf; display: flex; justify-content: space-between; gap: 16px; color: #596c4d; font-size: 9px; }
 .detail-landscape { width: min(1190px, calc(100% - 40px)); }
 .detail-landscape .object-detail-layout { grid-template-columns: 1.4fr 1fr; }
 .detail-landscape .detail-photo { padding: 28px 28px 42px; }
@@ -103,21 +104,6 @@
 @keyframes detail-approach { from { opacity: 0; transform: translateY(12px) scale(.96); } to { opacity: 1; transform: none; } }
 
 @media (max-width: 700px) {
-  .note-travel { left: 34%; top: 18.5%; width: 15%; }
-  .note-travel > span:last-child { font-size: 1.25cqw; }
-  .target-poker { left: 72.5%; top: 71%; width: 24px; height: 24px; }
-  .target-wings { left: 79%; top: 56%; width: 24px; height: 24px; }
-  .sticky-reminder { left: 88%; top: 57%; width: max(7%, 26px); }
-  /* A full chin keeps the physical switch clear of the screen's touch target. */
-  .room-stage > .computer .monitor-screen { height: calc(100% - 28px); }
-  .room-stage > .computer .monitor-chin { height: 28px; }
-  .target-window { top: 23%; height: 37%; }
-  .target-lamp { left: 19%; top: 55%; width: 24px; height: 17%; }
-  .target-plants { top: 72%; height: 20%; }
-  .cat-detail-hotspot { left: 9%; top: 62.5%; }
-  .hobby-hotspot { left: 81%; }
-  .climb-hotspot { display: flex; left: 91%; top: 35.5%; }
-  .object-target > span { font-size: 9px; padding: 5px 7px; }
   .computer-focus,.object-detail { width: calc(100% - 16px); max-height: calc(100dvh - 20px); border-radius: 10px; }
   .computer-focus-inner { padding: 19px 12px 17px; }
   .computer-focus-header { align-items: flex-start; gap: 10px; margin-bottom: 18px; }

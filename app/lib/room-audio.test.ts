@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { DEFAULT_ROOM_SOUND, RoomSoundscape } from "./room-audio";
 
 function fakeContext() {
-  const parameter = () => ({ value: 0, setValueAtTime: vi.fn(), setTargetAtTime: vi.fn(), cancelAndHoldAtTime: vi.fn(), cancelScheduledValues: vi.fn(), linearRampToValueAtTime: vi.fn(), exponentialRampToValueAtTime: vi.fn() });
+  const parameter = () => ({ value: 0, setValueAtTime: vi.fn(), setValueCurveAtTime: vi.fn(), setTargetAtTime: vi.fn(), cancelAndHoldAtTime: vi.fn(), cancelScheduledValues: vi.fn(), linearRampToValueAtTime: vi.fn(), exponentialRampToValueAtTime: vi.fn() });
   const node = () => ({ connect: vi.fn(), disconnect: vi.fn() });
   type MockGain = ReturnType<typeof node> & { gain: ReturnType<typeof parameter> };
   type MockSource = ReturnType<typeof node> & { type: string; frequency: ReturnType<typeof parameter>; onended: (() => void) | null; start: ReturnType<typeof vi.fn>; stop: ReturnType<typeof vi.fn>; buffer: unknown; loop: boolean };
@@ -17,7 +17,7 @@ function fakeContext() {
   const context = {
     state: "suspended", currentTime: 0, sampleRate: 8000, destination: node(),
     createGain: vi.fn(gain), createOscillator: vi.fn(source), createBufferSource: vi.fn(source),
-    createBiquadFilter: vi.fn(() => ({ ...node(), type: "lowpass", frequency: parameter() })),
+    createBiquadFilter: vi.fn(() => ({ ...node(), type: "lowpass", frequency: parameter(), Q: parameter() })),
     createBuffer: vi.fn(() => ({ getChannelData: () => new Float32Array(16000) })),
     resume: vi.fn(async () => { context.state = "running"; }),
     suspend: vi.fn(async () => { context.state = "suspended"; }),
@@ -103,14 +103,22 @@ describe("RoomSoundscape lifecycle", () => {
     expect(oscillator.disconnect).toHaveBeenCalledOnce();
   });
 
-  it("stops disabled layers and stops the scheduler when both are disabled", async () => {
-    const { engine, context, sources } = fakeContext();
+  it("fades disabled layers before releasing voices and leaves no timers after both finish", async () => {
+    const { engine, context, sources, gains } = fakeContext();
     await engine.setVisible(true);
     const breeze = sources.find((source) => source.loop)!;
+    context.currentTime = 2;
     engine.setSettings({ ...DEFAULT_ROOM_SOUND, nature: false });
+    expect(gains[2].gain.setValueAtTime).toHaveBeenLastCalledWith(1, 2);
+    expect(gains[2].gain.linearRampToValueAtTime).toHaveBeenLastCalledWith(0, 2.45);
+    expect(breeze.disconnect).not.toHaveBeenCalled();
+    vi.advanceTimersByTime(450);
     expect(breeze.disconnect).toHaveBeenCalledOnce();
     expect(sources[0].disconnect).not.toHaveBeenCalled();
     engine.setSettings({ ...DEFAULT_ROOM_SOUND, music: false, nature: false });
+    expect(sources[0].disconnect).not.toHaveBeenCalled();
+    expect(vi.getTimerCount()).toBe(1);
+    vi.advanceTimersByTime(450);
     expect(sources[0].disconnect).toHaveBeenCalledOnce();
     expect(vi.getTimerCount()).toBe(0);
     const previousCount = context.createOscillator.mock.calls.length;
@@ -120,6 +128,36 @@ describe("RoomSoundscape lifecycle", () => {
     engine.setSettings({ ...DEFAULT_ROOM_SOUND, nature: false });
     expect(vi.getTimerCount()).toBe(1);
     await engine.close();
+  });
+
+  it("bounds rapid layer fades and cancels every release task when hidden", async () => {
+    const { engine, sources, context } = fakeContext();
+    await engine.setVisible(true);
+    const originalSources = sources.length;
+    for (let index = 0; index < 30; index++) {
+      engine.setSettings({ ...DEFAULT_ROOM_SOUND, music: false, nature: false });
+      expect(vi.getTimerCount()).toBe(2);
+      engine.setSettings(DEFAULT_ROOM_SOUND);
+      expect(vi.getTimerCount()).toBe(1);
+    }
+    // Reversing a fade reuses the current voices instead of stacking a new chord.
+    expect(sources).toHaveLength(originalSources);
+    engine.setSettings({ ...DEFAULT_ROOM_SOUND, music: false, nature: false });
+    await engine.setVisible(false);
+    expect(vi.getTimerCount()).toBe(0);
+    expect(sources.every((source) => source.disconnect.mock.calls.length > 0)).toBe(true);
+    await engine.close();
+    expect(context.close).toHaveBeenCalledOnce();
+  });
+
+  it("closes during a layer fade without leaving delayed cleanup or connected filters", async () => {
+    const { engine, context } = fakeContext();
+    await engine.setVisible(true);
+    engine.setSettings({ ...DEFAULT_ROOM_SOUND, nature: false });
+    expect(vi.getTimerCount()).toBe(2);
+    await engine.close();
+    expect(vi.getTimerCount()).toBe(0);
+    expect(context.createBiquadFilter.mock.results.every(({ value }) => value.disconnect.mock.calls.length > 0)).toBe(true);
   });
 
   it("caps retained sources even if a browser delays every ended event", async () => {

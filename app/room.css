@@ -28,7 +28,6 @@ button:disabled { cursor: default; }
 .room-night-wash { position: absolute; inset: 0; background: #142a3b; mix-blend-mode: multiply; opacity: 0; transition: opacity 1s; pointer-events: none; z-index: -1; }
 .workspace[data-night=true] .room-night-wash { opacity: .62; }
 .workspace[data-night=true] .room-art { filter: saturate(.72); }
-.window-sunbeam { position: absolute; left: 25%; top: 34%; width: 27%; height: 37%; border-radius: 50%; background: radial-gradient(ellipse, #fff3b629, transparent 70%); pointer-events: none; animation: sun-drift 18s ease-in-out infinite alternate; z-index: -1; }
 .room-caption { position: absolute; top: 68%; left: 6.6%; font-size: .65cqw; letter-spacing: .17cqw; font-weight: 500; color: #5a6852; }
 .room-caption small { display: block; margin: .7cqw 0 0 1.1cqw; letter-spacing: 0; font-size: .75cqw; font-family: var(--font-handwriting), cursive; }
 .tiny-dot { width: .4cqw; height: .4cqw; background: #879676; border-radius: 50%; display: inline-block; margin: 0 .6cqw .1cqw 0; }
@@ -92,7 +91,6 @@ button:disabled { cursor: default; }
 .work-note-art svg { width: 1.5cqw; height: 1.5cqw; color: #677553; }
 .work-note-art > span { font: .85cqw/1.15 var(--font-room-serif), Georgia, serif; text-align: left; color: #5c6a4e; }
 .sticky-reminder { position: absolute; top: 56%; left: 69.6%; width: 5.8%; aspect-ratio: 1; transform: rotate(-5deg); background: linear-gradient(#e9d693 10%, #eddda4 15%); color: #6d6845; font: 500 1.22cqw/.95 var(--font-handwriting), cursive; box-shadow: .25cqw .35cqw .4cqw #53452d1f; z-index: 2; }
-.sticky-reminder span { display: block; font: .45cqw var(--font-inter), sans-serif; margin-top: .6cqw; }
 .keyboard { position: absolute; top: 76.2%; left: 42%; width: 17.5%; height: 5.6%; background: #dedaca; border: .23cqw solid #eae7da; border-bottom: .45cqw solid #9b9e8d; border-radius: .35cqw; transform: perspective(18cqw) rotateX(27deg); padding: .3cqw; display: grid; grid-template-columns: repeat(12, 1fr); gap: .16cqw; box-shadow: .4cqw .5cqw .4cqw #3f45322e; }
 .keyboard i { background: #eeede1; border-radius: .1cqw; border-bottom: .12cqw solid #b0b5a5; }
 .keyboard i:nth-child(13), .keyboard i:nth-child(36) { background: #aeb8a0; }
@@ -115,15 +113,6 @@ button:disabled { cursor: default; }
 .cat-awake .cat-paw { animation: paw-hello 6.5s ease-in-out both; }
 .cat-label { position: absolute; top: 105%; left: 0; white-space: nowrap; font: 1.15cqw var(--font-handwriting), cursive; color: #656b56; opacity: 0; transition: opacity .2s; }
 .window-cat:hover .cat-label, .window-cat:focus-visible .cat-label, .cat-awake .cat-label { opacity: 1; }
-.room-hotspot { position: absolute; z-index: 4; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; }
-.room-hotspot > span:first-child { width: 22px; height: 22px; border: 1px solid #66765d66; border-radius: 50%; background: #f3f1dfb5; color: #5b6e4f; display: grid; place-items: center; font-size: 17px; transition: transform .2s; box-shadow: 0 0 0 4px #f4efdb33; }
-.room-hotspot:hover > span:first-child { transform: scale(1.15); background: #f3f1df; }
-.hobby-hotspot { left: 85.2%; top: 43.5%; }
-.climb-hotspot { left: 91.3%; top: 38%; }
-.hotspot-label { position: absolute; bottom: 100%; right: 0; white-space: nowrap; font-size: 11px; padding: 7px 10px; background: #f9f7ed; border: 1px solid #d1d6c4; border-radius: 4px; box-shadow: 0 3px 10px #39432718; opacity: 0; pointer-events: none; }
-.room-hotspot:hover .hotspot-label, .room-hotspot:focus-visible .hotspot-label { opacity: 1; }
-.power-hint { position: absolute; top: 28%; left: 38%; color: #737558; font: 1.2cqw var(--font-handwriting), cursive; transform: rotate(-2deg); display: flex; align-items: center; gap: .7cqw; }
-.power-hint svg { width: 3cqw; margin-top: -1.3cqw; fill: none; stroke: currentColor; stroke-width: 1.3; }
 .room-toolbar { max-width: 1296px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--line); padding: 18px 0; gap: 20px; color: #71765f; font-size: 11px; }
 .room-toolbar > p { display: flex; gap: 7px; align-items: center; }
 .toolbar-spark { font-size: 22px; color: #8e9874; margin-right: 5px; }
@@ -177,7 +166,7 @@ button:disabled { cursor: default; }
 .window-content h3 { font-weight: 500; }
 .window-content a { text-underline-offset: 4px; }
 .window-content a:hover { text-decoration: underline; }
-.window-status { display: flex; justify-content: space-between; align-items: center; padding: 0 18px; height: 30px; flex-shrink: 0; border-top: 1px solid #d6ddcb; background: #eef1e5; color: #7f8b70; font-size: 8px; letter-spacing: .15px; }
+.window-status { display: flex; justify-content: space-between; align-items: center; padding: 0 18px; height: 30px; flex-shrink: 0; border-top: 1px solid #d6ddcb; background: #eef1e5; color: #586b4b; font-size: 8px; letter-spacing: .15px; }
 .window-status i { display: inline-block; height: 4px; width: 4px; background: #859c70; border-radius: 50%; margin-right: 6px; vertical-align: middle; }
 .about-heading { display: flex; gap: 28px; justify-content: space-between; align-items: center; }
 .about-portrait { width: 95px; height: 95px; border: 6px solid #f4eedc; transform: rotate(4deg); box-shadow: 0 3px 8px #34452c24; object-fit: cover; }
@@ -192,7 +181,7 @@ button:disabled { cursor: default; }
 .section-label { font-size: 10px; color: #829075; margin: 24px 0 13px; }
 .skill-list { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 28px; }
 .skill-list > span { border: 1px solid #dbe1d0; background: #f1f3e9; border-radius: 4px; padding: 5px 9px; font-size: 10px; color: #6b7c5f; }
-.primary-link { display: inline-flex; align-items: center; justify-content: center; gap: 22px; background: #657c58; color: #fbfbed; padding: 13px 18px; min-height: 44px; border-radius: 5px; font-size: 11px; }
+.primary-link { display: inline-flex; align-items: center; justify-content: center; gap: 22px; background: #586f4c; color: #fbfbed; padding: 13px 18px; min-height: 44px; border-radius: 5px; font-size: 11px; }
 .primary-link svg { width: 16px; height: 16px; }
 .primary-link:hover { background: #506945; text-decoration: none !important; }
 .text-button { display: inline-flex; gap: 7px; align-items: center; font-size: 11px; color: #6c7e5c; min-height: 44px; }
@@ -273,7 +262,6 @@ button:disabled { cursor: default; }
 .contact-location > span { margin-right: 6px; }
 
 @keyframes blink { 50% { opacity: 0; } }
-@keyframes sun-drift { to { transform: translate(4%, 4%); opacity: .5; } }
 @keyframes window-enter { from { opacity: 0; transform: translateY(10px) scale(.98); } to { opacity: 1; transform: none; } }
 @keyframes cat-breathe { 50% { transform: scaleY(1.035); } }
 @keyframes tail-flick { 0%,80%,100% { transform: rotate(0); } 86% { transform: rotate(-5deg); } 92% { transform: rotate(3deg); } }
@@ -300,21 +288,13 @@ button:disabled { cursor: default; }
   .room-header { padding: 18px 6%; }.wordmark { gap: 9px; font-size: 8px; letter-spacing: 1.4px; }.wordmark small { font-size: 8px; }.monogram { font-size: 36px; }
   .room-header nav { gap: 17px; font-size: 11px; }.room-header nav button:first-child { display: none; }.header-contact { border: 0; padding: 0; gap: 7px; }.header-contact svg { width: 13px; }
   .room-intro { padding: 29px 28px 12px; }.room-intro h1 { font-size: 39px; letter-spacing: -1.3px; margin: 13px 0; }.room-intro .eyebrow { font-size: 7px; letter-spacing: 1.6px; }.room-intro > p:last-child { max-width: 340px; margin: auto; font-size: 11px; }
-  .room-stage { margin-top: 5px; aspect-ratio: 1440 / 990; }
-  .room-art,.room-night-wash { top: 8%; bottom: 0; }.room-art { height: 92%; }.window-sunbeam { display: none; }
-  .computer { width: 46%; left: 27%; top: 33%; aspect-ratio: 482 / 375; }
   .monitor-body { border-radius: 1.6cqw; padding: 1.2cqw 1.2cqw 0; height: 86%; }.monitor-screen { height: 87%; border-width: .5cqw; border-radius: .6cqw; }.monitor-chin { height: 13%; font-size: .7cqw; padding: 0 .4cqw; }.power-button { min-height: 22px; padding: 0; }.power-button svg { width: 1.8cqw; height: 1.8cqw; }.power-led { width: .7cqw; height: .7cqw; }
   .screen-off > svg { width: 4.2cqw; height: 4.2cqw; margin-bottom: 1.5cqw; }.screen-off > span:not(.screen-reflection) { font-size: 1.7cqw; }.screen-off strong { font-size: 1.35cqw; margin-top: 2cqw; padding: 1.5cqw; }
   .screen-off { min-height: 44px; }.desktop-menubar { height: 2.5cqw; font-size: .8cqw; }.desktop-menubar strong { font-size: 1.2cqw; }.desktop-menubar svg { width: 1.2cqw; height: 1.2cqw; }
   .desktop-welcome { padding: 2cqw 0 1.5cqw; }.desktop-welcome > span { font-size: .65cqw; }.desktop-welcome h2 { font-size: 2.9cqw; }.desktop-welcome p { font-size: .85cqw; }
   .desktop-folders { gap: 1cqw; padding: 0; }.desktop-folders button { min-width: 6cqw; font-size: .78cqw; gap: .8cqw; padding: .2cqw; }.app-icon { width: 3.8cqw; height: 3.8cqw; }.app-icon svg { width: 2cqw; height: 2cqw; }.desktop-status { font-size: .7cqw; }.desktop-status button svg { width: 1.5cqw; height: 1.5cqw; }
   .bios-logo { font-size: 2.5cqw; margin-bottom: 1cqw; }.bios-logo span { font-size: 1.5cqw; }.boot-screen { padding: 1.7cqw; }.boot-lines { font-size: .93cqw; line-height: 1.65; }.boot-progress { bottom: 5cqw; left: 1.7cqw; right: 1.7cqw; }.skip-boot { font-size: 1.35cqw; bottom: .2cqw; min-height: 18px; }.skip-boot svg { width: 1.6cqw; height: 1.6cqw; }
-  .window-cat { width: 17%; left: 7%; top: 47.7%; }.cat-label { font-size: 2cqw; }
-  .note-profile { left: 21%; top: 38%; width: 8%; z-index: 4; }.note-work { left: 73.5%; top: 40%; width: 8%; }.photo-note > span:last-child { font-size: 1.1cqw; }.note-tape { height: 1.7cqw; }.work-note-art > span { font-size: 1.2cqw; }
-  .sticky-reminder { left: 74.5%; top: 54%; width: 7%; font-size: 1.6cqw; }.sticky-reminder span { font-size: .6cqw; }
-  .keyboard { left: 40%; top: 78%; width: 20%; height: 4.8%; }.desk-mouse { top: 78%; left: 63%; width: 3%; height: 3.5%; }
-  .room-hotspot { width: 32px; height: 32px; }.room-hotspot > span:first-child { width: 16px; height: 16px; font-size: 12px; }.hobby-hotspot { left: 84%; top: 43%; }.climb-hotspot { display: none; }.hotspot-label { font-size: 9px; }
-  .room-caption { font-size: 1cqw; top: 69%; left: 5%; letter-spacing: .13cqw; }.room-caption small { font-size: 1.5cqw; max-width: 16cqw; }.power-hint { left: 35%; top: 70%; font-size: 1.9cqw; }.power-hint svg { width: 5cqw; }
+  .cat-label { font-size: 2cqw; }
   .room-toolbar { flex-direction: column; gap: 7px; padding: 11px 0 12px; margin: 0 6%; font-size: 10px; }.room-toolbar > p { gap: 4px; }.toolbar-spark { font-size: 17px; }.room-controls { gap: 18px; }.room-controls button { font-size: 10px; min-height: 38px; }.desktop-only { display: none; }
   .quick-access { display: grid; grid-template-columns: repeat(3, 1fr); gap: 7px; padding: 20px 6% 5px; }.quick-access button { justify-content: center; border-color: #dce0d0; padding: 10px 7px; font-size: 10px; background: #eeefe3; gap: 7px; }.quick-access .quick-arrow { display: none; }.quick-access button:nth-child(4) { grid-column: span 2; }
   .room-footer { flex-direction: column; gap: 10px; text-align: center; padding: 22px 0; font-size: 8px; }
@@ -336,11 +316,11 @@ button:disabled { cursor: default; }
 .window-content .project-meta { font-size: 10px; color: #637357; }
 .window-content .resume-role > p,.window-content .education-row p { font-size: 13px; color: #607454; }
 .window-content .resume-role > div > span,.window-content .education-row > span { font-size: 11px; color: #6c7c5f; }
-.window-content .interest-number,.window-content .section-label,.window-content .location-chip { color: #667959; }
+.window-content .section-label,.window-content .location-chip { color: #667959; }
+.window-content .interest-number { color: #5b6f4e; }
 .room-intro > p:last-child,.room-toolbar,.room-footer { color: #626e55; }
 .quick-access button { color: #526442; }
 .power-button { min-width: 26px; min-height: 26px; }
-@media (max-width: 700px) { .power-hint { top: 27%; left: 27%; font-size: 2cqw; } }
 @media (prefers-reduced-motion: reduce) { .workspace *, .workspace *::before, .workspace *::after, .desktop-window, .desktop-window * { animation: none !important; transition: none !important; scroll-behavior: auto !important; }.cat-eyes-open { opacity: 0; }.cat-awake .cat-eyes-open { opacity: 1; }.cat-awake .cat-eyes-sleep { opacity: 0; } }
 @media print {
   body { background: white; color: #222; }

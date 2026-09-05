@@ -20,6 +20,11 @@ export default defineConfig({
       name: "chromium",
       use: { browserName: "chromium" },
     },
+    {
+      name: "webkit-mobile",
+      testMatch: /room-(mobile|motion)\.spec\.ts/,
+      use: { browserName: "webkit" },
+    },
   ],
   webServer: deployedBaseURL ? undefined : {
     // CI already built the artifact. Locally, reuse a running server before

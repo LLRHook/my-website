@@ -9,11 +9,17 @@ apps. The window cat mostly sleeps, with occasional looks around and grooming.
 The room has a daylight/evening switch, photo notes, and small nods to climbing,
 Magic: The Gathering, Pokémon, poker, and Buffalo Wild Wings. Click the computer
 for a larger monitor, or inspect eleven room details for sharp artwork, original
-photos, and a short story. Phones have larger tap targets and full reading windows.
+photos, and a short story. On phones, the three photos sit above the room and the
+computer keeps its desk proportions. Tap the miniature screen for a full reading
+window. The gold carton on the lower right shelf uses the official Buffalo Wild
+Wings mark. Objects have quiet hover and keyboard-focus responses; their names
+and stories appear in the close-up, without plus badges around the room.
 
 A curtain catches a gentle breeze. Optional sound adds quiet music, bird calls,
 insects, and wind, with separate music/nature controls and a volume slider. Sound
-starts only after the visitor turns it on.
+starts only after the visitor turns it on. Long overlapping chords and rounded
+attacks keep the music quiet. Pointer movement and taps gently shift the light,
+leaf shadows, and nearby objects; slow CSS animation supplies the idle movement.
 
 ## Run locally
 
@@ -29,6 +35,7 @@ npm run lint
 npm test
 npm run build
 npm run start
+npx playwright install chromium webkit
 npm run test:e2e
 ```
 
@@ -42,7 +49,7 @@ To exercise a deployment, set `PLAYWRIGHT_BASE_URL` to its URL before running
 ## Implementation
 
 Next.js 15 App Router, React 19, TypeScript, and Tailwind CSS 4. The illustrated
-room is a 27 KB SVG. CSS handles ambient animation; React owns the computer's
+room is a 30 KB SVG. CSS handles ambient animation; React owns the computer's
 off, booting, and on states. No WebGL engine or particle canvas runs on the
 homepage. The Markdown reader loads only when a visitor opens a project.
 
@@ -54,6 +61,9 @@ homepage. The Markdown reader loads only when a visitor opens a project.
 - `app/components/room/ComputerFocus.tsx`: enlarged monitor and keyboard focus.
 - `app/components/room/ObjectDetail.tsx`: photo and vector close-ups with captions.
 - `app/components/room/RoomBreeze.tsx`: animated curtain, air, and falling leaf.
+- `app/components/room/RoomAtmosphere.tsx`: sunlight, leaf shadows, and dust motes.
+- `app/components/room/useRoomMotion.ts`: bounded pointer and touch interpolation.
+- `app/components/room/room-mobile.css`: phone photo row and scene composition.
 - `app/components/room/RoomAudio.tsx`: opt-in sound and layer controls.
 - `app/lib/room-audio.ts`: original procedural Web Audio soundscape.
 - `app/room.css`: scene, responsive reading windows, animations, print styles.
@@ -63,7 +73,8 @@ homepage. The Markdown reader loads only when a visitor opens a project.
 Ambient room motion pauses when the page is hidden, a reading window or close-up
 is open, or the visitor chooses Pause motion. Reduced-motion settings disable
 animation and skip the timed startup. Effects remove listeners and clear timers
-on teardown. Audio suspends when hidden, limits concurrent voices, disconnects
+on teardown. The pointer animation frame loop stops when it settles, and passive
+touch handlers leave scrolling available. Audio suspends when hidden, limits concurrent voices, disconnects
 finished nodes, and closes its context when disabled or unmounted.
 
 ## Content and resume
