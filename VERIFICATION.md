@@ -1,192 +1,84 @@
-# my-website (Victor Ivanov Portfolio) — End-to-End Verification & Validation Protocol
+# Workspace release verification
 
-This document is the canonical checklist for taking the portfolio from "compiles"
-to "ship-ready". Run it before any release, after any large refactor, and any time
-you suspect a regression. It is **executable from a cold start** — every command is
-written verbatim, every expected output is named, and every "manual" step has
-unambiguous accept / reject criteria.
+This checklist covers the interactive room introduced in version 0.5.0. It
+supersedes the old timeline and Lenis UI checks. The GitHub API tests and public
+route contracts remain in scope.
 
-The portfolio is a **single-tier Next.js 15 (App Router) application** deployed on
-**Vercel**. The homepage is a Server Component rendered with **ISR**
-(`revalidate = 3600`) that fetches the owner's public GitHub repositories at
-build/revalidate time via the GitHub REST API (`app/lib/github.ts`, keyed by the
-`GITHUB_TOKEN` env var) and renders them as a timeline. There is **no database and
-no auth**. The only external provider is the **GitHub REST API**.
+## Build and automated checks
 
-See also: [`bugs.md`](./bugs.md), [`features.md`](./features.md),
-[`CHANGELOG.md`](./CHANGELOG.md), [`README.md`](./README.md).
+1. Record `git rev-parse HEAD` and inspect `git status --short`. Keep unrelated
+   user changes out of the release.
+2. Use Node 22 or later and the committed npm lockfile. On a clean checkout,
+   run `npm ci`.
+3. Run `npm run lint`, `npm test`, and `npm run build`.
+4. Start the production artifact with `npm run start` on port 3000, then run
+   `npm run test:e2e`. Playwright reuses that server.
+5. For a deployed build, set `PLAYWRIGHT_BASE_URL` to the HTTPS deployment URL
+   and run the same E2E command. This skips local startup.
 
-## How to use this file
+Current baseline: 40 Vitest cases across 5 files; 17 Playwright cases across
+3 files. Test runners provide the authoritative counts. Run `npx playwright
+test --list` when updating the baseline.
 
-1. Work top-to-bottom. Do not skip stages.
-2. Tick each step locally as you go.
-3. Every failed step files a `BUG-NNN` entry in `bugs.md`.
-4. Every gap that is a missing feature, not a defect, files a `FEAT-NNN` in `features.md`.
-5. Fill in the summary table (§ 6.3) and either declare the build green or block on open `BUG-NNN`s.
+## Acceptance coverage
 
-Time estimate: 15–30 minutes (dominated by the Playwright E2E run, which builds and
-starts the production server).
+- Power off, full six-stage startup, skipped startup, immediate startup under
+  reduced motion, shutdown during startup, and subsequent reboot.
+- About, Projects, Resume, Off the clock, and Contact apps open correctly.
+- The native dialog contains focus. Escape and the close button return focus to
+  the launcher, including notes used before startup. Project details focus their
+  heading and the back button restores search focus.
+- Every app stays inside 320, 390, 768, and 1440px viewports. Main reading copy
+  is at least 14px; content scrolls without horizontal page overflow.
+- Search works for names, descriptions, topics, and languages. Missing projects
+  show a direct GitHub link. README requests use the actual text/plain endpoint;
+  errors have a usable fallback and requests abort when their view closes.
+- README tables render and relative links resolve correctly. Raw HTML and remote
+  images do not execute or load; unsafe link schemes are rejected.
+- Existing #work/#about/#contact links open the right app. #resume/#interests
+  also work. JavaScript-disabled users get a summary and contact/project links.
+- Resume print mode shows readable professional content without room controls.
+- Daylight/evening and pause controls work; reduced motion is respected.
+- The cat sleeps, wakes and looks around, grooms, and returns to sleep. Clicking
+  the cat triggers a temporary greeting. Ambient animation pauses when hidden or
+  while a reading window is open.
 
-## Roles & abbreviations
+## Runtime and deployment checks
 
-- **DUT** — the built Next.js app under `npm run build && npm run start` on `http://localhost:3000`.
-- **prod artifact** — the production build (`next build`), not the dev server (`next dev`).
-- **provider** — the GitHub REST API (`https://api.github.com`).
+- GET /, /api/repos, /robots.txt, /sitemap.xml, /manifest.webmanifest,
+  /opengraph-image, /twitter-image, /room-studio.svg and public photos return 200.
+- /api/readme/LLRHook/my-website returns text, not JSON. Source-peek API behavior
+  remains covered by the existing provider abstraction.
+- An unknown route returns 404 with a readable return-to-workspace link.
+- Browser console has no page exceptions or hydration errors.
+- Repeated app cycles do not accumulate DOM nodes or listeners. Check retained
+  heap after warm-up and forced GC; report measurements, not a leak-free claim.
+- Run mobile Lighthouse against the production artifact/domain. Existing targets
+  are Performance>=90, Accessibility>=95, and LCP<2.5s. Report the measured LCP
+  separately; a high aggregate score does not establish that the LCP target passed.
+- Review public copy and images against authorized sources. Keep source resume
+  PDFs and credentials private; verify no EXIF/XMP metadata on public photos.
+- Check GitHub Actions and Vercel status for the exact pushed commit, then repeat
+  the critical browser flows on victorivanov.engineer.
 
----
+## September 5 local evidence
 
-## Stage 0 — Pre-flight
+The production build passed lint, type checking, 40 unit tests and 17 browser
+cases. A mobile Lighthouse 13.4.1 run measured Performance 98, Accessibility 100,
+Best Practices 100 and SEO 100, with LCP 2.2s, TBT 10ms and CLS 0.001. This local simulated-mobile LCP meets the 2.5s target; production must be measured too.
+The final audit used Lighthouse through an existing headless Chromium session.
 
-- [ ] 0.1 Record the exact commit SHA under test: `git rev-parse --short HEAD`. Every result and the final Verified entry bind to it.
-- [ ] 0.2 Toolchain: `node -v` (expect ≥ 22, matching `.github/workflows/ci.yml`), `npm -v`.
-- [ ] 0.3 Clean install exactly as CI does: `npm ci` (CI uses `npm ci`, not `npm install`).
-- [ ] 0.4 Env: ensure `GITHUB_TOKEN` is available for a fully-populated build (`.env.local` locally; Vercel Production env for the deployed artifact). Without it the build still succeeds but falls back to the public GitHub endpoint (rate-limited from shared IPs). See `.env.example`.
-- [ ] 0.5 Port 3000 free.
-- [ ] 0.6 Determinism posture: data comes from a live external API (GitHub). Repo counts vary as repos are pushed; assertions must test **structure/non-emptiness**, not exact counts.
+After 10 warm Resume cycles plus 100 more open/close cycles, Chromium DOM counters
+remained 2 documents, 1,096 nodes, 338 listeners and 337 page elements. Heap samples
+were 3,840,792 bytes at the warm baseline, 3,797,284 at 50 cycles, and 3,961,280 at 100
+cycles: net retained growth 120,488 bytes. No page errors or remaining scroll lock
+were observed. This bounded run does not prove the absence of every memory leak.
 
-> **Protocol vs CI.** CI (`.github/workflows/ci.yml`) runs `npm ci` → lint → unit tests → build → Playwright E2E on every push/PR to main (FEAT-1781501124), uploading the Playwright report as an artifact. This protocol is the deeper release-readiness gate at a chosen SHA — it adds the prod smoke, adversarial, and product-constraint stages CI does not.
+A dedicated review found and fixed focus restoration, focus loss on project
+navigation, README relative-link routing, and missing GFM table rendering.
+Original resume PDFs remain unchanged. The user's pre-existing CLAUDE.md deletion
+is outside the release.
 
-**Command fidelity.** CI's canonical commands are `npm ci`, `npm run lint`, `npm test`, `npm run build`, and `npm run test:e2e`. Run those verbatim in Stages 1–2. CI authenticates the data-driven build + E2E via `secrets.GITHUB_TOKEN`; locally, set `GITHUB_TOKEN` for a populated run, or accept that the two `card-tabs` E2E cases skip when the unauthenticated build is rate-limited.
-
-## Stage 1 — Static / spec compliance review
-
-- [ ] 1.1 Type-check: `npx tsc --noEmit` → no errors. (`next build` also type-checks; this is the isolated check.)
-- [ ] 1.2 Lint: `npm run lint` (ESLint 9 flat config — `next/core-web-vitals` + `next/typescript`, FEAT-1781501123) → clean, no errors.
-- [ ] 1.3 Secrets scan: confirm no token/secret is committed. `git grep -nE "gh[ps]_[A-Za-z0-9]{20,}|github_pat_"` → no matches. Confirm `.env*.local` and `.vercel` are git-ignored (`.gitignore`).
-- [ ] 1.4 Provider abstraction intact: all GitHub access goes through `app/lib/github.ts` (no raw `api.github.com` `fetch` calls scattered in components). `git grep -n "api.github.com" -- app` → only `app/lib/github.ts`.
-- [ ] 1.5 Resilience invariant (regression guard for BUG-1781501120): `app/lib/github.ts` `fetchPaginatedRepos` wraps its fetch in try/catch (a timeout/abort must not throw through the Server Component), and `fetchAllRepos` falls back to the public endpoint when the authenticated request yields nothing.
-- [ ] 1.6 Performance anti-pattern scan: the homepage fetches languages + commit activity per repo via `Promise.all` (bounded by repo count, acceptable). Confirm no unbounded/synchronous per-item I/O was added on the render path; confirm `fetchCommitActivity` keeps its short timeout. No N+1 against a DB (there is none).
-- [ ] 1.7 Security headers present in `next.config.js` (CSP-adjacent: `X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`, `Permissions-Policy`, HSTS).
-
-## Stage 2 — Automated builds & tests
-
-- [ ] 2.1 Production build (CI-fidelity command): `npm run build` → "Compiled successfully", static pages generated, no errors. Record the route table.
-- [ ] 2.2 Unit/component tests: `npm test` (Vitest, jsdom — FEAT-1781501122) → all pass. Covers `github.ts` transforms + the `fetchAllRepos` fallback path, and `TimelineSection` empty vs populated.
-- [ ] 2.3 E2E (Playwright): `npm run test:e2e` (config builds + starts the prod server, runs chromium). Record results.
-
-**Baseline test counts (update on drift — § 3.1.1):**
-
-| Layer | Tool | Files | Cases |
-|-------|------|-------|-------|
-| Unit/component | Vitest (jsdom) | 2 | 8 |
-| E2E | Playwright (chromium) | 3 | 20 |
-
-E2E breakdown: `centering.spec.ts` 16 (4 viewports × 4 sections), `smooth-scroll.spec.ts` 2 (Lenis activation + anchor nav), `card-tabs.spec.ts` 2 (tab render/switch + Run-tab leak-safe mount/unmount). BUG-1781501121 (orphaned `StatementSection`) is resolved — the 4 `statement` cases were removed.
-
-- **2a — Per-ticket acceptance verification.** For each ticket shipped since the last `Verified` SHA, locate the test(s) proving its acceptance criteria. BUG-1781501120 (projects render): proven by Stage 3 smoke (`/api/repos` returns repos; `/` lacks "No projects to display") **and** by the `fetchAllRepos` unit tests in `app/lib/github.test.ts` (public path / empty→public fallback / non-ok→[]) — the former coverage gap is now closed (FEAT-1781501122 shipped).
-- **2b — Coverage of the change.** Vitest is wired (FEAT-1781501122) but coverage reporting (`vitest --coverage`) is not yet configured. Fall back to 2a per-ticket mapping; note the gap.
-- **2c — Trust the green (flake check).** Run the E2E suite twice; any case that flips is quarantined and filed as a `BUG` (area `tests`). Playwright `retries` is 0 locally / 2 in CI — a case that only passes on retry is suspect.
-
-Regression stays whole-platform: run the full E2E suite, not just the changed flow.
-
-## Stage 3 — Functional E2E walkthrough
-
-API smoke first (against the DUT or production domain):
-
-- [ ] 3.1 `GET /` → 200, HTML does **not** contain "No projects to display" (regression guard for BUG-1781501120).
-- [ ] 3.2 `GET /api/repos` → 200, JSON timeline array is non-empty (≥ 1 year-group, total repos ≥ 1).
-- [ ] 3.3 `GET /api/readme/LLRHook/my-website` → 200, returns markdown (not the "*No README available.*" fallback).
-- [ ] 3.3b `GET /api/source/LLRHook/my-website?lang=TypeScript` → 200, JSON `{ html, path }`; `html` is non-null for repos with a resolvable source file and graceful null otherwise (FEAT-1781502132).
-- [ ] 3.4 `GET /sitemap.xml`, `/robots.txt`, `/manifest.webmanifest`, `/opengraph-image`, `/twitter-image` → 200.
-
-UI walkthrough (manual, on the prod artifact):
-
-- [ ] 3.5 Homepage loads: aurora background, hero, Work timeline populated with project cards.
-- [ ] 3.6 "Show More Projects" pagination reveals additional cards.
-- [ ] 3.7 Expanding a project card loads its README (exercises `/api/readme`).
-- [ ] 3.8 Navbar anchors scroll to `#work`, `#about`, `#contact`; Back-to-top works.
-- [ ] 3.9 Accessibility manual pass: keyboard-tab through interactive elements; headings/landmarks present; `prefers-reduced-motion` respected by animations.
-
-## Stage 4 — Adversarial, stress & performance checks
-
-- [ ] 4.1 Provider failure handling: with an invalid/empty `GITHUB_TOKEN`, the build still completes and the page renders the graceful empty state (not a 500). (Regression guard for the uncaught-abort class in BUG-1781501120.)
-- [ ] 4.2 Unknown routes → the custom `not-found` page renders (`/this-does-not-exist` → 404 page).
-- [ ] 4.3 `/api/readme/<owner>/<nonexistent-repo>` → returns the "*No README available.*" fallback, not a crash.
-- [ ] 4.4 No DB / no volumes / no auth → migration, restart-preserves-data, cross-tenant isolation, and token-tampering steps are **n/a** for this stack.
-- [ ] 4.5 **Performance (hot path = homepage):** Lighthouse on the production build — `npx lighthouse https://victorivanov.engineer --only-categories=performance,accessibility,best-practices,seo --quiet` (or Chrome DevTools). Budget (confirm with owner): Performance ≥ 90, Accessibility ≥ 95, LCP < 2.5 s. A crit/high budget breach is a hard block.
-- [ ] 4.6 Animation cost: confirm particle/aurora animations do not pin the main thread (no long-task jank on mid-tier hardware); honor `prefers-reduced-motion`.
-
-## Stage 5 — Hard product-constraint verification
-
-- [ ] 5.1 Provider abstraction integrity (re-tick): GitHub access is isolated to `app/lib/github.ts` (§ 1.4).
-- [ ] 5.2 No third-party telemetry / analytics leaked unless intended; `poweredByHeader` disabled; security headers served (verify response headers on the live site).
-- [ ] 5.3 Secrets never in the bundle: `GITHUB_TOKEN` is only read server-side (in `app/lib/github.ts`); confirm it is not referenced in any client component / not present in the client JS bundle.
-- [ ] 5.4 Performance NFRs (§ 4.5 evidence): re-tick the agreed Lighthouse/LCP budgets as hard constraints.
-- [ ] 5.5 SEO surface intact: `sitemap.xml`, `robots.txt`, OpenGraph/Twitter images, and JSON-LD (`JsonLd.tsx`) render correctly.
-
-## Stage 6 — Reporting
-
-- [ ] 6.1 every failed step has a `BUG-NNN`
-- [ ] 6.2 every gap has a `FEAT-NNN`
-- [ ] 6.3 fill in summary table
-- [ ] 6.4 record run metadata (git SHA, node version, whether `GITHUB_TOKEN` was set, prod vs dev artifact)
-- [ ] 6.5 if all green, migrate pending-migration tickets and append a `Verified` entry to `CHANGELOG.md / Unreleased`
-
-A build is **release-ready** only if all six stages tick. A failed step in Stages 1,
-2, or 5 is a hard block. In Stage 4, a crit/high performance failure also blocks.
-
-### 6.3 Summary table
-
-```
-| Stage                    | Pass / Fail | Notes |
-|--------------------------|-------------|-------|
-| 0 Pre-flight             |             |       |
-| 1 Static review          |             |       |
-| 2 Automated tests        |             |       |
-| 3 Functional E2E         |             |       |
-| 4 Adversarial / perf     |             |       |
-| 5 Hard constraints       |             |       |
-| 6 Reporting hygiene      |             |       |
-```
-
----
-
-## Appendix A — Inspecting persistent state
-n/a — no database, cache, or persistent volume. All state is the live GitHub API
-plus Next.js ISR cache (cleared by a redeploy).
-
-## Appendix B — Reusable command recipes
-
-```bash
-# Build + run the production artifact locally
-npm ci && npm run build && npm run start      # http://localhost:3000
-
-# Run E2E (auto-builds + starts the server per playwright.config.ts)
-npm run test:e2e
-npx playwright show-report                     # view the HTML report
-
-# Smoke the production deployment
-curl -s https://victorivanov.engineer/ | grep -c "No projects to display"   # expect 0
-curl -s https://victorivanov.engineer/api/repos | head -c 200
-```
-
-## Appendix C — Common platform commands
-
-```bash
-# Vercel (project linked via `vercel link`; auth as the project owner)
-vercel ls my-website                  # recent deployments
-vercel --prod                         # build + deploy current dir to production
-vercel env ls production              # list production env vars (values encrypted)
-
-# GitHub deployments record
-gh api repos/LLRHook/my-website/deployments --jq '.[0] | {env:.environment, ref:.ref}'
-```
-
-## Appendix D — Toggling provider variants
-
-The GitHub provider has two modes in `app/lib/github.ts`:
-- **Authenticated** (`GITHUB_TOKEN` set): `/user/repos?affiliation=owner`, 5000 req/hr.
-- **Public fallback** (no/invalid token): `/users/<username>/repos?type=owner`, 60 req/hr per IP.
-
-To exercise the fallback locally, unset `GITHUB_TOKEN` and rebuild; the build log
-prints `[github] GITHUB_TOKEN is not set — falling back to public repos`.
-
-## Appendix E — Smoke checklist (sub-15-minute version)
-
-1. `npm ci && npm run build` → green.
-2. `npx tsc --noEmit` → clean.
-3. `npm run start`, open `/` → Work timeline shows project cards (not the empty state).
-4. Expand a card → README loads.
-5. `curl -s localhost:3000/api/repos | head -c 80` → non-empty timeline JSON.
-6. Navbar anchors + Back-to-top work.
-7. `curl -s localhost:3000/sitemap.xml` → 200.
+A repeated live README check exposed GitHub API rate limiting. Public raw-file
+fallbacks now recover README content; 14 provider regression tests cover limits,
+timeouts, missing files, validated URL paths, and omitted authorization headers.

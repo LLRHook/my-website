@@ -1,95 +1,89 @@
-# Victor Ivanov — Portfolio
+# Victor Ivanov's workspace
 
 [victorivanov.engineer](https://victorivanov.engineer)
 
-Personal portfolio site built with Next.js, featuring ambient animations and a glassmorphism design system.
+A personal portfolio inside a cozy, interactive room. Turn on the computer,
+watch viOS start, and open the profile, projects, resume, interests, or contact
+apps. The window cat mostly sleeps, with occasional looks around and grooming.
 
-## Tech Stack
+The room has a daylight/evening switch, photo notes, and small nods to climbing,
+Magic: The Gathering, Pokémon, and Buffalo Wild Wings. Phones have a larger
+computer and direct app buttons; reading windows fill the available viewport.
 
-- **Framework**: Next.js 15 (App Router)
-- **Styling**: Tailwind CSS 4
-- **Animations**: Motion (Framer Motion), tsParticles, CSS keyframes
-- **Language**: TypeScript, React 19
+## Run locally
 
-## Features
-
-- **Aurora Background** — 3-layer animated gradient with purple, teal, blue, and red accents
-- **Noise Overlay** — SVG feTurbulence film grain texture at 3% opacity
-- **Floating Particles** — 50 interactive dots with grab interaction (desktop only)
-- **Shimmer Card Borders** — Rotating conic-gradient light on glass cards, red accent on hover
-- **Timeline** — Chronological project showcase with alternating left/right cards, paginated (6 at a time) with "Show More" lazy loading
-- **Scroll Animations** — Parallax hero, fade-in sections, opacity-driven statement text
-- **Glassmorphism** — Frosted glass cards with backdrop blur and hover glow
-
-## Project Structure
-
-```
-app/
-  components/
-    ui/           # Reusable: Container, GlassCard, AuroraBackground, NoiseOverlay, ParticlesBackground, etc.
-    work/         # Timeline: TimelineSection, TimelineCard, ProjectCardExpanded
-    about/        # SkillBadge
-  lib/            # Types, constants
-  globals.css     # Theme tokens, glass utilities, shimmer borders, keyframes
-  layout.tsx      # Root layout with background layers + z-index stacking
-```
-
-## Z-Index Layering
-
-| Layer      | z-index | Position |
-|------------|---------|----------|
-| Aurora     | -10     | fixed    |
-| Noise      | 1       | fixed    |
-| Particles  | 2       | fixed    |
-| Content    | 5       | relative |
-| Navbar     | 50      | fixed    |
-
-## Getting Started
-
-```bash
-npm install
+```sh
+npm ci
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000).
+For production validation:
 
-## Build
-
-```bash
+```sh
+npm run lint
+npm test
 npm run build
-npm start
+npm run start
+npm run test:e2e
 ```
 
-## Configuration
+The app runs at `http://localhost:3000`. Playwright reuses a running local server.
+Without one, it builds and starts the production app. CI already builds the app
+before running Playwright.
 
-The Work timeline is populated from the owner's public GitHub repositories, fetched
-server-side at build / ISR-revalidate time (`app/lib/github.ts`).
+To exercise a deployment, set `PLAYWRIGHT_BASE_URL` to its URL before running
+`npm run test:e2e`; the test runner then skips local server startup.
 
-| Env var | Required | Purpose |
-|---------|----------|---------|
-| `GITHUB_TOKEN` | Recommended | GitHub PAT used to authenticate REST API calls (5000 req/hr). Without it the app falls back to the public endpoint, which is rate-limited to **60 req/hr per IP** — unreliable on serverless/shared IPs (this caused the "No projects to display" outage; see `CHANGELOG.md`, BUG-1781501120). Public-repo read is all that's needed (no scopes required). See `.env.example`. |
+## Implementation
 
-Set it locally in `.env.local` and in the Vercel project's **Production** environment
-variables. Editing the Vercel value requires a redeploy to take effect.
+Next.js 15 App Router, React 19, TypeScript, and Tailwind CSS 4. The illustrated
+room is a 24 KB SVG. CSS handles ambient animation; React owns the computer's
+off, booting, and on states. No WebGL engine or particle canvas runs on the
+homepage. The Markdown reader loads only when a visitor opens a project.
 
-## Testing & Verification
+- `app/components/room/Workspace.tsx`: room interactions, startup, app launchers.
+- `app/components/room/DesktopWindow.tsx`: native dialog, app navigation, content.
+- `app/components/room/ProjectReadme.tsx`: lazy Markdown rendering with safe links,
+  GitHub tables, an abortable request, and a bounded display length.
+- `app/components/room/WindowCat.tsx`: cat SVG and temporary greeting state.
+- `app/room.css`: scene, responsive reading windows, animations, print styles.
+- `public/room-studio.svg`: original vector scenery.
+- `app/lib/github.ts`: existing public project data and API abstraction.
 
-```bash
-npm run test:e2e     # Playwright E2E (auto-builds + starts the prod server)
-npx tsc --noEmit     # type-check
-```
+Ambient motion pauses when the page is hidden, a reading window is open, or the
+visitor chooses Pause motion. Reduced-motion settings disable animation and skip
+the timed startup. Effects remove listeners and clear timers on teardown.
 
-[`VERIFICATION.md`](./VERIFICATION.md) is the canonical, cold-start release-readiness
-protocol (six staged gates). Run it before any release or after a large refactor.
+## Content and resume
 
-## Contributing — project cycle
+The screen resume is adapted from the August 2026 source resume. It is readable
+HTML with a print/save-to-PDF action. Original resume PDFs remain unchanged and
+are not copied into the public repository. See
+[resume suggestions](docs/resume-suggestions.md) for proposed content edits and
+source differences.
 
-This repo follows a tracked dev cycle:
+The portrait illustration comes from the linked public GitHub profile. The
+conference photo was supplied through the owner's local photo collection and
+authorized for publication. Public copies have no EXIF or XMP metadata.
 
-- [`bugs.md`](./bugs.md) — open defects (`BUG-NNN`).
-- [`features.md`](./features.md) — scoped features (`FEAT-NNN`).
-- [`CHANGELOG.md`](./CHANGELOG.md) — fixes/features migrated here once verified.
-- [`VERIFICATION.md`](./VERIFICATION.md) — the V&V protocol.
+Old links to `/#work`, `/#about`, and `/#contact` open their matching apps;
+`/#resume` and `/#interests` also work. A no-JavaScript fallback contains the
+professional summary and direct project/contact links.
 
-File a `BUG-NNN`/`FEAT-NNN` before fixing/building; migrate it to `CHANGELOG.md` once
-verified. See [`CLAUDE.md`](./CLAUDE.md) for the full lifecycle rules.
+## GitHub data
+
+Project data is fetched on the server and revalidated hourly. `GITHUB_TOKEN` is
+recommended for higher rate limits; without it the existing public endpoint
+fallback is used. Only public, non-fork repositories are exposed. An empty
+response leaves the biography and resume available and shows a direct GitHub
+link in Projects.
+
+Set local secrets in `.env.local` and production secrets in Vercel. Never commit
+them. GitHub credentials are not sent to the browser.
+
+## Release
+
+The existing GitHub integration deploys `main` to the Vercel `my-website` project
+and `victorivanov.engineer`. Follow [VERIFICATION.md](VERIFICATION.md) before
+release and inspect deployment status afterward. Roll back with a normal revert
+and the same deployment path.

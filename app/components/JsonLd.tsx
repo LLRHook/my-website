@@ -5,7 +5,7 @@ const personJson = JSON.stringify({
   "@type": "Person",
   name: "Victor Ivanov",
   url: SITE_URL,
-  jobTitle: "Software Engineer",
+  jobTitle: "Senior Backend Engineer",
   worksFor: {
     "@type": "Organization",
     name: "Paradigm Testing",
@@ -24,11 +24,6 @@ const personJson = JSON.stringify({
       "@type": "EducationalOrganization",
       name: "University of Maryland, Baltimore County",
       sameAs: "https://umbc.edu",
-    },
-    {
-      "@type": "EducationalOrganization",
-      name: "Georgia Institute of Technology",
-      sameAs: "https://gatech.edu",
     },
   ],
   knowsAbout: [
