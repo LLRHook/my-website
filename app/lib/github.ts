@@ -301,22 +301,40 @@ export async function fetchReadme(
   owner: string,
   repo: string
 ): Promise<string> {
-  try {
-    const res = await fetchWithTimeout(
-      `${GITHUB_API}/repos/${owner}/${repo}/readme`,
-      {
-        headers: {
-          ...getHeaders(),
-          Accept: "application/vnd.github.v3.raw",
-        },
-      }
-    );
+  const unavailable = "*No README available.*";
+  // Each value must remain a single path component, including after URL parsing.
+  if (!/^[a-z\d](?:[a-z\d-]{0,37}[a-z\d])?$/i.test(owner)
+    || !/^[a-z\d._-]{1,100}$/i.test(repo)
+    || repo === "." || repo === "..") return unavailable;
 
-    if (!res.ok) return "*No README available.*";
-    return res.text();
-  } catch {
-    return "*No README available.*";
+  const sources = [
+    { url: `${GITHUB_API}/repos/${owner}/${repo}/readme`, accept: "application/vnd.github.v3.raw" },
+    { url: `https://raw.githubusercontent.com/${owner}/${repo}/HEAD/README.md`, accept: "text/plain" },
+    { url: `https://raw.githubusercontent.com/${owner}/${repo}/HEAD/readme.md`, accept: "text/plain" },
+  ];
+
+  for (const source of sources) {
+    const controller = new AbortController();
+    // Three public attempts at most; the deadline also covers reading the body.
+    const timeout = setTimeout(() => controller.abort(), 4000);
+    try {
+      const response = await fetch(source.url, {
+        headers: { Accept: source.accept },
+        signal: controller.signal,
+        next: { revalidate: 3600 },
+      });
+      if (!response.ok) continue;
+      const markdown = await response.text();
+      if (markdown.trim()) return markdown;
+    } catch {
+      // A rate limit, network failure, or timeout must still try the next public
+      // source. Never use getHeaders here: this endpoint may expose only public
+      // content and must not forward the site's GitHub token to the raw host.
+    } finally {
+      clearTimeout(timeout);
+    }
   }
+  return unavailable;
 }
 
 // --- Source peek (key-file selection) ---------------------------------------

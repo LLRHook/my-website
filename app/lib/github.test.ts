@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { buildTimelineData, shikiLang, fetchAllRepos } from "./github";
+import { buildTimelineData, shikiLang, fetchAllRepos, fetchReadme } from "./github";
 import type { RepoCardData } from "./types";
 
 beforeEach(() => {
@@ -129,5 +129,86 @@ describe("fetchAllRepos", () => {
   it("degrades to [] when the repos-list request is not ok", async () => {
     stubFetch(() => ({ ok: false, body: null }));
     expect(await fetchAllRepos()).toEqual([]);
+  });
+});
+
+describe("fetchReadme", () => {
+  afterEach(() => vi.useRealTimers());
+
+  it("returns the public API's Markdown without using the configured token", async () => {
+    process.env.GITHUB_TOKEN = "test-token-not-for-public-readmes";
+    const request = vi.fn().mockResolvedValue(new Response("# Public README"));
+    vi.stubGlobal("fetch", request);
+    expect(await fetchReadme("LLRHook", "my-website")).toBe("# Public README");
+    expect(request).toHaveBeenCalledTimes(1);
+    expect(new Headers(request.mock.calls[0][1].headers).has("Authorization")).toBe(false);
+  });
+
+  it.each([403, 429, 500])("uses public raw README.md after API status %s without forwarding authorization", async (status) => {
+    process.env.GITHUB_TOKEN = "test-token-not-for-raw-host";
+    const request = vi.fn()
+      .mockResolvedValueOnce(new Response("API unavailable", { status }))
+      .mockResolvedValueOnce(new Response("# Raw README"));
+    vi.stubGlobal("fetch", request);
+    expect(await fetchReadme("LLRHook", "my-website")).toBe("# Raw README");
+    expect(request.mock.calls.map(([url]) => url)).toEqual([
+      "https://api.github.com/repos/LLRHook/my-website/readme",
+      "https://raw.githubusercontent.com/LLRHook/my-website/HEAD/README.md",
+    ]);
+    for (const [, options] of request.mock.calls) {
+      expect(new Headers(options.headers).has("Authorization")).toBe(false);
+    }
+  });
+
+  it("continues to the lowercase public README after a timeout and another failed attempt", async () => {
+    vi.useFakeTimers();
+    const request = vi.fn((url: string, options: RequestInit) => {
+      if (url.startsWith("https://api.github.com/")) {
+        return new Promise<Response>((_resolve, reject) => {
+          options.signal?.addEventListener("abort", () => reject(new DOMException("Timed out", "AbortError")), { once: true });
+        });
+      }
+      if (url.endsWith("/README.md")) return Promise.reject(new TypeError("Network unavailable"));
+      return Promise.resolve(new Response("# Lowercase README"));
+    });
+    vi.stubGlobal("fetch", request);
+    const result = fetchReadme("LLRHook", "my-website");
+    await vi.advanceTimersByTimeAsync(4000);
+    expect(await result).toBe("# Lowercase README");
+    expect(request).toHaveBeenCalledTimes(3);
+    expect(request.mock.calls[2][0]).toBe("https://raw.githubusercontent.com/LLRHook/my-website/HEAD/readme.md");
+    expect(vi.getTimerCount()).toBe(0);
+  });
+
+  it("tries lowercase README when the API body is empty and uppercase file is missing", async () => {
+    const request = vi.fn()
+      .mockResolvedValueOnce(new Response(""))
+      .mockResolvedValueOnce(new Response("Not found", { status: 404 }))
+      .mockResolvedValueOnce(new Response("# Lowercase README"));
+    vi.stubGlobal("fetch", request);
+    expect(await fetchReadme("LLRHook", "my-website")).toBe("# Lowercase README");
+    expect(request).toHaveBeenCalledTimes(3);
+  });
+
+  it("keeps the exact existing fallback when all public sources are missing", async () => {
+    const request = vi.fn().mockImplementation(() => Promise.resolve(new Response("Not found", { status: 404 })));
+    vi.stubGlobal("fetch", request);
+    expect(await fetchReadme("LLRHook", "no-such-repository")).toBe("*No README available.*");
+    expect(request).toHaveBeenCalledTimes(3);
+  });
+
+  it.each([
+    ["../LLRHook", "my-website"],
+    ["LLRHook", "../my-website"],
+    ["LLRHook", ".."],
+    ["LLRHook", "%2e%2e"],
+    ["LLRHook", "repo?token=value"],
+    ["LLRHook", "repo\\file"],
+    ["", "my-website"],
+  ])("rejects path components %j / %j before making a request", async (owner, repo) => {
+    const request = vi.fn();
+    vi.stubGlobal("fetch", request);
+    expect(await fetchReadme(owner, repo)).toBe("*No README available.*");
+    expect(request).not.toHaveBeenCalled();
   });
 });

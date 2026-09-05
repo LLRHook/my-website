@@ -1,22 +1,11 @@
 import type { Metadata } from "next";
-import { Inter, Syne } from "next/font/google";
+import { DM_Serif_Display, Caveat } from "next/font/google";
 import "./globals.css";
-import AuroraBackground from "./components/ui/AuroraBackground";
 import JsonLd from "./components/JsonLd";
-import NoiseOverlay from "./components/ui/NoiseOverlay";
-import ParticlesBackground from "./components/ui/ParticlesBackground";
-import SmoothScroll from "./components/ui/SmoothScroll";
+import "./room.css";
 
-const inter = Inter({
-  subsets: ["latin"],
-  variable: "--font-inter",
-});
-
-const syne = Syne({
-  subsets: ["latin"],
-  weight: ["800"],
-  variable: "--font-syne",
-});
+const serif = DM_Serif_Display({ subsets: ["latin"], weight: "400", variable: "--font-room-serif" });
+const handwriting = Caveat({ subsets: ["latin"], weight: "500", variable: "--font-handwriting" });
 
 import {
   SITE_URL,
@@ -53,18 +42,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${inter.variable} ${syne.variable}`}>
+    <html lang="en" className={`${serif.variable} ${handwriting.variable}`}>
       <body>
         <a href="#main" className="skip-link">Skip to content</a>
         <JsonLd />
-        <AuroraBackground />
-        <NoiseOverlay />
-        <ParticlesBackground />
-        <SmoothScroll>
-          <main id="main" className="relative z-[5]">
+          <main id="main">
             {children}
           </main>
-        </SmoothScroll>
       </body>
     </html>
   );

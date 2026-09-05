@@ -9,7 +9,7 @@ export default function Image() {
     (
       <div
         style={{
-          background: "#050505",
+          background: "#f5f2e9",
           width: "100%",
           height: "100%",
           display: "flex",
@@ -23,7 +23,7 @@ export default function Image() {
           style={{
             fontSize: 72,
             fontWeight: 800,
-            color: "#f5f5f5",
+            color: "#303c32",
             letterSpacing: "-2px",
             lineHeight: 1.1,
             textAlign: "center",
@@ -34,7 +34,7 @@ export default function Image() {
         <div
           style={{
             fontSize: 32,
-            color: "#a3a3a3",
+            color: "#657e62",
             marginTop: "20px",
             letterSpacing: "2px",
             textTransform: "uppercase" as const,
@@ -45,14 +45,14 @@ export default function Image() {
         <div
           style={{
             fontSize: 20,
-            color: "#737373",
+            color: "#6f7567",
             marginTop: "40px",
             textAlign: "center",
             maxWidth: "800px",
             lineHeight: 1.5,
           }}
         >
-          Full-stack development · React · Next.js · TypeScript
+          A personal workspace. Software, projects, and a sleeping cat.
         </div>
       </div>
     ),

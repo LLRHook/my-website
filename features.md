@@ -44,6 +44,19 @@ the end of their section, sorted by id on read.
 
 ## Open
 
+### [FEAT-1788624000] Interactive cozy workspace portfolio
+- [ ] **Priority:** high
+- **Area:** frontend, animation, accessibility
+- **File(s):** app/components/room/*, app/page.tsx, app/layout.tsx, app/globals.css, public/*, e2e/*
+- **Why:** Replace the scrolling portfolio with a personal room and usable virtual computer.
+- **Approach:** SVG scenery, CSS animation, accessible app windows, responsive reading view, verified professional content.
+- **Library / dependency notes:** Use existing React and browser APIs; no new runtime dependency.
+- **Acceptance criteria:** Power-on and skippable boot; profile/projects/resume/interests/contact apps; photo notes; sleeping/waking/grooming cat; hobby hints; mobile and keyboard support; reduced-motion control; production deployment verified.
+- **Test plan:** Unit lifecycle tests, Playwright desktop/mobile/keyboard/reduced-motion flows, repeated window cycles and browser heap check, production smoke.
+- **Out of scope:** Rewriting the original resume or adding unsupported professional claims.
+- **Bump:** minor
+- **Status:** shipped-pending-migration
+
 ### [FEAT-1781505473] Refine source-peek key-file heuristic
 - [ ] **Priority:** low
 - **Area:** github-api, frontend
