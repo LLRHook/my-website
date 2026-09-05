@@ -5,7 +5,7 @@ import JsonLd from "./components/JsonLd";
 import "./room.css";
 
 const serif = DM_Serif_Display({ subsets: ["latin"], weight: "400", variable: "--font-room-serif" });
-const handwriting = Caveat({ subsets: ["latin"], weight: "500", variable: "--font-handwriting" });
+const handwriting = Caveat({ subsets: ["latin"], weight: "500", variable: "--font-handwriting", preload: false });
 
 import {
   SITE_URL,

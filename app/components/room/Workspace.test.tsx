@@ -1,5 +1,5 @@
 import { act, cleanup, fireEvent, render, screen, within } from "@testing-library/react";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import Workspace, { BOOT_LINES } from "./Workspace";
 
 vi.mock("./DesktopWindow", () => ({
@@ -7,6 +7,11 @@ vi.mock("./DesktopWindow", () => ({
 }));
 
 let motionQuery: MediaQueryList;
+
+beforeAll(() => {
+  Object.defineProperty(HTMLDialogElement.prototype, "showModal", { configurable: true, value: function (this: HTMLDialogElement) { this.setAttribute("open", ""); } });
+  Object.defineProperty(HTMLDialogElement.prototype, "close", { configurable: true, value: function (this: HTMLDialogElement) { this.removeAttribute("open"); } });
+});
 
 beforeEach(() => {
   vi.useFakeTimers();
@@ -29,6 +34,7 @@ afterEach(() => {
   vi.useRealTimers();
   vi.restoreAllMocks();
   vi.unstubAllGlobals();
+  document.body.style.overflow = "";
 });
 
 describe("Workspace power lifecycle", () => {
@@ -40,7 +46,7 @@ describe("Workspace power lifecycle", () => {
     expect(screen.getByText(BOOT_LINES[0])).toBeInTheDocument();
     for (let step = 1; step < BOOT_LINES.length; step++) {
       act(() => vi.advanceTimersByTime(step === 1 ? 700 : 540));
-      expect(screen.getByText(BOOT_LINES[step])).toBeInTheDocument();
+      expect(screen.getByText((_content, element) => element?.tagName === "P" && element.textContent === BOOT_LINES[step])).toBeInTheDocument();
       expect(screen.queryByTestId("desktop")).not.toBeInTheDocument();
     }
     expect(screen.getByRole("progressbar")).toHaveAttribute("aria-valuenow", "100");
@@ -88,11 +94,17 @@ describe("Workspace power lifecycle", () => {
     const removeWindow = vi.spyOn(window, "removeEventListener");
     const view = render(<Workspace repos={[]} />);
     fireEvent.click(screen.getByRole("button", { name: "Power on computer" }));
-    const visibility = add.mock.calls.find(([event]) => event === "visibilitychange")?.[1];
+    // jsdom queues a zero-delay selectionchange when the focused computer opens.
+    // Deliver that browser event while mounted; the 700 ms boot timer must remain.
+    act(() => vi.advanceTimersByTime(0));
+    expect(vi.getTimerCount()).toBe(1);
+    expect(screen.getByText(BOOT_LINES[0])).toBeInTheDocument();
+    const visibility = add.mock.calls.filter(([event]) => event === "visibilitychange").map(([, listener]) => listener);
     const motion = vi.mocked(motionQuery.addEventListener).mock.calls[0][1];
     const hash = addWindow.mock.calls.find(([event]) => event === "hashchange")?.[1];
     view.unmount();
-    expect(remove).toHaveBeenCalledWith("visibilitychange", visibility);
+    expect(visibility.length).toBeGreaterThan(0);
+    for (const listener of visibility) expect(remove).toHaveBeenCalledWith("visibilitychange", listener);
     expect(motionQuery.removeEventListener).toHaveBeenCalledWith("change", motion);
     expect(removeWindow).toHaveBeenCalledWith("hashchange", hash);
     expect(vi.getTimerCount()).toBe(0);

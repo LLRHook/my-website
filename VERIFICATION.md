@@ -1,6 +1,6 @@
 # Workspace release verification
 
-This checklist covers the interactive room introduced in version 0.5.0. It
+This checklist covers the interactive room and the version 0.6.0 close-ups and sound. It
 supersedes the old timeline and Lenis UI checks. The GitHub API tests and public
 route contracts remain in scope.
 
@@ -16,8 +16,8 @@ route contracts remain in scope.
 5. For a deployed build, set `PLAYWRIGHT_BASE_URL` to the HTTPS deployment URL
    and run the same E2E command. This skips local startup.
 
-Current baseline: 40 Vitest cases across 5 files; 17 Playwright cases across
-3 files. Test runners provide the authoritative counts. Run `npx playwright
+Current baseline: 55 Vitest cases across 7 files; 34 Playwright cases across
+5 files. Test runners provide the authoritative counts. Run `npx playwright
 test --list` when updating the baseline.
 
 ## Acceptance coverage
@@ -39,6 +39,14 @@ test --list` when updating the baseline.
   also work. JavaScript-disabled users get a summary and contact/project links.
 - Resume print mode shows readable professional content without room controls.
 - Daylight/evening and pause controls work; reduced motion is respected.
+- The computer zooms into a readable startup and returns with its power state
+  intact. All eleven photo/object close-ups respond to ordinary pointer clicks
+  at 320, 390, and 1440px, contain Tab focus, and restore their launcher's focus.
+- The Peru original returns a 2400×1800 WebP; vector details crop the original
+  SVG. The breeze follows pause, page visibility, and reduced-motion preferences.
+- No AudioContext is created before sound is enabled. Real browser audio produces
+  signal with either layer enabled and silence at zero volume or with both layers
+  disabled. Hidden pages suspend audio; repeated sound cycles close each context.
 - The cat sleeps, wakes and looks around, grooms, and returns to sleep. Clicking
   the cat triggers a temporary greeting. Ambient animation pauses when hidden or
   while a reading window is open.
@@ -82,3 +90,40 @@ is outside the release.
 A repeated live README check exposed GitHub API rate limiting. Public raw-file
 fallbacks now recover README content; 14 provider regression tests cover limits,
 timeouts, missing files, validated URL paths, and omitted authorization headers.
+
+## September 5 version 0.6.0 evidence
+
+Lint, TypeScript, the production build, 55 unit tests, and all 34 Chromium browser
+tests passed. A separate production-artifact smoke covered Chromium and WebKit at
+320, 390, and 1440px, with screenshots of the room, computer startup/desktop,
+photos, objects, apps, and sound settings. No page exceptions or horizontal
+overflow were observed. All eleven objects also received a WebKit pointer/focus
+review at 320 and 390px. That review caught and fixed mobile hit targets, a narrow
+desktop overlap, and WebKit's different pointer-focus behavior.
+
+The native Chromium audio tests measure output from the actual audio graph,
+exercise independent layers and volume, verify hidden-tab suspension, and confirm
+each context closes over repeated enable/disable cycles. The Windows Playwright
+WebKit build exposes no Web Audio API: it verifies the unsupported-browser
+message and layout, not audio playback on a physical Safari device.
+
+After ten warm cycles, another 100 cycles each opened and closed an object and
+the computer. Chromium counters stayed at 2 documents, 1,238 nodes, and 359
+listeners, with no remaining open dialogs. Forced-GC heap samples were 4,011,996,
+4,075,440, and 4,124,816 bytes (baseline, 50, 100): net retained growth 112,820
+bytes. This bounded measurement does not prove the absence of every memory leak.
+
+The new photo is a 2400×1800 WebP without EXIF, XMP, or ICC metadata. Original
+resume files remain unchanged. A local anonymous GitHub rate limit was resolved
+for the build using existing authenticated access without saving a credential.
+
+The final local Lighthouse 13.4.1 mobile audit measured Performance 98,
+Accessibility 100, Best Practices 100, and SEO 100. LCP was 2.3s, TBT 10ms, and
+CLS 0.001. Accurate photo thumbnail sizes and deferred handwriting-font preload
+reduced loading contention. The audit also verified corrected accessible labels
+and unobstructed mobile controls.
+
+Additional touch-target checks use axe 4.12.1 and actual pointer clicks at 320,
+390, and 412px. All eleven details, the physical power switch, and the project
+reminder pass, with no target-size violations. The browser suite also checks a
+clear 24px square inside the power switch and reminder before opening them.
