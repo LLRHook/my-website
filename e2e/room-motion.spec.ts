@@ -31,7 +31,7 @@ async function observeFrames(page: Page) {
 }
 
 function frames(page: Page) {
-  return page.evaluate(() => (window as Window & { roomFrameSnapshot: () => FrameSnapshot }).roomFrameSnapshot());
+  return page.evaluate(() => (window as unknown as Window & { roomFrameSnapshot: () => FrameSnapshot }).roomFrameSnapshot());
 }
 
 function attention(page: Page) {

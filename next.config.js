@@ -17,6 +17,7 @@ const nextConfig = {
   devIndicators: false,
   compress: true,
   poweredByHeader: false,
+  images: { qualities: [75, 90] },
   async headers() {
     return [
       {

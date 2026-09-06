@@ -84,15 +84,19 @@ export default function useRoomMotion(ref: RefObject<HTMLElement | null>, active
 
     function pointerMove(event: PointerEvent) {
       if (event.pointerType && event.pointerType !== "mouse") return;
-      cancelTouchRest();
+      // WebKit can emit mouse pointer events after a tap or touch scroll.
+      // Keep the tap's reset timer until its brief response has finished.
+      if (touchRest !== null) return;
       aimAtPointer(event);
     }
 
     function pointerDown(event: PointerEvent) {
       if (disposed || !allowed) return;
+      const isContact = event.pointerType === "touch" || event.pointerType === "pen";
+      if (touchRest !== null && !isContact) return;
       cancelTouchRest();
       aimAtPointer(event);
-      if (event.pointerType === "touch" || event.pointerType === "pen") {
+      if (isContact) {
         touchRest = setTimeout(() => {
           touchRest = null;
           aim(0, 0);
@@ -100,10 +104,9 @@ export default function useRoomMotion(ref: RefObject<HTMLElement | null>, active
       }
     }
 
-    function pointerLeave(event: PointerEvent) {
-      // Touch browsers send pointerleave after a tap; let its short response finish.
-      if (touchRest !== null && (event.pointerType === "touch" || event.pointerType === "pen")) return;
-      cancelTouchRest();
+    function pointerLeave() {
+      // This can be a touch leave or a compatibility mouse leave after a tap.
+      if (touchRest !== null) return;
       aim(0, 0);
     }
 

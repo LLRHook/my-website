@@ -1,10 +1,11 @@
 # my-website — Project Instructions
 
-Personal portfolio (Next.js 15 App Router, React 19, TypeScript, Tailwind CSS 4),
+Personal portfolio (Next.js App Router, React, TypeScript, Tailwind CSS),
 deployed on Vercel at [victorivanov.engineer](https://victorivanov.engineer). The
-Work timeline is populated from the owner's public GitHub repositories via
+interactive room's Projects app is populated from the owner's public GitHub repositories via
 `app/lib/github.ts` (server-side, ISR `revalidate=3600`, keyed by `GITHUB_TOKEN`).
-No database, no auth. E2E tests are Playwright (`e2e/`).
+No database, no auth. Use `.nvmrc` for the Node version and `package.json` for
+the current toolchain. E2E tests are Playwright (`e2e/`).
 
 ### Project-cycle files (`bugs.md` / `features.md` / `CHANGELOG.md` / `VERIFICATION.md`)
 
@@ -46,7 +47,10 @@ shipped or fixed entries are *migrated* into `CHANGELOG.md` as a permanent recor
 ### Stack notes
 
 - Package manager: **npm** (`package-lock.json`). CI: `.github/workflows/ci.yml`
-  (`npm ci` + `next build`).
+  (`npm ci`, lint, unit tests, production build, Chromium and mobile WebKit tests).
+- Before upgrading TypeScript or ESLint beyond their pinned major versions,
+  check the compatibility notes in `docs/dependency-update.md` and the current
+  lint plugins' peer dependencies.
 - All GitHub API access goes through `app/lib/github.ts` — do not scatter
   `api.github.com` `fetch` calls into components.
 - `GITHUB_TOKEN` is server-only; never reference it from a client component.

@@ -46,24 +46,17 @@ export default function ProjectCardExpanded({ repo }: { repo: RepoCardData }) {
   const [tab, setTab] = useState<Tab>("readme");
 
   const [readme, setReadme] = useState<string | null>(null);
-  const [readmeLoading, setReadmeLoading] = useState(false);
-
   const [source, setSource] = useState<SourcePeek | null>(null);
-  const [sourceLoading, setSourceLoading] = useState(false);
 
   // Lazy-load the README the first time its tab is shown.
   useEffect(() => {
     if (tab !== "readme" || readme !== null) return;
     const ctrl = new AbortController();
-    setReadmeLoading(true);
     fetch(`/api/readme/${repo.owner}/${repo.name}`, { signal: ctrl.signal })
       .then((r) => r.text())
       .then((t) => setReadme(t))
       .catch((e) => {
         if (e?.name !== "AbortError") setReadme("*Failed to load README.*");
-      })
-      .finally(() => {
-        if (!ctrl.signal.aborted) setReadmeLoading(false);
       });
     return () => ctrl.abort();
   }, [tab, readme, repo.owner, repo.name]);
@@ -72,16 +65,12 @@ export default function ProjectCardExpanded({ repo }: { repo: RepoCardData }) {
   useEffect(() => {
     if (tab !== "code" || source !== null) return;
     const ctrl = new AbortController();
-    setSourceLoading(true);
     const q = repo.language ? `?lang=${encodeURIComponent(repo.language)}` : "";
     fetch(`/api/source/${repo.owner}/${repo.name}${q}`, { signal: ctrl.signal })
       .then((r) => r.json())
       .then((d: SourcePeek) => setSource(d))
       .catch((e) => {
         if (e?.name !== "AbortError") setSource({ html: null, path: null });
-      })
-      .finally(() => {
-        if (!ctrl.signal.aborted) setSourceLoading(false);
       });
     return () => ctrl.abort();
   }, [tab, source, repo.owner, repo.name, repo.language]);
@@ -140,7 +129,7 @@ export default function ProjectCardExpanded({ repo }: { repo: RepoCardData }) {
 
         {tab === "readme" && (
           <div role="tabpanel" aria-live="polite">
-            {readmeLoading || readme === null ? (
+            {readme === null ? (
               <SkeletonLines />
             ) : (
               <div className="markdown-content text-sm">
@@ -172,7 +161,7 @@ export default function ProjectCardExpanded({ repo }: { repo: RepoCardData }) {
 
         {tab === "code" && (
           <div role="tabpanel" aria-live="polite">
-            {sourceLoading || source === null ? (
+            {source === null ? (
               <SkeletonLines />
             ) : source.html ? (
               <>

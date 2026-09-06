@@ -23,6 +23,9 @@ leaf shadows, and nearby objects; slow CSS animation supplies the idle movement.
 
 ## Run locally
 
+Use Node 24.15 or later within Node 24 (`.nvmrc`; `nvm use` if using nvm).
+CI reads the same `.nvmrc` file.
+
 ```sh
 npm ci
 npm run dev
@@ -48,7 +51,7 @@ To exercise a deployment, set `PLAYWRIGHT_BASE_URL` to its URL before running
 
 ## Implementation
 
-Next.js 15 App Router, React 19, TypeScript, and Tailwind CSS 4. The illustrated
+Next.js 16 App Router, React 19, TypeScript 6, and Tailwind CSS 4. The illustrated
 room is a 30 KB SVG. CSS handles ambient animation; React owns the computer's
 off, booting, and on states. No WebGL engine or particle canvas runs on the
 homepage. The Markdown reader loads only when a visitor opens a project.
