@@ -8,7 +8,7 @@ route contracts remain in scope.
 
 1. Record `git rev-parse HEAD` and inspect `git status --short`. Keep unrelated
    user changes out of the release.
-2. Use Node 22 or later and the committed npm lockfile. On a clean checkout,
+2. Use Node 24.15 or later within Node 24 (`.nvmrc`) and the committed npm lockfile. On a clean checkout,
    run `npm ci`.
 3. Run `npm run lint`, `npm test`, and `npm run build`.
 4. Start the production artifact with `npm run start` on port 3000, then run
@@ -16,7 +16,7 @@ route contracts remain in scope.
 5. For a deployed build, set `PLAYWRIGHT_BASE_URL` to the HTTPS deployment URL
    and run the same E2E command. This skips local startup.
 
-Current baseline: 63 Vitest cases across 8 files; 54 Playwright cases across
+Current baseline: 68 Vitest cases across 9 files; 54 Playwright cases across
 7 files (44 Chromium and 10 WebKit). Playwright runs the complete suite in
 Chromium and the mobile/motion suites in WebKit. Test runners provide
 the authoritative browser counts. Run `npx playwright
@@ -183,3 +183,18 @@ The final local mobile Lighthouse run measured Performance 97, Accessibility
 is 30,092 bytes and the homepage's initial JavaScript is 129kB. A separate smoke
 checked public routes, all app views, photos, close-ups, sound settings, and the
 no-JavaScript fallback without page exceptions or horizontal overflow.
+
+
+## September 5 dependency maintenance evidence
+
+The maintenance source uses Node 24.19.0, Next 16.3.4, React 19.2.8 and the refreshed
+npm lockfile. Clean installation, lint, type checking, production build, 68 unit
+tests and all 54 browser cases passed. npm audit reported zero vulnerabilities.
+The updated WebKit engine exposed a touch-reset bug (BUG-1788662454); event tracing
+identified synthetic mouse events canceling the reset timer. Two regression tests
+failed before the fix, and the unchanged browser assertion passed afterward.
+
+See [dependency maintenance](docs/dependency-update.md) for package compatibility
+holds, route/header/image smoke results, and validation limits. These results
+cover the local production artifact, not a new production deployment or a full
+repeat of the performance and memory protocol.

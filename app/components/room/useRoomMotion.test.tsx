@@ -100,6 +100,57 @@ describe("room pointer motion lifecycle", () => {
     expect(vi.getTimerCount()).toBe(0);
   });
 
+  it("keeps the touch reset through WebKit's compatibility mouse events after scrolling", () => {
+    render(<Harness />);
+    point("pointerdown", "touch");
+    point("pointerup", "touch");
+    point("pointerleave", "touch");
+    fireEvent.mouseMove(stage(), { clientX: 500, clientY: 250 });
+    fireEvent.mouseDown(stage(), { clientX: 500, clientY: 250 });
+    fireEvent.mouseUp(stage(), { clientX: 500, clientY: 250 });
+    act(() => vi.advanceTimersByTime(175));
+    fireEvent.scroll(window);
+    act(() => vi.advanceTimersByTime(90));
+    point("pointerleave", "mouse");
+    point("pointerleave", "mouse");
+    point("pointermove", "mouse");
+    settle();
+    expect(value("x")).toBe(1);
+
+    act(() => vi.advanceTimersByTime(1000));
+    settle();
+    expect(value("x")).toBe(0);
+    expect(value("y")).toBe(0);
+    expect(vi.getTimerCount()).toBe(0);
+
+    point("pointermove", "mouse", 100, 50);
+    settle();
+    expect(value("x")).toBe(-1);
+    expect(value("y")).toBe(-1);
+  });
+
+  it("ignores compatibility mouse presses while a fresh touch can restart its rest timer", () => {
+    render(<Harness />);
+    point("pointerdown", "touch");
+    point("pointerdown", "mouse", 100, 50);
+    settle();
+    expect(value("x")).toBe(1);
+    act(() => vi.advanceTimersByTime(800));
+
+    point("pointerdown", "touch", 100, 50);
+    settle();
+    expect(value("x")).toBe(-1);
+    act(() => vi.advanceTimersByTime(200));
+    settle();
+    expect(value("x")).toBe(-1);
+
+    act(() => vi.advanceTimersByTime(800));
+    settle();
+    expect(value("x")).toBe(0);
+    expect(value("y")).toBe(0);
+    expect(vi.getTimerCount()).toBe(0);
+  });
+
   it("cancels touch response on pointer cancellation without blocking the event", () => {
     render(<Harness />);
     point("pointerdown", "touch");

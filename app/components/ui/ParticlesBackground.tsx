@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
-import type { ISourceOptions } from "@tsparticles/engine";
+import type { Engine, ISourceOptions } from "@tsparticles/engine";
 import {
   PARTICLE_COUNT,
   PARTICLE_LINK_DISTANCE,
@@ -13,6 +13,15 @@ import {
 const Particles = dynamic(() => import("@tsparticles/react").then((m) => m.default), {
   ssr: false,
 });
+const ParticlesProvider = dynamic(
+  () => import("@tsparticles/react").then((m) => m.ParticlesProvider),
+  { ssr: false },
+);
+
+async function initParticles(engine: Engine) {
+  const { loadSlim } = await import("@tsparticles/slim");
+  await loadSlim(engine);
+}
 
 // The full animated, hover-interactive star-field — as the original early
 // implementation did it (no reduced-motion gate, no static fallback). Mobile
@@ -76,17 +85,7 @@ export default function ParticlesBackground() {
     // the interactive field renders for everyone (matching the early version).
     const count = window.innerWidth < 768 ? Math.round(PARTICLE_COUNT / 2) : PARTICLE_COUNT;
 
-    let cancelled = false;
-    const init = async () => {
-      const [{ initParticlesEngine }, { loadSlim }] = await Promise.all([
-        import("@tsparticles/react"),
-        import("@tsparticles/slim"),
-      ]);
-      await initParticlesEngine(async (engine) => {
-        await loadSlim(engine);
-      });
-      if (!cancelled) setOptions(buildOptions(count));
-    };
+    const init = () => setOptions(buildOptions(count));
 
     // Defer engine init to idle time so it doesn't compete with first paint.
     const hasRIC = typeof window.requestIdleCallback === "function";
@@ -95,7 +94,6 @@ export default function ParticlesBackground() {
       : window.setTimeout(() => init(), 200);
 
     return () => {
-      cancelled = true;
       if (hasRIC) window.cancelIdleCallback(handle);
       else window.clearTimeout(handle);
     };
@@ -105,7 +103,9 @@ export default function ParticlesBackground() {
 
   return (
     <div className="fixed inset-0 z-[2] pointer-events-none" aria-hidden="true">
-      <Particles id="tsparticles" options={options} />
+      <ParticlesProvider init={initParticles}>
+        <Particles id="tsparticles" options={options} />
+      </ParticlesProvider>
     </div>
   );
 }

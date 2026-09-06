@@ -38,15 +38,29 @@ the end of their section, sorted by id on read.
 
 ## Open
 
-### [BUG-1781504214] Dependency CVEs: Next.js (high) + postcss (moderate)
-- [ ] **Severity:** high
+### [BUG-1781504214] Outdated dependency tree includes high-severity advisories
+- [x] **Severity:** high
 - **Area:** ci, deploy
 - **File(s):** package.json, package-lock.json
 - **Observation:** `npm audit` reports a high-severity set of Next.js advisories on the installed Next 15.5.x (HTTP request smuggling in rewrites, several DoS vectors, middleware/proxy bypass, cache poisoning, XSS in App Router CSP nonces, image-optimization DoS, SSRF via WebSocket upgrades), plus a moderate postcss XSS (`<8.5.10`). Surfaced during the motion batch (`npm i lenis`); **not** introduced by Lenis (its dependency tree is clean).
 - **Expected:** No high/moderate dependency CVEs; dependencies on patched versions.
 - **Repro / Notes:** `npm audit`. Fix is a Next.js upgrade to a patched release plus a postcss bump (`npm audit fix` proposes it). Deliberately deferred from the motion batch (out of scope; bumping Next mid-feature is risky). Handle via a focused dependency-bump run + re-run `VERIFICATION.md`; good candidate for `/security-audit`.
 - **Bump:** patch
-- **Status:** open
+- **Status:** fixed-pending-migration
+
+- **September 5 follow-up:** Baseline `npm audit` reports seven high-severity package findings. Refresh current supported dependencies, migrate Next.js/ESLint configuration, and validate the room UI, API routes, image quality, unit tests and browser suites. Keep TypeScript and ESLint within the published compatibility ranges of their integrations.
+- **Fix:** Updated the framework, runtime/test packages and compatible transitive dependencies; migrated Next/ESLint/tsParticles configuration and preserved image quality. Clean npm ci and npm audit report zero vulnerabilities. Lint, build/type checking, 68 unit tests and 54 browser tests pass under Node 24.19.0. Compatibility holds are documented in docs/dependency-update.md.
+
+### [BUG-1788662454] WebKit compatibility mouse events cancel the touch-motion reset
+- [x] **Severity:** med
+- **Area:** animation, tests
+- **File(s):** app/components/room/useRoomMotion.ts, app/components/room/useRoomMotion.test.tsx
+- **Observation:** The updated WebKit browser fails the real-tap/scroll E2E test consistently: room attention remains at x=0.4359, y=-0.5174 instead of returning to zero. Event tracing shows synthetic mouse pointerleave/pointermove after the touch and scroll cancel the pending 950ms touch reset.
+- **Expected:** A touch response returns to neutral and releases its animation frame loop while scrolling remains available.
+- **Repro / Notes:** Run the WebKit `a real touch tap` case in e2e/room-motion.spec.ts. Preserve its assertions; model the observed synthetic mouse event sequence in a unit regression.
+- **Bump:** patch
+- **Status:** fixed-pending-migration
+- **Fix:** Preserve the pending touch reset through compatibility mouse move/down/leave events. Two unit regressions failed before the fix and pass afterward; all 54 Chromium/WebKit browser cases now pass, including the original reproducible WebKit tap/scroll failure.
 
 ---
 

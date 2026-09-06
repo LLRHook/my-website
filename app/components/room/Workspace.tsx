@@ -182,7 +182,7 @@ export default function Workspace({ repos }: { repos: RepoCardData[] }) {
         </button>
         </div>
         <div className="room-scene">
-        <Image className="room-art" src="/room-studio.svg" width={1440} height={850} priority fetchPriority="high" unoptimized alt="" aria-hidden="true" />
+        <Image className="room-art" src="/room-studio.svg" width={1440} height={850} loading="eager" fetchPriority="high" unoptimized alt="" aria-hidden="true" />
         <RoomAtmosphere />
         <RoomBreeze />
         <div className="room-night-wash" aria-hidden="true" />
