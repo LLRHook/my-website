@@ -98,9 +98,76 @@ the end of their section, sorted by id on read.
 - **Bump:** patch
 - **Status:** open
 
+### [FEAT-1788650818] Professional profile copy and curated work inside the room
+- [x] **Priority:** high
+- **Area:** frontend, content, seo
+- **File(s):** app/components/room/Workspace.tsx, DesktopWindow.tsx, FeaturedProjects.tsx, app/lib/projectPresentation.ts, app/lib/constants.ts, app/components/JsonLd.tsx, app/page.tsx, app/room.css
+- **Why:** Professional visitors need clear positioning and selected evidence while the owner retains the current interactive room.
+- **Approach:** Use the owner's Senior Full-Stack Engineer / Virginia positioning, add three sourced project summaries ahead of the searchable repository shelf, label Billington by its product name, and expose X in Contact. Preserve room art, interactions, resume history, and print action.
+- **Library / dependency notes:** No new dependencies; current lockfile only.
+- **Acceptance criteria:** Featured evidence remains available if GitHub data fails; Billington is searchable by product and repository name; search and README flow still work; mobile layout is readable; no unverified metrics or completed Georgia Tech degree claims.
+- **Test plan:** Existing unit suite plus fallback/search regressions, lint/build, desktop/mobile browser checks of project search, modal navigation, resume, and contact.
+- **Out of scope:** Public profile writes, posting, deployment, historical job-title changes, Appshot and Billington code changes.
+- **Bump:** minor
+- **Status:** shipped-pending-migration
+- **Implementation:** Local review draft preserves the interactive room, adds three sourced project summaries and product aliases, aligns Senior Full-Stack Engineer / Virginia copy, and exposes X in Contact. Verified with 85 unit tests, lint, production build, and desktop/phone browser QA. Public deployment and profile application remain pending owner review.
+
+### [FEAT-1788652720] Replace poker desk detail with a playful roulette toy
+- [x] **Priority:** med
+- **Area:** frontend, accessibility, animation, tests
+- **File(s):** app/components/room/RouletteToy.tsx, roulette.css, ObjectDetail.tsx, Workspace.tsx, DesktopWindow.tsx, room-details.css, room-mobile.css, app/lib/roulette.ts, public/room-studio.svg, related tests
+- **Why:** Owner requested roulette in place of the poker detail, as a small secondary interaction in the existing room.
+- **Approach:** Replace only the desk object and its close-up with a compact single-zero wheel. Each explicit spin uses unbiased browser crypto sampling across all 37 pockets and produces a number/color result; no wallet, payouts, payments, persistence, or autoplay. Keep the spin and a brief confetti burst in the small desk object, with a number/color chip that fades after 2.5 seconds. Remove the adjacent journal and reuse the room motion preference.
+- **Library / dependency notes:** Existing React, CSS and SVG only; no dependencies added.
+- **Acceptance criteria:** Roulette replaces visible poker copy/art and remains secondary to professional work; an accessible wheel control and text result; accurate wheel/result mapping; no overlapping spins or orphan timers; immediate reduced-motion result; fits desktop and phone; result expiration cannot clear a newer spin; journal removed.
+- **Test plan:** Deterministic result/RNG tests, pending-spin locking/unmount/preference tests, existing unit suite, lint/build, computer-controlled desktop/mobile interaction and focus QA. Update existing E2E selectors for the renamed object.
+- **Out of scope:** Real stakes, monetary balances, payouts, wagering services, publishing.
+- **Bump:** minor
+- **Status:** shipped-pending-migration
+- **Implementation:** Replaced poker with a small keyboard-accessible in-room wheel, secure unbiased single-zero sampling, exact numbered landing, brief confetti, and a 2.5-second result followed by a 350ms fade. Removed the nearby journal. Spin/expiration timers clean up on new rounds and unmount; paused/reduced-motion results omit animation. Verified with deterministic RNG/lifecycle tests, browser desktop/mobile checks, lint, typecheck and build.
+
+### [FEAT-1788653835] Simplify room close-ups and give the cat a varied idle rhythm
+- [x] **Priority:** med
+- **Area:** frontend, animation, accessibility
+- **File(s):** app/components/room/ObjectDetail.tsx, WindowCat.tsx, room-details.css, app/room.css, related tests
+- **Why:** Owner wants the artwork and interaction to speak, with concise labels instead of redundant descriptions and scene/mood metadata; the cat should feel subtly alive.
+- **Approach:** Use visual-first object dialogs with only a title and useful actions; vary low-amplitude cat gestures with restful gaps and retain pause/reduced-motion support.
+- **Library / dependency notes:** Existing React/CSS/SVG only.
+- **Acceptance criteria:** Window and other object details omit editorial prose/metadata; useful links and accessible labels remain; varied cat breathing, attention, tail and ear motion stop when requested.
+- **Test plan:** Unit/component checks, lint/build, browser keyboard and desktop/mobile visual QA.
+- **Bump:** minor
+- **Status:** shipped-pending-migration
+- **Implementation:** Removed redundant descriptions and scene/mood metadata from object close-ups, retaining concise headings, art and useful actions. Added independent quiet breathing, head/eye, ear, tail and stretch layers to the cat, including attached tail markings and pause guards. Desktop and320px close-up QA and existing lifecycle tests pass.
+
+### [FEAT-1788655296] Red Rising reading shelf and default quiet room ambience
+- [x] **Priority:** med
+- **Area:** frontend, audio, accessibility, content
+- **File(s):** public/room-studio.svg, app/components/room/Workspace.tsx, ObjectDetail.tsx, DesktopWindow.tsx, RoomAudio.tsx, related audio code/tests/styles
+- **Why:** Owner is currently reading the Red Rising trilogy and wants the room to feel more alive with quiet sound enabled by default.
+- **Approach:** Replace generic shelf books with a restrained three-book illustration and Currently reading label. Prefer quiet procedural ambience on first visit, remember mute preference, respect browser autoplay limits with gesture fallback and truthful playback labels.
+- **Library / dependency notes:** Reuse existing SVG, React and procedural Web Audio; no commercial recordings or new dependencies.
+- **Acceptance criteria:** Red Rising, Golden Son and Morning Star are represented without completion claims; journal stays removed. Default audio is quiet, mute is visible/persistent, blocked autoplay causes no errors or false playing state, motion remains independent.
+- **Test plan:** Audio preference/autoplay/cleanup tests, existing suite, lint/type/build, browser first gesture and mute checks; shelf desktop/mobile visual review.
+- **Bump:** minor
+- **Status:** shipped-pending-migration
+- **Implementation:** Added Red Rising, Golden Son, and Morning Star cloth-spine artwork and a Currently reading close-up/interest entry. Quiet nature ambience defaults to 18% with music optional, persisted mute/settings, first-gesture autoplay fallback, truthful waiting/on/silent/off labels, and bounded cleanup. Validated in the 99-test suite, lint/type/build checks, and desktop/phone browser walkthroughs.
+
+### [FEAT-1788655651] Direct room interactions and education frame
+- [x] **Priority:** med
+- **Area:** frontend, animation, accessibility, content
+- **File(s):** app/components/room/Workspace.tsx, ObjectDetail.tsx, WindowCat.tsx, room-details.css, room-mobile.css, app/room.css, public/room-studio.svg, related tests
+- **Why:** Owner wants window/lamp/cat actions in place, a diploma instead of the mountain print, and both journal and pencil removed.
+- **Approach:** Window toggles day/evening; lamp independently toggles a soft desk light; cat responds through its existing wake gesture. Represent verified UMBC B.S. Computer Science with owner-provided May2024 date and no invented seal/honors.
+- **Library / dependency notes:** Existing native React/CSS/SVG only.
+- **Acceptance criteria:** No window/lamp/cat zoom-only modal; direct controls have clear accessible names/states; pause/reduced motion work; concise education artwork uses supported facts; journal and pencil absent.
+- **Test plan:** Unit/control tests, lint/type/build, desktop/mobile keyboard and visual QA.
+- **Bump:** minor
+- **Status:** shipped-pending-migration
+
 ---
 
 ## Shipped
+- **Implementation:** Window toggles day/evening, lamp toggles its independent desk glow, and the cat responds directly with its wake gesture. Replaced the mountain print with a UMBC B.S. Computer Science May 2024 frame; removed both journal and pencil. Added control regressions and verified 320px/390px/desktop layouts and focus return.
 
 ### [FEAT-1781507205] Restore prominent interactive star/aurora background
 - [x] **Priority:** med

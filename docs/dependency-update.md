@@ -99,3 +99,17 @@ FEAT-1781505473.
 Before maintenance, the latest successful production deployment matched base
 commit `814acf811a840f59ef82fca69f51203bf11f533e`. These updates are prepared on a
 separate branch for review; production publication is a separate step.
+
+
+## Combined mobile and desktop follow-up
+
+The owner subsequently requested immediate publication of the roulette and
+other desktop changes on mobile. Integrated the separate professional-room
+branch through `1afd089`, preserving this dependency update. The combined
+source passes lint, standalone typecheck, production build, 104 unit tests
+across 11 files, and all 64 browser cases (50 Chromium, 14 WebKit).
+
+Added true-touch parity checks across seven phone layouts, WebKit roulette
+coverage, current-toolchain feature adaptations, and corrected stale browser
+fixtures. See VERIFICATION.md for coverage and limits. The earlier 68/54 counts
+above document the dependency-only artifact before the feature integration.

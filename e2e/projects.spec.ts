@@ -38,7 +38,7 @@ test("projects are populated, searchable, and open their README with a repositor
 test("the portfolio's actual README endpoint returns text that the computer renders", async ({ page }) => {
   const dialog = await openProjects(page);
   await dialog.getByRole("searchbox", { name: "Search projects" }).fill("my-website");
-  const project = dialog.locator(".project-tile").filter({ has: page.getByRole("heading", { name: "my-website", exact: true }) });
+  const project = dialog.locator(".project-tile").filter({ has: page.getByRole("heading", { name: "Personal website", exact: true }) });
   await expect(project).toBeVisible();
   const responsePromise = page.waitForResponse((response) => response.url().includes("/api/readme/LLRHook/my-website"));
   await project.click();

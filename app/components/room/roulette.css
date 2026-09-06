@@ -1,0 +1,22 @@
+.roulette-desk { position: absolute; z-index: 5; min-width: 24px; min-height: 24px; }
+.roulette-wheel { display: block; width: 100%; height: 100%; border: 0; border-radius: 50%; background: none; padding: 0; cursor: pointer; filter: drop-shadow(0 3px 2px #443a292f); }
+.roulette-wheel:hover { filter: drop-shadow(0 2px 4px #d0ad7280); }
+.roulette-wheel:focus-visible { outline: 2px solid #775c34; outline-offset: 4px; }
+.roulette-wheel[aria-disabled=true] { cursor: progress; }
+.roulette-wheel svg { display: block; width: 100%; height: 100%; overflow: visible; }
+.roulette-rotor { transform-origin: 180px 180px; transition-property: none; }
+.roulette-wheel[data-spinning=true] .roulette-rotor { transition-property: transform; transition-timing-function: cubic-bezier(.12,.7,.14,1); }
+.roulette-result { position: absolute; bottom: calc(100% + 5px); left: 50%; transform: translateX(-50%); width: max-content; max-width: 150px; padding: 7px 10px; border: 1px solid #c2c9ad; border-radius: 6px; box-shadow: 0 3px 8px #34473c1a; background: #fbf7e8; color: #45573b; text-align: center; font-size: 12px; line-height: 1.3; pointer-events: none; }
+.roulette-result[data-visible=false] { opacity: 0; transition: opacity .35s ease; }
+.roulette-result[data-still=true] { transition: none; }
+.roulette-result strong { font-weight: 600; text-transform: capitalize; }
+.roulette-result strong[data-color=red] { color: #984638; }
+.roulette-result strong[data-color=green] { color: #506e38; }
+.roulette-confetti { position: absolute; left: 50%; top: 35%; pointer-events: none; }
+.roulette-confetti i { position: absolute; inset: 0; }
+.roulette-confetti b { display: block; width: 4px; height: 7px; border-radius: 1px; background: #b26b50; animation: roulette-confetti .75s ease-out both; }
+.roulette-confetti i:nth-child(3n) b { background: #c8ac69; }
+.roulette-confetti i:nth-child(3n+1) b { background: #6f8754; }
+.roulette-mark { font: 48px Georgia, serif; background: #e5dcc6; color: #4d644b; }
+@keyframes roulette-confetti { from { opacity: 0; transform: translateY(-8px) rotate(0); } 15% { opacity: 1; } to { opacity: 0; transform: translateY(-46px) rotate(100deg); } }
+@media (prefers-reduced-motion: reduce) { .roulette-rotor { transition: none !important; } .roulette-result { transition: none !important; } .roulette-confetti { display: none; } }

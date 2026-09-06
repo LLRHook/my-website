@@ -97,7 +97,8 @@ export class RoomSoundscape {
 
   async setVisible(visible: boolean) {
     if (this.disposed) return;
-    if (visible && this.visible && this.timer !== null) return;
+    // Only skip when already audible: a suspended/interrupted context with a live scheduler must still resume.
+    if (visible && this.visible && this.timer !== null && this.context.state === "running") return;
     this.visible = visible;
     const revision = ++this.revision;
     if (!visible) {

@@ -35,11 +35,11 @@ test("a photo opens its close-up and its experience link starts the requested ap
   await page.goto("/");
   const note = page.getByRole("button", { name: /Open experience note$/ });
   await note.click();
-  const photo = page.getByRole("dialog", { name: "Away from the desk." });
+  const photo = page.getByRole("dialog", { name: "At the podium" });
   await expect(photo).toBeVisible();
   await expect(photo.getByRole("img", { name: "A moment at the conference podium" })).toBeVisible();
   await expect(page.getByTestId("computer")).toHaveAttribute("data-power", "off");
-  await photo.getByRole("button", { name: "Explore my experience" }).click();
+  await photo.getByRole("button", { name: "My experience", exact: true }).click();
   await expect(page.getByTestId("boot-screen")).toBeVisible();
   await page.getByRole("button", { name: "Skip startup", exact: true }).click();
   await expect(page.getByRole("dialog", { name: "Resume", exact: true })).toBeVisible();
@@ -119,9 +119,9 @@ test("room controls pause motion, change lighting, and let the cat return to sle
   await expect(room).toHaveAttribute("data-night", "false");
   await page.getByRole("button", { name: /Resume ambient motion$/ }).click();
   await expect(room).toHaveAttribute("data-moving", "true");
-  await page.getByRole("button", { name: "Meet the window cat up close", exact: true }).click();
-  await expect(page.getByRole("dialog", { name: "Resident quality assurance.", exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Meet the window cat up close", exact: true })).toHaveCount(0);
   await page.getByRole("button", { name: "Say hello to the cat", exact: true }).click();
+  await expect(page.locator("dialog[open]")).toHaveCount(0);
   await expect(page.getByRole("button", { name: "Let the cat sleep", exact: true })).toHaveAttribute("aria-pressed", "true");
   await expect(page.getByRole("button", { name: "Say hello to the cat", exact: true })).toBeVisible({ timeout: 8000 });
 });
