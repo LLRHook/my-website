@@ -69,7 +69,9 @@ for (const { deviceScaleFactor, ...viewport } of viewports) {
           expect(photo.width).toBeGreaterThan(70);
         }
       }
-      await expect(page.locator(".power-hint,.hotspot-label,.object-target > span,.room-scene .cat-label")).toHaveCount(0);
+      await expect(page.locator(".power-hint,.hotspot-label,.object-target > span")).toHaveCount(0);
+      // The cat's direct-gesture label only appears on hover, focus, or while awake.
+      await expect(page.locator(".room-scene .cat-label")).toHaveCSS("opacity", "0");
 
       // Check the painted keyboard, not just its CSS bounding rectangle.
       const keyboard = page.locator(".keyboard");

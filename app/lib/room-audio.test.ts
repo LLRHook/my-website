@@ -66,6 +66,24 @@ describe("RoomSoundscape lifecycle", () => {
     await engine.close();
   });
 
+  it("resumes again after an external suspension while the scheduler is still running", async () => {
+    const { engine, context } = fakeContext();
+    await engine.setVisible(true);
+    expect(vi.getTimerCount()).toBe(1);
+    // The browser interrupted the context behind the engine's back; the timer keeps ticking but produces nothing.
+    context.state = "interrupted";
+    const scheduled = context.createOscillator.mock.calls.length;
+    vi.advanceTimersByTime(1000);
+    expect(context.createOscillator).toHaveBeenCalledTimes(scheduled);
+    await engine.setVisible(true);
+    expect(context.resume).toHaveBeenCalledTimes(2);
+    expect(context.state).toBe("running");
+    expect(vi.getTimerCount()).toBe(1);
+    await engine.close();
+    expect(context.close).toHaveBeenCalledOnce();
+    expect(vi.getTimerCount()).toBe(0);
+  });
+
   it("does not restart after a pending resume resolves following hide or close", async () => {
     const { engine, context } = fakeContext();
     let resumed: () => void = () => {};

@@ -140,7 +140,7 @@ the end of their section, sorted by id on read.
 - **Implementation:** Removed redundant descriptions and scene/mood metadata from object close-ups, retaining concise headings, art and useful actions. Added independent quiet breathing, head/eye, ear, tail and stretch layers to the cat, including attached tail markings and pause guards. Desktop and320px close-up QA and existing lifecycle tests pass.
 
 ### [FEAT-1788655296] Red Rising reading shelf and default quiet room ambience
-- [ ] **Priority:** med
+- [x] **Priority:** med
 - **Area:** frontend, audio, accessibility, content
 - **File(s):** public/room-studio.svg, app/components/room/Workspace.tsx, ObjectDetail.tsx, DesktopWindow.tsx, RoomAudio.tsx, related audio code/tests/styles
 - **Why:** Owner is currently reading the Red Rising trilogy and wants the room to feel more alive with quiet sound enabled by default.
@@ -149,11 +149,25 @@ the end of their section, sorted by id on read.
 - **Acceptance criteria:** Red Rising, Golden Son and Morning Star are represented without completion claims; journal stays removed. Default audio is quiet, mute is visible/persistent, blocked autoplay causes no errors or false playing state, motion remains independent.
 - **Test plan:** Audio preference/autoplay/cleanup tests, existing suite, lint/type/build, browser first gesture and mute checks; shelf desktop/mobile visual review.
 - **Bump:** minor
-- **Status:** in-progress
+- **Status:** shipped-pending-migration
+- **Implementation:** Added Red Rising, Golden Son, and Morning Star cloth-spine artwork and a Currently reading close-up/interest entry. Quiet nature ambience defaults to 18% with music optional, persisted mute/settings, first-gesture autoplay fallback, truthful waiting/on/silent/off labels, and bounded cleanup. Validated in the 99-test suite, lint/type/build checks, and desktop/phone browser walkthroughs.
+
+### [FEAT-1788655651] Direct room interactions and education frame
+- [x] **Priority:** med
+- **Area:** frontend, animation, accessibility, content
+- **File(s):** app/components/room/Workspace.tsx, ObjectDetail.tsx, WindowCat.tsx, room-details.css, room-mobile.css, app/room.css, public/room-studio.svg, related tests
+- **Why:** Owner wants window/lamp/cat actions in place, a diploma instead of the mountain print, and both journal and pencil removed.
+- **Approach:** Window toggles day/evening; lamp independently toggles a soft desk light; cat responds through its existing wake gesture. Represent verified UMBC B.S. Computer Science with owner-provided May2024 date and no invented seal/honors.
+- **Library / dependency notes:** Existing native React/CSS/SVG only.
+- **Acceptance criteria:** No window/lamp/cat zoom-only modal; direct controls have clear accessible names/states; pause/reduced motion work; concise education artwork uses supported facts; journal and pencil absent.
+- **Test plan:** Unit/control tests, lint/type/build, desktop/mobile keyboard and visual QA.
+- **Bump:** minor
+- **Status:** shipped-pending-migration
 
 ---
 
 ## Shipped
+- **Implementation:** Window toggles day/evening, lamp toggles its independent desk glow, and the cat responds directly with its wake gesture. Replaced the mountain print with a UMBC B.S. Computer Science May 2024 frame; removed both journal and pencil. Added control regressions and verified 320px/390px/desktop layouts and focus return.
 
 ### [FEAT-1781507205] Restore prominent interactive star/aurora background
 - [x] **Priority:** med

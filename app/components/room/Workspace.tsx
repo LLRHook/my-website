@@ -39,6 +39,7 @@ export default function Workspace({ repos }: { repos: RepoCardData[] }) {
   const [bootStep, setBootStep] = useState(0);
   const [app, setApp] = useState<AppId | null>(null);
   const [night, setNight] = useState(false);
+  const [lamp, setLamp] = useState(true);
   const [paused, setPaused] = useState(false);
   const [reducedMotion, setReducedMotion] = useState(false);
   const [visible, setVisible] = useState(true);
@@ -152,7 +153,7 @@ export default function Workspace({ repos }: { repos: RepoCardData[] }) {
   }
 
   return (
-    <div className="workspace" data-night={night} data-moving={moving}>
+    <div className="workspace" data-night={night} data-moving={moving} data-lamp={lamp}>
       <header className="room-header">
         <Link className="wordmark" href="/"><span className="monogram">vi<span>.</span></span><span>VICTOR IVANOV<small>Senior Full-Stack Engineer</small></span></Link>
         <nav aria-label="Portfolio navigation">
@@ -187,6 +188,7 @@ export default function Workspace({ repos }: { repos: RepoCardData[] }) {
         <RoomAtmosphere />
         <RoomBreeze />
         <div className="room-night-wash" aria-hidden="true" />
+        <div className="room-lamp-glow" aria-hidden="true" />
         <div className="room-caption"><span className="tiny-dot" /> VIRGINIA<small>A good place to build things.</small></div>
         <button className="sticky-reminder" aria-label="one more commit. Explore projects" onClick={(event) => openApp("projects", event.currentTarget)}>one more<br />commit.</button>
 
@@ -210,13 +212,21 @@ export default function Workspace({ repos }: { repos: RepoCardData[] }) {
 
         <div className="keyboard" aria-hidden="true">{Array.from({ length: 46 }, (_, index) => <i key={index} />)}<b /></div>
         <div className="desk-mouse" aria-hidden="true"><span /></div>
-        <WindowCat moving={moving} onInspect={(trigger) => inspectObject("cat", trigger)} />
+        <WindowCat moving={moving} />
         <button className="object-target hobby-hotspot" onClick={(event) => inspectObject("games", event.currentTarget)} aria-label="Explore Magic, Pokémon, and other interests" />
         <button className="object-target climb-hotspot" onClick={(event) => inspectObject("climbing", event.currentTarget)} aria-label="Read about rock climbing" />
+        <button
+  type="button"
+  className="object-target target-reading"
+  style={{ left: "78.7%", top: "21.3%", width: "6%", height: "8.5%" }}
+  aria-label="Currently reading · Red Rising"
+  onClick={(event) => inspectObject("reading", event.currentTarget)}
+/>
         <RouletteToy moving={moving} />
         <button className="object-target target-wings" onClick={(event) => inspectObject("wings", event.currentTarget)} aria-label="Take a closer look at the Buffalo Wild Wings carton" />
-        <button className="object-target target-window" onClick={(event) => inspectObject("window", event.currentTarget)} aria-label="Take a closer look out the window" />
-        <button className="object-target target-lamp" onClick={(event) => inspectObject("lamp", event.currentTarget)} aria-label="Take a closer look at the desk lamp" />
+        <button className="object-target target-window" onClick={() => setNight((value) => !value)} aria-pressed={night} aria-label={night ? "Look out the window. Bring back daylight" : "Look out the window. Bring in the evening"} />
+        <button className="object-target target-lamp" onClick={() => setLamp((value) => !value)} aria-pressed={lamp} aria-label={lamp ? "Desk lamp is on. Switch it off" : "Desk lamp is off. Switch it on"} />
+        <button className="object-target target-education" onClick={(event) => inspectObject("education", event.currentTarget)} aria-label="Take a closer look at the diploma" />
         <button className="object-target target-plants" onClick={(event) => inspectObject("plants", event.currentTarget)} aria-label="Take a closer look at the plants" />
         </div>
       </section>
@@ -228,7 +238,7 @@ export default function Workspace({ repos }: { repos: RepoCardData[] }) {
       <footer className="room-footer"><span>© {new Date().getFullYear()} Victor Ivanov</span></footer>
       <span className="sr-only" role="status" aria-live="polite">{power === "booting" ? "Computer is starting. You can skip startup." : power === "on" ? "Computer ready. Choose a desktop app." : "Computer is off."}</span>
       <DesktopWindow app={app} onNavigate={setApp} onClose={closeApp} repos={repos} />
-      <ObjectDetail selected={detail} onClose={() => setDetail(null)} onOpenApp={(id) => openApp(id, detailTrigger.current)} returnFocus={detailTrigger} moving={ambientMotion} />
+      <ObjectDetail selected={detail} onClose={() => setDetail(null)} onOpenApp={(id) => openApp(id, detailTrigger.current)} returnFocus={detailTrigger} />
     </div>
   );
 }

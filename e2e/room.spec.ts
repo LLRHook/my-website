@@ -119,9 +119,9 @@ test("room controls pause motion, change lighting, and let the cat return to sle
   await expect(room).toHaveAttribute("data-night", "false");
   await page.getByRole("button", { name: /Resume ambient motion$/ }).click();
   await expect(room).toHaveAttribute("data-moving", "true");
-  await page.getByRole("button", { name: "Meet the window cat up close", exact: true }).click();
-  await expect(page.getByRole("dialog", { name: "Meet the cat", exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Meet the window cat up close", exact: true })).toHaveCount(0);
   await page.getByRole("button", { name: "Say hello to the cat", exact: true }).click();
+  await expect(page.locator("dialog[open]")).toHaveCount(0);
   await expect(page.getByRole("button", { name: "Let the cat sleep", exact: true })).toHaveAttribute("aria-pressed", "true");
   await expect(page.getByRole("button", { name: "Say hello to the cat", exact: true })).toBeVisible({ timeout: 8000 });
 });

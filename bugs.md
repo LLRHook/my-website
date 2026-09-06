@@ -69,12 +69,35 @@ the end of their section, sorted by id on read.
 - **Bump:** patch
 - **Status:** fixed-pending-migration
 
+### [BUG-1788655652] Evening caption loses contrast and room computer is off center
+- [x] **Severity:** med
+- **Area:** ui, accessibility
+- **File(s):** app/room.css, app/components/room/room-mobile.css, related browser tests
+- **Observation:** Evening wash darkens the room behind the unchanged dark location caption and extends behind the introduction without matching the scene’s top fade. Browser geometry measured the monitor center7.96px right of room center at1280px.
+- **Expected:** Readable labels in evening and a horizontally centered computer at desktop/mobile sizes.
+- **Repro / Notes:** Toggle Evening; inspect caption and compare computer/room bounding-box centers.
+- **Bump:** patch
+- **Status:** fixed-pending-migration
+
 ---
+- **Fix:** Centered the computer using its shared width variable, added a high-contrast evening caption plate, and tapered the night wash below the overlapping introduction. Browser checks found less than 0.01px stationary center offset, readable evening copy, and no mobile overflow.
+
+### [BUG-1788656593] Interrupted ambient audio cannot resume with an existing scheduler
+- [x] **Severity:** med
+- **Area:** frontend, tests
+- **File(s):** app/lib/room-audio.ts, app/lib/room-audio.test.ts, app/components/room/RoomAudio.test.tsx
+- **Observation:** setVisible(true) returns early while a timer exists even if the browser has externally suspended or interrupted its AudioContext. Review also found mismatched retry instructions, silent settings reporting playback, and gesture listeners retained for already-running contexts. The default-audio test fixture encountered Node's partial localStorage global instead of usable browser storage.
+- **Expected:** A fresh visitor gesture resumes an interrupted context without duplicating its scheduler; status and retry instructions match behavior; fallback listeners detach after playback starts; preference tests have isolated, usable storage.
+- **Repro / Notes:** Start the engine, externally suspend its context, then call setVisible(true) while its timer remains allocated.
+- **Bump:** patch
+- **Status:** fixed-pending-migration
+
 
 ## Migrated to changelog
 
 Entries below have been ticked off and copied as a one-liner into `CHANGELOG.md`.
 They are kept here so each `BUG-NNN` stays resolvable.
+- **Fix:** Resume now checks actual running state before returning early; the real-engine regression verifies one scheduler after interruption/recovery. Audio status and retry instructions match actual behavior, successful playback removes gesture fallback listeners, and preference tests use isolated storage. All 99 unit/component tests pass.
 
 ### [BUG-1781501120] Projects never render in production ("No projects to display")
 - [x] **Severity:** high

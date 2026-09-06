@@ -47,6 +47,12 @@ function Interests() {
     <article><span className="interest-illustration wings-mark"><Image src="/bww-logo.svg" width={48} height={48} alt="Buffalo Wild Wings" unoptimized /></span><div><span className="interest-number">04 / RECHARGE</span><h3>Wings after a long week.</h3><p>A small nod to Buffalo Wild Wings. Good food belongs in the room, too.</p></div></article>
     <article><span className="interest-illustration travel-mark" aria-hidden="true">↗</span><div><span className="interest-number">05 / GET OUTSIDE</span><h3>A postcard from Peru.</h3><p>The mountain-and-river photo in the room comes from my September 2026 Peru trip. Open the postcard to see the full view.</p></div></article>
     <article><span className="interest-illustration"><Icon name="code" /></span><div><span className="interest-number">06 / TINKER</span><h3>Probably building a tool for that.</h3><p>Agentic workflows, deployment automation, and little utilities that make the next development cycle easier.</p></div></article>
+    <article>  <svg className="interest-illustration" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+    <rect x="4" y="5" width="5" height="15" rx=".8" fill="#B0674F"/>
+    <rect x="10" y="7" width="4.5" height="13" rx=".8" fill="#C9A45C"/>
+    <rect x="15.5" y="4" width="5" height="16" rx=".8" fill="#5F7A7C"/>
+    <path d="M5 8h3M11 10h2.5M16.5 7h3" stroke="#F4EBDD" strokeOpacity=".8" strokeWidth=".8"/>
+  </svg><div><span className="interest-number">07 / READ</span><h3>Red Rising trilogy</h3><p>Currently reading Pierce Brown’s Red Rising trilogy.</p></div></article>
   </div></section>;
 }
 
