@@ -7,7 +7,7 @@ export function containRoomTab(event: KeyboardEvent<HTMLDialogElement>) {
   if (event.key !== "Tab") return;
   const controls = Array.from(event.currentTarget.querySelectorAll<HTMLElement>(
     'a[href], button:not([disabled]), input:not([disabled]), [tabindex]:not([tabindex="-1"])',
-  )).filter((element) => element.tabIndex >= 0 && element.getClientRects().length > 0);
+  )).filter((element) => !element.matches(":disabled") && element.tabIndex >= 0 && element.getClientRects().length > 0);
   const first = controls[0];
   const last = controls[controls.length - 1];
   if (!first || !last) return;

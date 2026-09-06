@@ -5,7 +5,7 @@ const personJson = JSON.stringify({
   "@type": "Person",
   name: "Victor Ivanov",
   url: SITE_URL,
-  jobTitle: "Senior Backend Engineer",
+  jobTitle: "Senior Full-Stack Engineer",
   worksFor: {
     "@type": "Organization",
     name: "Paradigm Testing",
@@ -14,7 +14,6 @@ const personJson = JSON.stringify({
     "@type": "Place",
     address: {
       "@type": "PostalAddress",
-      addressLocality: "Tysons",
       addressRegion: "VA",
       addressCountry: "US",
     },

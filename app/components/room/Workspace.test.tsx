@@ -38,6 +38,38 @@ afterEach(() => {
 });
 
 describe("Workspace power lifecycle", () => {
+  it("spins roulette in the room without opening a dialog", () => {
+    render(<Workspace repos={[]} />);
+    const wheel = screen.getByRole("button", { name: "Spin roulette wheel" });
+    fireEvent.click(wheel);
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    expect(screen.getByRole("status", { name: "Roulette result" })).toHaveTextContent("Spinning…");
+    act(() => vi.advanceTimersByTime(2600));
+    expect(wheel).toHaveAttribute("aria-disabled", "false");
+    expect(screen.getByRole("status", { name: "Roulette result" })).toHaveTextContent(/\d+ · (red|black|green)/);
+  });
+
+  it.each(["pause", "reduced motion"])("settles roulette without delay or confetti for %s", preference => {
+    if (preference === "reduced motion") Object.defineProperty(motionQuery, "matches", { value: true });
+    const view = render(<Workspace repos={[]} />);
+    if (preference === "pause") fireEvent.click(screen.getByRole("button", { name: "Pause motion" }));
+    fireEvent.click(screen.getByRole("button", { name: "Spin roulette wheel" }));
+    expect(screen.getByRole("button", { name: "Spin roulette wheel" })).toHaveAttribute("aria-disabled", "false");
+    expect(screen.getByRole("status", { name: "Roulette result" })).toHaveTextContent(/\d+ · (red|black|green)/);
+    expect(view.container.querySelector(".roulette-confetti")).toBeNull();
+  });
+
+  it("shows a concise window close-up and restores the room trigger", () => {
+    render(<Workspace repos={[]} />);
+    const trigger = screen.getByRole("button", { name: "Take a closer look out the window" });
+    fireEvent.click(trigger);
+    const detail=screen.getByRole("dialog", { name: "By the window" });
+    expect(within(detail).getByRole("img", { name: "By the window" })).toBeInTheDocument();
+    expect(detail.querySelector("dl, .detail-description, .object-detail-story")).toBeNull();
+    fireEvent.click(within(detail).getByRole("button", { name: "Back to room" }));
+    expect(trigger).toHaveFocus();
+  });
+
   it("shows every boot stage before exposing the desktop", () => {
     render(<Workspace repos={[]} />);
     expect(screen.getByTestId("computer")).toHaveAttribute("data-power", "off");

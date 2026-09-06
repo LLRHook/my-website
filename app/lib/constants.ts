@@ -1,8 +1,8 @@
 export const SITE_URL = "https://victorivanov.engineer";
-export const SITE_NAME = "Victor Ivanov — Software Engineer";
-export const SITE_TITLE = "Victor Ivanov | Software Engineer";
+export const SITE_NAME = "Victor Ivanov — Senior Full-Stack Engineer";
+export const SITE_TITLE = "Victor Ivanov | Senior Full-Stack Engineer";
 export const SITE_DESCRIPTION =
-  "Portfolio of Victor Ivanov — software engineer specializing in full-stack development. Explore projects, skills, and professional experience.";
+  "Senior full-stack engineer in Virginia. Explore web products, developer tools, and open-source contributions across Java, Spring Boot, React, and TypeScript.";
 
 export interface NavLink {
   label: string;

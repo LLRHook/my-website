@@ -48,6 +48,27 @@ the end of their section, sorted by id on read.
 - **Bump:** patch
 - **Status:** open
 
+### [BUG-1788653836] Dialog focus trap includes inputs disabled by a fieldset
+- [x] **Severity:** med
+- **Area:** frontend, accessibility
+- **File(s):** app/components/room/ComputerFocus.tsx, ComputerFocus.test.tsx
+- **Observation:** Browser QA of a pending roulette spin found Tab could leave the close button because the focus list included radio inputs disabled through their fieldset.
+- **Expected:** Tab wraps among enabled controls inside the open dialog.
+- **Repro / Notes:** A dialog containing one close button and a disabled fieldset reproduces the incorrect boundary list.
+- **Bump:** patch
+- **Status:** fixed-pending-migration
+- **Fix:** Exclude controls matching :disabled, including fieldset descendants; regression covers forward and reverse Tab wrapping.
+
+### [BUG-1788655093] Standalone typecheck rejects injected browser test helper assertion
+- [x] **Severity:** low
+- **Area:** tests
+- **File(s):** e2e/room-motion.spec.ts
+- **Observation:** Standalone tsc reports TS2352 for the roomFrameSnapshot helper injected by the test setup, because the DOM Window type does not declare the injected function.
+- **Expected:** Typecheck the existing browser test helper without weakening the application types.
+- **Fix:** Assert through unknown before the narrow injected-helper type; runtime behavior is unchanged.
+- **Bump:** patch
+- **Status:** fixed-pending-migration
+
 ---
 
 ## Migrated to changelog

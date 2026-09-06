@@ -14,6 +14,7 @@ describe("WindowCat", () => {
     render(<WindowCat moving />);
     const sleeping = screen.getByRole("button", { name: "Say hello to the cat" });
     expect(sleeping).toHaveAttribute("aria-pressed", "false");
+    expect(vi.getTimerCount()).toBe(0);
     fireEvent.click(sleeping);
     expect(screen.getByRole("button", { name: "Let the cat sleep" })).toHaveAttribute("aria-pressed", "true");
     act(() => vi.advanceTimersByTime(6500));

@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from "react";
 import type { RepoCardData } from "@/app/lib/types";
 import { Icon, type IconName } from "./RoomIcons";
 import WindowCat from "./WindowCat";
+import RouletteToy from "./RouletteToy";
 import DesktopWindow from "./DesktopWindow";
 import ComputerFocus from "./ComputerFocus";
 import ObjectDetail, { type ObjectId } from "./ObjectDetail";
@@ -153,7 +154,7 @@ export default function Workspace({ repos }: { repos: RepoCardData[] }) {
   return (
     <div className="workspace" data-night={night} data-moving={moving}>
       <header className="room-header">
-        <Link className="wordmark" href="/"><span className="monogram">vi<span>.</span></span><span>VICTOR IVANOV<small>Software engineer</small></span></Link>
+        <Link className="wordmark" href="/"><span className="monogram">vi<span>.</span></span><span>VICTOR IVANOV<small>Senior Full-Stack Engineer</small></span></Link>
         <nav aria-label="Portfolio navigation">
           <button onClick={(event) => openApp("projects", event.currentTarget)}>Projects</button>
           <button onClick={(event) => openApp("resume", event.currentTarget)}>Resume</button>
@@ -164,7 +165,7 @@ export default function Workspace({ repos }: { repos: RepoCardData[] }) {
       <section className="room-intro" aria-labelledby="room-title">
         <p className="eyebrow"><span /> A SMALL SPACE FOR BIG IDEAS</p>
         <h1 id="room-title">Make yourself <em>at home.</em></h1>
-        <p>I&apos;m Victor. I build software, climb rocks, and make tools for the way I work.</p>
+        <p>I&apos;m Victor. I build web products and developer tools, work across the stack, and climb rocks.</p>
       </section>
 
       <section className="room-stage" ref={stageRef} aria-label="Victor's interactive workspace">
@@ -186,7 +187,7 @@ export default function Workspace({ repos }: { repos: RepoCardData[] }) {
         <RoomAtmosphere />
         <RoomBreeze />
         <div className="room-night-wash" aria-hidden="true" />
-        <div className="room-caption"><span className="tiny-dot" /> TYSONS, VIRGINIA<small>A good place to build things.</small></div>
+        <div className="room-caption"><span className="tiny-dot" /> VIRGINIA<small>A good place to build things.</small></div>
         <button className="sticky-reminder" aria-label="one more commit. Explore projects" onClick={(event) => openApp("projects", event.currentTarget)}>one more<br />commit.</button>
 
         <ComputerFocus active={computerFocused} onClose={() => setComputerFocused(false)} returnFocus={computerTrigger} fallbackFocus={powerButton}>
@@ -212,7 +213,7 @@ export default function Workspace({ repos }: { repos: RepoCardData[] }) {
         <WindowCat moving={moving} onInspect={(trigger) => inspectObject("cat", trigger)} />
         <button className="object-target hobby-hotspot" onClick={(event) => inspectObject("games", event.currentTarget)} aria-label="Explore Magic, Pokémon, and other interests" />
         <button className="object-target climb-hotspot" onClick={(event) => inspectObject("climbing", event.currentTarget)} aria-label="Read about rock climbing" />
-        <button className="object-target target-poker" onClick={(event) => inspectObject("poker", event.currentTarget)} aria-label="Take a closer look at the poker cards and chips" />
+        <RouletteToy moving={moving} />
         <button className="object-target target-wings" onClick={(event) => inspectObject("wings", event.currentTarget)} aria-label="Take a closer look at the Buffalo Wild Wings carton" />
         <button className="object-target target-window" onClick={(event) => inspectObject("window", event.currentTarget)} aria-label="Take a closer look out the window" />
         <button className="object-target target-lamp" onClick={(event) => inspectObject("lamp", event.currentTarget)} aria-label="Take a closer look at the desk lamp" />
