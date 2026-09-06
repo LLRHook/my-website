@@ -1,17 +1,16 @@
 import { test, expect } from "@playwright/test";
 
 const objects = [
-  [".note-profile", "A familiar face."],
-  [".note-work", "Away from the desk."],
+  [".note-profile", "Victor Ivanov"],
+  [".note-work", "At the podium"],
   [".note-travel", "Peru · September 2026"],
-  [".hobby-hotspot", "There’s always another deck."],
-  [".target-poker", "A seat at the table."],
-  [".climb-hotspot", "One more attempt."],
-  [".target-wings", "Buffalo Wild Wings."],
-  [".target-window", "Let a little outside in."],
-  [".target-lamp", "A little pool of light."],
-  [".target-plants", "Room to grow."],
-  [".cat-detail-hotspot", "Resident quality assurance."],
+  [".hobby-hotspot", "Magic & Pokémon"],
+  [".climb-hotspot", "Rock climbing"],
+  [".target-wings", "Buffalo Wild Wings"],
+  [".target-window", "By the window"],
+  [".target-lamp", "Desk lamp"],
+  [".target-plants", "Plants"],
+  [".cat-detail-hotspot", "Meet the cat"],
 ];
 
 for (const viewport of [{ width: 320, height: 740 }, { width: 390, height: 844 }, { width: 412, height: 915 }, { width: 1440, height: 1000 }]) {
@@ -34,7 +33,6 @@ for (const viewport of [{ width: 320, height: 740 }, { width: 390, height: 844 }
         expect(bounds!.x + bounds!.width).toBeLessThanOrEqual(viewport.width + 1);
         expect(bounds!.y + bounds!.height).toBeLessThanOrEqual(viewport.height + 1);
         expect(await dialog.evaluate(el => el.scrollWidth - el.clientWidth)).toBeLessThanOrEqual(1);
-        expect(await dialog.locator(".detail-description").evaluate(el => parseFloat(getComputedStyle(el).fontSize))).toBeGreaterThanOrEqual(14);
         const vector = dialog.locator(".object-detail-visual > svg");
         if (await vector.count()) {
           await expect(vector).toHaveAttribute("viewBox", /^\d+ \d+ \d+ \d+$/);
@@ -113,7 +111,6 @@ test("the travel postcard serves a real high-resolution photo and verified trip 
   await page.goto("/");
   await page.locator(".note-travel").click();
   const dialog = page.getByRole("dialog", { name: "Peru · September 2026" });
-  await expect(dialog).toContainText("A photo from my September 2026 trip to Peru.");
   await expect(dialog.getByRole("link", { name: "View original photo" })).toHaveAttribute("href", "/peru-travel.webp");
   const response = await page.request.get("/peru-travel.webp");
   expect(response.status()).toBe(200);

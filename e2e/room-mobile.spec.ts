@@ -51,7 +51,7 @@ for (const { deviceScaleFactor, ...viewport } of viewports) {
         return {
           scene: rect(".room-scene"), computer: rect(".room-scene > .computer"),
           screen: rect(".room-scene > .computer .monitor-screen"), keyboard: rect(".keyboard"),
-          lamp: rect(".target-lamp"), poker: rect(".target-poker"),
+          lamp: rect(".target-lamp"), roulette: rect(".target-roulette"),
           photos: [".note-profile", ".note-work", ".note-travel"].map(rect),
           overflow: document.documentElement.scrollWidth > innerWidth + 1,
         };
@@ -61,7 +61,7 @@ for (const { deviceScaleFactor, ...viewport } of viewports) {
       expect(geometry.computer.width).toBeLessThan(geometry.scene.width * 0.35);
       expect(geometry.keyboard.y).toBeGreaterThanOrEqual(geometry.computer.y + geometry.computer.height - 1);
       expect(geometry.lamp.x + geometry.lamp.width).toBeLessThan(geometry.computer.x);
-      expect(geometry.poker.x).toBeGreaterThan(geometry.computer.x + geometry.computer.width);
+      expect(geometry.roulette.x).toBeGreaterThan(geometry.computer.x + geometry.computer.width);
       for (const photo of geometry.photos) {
         expect(overlaps(photo, geometry.screen)).toBe(false);
         if (viewport.width <= 700) {
@@ -95,7 +95,7 @@ for (const { deviceScaleFactor, ...viewport } of viewports) {
 
       const wings = page.getByRole("button", { name: "Take a closer look at the Buffalo Wild Wings carton", exact: true });
       await wings.tap();
-      const wingsDetail = page.getByRole("dialog", { name: "Buffalo Wild Wings.", exact: true });
+      const wingsDetail = page.getByRole("dialog", { name: "Buffalo Wild Wings", exact: true });
       await expect(wingsDetail).toBeVisible();
       await expectDialogFits(page, wingsDetail);
       // A shorter viewport represents browser chrome expanding while a dialog is open.
