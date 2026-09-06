@@ -56,6 +56,27 @@ describe("DesktopWindow projects", () => {
     expect(screen.getByRole("link", { name: "Visit GitHub ↗" })).toHaveAttribute("href", "https://github.com/LLRHook");
   });
 
+  it("keeps selected work available when the GitHub shelf is unavailable", () => {
+    openProjects([]);
+    expect(screen.getByRole("link", { name: "Merged contribution" })).toHaveAttribute("href", "https://github.com/Kilo-Org/kilocode/pull/8524");
+    expect(screen.getByRole("link", { name: "Explore the source" })).toHaveAttribute("href", "https://github.com/LLRHook/checksinmyhead");
+  });
+
+  it("finds Billington by both names and loads notes from the original repository path", async () => {
+    const fetchNotes = vi.fn().mockResolvedValue(new Response("# Billington notes", { headers: { "Content-Type": "text/plain; charset=utf-8" } }));
+    vi.stubGlobal("fetch", fetchNotes);
+    openProjects([{ ...repos[0], name: "checksinmyhead", owner: "LLRHook", htmlUrl: "https://github.com/LLRHook/checksinmyhead", description: null }]);
+    const search = screen.getByRole("searchbox", { name: "Search projects" });
+    for (const term of ["billington", "checksinmyhead"]) {
+      fireEvent.change(search, { target: { value: term } });
+      expect(screen.getByRole("button", { name: /Billington/ })).toBeInTheDocument();
+    }
+    fireEvent.click(screen.getByRole("button", { name: /Billington/ }));
+    expect(await screen.findByRole("heading", { name: "Billington notes" })).toBeInTheDocument();
+    expect(fetchNotes).toHaveBeenCalledWith("/api/readme/LLRHook/checksinmyhead", expect.any(Object));
+    expect(screen.getByRole("link", { name: "Open repository" })).toHaveAttribute("href", "https://github.com/LLRHook/checksinmyhead");
+  });
+
   it("renders notes, removes remote images, and keeps unsafe links off the page", async () => {
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response("# Mail guide\n\n![tracker](https://example.com/pixel.png)\n\n[Guide](https://example.com/guide)\n\n[Bad](javascript:alert(1))\n\n<script>window.evil=true</script>", { headers: { "Content-Type": "text/plain; charset=utf-8" } })));
     openProjects();

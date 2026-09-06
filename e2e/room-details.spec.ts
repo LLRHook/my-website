@@ -1,17 +1,15 @@
 import { test, expect } from "@playwright/test";
 
 const objects = [
-  [".note-profile", "A familiar face."],
-  [".note-work", "Away from the desk."],
+  [".target-reading", "Currently reading · Red Rising"],
+  [".target-education", "B.S. Computer Science · UMBC"],
+  [".note-profile", "Victor Ivanov"],
+  [".note-work", "At the podium"],
   [".note-travel", "Peru · September 2026"],
-  [".hobby-hotspot", "There’s always another deck."],
-  [".target-poker", "A seat at the table."],
-  [".climb-hotspot", "One more attempt."],
-  [".target-wings", "Buffalo Wild Wings."],
-  [".target-window", "Let a little outside in."],
-  [".target-lamp", "A little pool of light."],
-  [".target-plants", "Room to grow."],
-  [".cat-detail-hotspot", "Resident quality assurance."],
+  [".hobby-hotspot", "Magic & Pokémon"],
+  [".climb-hotspot", "Rock climbing"],
+  [".target-wings", "Buffalo Wild Wings"],
+  [".target-plants", "Plants"],
 ];
 
 for (const viewport of [{ width: 320, height: 740 }, { width: 390, height: 844 }, { width: 412, height: 915 }, { width: 1440, height: 1000 }]) {
@@ -34,7 +32,6 @@ for (const viewport of [{ width: 320, height: 740 }, { width: 390, height: 844 }
         expect(bounds!.x + bounds!.width).toBeLessThanOrEqual(viewport.width + 1);
         expect(bounds!.y + bounds!.height).toBeLessThanOrEqual(viewport.height + 1);
         expect(await dialog.evaluate(el => el.scrollWidth - el.clientWidth)).toBeLessThanOrEqual(1);
-        expect(await dialog.locator(".detail-description").evaluate(el => parseFloat(getComputedStyle(el).fontSize))).toBeGreaterThanOrEqual(14);
         const vector = dialog.locator(".object-detail-visual > svg");
         if (await vector.count()) {
           await expect(vector).toHaveAttribute("viewBox", /^\d+ \d+ \d+ \d+$/);
@@ -113,7 +110,6 @@ test("the travel postcard serves a real high-resolution photo and verified trip 
   await page.goto("/");
   await page.locator(".note-travel").click();
   const dialog = page.getByRole("dialog", { name: "Peru · September 2026" });
-  await expect(dialog).toContainText("A photo from my September 2026 trip to Peru.");
   await expect(dialog.getByRole("link", { name: "View original photo" })).toHaveAttribute("href", "/peru-travel.webp");
   const response = await page.request.get("/peru-travel.webp");
   expect(response.status()).toBe(200);
@@ -135,4 +131,42 @@ test("the breeze follows pause and reduced-motion preferences", async ({ page })
   await expect(curtain).toHaveCSS("animation-play-state", "paused");
   await page.emulateMedia({ reducedMotion: "reduce" });
   await expect(curtain).toHaveCSS("animation-name", "none");
+});
+
+test("the window, lamp, and cat respond in the room without a close-up", async ({ page }) => {
+  await page.goto("/");
+  const room = page.locator(".workspace");
+  const glow = page.locator(".room-lamp-glow");
+  const caption = page.locator(".room-caption");
+
+  const windowSeat = page.getByRole("button", { name: "Look out the window. Bring in the evening", exact: true });
+  await expect(windowSeat).toHaveAttribute("aria-pressed", "false");
+  await windowSeat.click();
+  await expect(page.locator("dialog[open]")).toHaveCount(0);
+  await expect(room).toHaveAttribute("data-night", "true");
+  await expect(page.getByRole("button", { name: "Look out the window. Bring back daylight", exact: true })).toHaveAttribute("aria-pressed", "true");
+  await expect(page.getByRole("button", { name: "Evening. Switch to daylight", exact: true })).toHaveAttribute("aria-pressed", "true");
+  await expect(caption).toHaveCSS("color", "rgb(243, 236, 216)");
+  await page.getByRole("button", { name: "Evening. Switch to daylight", exact: true }).click();
+  await expect(room).toHaveAttribute("data-night", "false");
+  await expect(page.getByRole("button", { name: "Look out the window. Bring in the evening", exact: true })).toHaveAttribute("aria-pressed", "false");
+
+  await expect(room).toHaveAttribute("data-lamp", "true");
+  await expect(glow).toHaveCSS("opacity", "0.8");
+  const lamp = page.getByRole("button", { name: "Desk lamp is on. Switch it off", exact: true });
+  await expect(lamp).toHaveAttribute("aria-pressed", "true");
+  await lamp.click();
+  await expect(page.locator("dialog[open]")).toHaveCount(0);
+  await expect(room).toHaveAttribute("data-lamp", "false");
+  await expect(room).toHaveAttribute("data-night", "false");
+  await expect(glow).toHaveCSS("opacity", "0");
+  const lampOff = page.getByRole("button", { name: "Desk lamp is off. Switch it on", exact: true });
+  await expect(lampOff).toHaveAttribute("aria-pressed", "false");
+  await lampOff.click();
+  await expect(room).toHaveAttribute("data-lamp", "true");
+
+  await expect(page.getByRole("button", { name: "Meet the window cat up close", exact: true })).toHaveCount(0);
+  await page.getByRole("button", { name: "Say hello to the cat", exact: true }).click();
+  await expect(page.locator("dialog[open]")).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Let the cat sleep", exact: true })).toHaveAttribute("aria-pressed", "true");
 });

@@ -16,13 +16,14 @@
   .room-photo-strip .note-tape { top: -4px; height: 9px; }
 
   .room-scene { position: relative; inset: auto; width: 100%; aspect-ratio: 1440 / 850; }
-  .room-scene .room-art,.room-scene .room-night-wash,.room-scene .room-breeze { inset: 0; width: 100%; height: 100%; }
+  .room-scene .room-art,.room-scene .room-night-wash,.room-scene .room-lamp-glow,.room-scene .room-breeze { inset: 0; width: 100%; height: 100%; }
   .room-scene .room-art { mask-image: linear-gradient(to bottom, transparent, black 9%); }
+  .room-scene .room-night-wash { mask-image: linear-gradient(to bottom, transparent, black 9%); }
   .room-scene .room-caption { display: none; }
 
   /* A miniature monitor belongs on the desk. Its screen opens the readable
      computer view instead of trying to fit five tiny app targets on a phone. */
-  .room-scene > .computer { top: 33.18%; left: 33.89%; width: 33.47%; aspect-ratio: 482 / 355; }
+  .room-scene > .computer { top: 33.18%; left: calc(50% - var(--computer-width) / 2); width: var(--computer-width); aspect-ratio: 482 / 355; }
   .room-scene > .computer .monitor-body { height: 88%; padding: 1cqw 1cqw 0; border-radius: 1.2cqw 1.2cqw .85cqw .85cqw; }
   .room-scene > .computer .monitor-screen { height: calc(100% - 26px); min-height: 0; border-width: .35cqw; border-radius: .47cqw; }
   .room-scene > .computer .monitor-chin { height: 26px; padding: 0; }
@@ -59,7 +60,7 @@
   .room-scene .object-target { min-width: 24px; min-height: 24px; }
   .room-scene .target-window { left: 4.8%; top: 17%; width: 21.5%; height: 29%; }
   .room-scene .target-lamp { left: 25%; top: 49.5%; width: 7.3%; height: 26%; }
-  .room-scene .target-poker { left: 68%; top: 68%; width: 8%; height: 9%; }
+  .room-scene .target-roulette { left: 68%; top: 68%; width: 8%; height: 9%; }
   .room-scene .target-wings { left: 78.8%; top: 53.5%; width: 5%; height: 7%; }
   .room-scene .target-plants { left: 85%; top: 73%; width: 10%; height: 19%; }
   .room-toolbar { margin-top: 8px; }

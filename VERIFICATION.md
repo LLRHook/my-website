@@ -1,6 +1,7 @@
 # Workspace release verification
 
-This checklist covers the interactive room and version 0.7.0 mobile composition, motion, and sound. It
+This checklist covers the interactive room, professional project content,
+roulette, mobile composition, motion, and remembered sound preferences. It
 supersedes the old timeline and Lenis UI checks. The GitHub API tests and public
 route contracts remain in scope.
 
@@ -16,11 +17,12 @@ route contracts remain in scope.
 5. For a deployed build, set `PLAYWRIGHT_BASE_URL` to the HTTPS deployment URL
    and run the same E2E command. This skips local startup.
 
-Current baseline: 68 Vitest cases across 9 files; 54 Playwright cases across
-7 files (44 Chromium and 10 WebKit). Playwright runs the complete suite in
-Chromium and the mobile/motion suites in WebKit. Test runners provide
-the authoritative browser counts. Run `npx playwright
-test --list` when updating the baseline.
+Current baseline: 104 Vitest cases across 11 files and 64 Playwright cases
+across 8 files (50 Chromium and 14 WebKit). Playwright runs the
+complete suite in Chromium and the mobile, motion, and roulette suites in WebKit.
+Test runners provide the authoritative browser counts; run
+`npx playwright test --list` when updating the baseline. Historical counts below
+refer to their recorded builds.
 
 ## Acceptance coverage
 
@@ -35,14 +37,17 @@ test --list` when updating the baseline.
 - Search works for names, descriptions, topics, and languages. Missing projects
   show a direct GitHub link. README requests use the actual text/plain endpoint;
   errors have a usable fallback and requests abort when their view closes.
+- Featured Billington, Citybase, and Kilo work remains readable in the Projects
+  app on desktop and phone widths, alongside the searchable repository collection.
 - README tables render and relative links resolve correctly. Raw HTML and remote
   images do not execute or load; unsafe link schemes are rejected.
 - Existing #work/#about/#contact links open the right app. #resume/#interests
   also work. JavaScript-disabled users get a summary and contact/project links.
 - Resume print mode shows readable professional content without room controls.
-- Daylight/evening and pause controls work; reduced motion is respected.
+- Daylight/evening and pause controls work; reduced motion is respected. Tapping
+  the window changes the time of day directly, and the lamp toggles its glow.
 - True touch/DPR emulation covers 320, 375, 390, 393, 412, and 430px phone widths
-  plus landscape. Photos stay clear of the monitor; the keyboard, lamp, cards,
+  plus landscape. Photos stay clear of the monitor; the keyboard, lamp, roulette,
   and wings carton remain exposed. Check dialog bounds again after shrinking the
   viewport height to represent browser controls expanding.
 - Pointer and touch response stays small, settles without a JavaScript frame
@@ -50,16 +55,26 @@ test --list` when updating the baseline.
 - The official winged-buffalo mark appears on the gold carton and in Interests.
   The footer contains only copyright; no construction or inspiration copy remains.
 - The computer zooms into a readable startup and returns with its power state
-  intact. All eleven photo/object close-ups respond to ordinary pointer clicks
+  intact. Photo/object close-ups respond to ordinary pointer clicks
   at 320, 390, and 1440px, contain Tab focus, and restore their launcher's focus.
+- True touch cases spin roulette once, show a valid 0–36 result without opening
+  a dialog, and keep the result within the viewport. Reading and diploma notes
+  open, fit the screen, close, and restore focus at every touch configuration.
+- Roulette locks repeat activation during a spin, preserves keyboard focus,
+  and hides the result after its display interval. Pausing or reduced motion
+  settles the round immediately without confetti; later motion does not replay it.
 - The Peru original returns a 2400×1800 WebP; vector details crop the original
   SVG. The breeze follows pause, page visibility, and reduced-motion preferences.
-- No AudioContext is created before sound is enabled. Real browser audio produces
-  signal with either layer enabled and silence at zero volume or with both layers
-  disabled. Hidden pages suspend audio; repeated sound cycles close each context.
-- The cat sleeps, wakes and looks around, grooms, and returns to sleep. Clicking
-  the cat triggers a temporary greeting. Ambient animation pauses when hidden or
-  while a reading window is open.
+- First-visit audio requests nature only at 18% volume. A blocked browser reports
+  waiting and retries on the first gesture. Remembered mute prevents context
+  creation; volume and layer preferences survive remounts. The sound toggle does
+  not accidentally trigger the fallback before muting.
+- Real browser audio produces signal with either layer enabled and silence at
+  zero volume or with both layers disabled. Hidden pages suspend audio; repeated
+  sound cycles close each context. Failed playback permits a later retry.
+- The cat sleeps, looks around, blinks, flicks its ears and tail, and stretches.
+  Clicking or tapping triggers a temporary greeting without opening a dialog.
+  Ambient animation pauses when hidden or while a reading window is open.
 
 ## Runtime and deployment checks
 
@@ -198,3 +213,27 @@ See [dependency maintenance](docs/dependency-update.md) for package compatibilit
 holds, route/header/image smoke results, and validation limits. These results
 cover the local production artifact, not a new production deployment or a full
 repeat of the performance and memory protocol.
+
+
+## September 5 combined desktop and mobile rollout evidence
+
+Integrated the professional-room branch through `1afd089` with the dependency
+maintenance branch. The combined source passed lint, standalone TypeScript
+checking, the production build, all 104 unit tests, and all 64 browser cases
+without retries. No application dependency changed during this integration.
+
+Real touch taps verified roulette, lamp/window toggles, reading/diploma details,
+photo close-ups and computer/app navigation across seven portrait/landscape
+configurations in Chromium and WebKit. Animated roulette, repeat-spin locking,
+keyboard activation, pause and reduced motion also passed in both engines.
+The 390px rendered mobile page was visually inspected. Devices are emulated.
+
+The first combined browser run exposed two retired display-label locators and
+an autoplay probe affected by automation activation. Corrected those fixtures
+while retaining real endpoint, native audio, mute and navigation assertions.
+The final rerun passed every case. See BUG-1788663454.
+
+The owner explicitly requested immediate publication of these shared desktop
+and mobile features. Deployment and live-site verification follow the commit;
+this source record does not itself claim a successful production deployment.
+The full performance/memory release protocol was not repeated.

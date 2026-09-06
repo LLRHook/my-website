@@ -4,22 +4,27 @@
 
 A personal portfolio inside a cozy, interactive room. Turn on the computer,
 watch viOS start, and open the profile, projects, resume, interests, or contact
-apps. The window cat mostly sleeps, with occasional looks around and grooming.
+apps. The window cat mostly sleeps, with occasional looks around, ear flicks,
+blinks, and stretches. Tap the cat for a temporary greeting.
 
-The room has a daylight/evening switch, photo notes, and small nods to climbing,
-Magic: The Gathering, Pokémon, poker, and Buffalo Wild Wings. Click the computer
-for a larger monitor, or inspect eleven room details for sharp artwork, original
-photos, and a short story. On phones, the three photos sit above the room and the
-computer keeps its desk proportions. Tap the miniature screen for a full reading
-window. The gold carton on the lower right shelf uses the official Buffalo Wild
-Wings mark. Objects have quiet hover and keyboard-focus responses; their names
-and stories appear in the close-up, without plus badges around the room.
+Tap the window to switch between daylight and evening, or the lamp to toggle its
+warm glow. A small roulette wheel spins on the desk and shows a numbered result.
+Photo notes and close-ups include climbing, Magic: The Gathering, Pokémon,
+Buffalo Wild Wings, the UMBC diploma, and the book Red Rising. Click the computer
+for a larger monitor. On phones, the three photos sit above the room and the
+computer keeps its desk proportions; tapping its screen opens a readable view.
+The same room interactions and apps are available on desktop and mobile.
 
-A curtain catches a gentle breeze. Optional sound adds quiet music, bird calls,
-insects, and wind, with separate music/nature controls and a volume slider. Sound
-starts only after the visitor turns it on. Long overlapping chords and rounded
-attacks keep the music quiet. Pointer movement and taps gently shift the light,
-leaf shadows, and nearby objects; slow CSS animation supplies the idle movement.
+A curtain catches a gentle breeze. On a first visit, the room requests quiet
+nature sound at 18% volume, with music off. If the browser blocks playback, sound
+waits for a tap or key press. Sound controls report whether playback is on,
+waiting, or off, and remember mute, volume, and layer choices on that device.
+Music can be enabled separately. Pointer movement and taps gently shift the
+light, leaf shadows, and nearby objects; CSS supplies the idle animation.
+
+The Projects app highlights Billington, Citybase, and a Kilo contribution before
+the searchable public repository collection. Profile, resume, and contact views
+describe Victor's work across the stack.
 
 ## Run locally
 
@@ -52,22 +57,26 @@ To exercise a deployment, set `PLAYWRIGHT_BASE_URL` to its URL before running
 ## Implementation
 
 Next.js 16 App Router, React 19, TypeScript 6, and Tailwind CSS 4. The illustrated
-room is a 30 KB SVG. CSS handles ambient animation; React owns the computer's
+room is an SVG. CSS handles ambient animation; React owns the computer's
 off, booting, and on states. No WebGL engine or particle canvas runs on the
 homepage. The Markdown reader loads only when a visitor opens a project.
 
 - `app/components/room/Workspace.tsx`: room interactions, startup, app launchers.
 - `app/components/room/DesktopWindow.tsx`: native dialog, app navigation, content.
+- `app/components/room/FeaturedProjects.tsx`: featured professional projects.
 - `app/components/room/ProjectReadme.tsx`: lazy Markdown rendering with safe links,
   GitHub tables, an abortable request, and a bounded display length.
 - `app/components/room/WindowCat.tsx`: cat SVG and temporary greeting state.
+- `app/components/room/RouletteToy.tsx`: desk wheel, spin lifecycle, and results.
+- `app/lib/roulette.ts`: numbered pockets, secure random draw, and landing angles.
 - `app/components/room/ComputerFocus.tsx`: enlarged monitor and keyboard focus.
 - `app/components/room/ObjectDetail.tsx`: photo and vector close-ups with captions.
 - `app/components/room/RoomBreeze.tsx`: animated curtain, air, and falling leaf.
 - `app/components/room/RoomAtmosphere.tsx`: sunlight, leaf shadows, and dust motes.
 - `app/components/room/useRoomMotion.ts`: bounded pointer and touch interpolation.
 - `app/components/room/room-mobile.css`: phone photo row and scene composition.
-- `app/components/room/RoomAudio.tsx`: opt-in sound and layer controls.
+- `app/components/room/RoomAudio.tsx`: remembered sound preferences, browser
+  playback state, first-gesture fallback, and layer controls.
 - `app/lib/room-audio.ts`: original procedural Web Audio soundscape.
 - `app/room.css`: scene, responsive reading windows, animations, print styles.
 - `public/room-studio.svg`: original vector scenery.

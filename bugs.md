@@ -62,7 +62,73 @@ the end of their section, sorted by id on read.
 - **Status:** fixed-pending-migration
 - **Fix:** Preserve the pending touch reset through compatibility mouse move/down/leave events. Two unit regressions failed before the fix and pass afterward; all 54 Chromium/WebKit browser cases now pass, including the original reproducible WebKit tap/scroll failure.
 
+### [BUG-1788653836] Dialog focus trap includes inputs disabled by a fieldset
+- [x] **Severity:** med
+- **Area:** frontend, accessibility
+- **File(s):** app/components/room/ComputerFocus.tsx, ComputerFocus.test.tsx
+- **Observation:** Browser QA of a pending roulette spin found Tab could leave the close button because the focus list included radio inputs disabled through their fieldset.
+- **Expected:** Tab wraps among enabled controls inside the open dialog.
+- **Repro / Notes:** A dialog containing one close button and a disabled fieldset reproduces the incorrect boundary list.
+- **Bump:** patch
+- **Status:** fixed-pending-migration
+- **Fix:** Exclude controls matching :disabled, including fieldset descendants; regression covers forward and reverse Tab wrapping.
+
+### [BUG-1788655093] Standalone typecheck rejects injected browser test helper assertion
+- [x] **Severity:** low
+- **Area:** tests
+- **File(s):** e2e/room-motion.spec.ts
+- **Observation:** Standalone tsc reports TS2352 for the roomFrameSnapshot helper injected by the test setup, because the DOM Window type does not declare the injected function.
+- **Expected:** Typecheck the existing browser test helper without weakening the application types.
+- **Fix:** Assert through unknown before the narrow injected-helper type; runtime behavior is unchanged.
+- **Bump:** patch
+- **Status:** fixed-pending-migration
+
+### [BUG-1788655652] Evening caption loses contrast and room computer is off center
+- [x] **Severity:** med
+- **Area:** ui, accessibility
+- **File(s):** app/room.css, app/components/room/room-mobile.css, related browser tests
+- **Observation:** Evening wash darkens the room behind the unchanged dark location caption and extends behind the introduction without matching the scene’s top fade. Browser geometry measured the monitor center7.96px right of room center at1280px.
+- **Expected:** Readable labels in evening and a horizontally centered computer at desktop/mobile sizes.
+- **Repro / Notes:** Toggle Evening; inspect caption and compare computer/room bounding-box centers.
+- **Bump:** patch
+- **Status:** fixed-pending-migration
+- **Fix:** Centered the computer using its shared width variable, added a high-contrast evening caption plate, and tapered the night wash below the overlapping introduction. Browser checks found less than 0.01px stationary center offset, readable evening copy, and no mobile overflow.
+
+### [BUG-1788656593] Interrupted ambient audio cannot resume with an existing scheduler
+- [x] **Severity:** med
+- **Area:** frontend, tests
+- **File(s):** app/lib/room-audio.ts, app/lib/room-audio.test.ts, app/components/room/RoomAudio.test.tsx
+- **Observation:** setVisible(true) returns early while a timer exists even if the browser has externally suspended or interrupted its AudioContext. Review also found mismatched retry instructions, silent settings reporting playback, and gesture listeners retained for already-running contexts. The default-audio test fixture encountered Node's partial localStorage global instead of usable browser storage.
+- **Expected:** A fresh visitor gesture resumes an interrupted context without duplicating its scheduler; status and retry instructions match behavior; fallback listeners detach after playback starts; preference tests have isolated, usable storage.
+- **Repro / Notes:** Start the engine, externally suspend its context, then call setVisible(true) while its timer remains allocated.
+- **Bump:** patch
+- **Status:** fixed-pending-migration
+- **Fix:** Resume now checks actual running state before returning early; the real-engine regression verifies one scheduler after interruption/recovery. Audio status and retry instructions match actual behavior, successful playback removes gesture fallback listeners, and preference tests use isolated storage. All 99 unit/component tests pass.
+
+### [BUG-1788663409] Room documentation describes retired interactions and audio defaults
+- [x] **Severity:** low
+- **Area:** docs
+- **File(s):** README.md, VERIFICATION.md, bugs.md
+- **Observation:** After merging the professional room and roulette work, the README still described poker, eleven narrative close-ups, and sound starting only after explicit enablement. The active verification checklist retained those expectations and the prior 68-test baseline. Union merge also detached two existing fix notes from their bug entries.
+- **Expected:** Current documentation describes the shared desktop/mobile roulette, direct lamp/window controls, reading and diploma notes, professional projects, and quiet default audio with remembered preferences. Historical results remain tied to their original builds.
+- **Repro / Notes:** Compare README and current acceptance coverage with Workspace, ObjectDetail, FeaturedProjects and RoomAudio; inspect fix-note placement under BUG-1788655652 and BUG-1788656593.
+- **Bump:** patch
+- **Status:** fixed-pending-migration
+- **Fix:** Updated current behavior and acceptance descriptions, recorded the confirmed 104-unit-test baseline across 11 files, and restored the two fix notes to their owning entries. Final browser/deployment evidence is recorded separately after its checks complete.
+
 ---
+
+### [BUG-1788663454] Combined desktop features fail current lint and browser checks
+- [x] **Severity:** med
+- **Area:** frontend, tests, ci
+- **File(s):** app/components/room/RouletteToy.tsx, app/components/room/RoomAudio.tsx, e2e/projects.spec.ts, e2e/room.spec.ts, e2e/room-audio.spec.ts
+- **Observation:** Integrating the professional room branch with the updated toolchain exposed synchronous-state effect lint findings, two browser locators using retired display labels, and a blocked-autoplay probe that allowed native playback to run.
+- **Expected:** Preserve the requested desktop behavior on mobile and pass the current lint, unit, build, and browser checks without weakening runtime assertions.
+- **Repro / Notes:** The first combined run passed 104 unit tests and 61 of 64 browser cases; the three browser failures identify project naming, the experience link label, and autoplay emulation.
+- **Bump:** patch
+- **Status:** fixed-pending-migration
+
+- **Fix:** Settle paused roulette in the triggering event or conditional prop adjustment and preserve hydration-safe audio preference sync. Match the current project/action labels; gate the autoplay test on trusted pointer/key events. Lint, standalone typecheck, build, 104 unit tests, and all 64 Chromium/WebKit browser cases pass.
 
 ## Migrated to changelog
 

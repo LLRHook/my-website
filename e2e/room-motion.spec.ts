@@ -108,7 +108,7 @@ test.describe("desktop room motion", () => {
     await page.getByRole("button", { name: /Resume ambient motion/ }).click();
     await moveIntoRoom(page);
     await page.locator(".note-profile").click();
-    const detail = page.getByRole("dialog", { name: "A familiar face.", exact: true });
+    const detail = page.getByRole("dialog", { name: "Victor Ivanov", exact: true });
     await expect(detail).toBeVisible();
     await expect(page.locator(".room-stage")).toHaveAttribute("data-room-motion", "still");
     await expect.poll(() => attention(page)).toEqual({ x: 0, y: 0 });
