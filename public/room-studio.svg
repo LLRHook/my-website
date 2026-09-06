@@ -82,16 +82,23 @@
   <!-- The lower curtain is a matching RoomBreeze overlay so motion can be paused. -->
   <path d="M41 140v-8M58 144v-12M78 143v-11" stroke="#BBAA8C" stroke-width="3" stroke-linecap="round"/>
 
-  <!-- Wall print and little pinned ephemera live above the computer. -->
-  <g transform="rotate(2 904 197)">
+  <!-- A framed diploma and little pinned ephemera live above the computer.
+       B.S. in Computer Science, University of Maryland, Baltimore County, May 2024. -->
+  <g id="diploma" transform="rotate(2 904 197)">
     <rect x="847" y="137" width="135" height="127" rx="1" fill="#514D3A" fill-opacity=".08"/>
-    <rect x="843" y="133" width="135" height="127" rx="1" fill="#A98960"/>
-    <rect x="849" y="139" width="123" height="115" fill="#F7F0DE"/>
-    <rect x="860" y="150" width="101" height="93" fill="#ECE5D3"/>
-    <circle cx="930" cy="174" r="13" fill="#CBB374"/>
-    <path d="m862 213 29-44 25 33 15-20 27 32v21h-96v-22Z" fill="#AFB397"/>
-    <path d="m862 223 24-25 25 24 22-13 25 15v11h-96v-12Z" fill="#788772"/>
-    <path d="M874 245H947" stroke="#B1A68B" stroke-width=".7"/>
+    <rect x="843" y="133" width="135" height="127" rx="1" fill="#5B4636"/>
+    <rect x="846" y="136" width="129" height="121" fill="none" stroke="#8A6B4E" stroke-width=".8"/>
+    <rect x="849" y="139" width="123" height="115" fill="#EFE6CF"/>
+    <rect x="856" y="146" width="109" height="101" fill="#F8F3E6"/>
+    <rect x="859" y="149" width="103" height="95" fill="none" stroke="#B9A77E" stroke-width=".7"/>
+    <text x="910.5" y="163" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="5.4" letter-spacing=".4" fill="#5E5238">UNIVERSITY OF MARYLAND</text>
+    <text x="910.5" y="171" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="5" letter-spacing="1" fill="#7A6B4E">BALTIMORE COUNTY</text>
+    <path d="M878 178h65" stroke="#C0AE84" stroke-width=".7"/>
+    <text x="910.5" y="196" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="8.5" font-style="italic" fill="#3F3A2C">Bachelor of Science</text>
+    <text x="910.5" y="210" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="7.4" fill="#3F3A2C">Computer Science</text>
+    <path d="M878 219h65" stroke="#C0AE84" stroke-width=".7"/>
+    <text x="910.5" y="232" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="5.4" letter-spacing="1" fill="#7A6B4E">MAY 2024</text>
+    <path d="M849 139h123M849 139v115" stroke="#FFFFFF" stroke-opacity=".35" stroke-width=".8"/>
   </g>
   <g transform="rotate(-5 1004 218)">
     <path d="M985 198h62v46h-62z" fill="#AAA080" fill-opacity=".12"/>
@@ -111,18 +118,31 @@
   <path d="M1099 252h258v3h-258zM1099 376h258v3h-258zM1099 507h258v3h-258z" fill="#D0B084"/>
   <path d="M1125 519v20h12v-20M1321 519v20h12v-20" stroke="#9A805D" stroke-width="4"/>
 
-  <!-- Top shelf books with quiet cloth spines. -->
-  <rect x="1136" y="190" width="20" height="62" rx="1.5" fill="#6F806B"/>
-  <rect x="1158" y="183" width="17" height="69" rx="1.5" fill="#C6B99A"/>
-  <rect x="1177" y="196" width="24" height="56" rx="1.5" fill="#B9795D"/>
-  <g transform="rotate(-9 1211 250)"><rect x="1205" y="181" width="16" height="71" rx="1.5" fill="#89927A"/><path d="M1208 188h10M1208 192h10M1208 241h10" stroke="#DDD9BE" stroke-width="1.2"/></g>
-  <path d="M1140 197h12M1140 201h12M1140 243h12M1181 202h16M1181 206h16M1181 244h16" stroke="#E0D8B9" stroke-opacity=".7"/>
-  <path d="M1162 190h9M1162 193h9M1162 244h9" stroke="#887F64" stroke-opacity=".6"/>
-  <path d="M1140 214h12v9h-12z" stroke="#C5CAA8" stroke-opacity=".6"/>
-  <path d="M1185 218v11m-3-8h6" stroke="#DEC5A1" stroke-opacity=".5"/>
+  <g id="reading-books">
+  <!-- Top shelf: Red Rising trilogy, cloth spines (terracotta / gold / slate). -->
+  <rect x="1136" y="184" width="26" height="68" rx="1.5" fill="#B0674F"/>
+  <rect x="1136" y="184" width="2" height="68" rx="1" fill="#D08A70" fill-opacity=".5"/>
+  <rect x="1160.5" y="184" width="1.5" height="68" fill="#7E4536" fill-opacity=".45"/>
+  <path d="M1140 187h18M1140 190h18M1140 248h18" stroke="#EAD3B8" stroke-opacity=".75"/>
+  <path d="M1149 238l3 3-3 3-3-3z" fill="none" stroke="#EAD3B8" stroke-opacity=".85"/>
+  <text transform="translate(1147 215) rotate(90)" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="6" letter-spacing=".4" fill="#F1DFC9">RED RISING</text>
+  <rect x="1165" y="188" width="25" height="64" rx="1.5" fill="#C9A45C"/>
+  <rect x="1165" y="188" width="2" height="64" rx="1" fill="#E2C58A" fill-opacity=".6"/>
+  <rect x="1188.5" y="188" width="1.5" height="64" fill="#8A6C34" fill-opacity=".45"/>
+  <path d="M1169 191h17M1169 194h17M1169 249h17" stroke="#6B5530" stroke-opacity=".6"/>
+  <circle cx="1177.5" cy="243" r="2.6" fill="none" stroke="#6B5530" stroke-opacity=".7"/>
+  <circle cx="1177.5" cy="243" r=".8" fill="#6B5530" fill-opacity=".7"/>
+  <text transform="translate(1175.5 218) rotate(90)" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="6" letter-spacing=".4" fill="#5A4626">GOLDEN SON</text>
+  <rect x="1193" y="181" width="27" height="71" rx="1.5" fill="#5F7A7C"/>
+  <rect x="1193" y="181" width="2" height="71" rx="1" fill="#86A0A0" fill-opacity=".55"/>
+  <rect x="1218.5" y="181" width="1.5" height="71" fill="#3E5456" fill-opacity=".5"/>
+  <path d="M1197 185h19M1197 188h19M1197 250h19" stroke="#E3E8DC" stroke-opacity=".7"/>
+  <path d="M1206.5 240.5l3.5 6.5h-7z" fill="none" stroke="#E3E8DC" stroke-opacity=".8"/>
+  <text transform="translate(1204.5 215) rotate(90)" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="6" letter-spacing=".4" fill="#E3E8DC">MORNING STAR</text>
   <rect x="1233" y="242" width="57" height="10" rx="2" fill="#B6A789"/>
   <path d="M1238 244h46v5h-46" fill="#E9DFC9"/>
   <rect x="1239" y="234" width="47" height="8" rx="1" fill="#7E8874"/>
+  </g>
   <!-- A little terracotta plant on the top shelf. -->
   <path d="m1300 224 4 27h24l4-27h-32Z" fill="url(#pot)"/>
   <ellipse cx="1316" cy="224" rx="16" ry="5" fill="#CB8766"/>
@@ -243,10 +263,6 @@
 
   <!-- Roulette is rendered as an interactive SVG by RouletteToy. -->
 
-  <path d="m1094 618 57 8" stroke="#C39A56" stroke-width="4" stroke-linecap="round"/>
-  <path d="m1094 618 57 8" stroke="#E0BF78" stroke-width="1.3" stroke-linecap="round"/>
-  <path d="m1152 624 7 3-8 1" fill="#D6C5A1"/>
-  <path d="m1157 626 3 1-3 1" fill="#5E6552"/>
 
   <!-- A floor basket, a folded throw, and one unfussy little plant. -->
   <ellipse cx="167" cy="720" rx="70" ry="15" fill="url(#deskShadow)"/>

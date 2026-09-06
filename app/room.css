@@ -25,13 +25,16 @@ button:disabled { cursor: default; }
 .room-intro > p:last-child { font-size: 12px; color: #727668; line-height: 1.8; }
 .room-stage { container-type: inline-size; position: relative; max-width: 1440px; aspect-ratio: 1440 / 850; margin: -65px auto -5px; isolation: isolate; }
 .room-art { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: fill; mask-image: linear-gradient(to bottom, transparent, black 13%); z-index: -3; }
-.room-night-wash { position: absolute; inset: 0; background: #142a3b; mix-blend-mode: multiply; opacity: 0; transition: opacity 1s; pointer-events: none; z-index: -1; }
+.room-night-wash { position: absolute; inset: 0; mask-image: linear-gradient(to bottom, transparent 0, transparent 65px, black max(100px, 18%)); background: #142a3b; mix-blend-mode: multiply; opacity: 0; transition: opacity 1s; pointer-events: none; z-index: -1; }
 .workspace[data-night=true] .room-night-wash { opacity: .62; }
 .workspace[data-night=true] .room-art { filter: saturate(.72); }
-.room-caption { position: absolute; top: 68%; left: 6.6%; font-size: .65cqw; letter-spacing: .17cqw; font-weight: 500; color: #5a6852; }
+.room-caption { position: absolute; top: 68%; left: 6.6%; font-size: .65cqw; letter-spacing: .17cqw; font-weight: 500; color: #5a6852; padding: .55cqw .9cqw .6cqw; margin: -.55cqw 0 0 -.9cqw; border-radius: .35cqw; transition: color 1s, background-color 1s; }
 .room-caption small { display: block; margin: .7cqw 0 0 1.1cqw; letter-spacing: 0; font-size: .75cqw; font-family: var(--font-handwriting), cursive; }
 .tiny-dot { width: .4cqw; height: .4cqw; background: #879676; border-radius: 50%; display: inline-block; margin: 0 .6cqw .1cqw 0; }
-.computer { position: absolute; top: 33.18%; left: 33.89%; width: 33.47%; aspect-ratio: 482 / 355; z-index: 3; }
+/* In the evening the caption sits on a quiet dark plaque so cream text stays readable (contrast above 4.5:1). */
+.workspace[data-night=true] .room-caption { color: #f3ecd8; background: #1a2822e0; }
+.workspace[data-night=true] .tiny-dot { background: #d9cfa8; }
+.computer { --computer-width: 33.47%; position: absolute; top: 33.18%; left: calc(50% - var(--computer-width) / 2); width: var(--computer-width); aspect-ratio: 482 / 355; z-index: 3; }
 .monitor-body { height: 88%; position: relative; background: linear-gradient(135deg, #e5e3d8, #cccfc5 72%, #babeb3); padding: 1cqw 1cqw 0; border-radius: 1.2cqw 1.2cqw .85cqw .85cqw; border: .14cqw solid #f7f5e9; border-right-color: #a7ac9e; border-bottom: .36cqw solid #a4aa9f; box-shadow: .7cqw 1.1cqw 1.6cqw #3c422824, inset 0 0 0 .1cqw #ffffff5c; }
 .camera-dot { width: .28cqw; height: .28cqw; background: #6a7266; border-radius: 50%; position: absolute; top: .37cqw; left: 50%; }
 .monitor-screen { position: relative; height: 89%; overflow: hidden; border-radius: .47cqw; border: .35cqw solid #414c42; box-shadow: inset .2cqw .2cqw .6cqw #0005; background: #263a31; }

@@ -1,16 +1,15 @@
 import { test, expect } from "@playwright/test";
 
 const objects = [
+  [".target-reading", "Currently reading · Red Rising"],
+  [".target-education", "B.S. Computer Science · UMBC"],
   [".note-profile", "Victor Ivanov"],
   [".note-work", "At the podium"],
   [".note-travel", "Peru · September 2026"],
   [".hobby-hotspot", "Magic & Pokémon"],
   [".climb-hotspot", "Rock climbing"],
   [".target-wings", "Buffalo Wild Wings"],
-  [".target-window", "By the window"],
-  [".target-lamp", "Desk lamp"],
   [".target-plants", "Plants"],
-  [".cat-detail-hotspot", "Meet the cat"],
 ];
 
 for (const viewport of [{ width: 320, height: 740 }, { width: 390, height: 844 }, { width: 412, height: 915 }, { width: 1440, height: 1000 }]) {
@@ -132,4 +131,42 @@ test("the breeze follows pause and reduced-motion preferences", async ({ page })
   await expect(curtain).toHaveCSS("animation-play-state", "paused");
   await page.emulateMedia({ reducedMotion: "reduce" });
   await expect(curtain).toHaveCSS("animation-name", "none");
+});
+
+test("the window, lamp, and cat respond in the room without a close-up", async ({ page }) => {
+  await page.goto("/");
+  const room = page.locator(".workspace");
+  const glow = page.locator(".room-lamp-glow");
+  const caption = page.locator(".room-caption");
+
+  const windowSeat = page.getByRole("button", { name: "Look out the window. Bring in the evening", exact: true });
+  await expect(windowSeat).toHaveAttribute("aria-pressed", "false");
+  await windowSeat.click();
+  await expect(page.locator("dialog[open]")).toHaveCount(0);
+  await expect(room).toHaveAttribute("data-night", "true");
+  await expect(page.getByRole("button", { name: "Look out the window. Bring back daylight", exact: true })).toHaveAttribute("aria-pressed", "true");
+  await expect(page.getByRole("button", { name: "Evening. Switch to daylight", exact: true })).toHaveAttribute("aria-pressed", "true");
+  await expect(caption).toHaveCSS("color", "rgb(243, 236, 216)");
+  await page.getByRole("button", { name: "Evening. Switch to daylight", exact: true }).click();
+  await expect(room).toHaveAttribute("data-night", "false");
+  await expect(page.getByRole("button", { name: "Look out the window. Bring in the evening", exact: true })).toHaveAttribute("aria-pressed", "false");
+
+  await expect(room).toHaveAttribute("data-lamp", "true");
+  await expect(glow).toHaveCSS("opacity", "0.8");
+  const lamp = page.getByRole("button", { name: "Desk lamp is on. Switch it off", exact: true });
+  await expect(lamp).toHaveAttribute("aria-pressed", "true");
+  await lamp.click();
+  await expect(page.locator("dialog[open]")).toHaveCount(0);
+  await expect(room).toHaveAttribute("data-lamp", "false");
+  await expect(room).toHaveAttribute("data-night", "false");
+  await expect(glow).toHaveCSS("opacity", "0");
+  const lampOff = page.getByRole("button", { name: "Desk lamp is off. Switch it on", exact: true });
+  await expect(lampOff).toHaveAttribute("aria-pressed", "false");
+  await lampOff.click();
+  await expect(room).toHaveAttribute("data-lamp", "true");
+
+  await expect(page.getByRole("button", { name: "Meet the window cat up close", exact: true })).toHaveCount(0);
+  await page.getByRole("button", { name: "Say hello to the cat", exact: true }).click();
+  await expect(page.locator("dialog[open]")).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Let the cat sleep", exact: true })).toHaveAttribute("aria-pressed", "true");
 });

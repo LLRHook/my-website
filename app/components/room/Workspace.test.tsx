@@ -59,12 +59,59 @@ describe("Workspace power lifecycle", () => {
     expect(view.container.querySelector(".roulette-confetti")).toBeNull();
   });
 
-  it("shows a concise window close-up and restores the room trigger", () => {
+  it("toggles evening from the window and keeps the toolbar control in sync", () => {
     render(<Workspace repos={[]} />);
-    const trigger = screen.getByRole("button", { name: "Take a closer look out the window" });
+    const room = screen.getByTestId("computer").closest(".workspace");
+    const windowSeat = screen.getByRole("button", { name: "Look out the window. Bring in the evening" });
+    expect(windowSeat).toHaveAttribute("aria-pressed", "false");
+    fireEvent.click(windowSeat);
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    expect(room).toHaveAttribute("data-night", "true");
+    expect(windowSeat).toHaveAccessibleName("Look out the window. Bring back daylight");
+    expect(windowSeat).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByRole("button", { name: "Evening. Switch to daylight" })).toHaveAttribute("aria-pressed", "true");
+    fireEvent.click(screen.getByRole("button", { name: "Evening. Switch to daylight" }));
+    expect(room).toHaveAttribute("data-night", "false");
+    expect(windowSeat).toHaveAccessibleName("Look out the window. Bring in the evening");
+    expect(windowSeat).toHaveAttribute("aria-pressed", "false");
+  });
+
+  it("toggles the desk lamp glow in the room independently of daylight", () => {
+    render(<Workspace repos={[]} />);
+    const room = screen.getByTestId("computer").closest(".workspace");
+    expect(room).toHaveAttribute("data-lamp", "true");
+    const lamp = screen.getByRole("button", { name: "Desk lamp is on. Switch it off" });
+    expect(lamp).toHaveAttribute("aria-pressed", "true");
+    fireEvent.click(lamp);
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    expect(room).toHaveAttribute("data-lamp", "false");
+    expect(room).toHaveAttribute("data-night", "false");
+    expect(lamp).toHaveAccessibleName("Desk lamp is off. Switch it on");
+    expect(lamp).toHaveAttribute("aria-pressed", "false");
+    fireEvent.click(lamp);
+    expect(room).toHaveAttribute("data-lamp", "true");
+    expect(lamp).toHaveAttribute("aria-pressed", "true");
+  });
+
+  it("wakes the window cat in the room instead of opening a close-up", () => {
+    render(<Workspace repos={[]} />);
+    expect(screen.queryByRole("button", { name: "Meet the window cat up close" })).not.toBeInTheDocument();
+    const cat = screen.getByRole("button", { name: "Say hello to the cat" });
+    fireEvent.click(cat);
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    expect(cat).toHaveAccessibleName("Let the cat sleep");
+    expect(cat).toHaveAttribute("aria-pressed", "true");
+    act(() => vi.advanceTimersByTime(6500));
+    expect(cat).toHaveAccessibleName("Say hello to the cat");
+    expect(cat).toHaveAttribute("aria-pressed", "false");
+  });
+
+  it("shows a concise diploma close-up and restores the room trigger", () => {
+    render(<Workspace repos={[]} />);
+    const trigger = screen.getByRole("button", { name: "Take a closer look at the diploma" });
     fireEvent.click(trigger);
-    const detail=screen.getByRole("dialog", { name: "By the window" });
-    expect(within(detail).getByRole("img", { name: "By the window" })).toBeInTheDocument();
+    const detail = screen.getByRole("dialog", { name: "B.S. Computer Science · UMBC" });
+    expect(within(detail).getByRole("img", { name: "B.S. Computer Science · UMBC" })).toBeInTheDocument();
     expect(detail.querySelector("dl, .detail-description, .object-detail-story")).toBeNull();
     fireEvent.click(within(detail).getByRole("button", { name: "Back to room" }));
     expect(trigger).toHaveFocus();
