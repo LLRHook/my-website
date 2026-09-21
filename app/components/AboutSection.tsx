@@ -29,7 +29,7 @@ export default function AboutSection() {
       <FadeInOnScroll delay={0.1}>
         <div className="space-y-6 mb-20">
           <p className="text-xl sm:text-2xl text-text-secondary leading-relaxed">
-            Lead full-stack engineer at Paradigm Testing, based in Tysons,
+            Senior full-stack engineer at Paradigm Testing, based in Sterling,
             Virginia. I studied computer science at UMBC after switching from
             biochemistry mid-undergrad — spent too much time behind a screen to
             pretend I belonged in a lab. Currently finishing a master&apos;s in

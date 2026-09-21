@@ -39,7 +39,7 @@ export default function HeroSection() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.3 }}
         >
-          Software Engineer · Tysons, VA
+          Software Engineer · Sterling, VA
         </motion.p>
 
         <motion.div

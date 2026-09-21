@@ -14,6 +14,7 @@ const personJson = JSON.stringify({
     "@type": "Place",
     address: {
       "@type": "PostalAddress",
+      addressLocality: "Sterling",
       addressRegion: "VA",
       addressCountry: "US",
     },
