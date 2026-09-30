@@ -25,10 +25,11 @@ function Projects({ repos }: { repos: RepoCardData[] }) {
   }, [selected]);
   const matching = repos.filter((repo) => {
     const display = presentProject(repo);
+    if (!display.description || repo.name.toLowerCase() === repo.owner.toLowerCase()) return false;
     return `${repo.name} ${display.name} ${display.description ?? ""} ${repo.language ?? ""} ${repo.topics.join(" ")}`.toLowerCase().includes(query.toLowerCase());
   });
-  if (selected) return <section className="project-detail"><button className="text-button back-button" onClick={() => setSelected(null)}>← All projects</button><p className="eyebrow">PROJECT NOTES</p><h2 ref={projectTitle} tabIndex={-1}>{presentProject(selected).name}</h2><p className="app-lead">{presentProject(selected).description || "An experiment from my public GitHub workspace."}</p><a className="primary-link" href={selected.htmlUrl} target="_blank" rel="noopener noreferrer">Open repository <Icon name="arrow" /></a><ProjectReadme key={selected.id} repo={selected} /></section>;
-  return <section><p className="eyebrow">THE THINGS I BUILD</p><h2>Selected work<span>.</span></h2><p className="app-lead">Products, developer tools, and the engineering behind them.</p>{!query.trim() && <FeaturedProjects />}<h3 className="section-label">The project shelf</h3><label className="project-search"><Icon name="folder" /><input ref={searchInput} type="search" aria-label="Search projects" placeholder="Find a project, language, or idea…" value={query} onChange={(event) => setQuery(event.target.value)} /><span>{matching.length}</span></label><div className="project-grid">{matching.map((sourceRepo, index) => { const repo = presentProject(sourceRepo); return <button className="project-tile" key={repo.id} onClick={() => setSelected(sourceRepo)}><div className="project-tile-top"><span className={`project-folder folder-${index % 4}`}><Icon name="folder" /></span><span>↗</span></div><h3>{repo.name}</h3><p>{repo.description || "An experiment from my public GitHub workspace."}</p><div className="project-meta"><span><i />{repo.language || "Code & ideas"}</span><span>View project</span></div></button>; })}</div>{matching.length === 0 && <div className="empty-projects"><h3>{repos.length ? "No matching projects." : "The project shelf is taking a moment."}</h3><p>{repos.length ? "Try a different name or language." : "You can explore all of my public work directly on GitHub."}</p><a href={GITHUB_HREF} target="_blank" rel="noopener noreferrer">Visit GitHub ↗</a></div>}</section>;
+  if (selected) return <section className="project-detail"><button className="text-button back-button" onClick={() => setSelected(null)}>← All projects</button><p className="eyebrow">PROJECT NOTES</p><h2 ref={projectTitle} tabIndex={-1}>{presentProject(selected).name}</h2><p className="app-lead">{presentProject(selected).description}</p><a className="primary-link" href={selected.htmlUrl} target="_blank" rel="noopener noreferrer">Open repository <Icon name="arrow" /></a><ProjectReadme key={selected.id} repo={selected} /></section>;
+  return <section><p className="eyebrow">THE THINGS I BUILD</p><h2>Selected work<span>.</span></h2><p className="app-lead">Products, developer tools, and the engineering behind them.</p>{!query.trim() && <FeaturedProjects />}<h3 className="section-label">The project shelf</h3><label className="project-search"><Icon name="folder" /><input ref={searchInput} type="search" aria-label="Search projects" placeholder="Find a project, language, or idea…" value={query} onChange={(event) => setQuery(event.target.value)} /><span>{matching.length}</span></label><div className="project-grid">{matching.map((sourceRepo, index) => { const repo = presentProject(sourceRepo); return <button className="project-tile" key={repo.id} onClick={() => setSelected(sourceRepo)}><div className="project-tile-top"><span className={`project-folder folder-${index % 4}`}><Icon name="folder" /></span><span>↗</span></div><h3>{repo.name}</h3><p>{repo.description}</p><div className="project-meta"><span><i />{repo.language || "Code & ideas"}</span><span>View project</span></div></button>; })}</div>{matching.length === 0 && <div className="empty-projects"><h3>{repos.length ? "No matching projects." : "The project shelf is taking a moment."}</h3><p>{repos.length ? "Try a different name or language." : "You can explore all of my public work directly on GitHub."}</p><a href={GITHUB_HREF} target="_blank" rel="noopener noreferrer">Visit GitHub ↗</a></div>}</section>;
 }
 
 function About({ navigate }: { navigate: (id: AppId) => void }) {
@@ -36,7 +37,76 @@ function About({ navigate }: { navigate: (id: AppId) => void }) {
 }
 
 function Resume() {
-  return <section className="resume-content"><div className="resume-topline"><p className="eyebrow">RESUME.MD</p><button className="text-button print-button" onClick={() => window.print()}><Icon name="resume" /> Print / save PDF</button></div><h2>Victor Ivanov<span>.</span></h2><p className="resume-title">Senior Full-Stack Engineer</p><p className="resume-contact">Sterling, Virginia · DoD Secret eligibility (DCSA 2026) · <a href={EMAIL_HREF}>victor.n.ivanov@gmail.com</a><br /><a href="https://victorivanov.engineer">victorivanov.engineer</a> · <a href={GITHUB_HREF}>github.com/LLRHook</a></p><p className="prose resume-summary">Secret-eligible full-stack engineer building certification software, multi-tenant platforms, and tested APIs. Experience with Java, Spring Boot, React, PostgreSQL, Go, and production delivery. Open to on-site and hybrid roles across the DMV.</p><h3 className="resume-section-title">Experience</h3><article className="resume-role"><div><h4>Senior Backend Engineer</h4><span>May 2024 – present</span></div><p>Paradigm Testing</p><ul><li>Lead architecture and production readiness across certification software products.</li><li>Build React and Spring Boot exam workflows, including scheduling, accommodations, and tenant-scoped APIs.</li><li>Led the transition from a monolith to five Spring Boot services for exam delivery and review.</li><li>Develop real-time exam video systems, role-based access, automated tests, and merge-gated delivery pipelines.</li></ul></article><article className="resume-role"><div><h4>Software Developer</h4><span>June 2022 – May 2024</span></div><p>Paradigm Testing</p><ul><li>Built and maintained an oral-exam platform for high-stakes certification.</li><li>Led JPA adoption and resolved waiting-room failures under concurrent exam load.</li></ul></article><article className="resume-role"><div><h4>Full-Stack Engineering Practicum</h4><span>July – August 2026</span></div><p>Revature</p><ul><li>Built a Next.js trainer analytics dashboard with server-driven filtering, accessible tables, and automated tests.</li><li>Rebuilt a quiz flow using server-rendered Next.js, FastAPI sessions, and end-to-end browser tests.</li></ul></article><h3 className="resume-section-title">Education</h3><div className="education-row"><div><h4>Georgia Institute of Technology</h4><p>M.S. Computer Science</p></div><span>Expected December 2027</span></div><div className="education-row"><div><h4>University of Maryland, Baltimore County</h4><p>B.S. Computer Science</p></div></div><h3 className="resume-section-title">Technical skills</h3><p className="resume-skills">Java · Spring Boot · Go · TypeScript · React · Next.js · Python · PostgreSQL · Redis / Valkey · Docker · AWS · REST APIs · CI/CD · Automated testing</p><p className="resume-footnote">Screen edition, adapted from my August 2026 resume.</p></section>;
+  return (
+    <section className="resume-content">
+      <div className="resume-topline">
+        <p className="eyebrow">RESUME.MD</p>
+        <button className="text-button print-button" onClick={() => window.print()}><Icon name="resume" /> Print / save PDF</button>
+        <a className="text-button print-button" href="/Victor_Ivanov_Resume.pdf" download="Victor_Ivanov_Resume.pdf">Download PDF</a>
+      </div>
+      <h2>Victor Ivanov<span>.</span></h2>
+      <p className="resume-title">Senior Full-Stack Engineer</p>
+      <p className="resume-contact">
+        Sterling, Virginia · DoD Secret eligibility (DCSA 2026) · <a href={EMAIL_HREF}>victor.n.ivanov@gmail.com</a><br />
+        <a href="https://victorivanov.engineer">victorivanov.engineer</a> · <a href={GITHUB_HREF}>github.com/LLRHook</a> · <a href={SOCIAL_BY_ICON.linkedin.href}>LinkedIn</a>
+      </p>
+      <p className="prose resume-summary">Secret-eligible, backend-leaning full-stack engineer with 4+ years shipping high-stakes certification SaaS. Owned a React/Spring Boot scheduling workflow end to end, carried a billing hotfix through live production validation, and built Next.js analytics and quiz experiences with explicit async, accessibility, and security controls. Open to on-site and hybrid roles and customer travel.</p>
+      <h3 className="resume-section-title">Experience</h3>
+      <article className="resume-role">
+        <div><h4>Senior Backend Engineer</h4><span>May 2024 – present</span></div>
+        <p>Paradigm Testing · Remote</p>
+        <ul>
+          <li>Lead architecture, priorities, and production readiness for three engineers across four certification SaaS products.</li>
+          <li>Owned a React/Spring Boot written-exam scheduling workflow end to end: create/edit wizards, dirty state, an ADA accommodation picker, structured 409 conflict handling, tenant-scoped CRUD, and 10 dedicated test files/classes.</li>
+          <li>Owned a billing hotfix from root cause through protected production deployment; live reconciliation corrected an undercharge and restored accurate invoicing across a large document batch.</li>
+          <li>Diagnosed a three-month multithreaded AWS file-lock failure; cut errors from 80% to near-zero for 10 organizations.</li>
+          <li>Led a monolith-to-microservices rewrite into five Spring Boot 3 services for oral/written exams, plagiarism detection, AI proctoring, and results review; the MVP serves production traffic.</li>
+          <li>Architected secure real-time exam video delivery with WebSockets/STOMP, direct-to-S3 uploads, JWT role controls, audit logs, and Valkey-backed refresh tokens.</li>
+          <li>Partnered with a proctoring vendor and InfoSec to integrate proctoring across oral and written exam flows; authored cross-role acceptance steps and completed validation.</li>
+          <li>Built merge-gated CI/CD and 550+ automated tests from zero; containerized Playwright auth, admin CRUD, and impersonation flows in Bitbucket Pipelines, supporting six releases without covered-workflow regressions.</li>
+          <li>Turned live V&amp;V and demo findings into a fail-closed, 10-stage pilot gate spanning tenant onboarding, candidate disconnect/resume, scoring, and audit reconstruction; exposed an answer-key leak before go-live.</li>
+        </ul>
+      </article>
+      <article className="resume-role">
+        <div><h4>Software Developer</h4><span>June 2022 – May 2024</span></div>
+        <p>Paradigm Testing · Maryland</p>
+        <ul><li>Built a high-stakes oral-exam platform serving 4,800+ candidates annually; led JPA adoption across 73 entities and eliminated peak-load waiting-room errors at 200+ concurrent sessions.</li></ul>
+      </article>
+      <article className="resume-role">
+        <div><h4>Full-Stack Engineering Practicum</h4><span>July – August 2026</span></div>
+        <p>Revature</p>
+        <ul>
+          <li>Delivered 63 merged pull requests in 22 days, including a Next.js trainer analytics dashboard with server-driven filters/paging, an accessible table equivalent for SVG analytics, independent async states, retry UX, and 27 Vitest cases.</li>
+          <li>Rebuilt the quiz flow as a server-rendered Next.js route backed by FastAPI sessions: one request per question, zero-request history navigation, ownership-checked resume, token redaction, and Playwright E2E through nginx.</li>
+        </ul>
+      </article>
+      <h3 className="resume-section-title">Selected projects</h3>
+      <article className="resume-role">
+        <h4><a href="https://github.com/LLRHook/mailit">MailIt</a></h4>
+        <p>Go, Next.js 16, PostgreSQL, Redis, Docker/Kubernetes</p>
+        <ul><li>REST APIs, async workers, inbound SMTP, and a Next.js dashboard; direct MX delivery, DKIM, replay-safe sends, signed webhooks, multi-arch releases, and 523 tests.</li></ul>
+      </article>
+      <article className="resume-role">
+        <h4><a href="https://github.com/LLRHook/citybase">Citybase</a></h4>
+        <p>Electron, React, Node.js</p>
+        <ul><li>Desktop IDE mapping repositories into an isometric city and dispatching Claude/Codex through typed IPC; streamed, cancellable runs, persisted history, guarded Git operations, and 393 tests.</li></ul>
+      </article>
+      <article className="resume-role">
+        <h4><a href="https://github.com/LLRHook/fix-youtube">Fix YouTube</a></h4>
+        <p>JavaScript, Manifest V3</p>
+        <ul><li>Zero-dependency extension for SPA-aware Shorts redirects, feed filters, focus timers, watch history, and settings import/export; cross-browser CI and 15 tests.</li></ul>
+      </article>
+      <h3 className="resume-section-title">Education</h3>
+      <div className="education-row"><div><h4>Georgia Institute of Technology</h4><p>M.S. Computer Science, Systems &amp; Architecture (online)</p></div><span>Expected December 2027</span></div>
+      <div className="education-row"><div><h4>University of Maryland, Baltimore County</h4><p>B.S. Computer Science</p></div></div>
+      <h3 className="resume-section-title">Technical skills</h3>
+      <p className="resume-skills"><strong>Frontend:</strong> TypeScript/JavaScript, React, Next.js 16, Vite, HTML/CSS, React Query, Playwright, Vitest</p>
+      <p className="resume-skills"><strong>Backend:</strong> Java 21, Spring Boot 3, Spring Security, JPA/Hibernate, Python, FastAPI, Go, REST, WebSockets/STOMP</p>
+      <p className="resume-skills"><strong>Data &amp; cloud:</strong> PostgreSQL, MariaDB, Redis/Valkey, AWS (EC2, S3, RDS), Docker, Kubernetes/Helm</p>
+      <p className="resume-skills"><strong>Delivery &amp; security:</strong> Bitbucket Pipelines, GitHub Actions, CI/CD, OAuth2/JWT, JUnit/Mockito, Testcontainers, Pytest</p>
+      <p className="resume-footnote">Updated September 2026.</p>
+    </section>
+  );
 }
 
 function Interests() {
@@ -57,7 +127,7 @@ function Interests() {
 }
 
 function Contact() {
-  return <section className="contact-app"><span className="contact-stamp"><Icon name="mail" /></span><p className="eyebrow">A NOTE FROM YOUR DESK TO MINE</p><h2>Let&apos;s make<br />something <em>good.</em></h2><p className="app-lead">Have a project in mind, a question about my work, or a particularly good climbing route?</p><a className="contact-email" href={EMAIL_HREF}>victor.n.ivanov@gmail.com <Icon name="arrow" /></a><div className="contact-links"><a href={GITHUB_HREF} target="_blank" rel="noopener noreferrer">GitHub ↗</a><a href={SOCIAL_BY_ICON.linkedin.href} target="_blank" rel="noopener noreferrer">LinkedIn ↗</a><a href={SOCIAL_BY_ICON.x.href} target="_blank" rel="noopener noreferrer">X ↗</a></div><p className="contact-location"><span /> Virginia · Eastern time</p></section>;
+  return <section className="contact-app"><span className="contact-stamp"><Icon name="mail" /></span><p className="eyebrow">A NOTE FROM YOUR DESK TO MINE</p><h2>Let&apos;s make<br />something <em>good.</em></h2><p className="app-lead">Have a project in mind, a question about my work, or a particularly good climbing route?</p><a className="contact-email" href={EMAIL_HREF}>victor.n.ivanov@gmail.com <Icon name="arrow" /></a><div className="contact-links"><a href={GITHUB_HREF} target="_blank" rel="noopener noreferrer">GitHub ↗</a><a href={SOCIAL_BY_ICON.linkedin.href} target="_blank" rel="noopener noreferrer">LinkedIn ↗</a></div><p className="contact-location"><span /> Virginia · Eastern time</p></section>;
 }
 
 export default function DesktopWindow({ app, onNavigate, onClose, repos }: { app: AppId | null; onNavigate: (id: AppId) => void; onClose: () => void; repos: RepoCardData[] }) {

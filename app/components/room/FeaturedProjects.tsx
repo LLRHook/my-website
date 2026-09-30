@@ -4,11 +4,11 @@ export default function FeaturedProjects() {
   return (
     <div className="featured-projects" aria-label="Selected work">
       <article className="featured-project featured-project-main">
-        <p className="featured-category">01 / Personal project</p>
-        <h3>Billington <span>Make the shared trip simpler.</span></h3>
-        <p>Groups need to keep track of expenses and work out who owes what. Billington connects a Flutter app, a Next.js viewer, and a Go API through shared tabs and member links, without requiring accounts.</p>
-        <p className="featured-stack">Go · Flutter · Next.js · PostgreSQL</p>
-        <div className="featured-links"><a href="https://youtube.com/shorts/T1GHR6JgOX8?feature=share" target="_blank" rel="noopener noreferrer">Early demo (Spliq v1) <Icon name="arrow" /></a><a href="https://github.com/LLRHook/checksinmyhead" target="_blank" rel="noopener noreferrer">Explore the source <Icon name="arrow" /></a></div>
+        <p className="featured-category">01 / PERSONAL PROJECT</p>
+        <h3>MailIt <span>Email infrastructure you can run yourself.</span></h3>
+        <p>A self-hosted email platform: REST APIs, async workers, inbound SMTP, direct MX delivery, DKIM, replay-safe sends, and signed webhooks, with a Next.js dashboard and 523 tests.</p>
+        <p className="featured-stack">Go · Next.js · PostgreSQL · Redis · Kubernetes</p>
+        <div className="featured-links"><a href="https://github.com/LLRHook/mailit" target="_blank" rel="noopener noreferrer">Explore the source <Icon name="arrow" /></a></div>
       </article>
       <article className="featured-project">
         <p className="featured-category">02 / Developer-tool experiment</p>

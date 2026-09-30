@@ -50,6 +50,35 @@ describe("DesktopWindow projects", () => {
     expect(screen.getByRole("heading", { name: "city-demo" })).toBeInTheDocument();
   });
 
+  it("hides empty descriptions and case-insensitive profile README repos after presentation", () => {
+    openProjects([
+      ...repos,
+      { ...repos[0], id: 3, name: "empty-repo", description: "" },
+      { ...repos[0], id: 4, name: "null-repo", description: null },
+      { ...repos[0], id: 5, name: "SaMpLe-OwNeR", description: "My profile" },
+      { ...repos[0], id: 6, name: "checksinmyhead", owner: "LLRHook", description: null },
+    ]);
+    expect(screen.queryByRole("heading", { name: "empty-repo" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "null-repo" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "SaMpLe-OwNeR" })).not.toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Billington" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "mail-demo" })).toBeInTheDocument();
+  });
+
+  it("renders local development links as plain text while preserving public links", async () => {
+    const hosts = ["localhost:3000", "127.0.0.1:8000", "0.0.0.0:5173", "[::1]:3000", "service.local:8080"];
+    const markdown = hosts.map((host, i) => `[Local ${i}](http://${host}/docs)`).join("\n\n") + "\n\n[Public](https://example.com/docs)\n\n[Protocol local](//localhost:3000)";
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(markdown)));
+    openProjects();
+    fireEvent.click(screen.getByRole("button", { name: /mail-demo/ }));
+    for (let i = 0; i < hosts.length; i++) {
+      expect(await screen.findByText(`Local ${i}`, { selector: "span" })).toBeInTheDocument();
+      expect(screen.queryByRole("link", { name: `Local ${i} ↗` })).not.toBeInTheDocument();
+    }
+    expect(screen.getByText("Protocol local", { selector: "span" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Public ↗" })).toHaveAttribute("href", "https://example.com/docs");
+  });
+
   it("provides the GitHub fallback when no repos are available", () => {
     openProjects([]);
     expect(screen.getByText("The project shelf is taking a moment.")).toBeInTheDocument();
@@ -59,7 +88,7 @@ describe("DesktopWindow projects", () => {
   it("keeps selected work available when the GitHub shelf is unavailable", () => {
     openProjects([]);
     expect(screen.getByRole("link", { name: "Merged contribution" })).toHaveAttribute("href", "https://github.com/Kilo-Org/kilocode/pull/8524");
-    expect(screen.getByRole("link", { name: "Explore the source" })).toHaveAttribute("href", "https://github.com/LLRHook/checksinmyhead");
+    expect(screen.getByRole("link", { name: "Explore the source" })).toHaveAttribute("href", "https://github.com/LLRHook/mailit");
   });
 
   it("finds Billington by both names and loads notes from the original repository path", async () => {
@@ -156,4 +185,17 @@ describe("DesktopWindow projects", () => {
     expect(screen.getByRole("link", { name: "Root docs ↗" })).toHaveAttribute("href", `${repos[0].htmlUrl}/blob/HEAD/docs/guide.md`);
     expect(screen.getByRole("link", { name: "Section ↗" })).toHaveAttribute("href", `${repos[0].htmlUrl}#usage`);
   });
+});
+
+
+it("renders September resume metrics, repo links and the public PDF download", () => {
+  render(<DesktopWindow app="resume" onNavigate={vi.fn()} onClose={vi.fn()} repos={[]} />);
+  for (const metric of ["550+", "4,800+", "73 entities", "200+", "523 tests", "393 tests", "15 tests", "63 merged", "27 Vitest"]) {
+    expect(document.querySelector(".resume-content")).toHaveTextContent(metric);
+  }
+  expect(screen.getByRole("link", { name: "Download PDF" })).toHaveAttribute("href", "/Victor_Ivanov_Resume.pdf");
+  expect(screen.getByRole("link", { name: "Download PDF" })).toHaveAttribute("download", "Victor_Ivanov_Resume.pdf");
+  expect(screen.getByRole("link", { name: "MailIt" })).toHaveAttribute("href", "https://github.com/LLRHook/mailit");
+  expect(screen.getByRole("link", { name: "LinkedIn" })).toHaveAttribute("href", "https://www.linkedin.com/in/victorivanovofficial/");
+  expect(screen.getByText("Updated September 2026.")).toBeInTheDocument();
 });

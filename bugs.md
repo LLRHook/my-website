@@ -130,6 +130,50 @@ the end of their section, sorted by id on read.
 
 - **Fix:** Settle paused roulette in the triggering event or conditional prop adjustment and preserve hydration-safe audio preference sync. Match the current project/action labels; gate the autoplay test on trusted pointer/key events. Lint, standalone typecheck, build, 104 unit tests, and all 64 Chromium/WebKit browser cases pass.
 
+### [BUG-1790801366] Resume and featured projects lag the September resume
+- [x] **Severity:** med
+- **Area:** docs, content
+- **File(s):** app/components/room/DesktopWindow.tsx, app/components/room/FeaturedProjects.tsx
+- **Observation:** The Resume app uses August content and omits current metrics; the first featured card differs from the resume.
+- **Expected:** Use the supplied September 2026 content and feature MailIt.
+- **Repro / Notes:** Verify with targeted unit/browser checks and the full acceptance suite from the audit task.
+- **Bump:** patch
+- **Status:** fixed-pending-migration
+- **Fix:** Replaced the Resume app with the supplied September 2026 experience, metrics, projects, education and labelled skills; featured MailIt first while retaining Billington on the shelf. Unit content checks and all acceptance commands pass.
+
+### [BUG-1790801367] Project shelf and README links expose junk content
+- [x] **Severity:** med
+- **Area:** content
+- **File(s):** app/components/room/DesktopWindow.tsx, app/components/room/ProjectReadme.tsx
+- **Observation:** The shelf includes empty-description and profile repos; README anchors point to local development servers.
+- **Expected:** Filter junk repos and render local development links as plain text.
+- **Repro / Notes:** Verify with targeted unit/browser checks and the full acceptance suite from the audit task.
+- **Bump:** patch
+- **Status:** fixed-pending-migration
+- **Fix:** Filter empty presented descriptions and case-insensitive owner/profile repo names; remove fallback copy and render local README destinations as plain spans, including encoded IPv6 links. Unit regressions and full browser suite pass.
+
+### [BUG-1790801368] Skip link does not skip the header
+- [x] **Severity:** med
+- **Area:** accessibility
+- **File(s):** app/layout.tsx, app/components/room/Workspace.tsx, app/not-found.tsx
+- **Observation:** The skip link targets main before the header.
+- **Expected:** Target focusable content after the header, including on 404.
+- **Repro / Notes:** Verify with targeted unit/browser checks and the full acceptance suite from the audit task.
+- **Bump:** patch
+- **Status:** fixed-pending-migration
+- **Fix:** Target focusable content after the room header and the 404 primary content, with no target outline. Keyboard Tab/Enter/Tab browser checks pass on both routes.
+
+### [BUG-1790801370] App text fails WCAG AA contrast
+- [x] **Severity:** med
+- **Area:** accessibility
+- **File(s):** app/room.css
+- **Observation:** Thirteen audited text elements fall below AA contrast.
+- **Expected:** Darken the listed hues to at least 4.6:1 against actual backgrounds.
+- **Repro / Notes:** Verify with targeted unit/browser checks and the full acceptance suite from the audit task.
+- **Bump:** patch
+- **Status:** fixed-pending-migration
+- **Fix:** Darkened only the listed text hues to at least 4.6:1, including sidebar hover. The temporary Node WCAG script verifies every pair; the installed axe-core passes scoped rendered checks in About, Resume and Contact.
+
 ## Migrated to changelog
 
 Entries below have been ticked off and copied as a one-liner into `CHANGELOG.md`.

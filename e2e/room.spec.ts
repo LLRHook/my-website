@@ -48,11 +48,13 @@ test("a photo opens its close-up and its experience link starts the requested ap
   await expect(note).toBeFocused();
 });
 
-test("public app links open the requested content and follow hash navigation", async ({ page }) => {
+test("public app links open the requested content and migrate hash navigation to app paths", async ({ page }) => {
   await page.goto("/#work");
+  await expect(page).toHaveURL(/\/projects$/);
   await expect(page.getByRole("dialog", { name: "Projects", exact: true })).toBeVisible();
   await expect(page.getByTestId("computer")).toHaveAttribute("data-power", "on");
   await page.evaluate(() => { window.location.hash = "resume"; });
+  await expect(page).toHaveURL(/\/resume$/);
   await expect(page.getByRole("dialog", { name: "Resume", exact: true })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Experience", exact: true })).toBeVisible();
   await page.keyboard.press("Escape");
@@ -146,7 +148,7 @@ test("reduced motion skips the timed boot and pauses ambient CSS", async ({ page
 test("contact uses the public email and professional profile links", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/");
-  await page.getByRole("navigation", { name: "Open a desktop app" }).getByRole("button", { name: /^Contact(?:\s*↗)?$/ }).click();
+  await page.getByRole("navigation", { name: "Open a desktop app" }).getByRole("link", { name: /^Contact(?:\s*↗)?$/ }).click();
   const dialog = page.getByRole("dialog", { name: "Contact", exact: true });
   await expect(dialog).toBeVisible();
   await expect(dialog.getByRole("link", { name: /victor.n.ivanov@gmail.com/ })).toHaveAttribute("href", "mailto:victor.n.ivanov@gmail.com");
@@ -161,7 +163,7 @@ test("resume prints its readable screen edition", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/");
   await page.evaluate(() => { window.print = () => { document.documentElement.dataset.printRequested = "true"; }; });
-  await page.getByRole("navigation", { name: "Open a desktop app" }).getByRole("button", { name: /^Resume(?:\s*↗)?$/ }).click();
+  await page.getByRole("navigation", { name: "Open a desktop app" }).getByRole("link", { name: /^Resume(?:\s*↗)?$/ }).click();
   await page.getByRole("button", { name: "Print / save PDF", exact: true }).click();
   await expect(page.locator("html")).toHaveAttribute("data-print-requested", "true");
   await page.emulateMedia({ media: "print" });
@@ -169,4 +171,49 @@ test("resume prints its readable screen edition", async ({ page }) => {
   await expect(page.getByRole("heading", { name: "Georgia Institute of Technology", exact: true })).toBeVisible();
   await expect(page.getByRole("heading", { name: "University of Maryland, Baltimore County", exact: true })).toBeVisible();
   await expect(page.locator(".room-stage")).not.toBeVisible();
+});
+
+
+test("direct app URLs open Resume and Contact and unknown apps return 404", async ({ page }) => {
+  await page.goto("/resume");
+  const resume = page.getByRole("dialog", { name: "Resume", exact: true });
+  await expect(resume).toBeVisible();
+  await expect(resume).toContainText("550+");
+  await expect(page.getByTestId("boot-screen")).toHaveCount(0);
+  await expect(page).toHaveTitle("Resume | Victor Ivanov");
+  await expect(page.locator('link[rel="canonical"]')).toHaveAttribute("href", "https://victorivanov.engineer/resume");
+  await page.goto("/contact");
+  const contact = page.getByRole("dialog", { name: "Contact", exact: true });
+  await expect(contact).toBeVisible();
+  await expect(contact.getByRole("link", { name: /^X(?:\s*↗)?$/ })).toHaveCount(0);
+  await expect(page.locator('a[href*="x.com"]')).toHaveCount(0);
+  const response = await page.goto("/nope");
+  expect(response?.status()).toBe(404);
+  await expect(page.getByRole("heading", { name: "This room doesn't exist." })).toBeVisible();
+});
+
+test("browser Back closes an app opened from the room and Forward reopens it", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto("/");
+  await page.getByRole("navigation", { name: "Portfolio navigation" }).getByRole("link", { name: "Resume" }).click();
+  await expect(page).toHaveURL(/\/resume$/);
+  await expect(page.getByRole("dialog", { name: "Resume", exact: true })).toBeVisible();
+  await page.goBack();
+  await expect(page).toHaveURL(/\/$/);
+  await expect(page.locator(".desktop-window")).not.toBeVisible();
+  await expect(page).toHaveTitle("Victor Ivanov | Senior Full-Stack Engineer");
+  await page.goForward();
+  await expect(page.getByRole("dialog", { name: "Resume", exact: true })).toBeVisible();
+});
+
+test("skip link moves keyboard navigation past the room header and works on 404", async ({ page }) => {
+  for (const path of ["/", "/nope"]) {
+    await page.goto(path);
+    await page.keyboard.press("Tab");
+    await expect(page.getByRole("link", { name: "Skip to content" })).toBeFocused();
+    await page.keyboard.press("Enter");
+    await expect(page.locator("#content")).toBeFocused();
+    await page.keyboard.press("Tab");
+    expect(await page.evaluate(() => !!document.activeElement?.closest(".wordmark, .room-header nav"))).toBe(false);
+  }
 });

@@ -3,7 +3,7 @@ import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vite
 import Workspace, { BOOT_LINES } from "./Workspace";
 
 vi.mock("./DesktopWindow", () => ({
-  default: ({ app }: { app: string | null }) => <div data-testid="selected-app">{app}</div>,
+  default: ({ app, onNavigate, onClose }: { app: string | null; onNavigate: (id: "contact") => void; onClose: () => void }) => <div><div data-testid="selected-app">{app}</div><button onClick={() => onNavigate("contact")}>Test sidebar Contact</button><button onClick={onClose}>Test close app</button></div>,
 }));
 
 let motionQuery: MediaQueryList;
@@ -14,6 +14,7 @@ beforeAll(() => {
 });
 
 beforeEach(() => {
+  window.history.replaceState(null, "", "/");
   vi.useFakeTimers();
   motionQuery = {
     matches: false,
@@ -138,7 +139,7 @@ describe("Workspace power lifecycle", () => {
   it("keeps the requested app when startup is skipped and cancels the boot timer", () => {
     render(<Workspace repos={[]} />);
     const quick = within(screen.getByRole("navigation", { name: "Open a desktop app" }));
-    fireEvent.click(quick.getByRole("button", { name: /^Resume(?:\s*↗)?$/ }));
+    fireEvent.click(quick.getByRole("link", { name: /^Resume(?:\s*↗)?$/ }));
     expect(screen.getByTestId("computer")).toHaveAttribute("data-power", "booting");
     fireEvent.click(screen.getByRole("button", { name: "Skip startup" }));
     expect(screen.getByTestId("selected-app")).toHaveTextContent("resume");
@@ -200,5 +201,62 @@ describe("Workspace power lifecycle", () => {
     hidden.mockReturnValue(false);
     fireEvent(document, new Event("visibilitychange"));
     expect(room).toHaveAttribute("data-moving", "true");
+  });
+});
+
+
+describe("Workspace app URLs", () => {
+  it("opens a direct app immediately without a boot timer", () => {
+    window.history.replaceState(null, "", "/resume");
+    render(<Workspace repos={[]} initialApp="resume" />);
+    expect(screen.getByTestId("selected-app")).toHaveTextContent("resume");
+    expect(screen.getByTestId("computer")).toHaveAttribute("data-power", "on");
+    expect(screen.queryByTestId("boot-screen")).not.toBeInTheDocument();
+    expect(document.title).toBe("Resume | Victor Ivanov");
+  });
+
+  it("pushes room app opens and close, replaces sidebar switches, and reopens on popstate", () => {
+    const push = vi.spyOn(window.history, "pushState");
+    const replace = vi.spyOn(window.history, "replaceState");
+    render(<Workspace repos={[]} />);
+    fireEvent.click(within(screen.getByRole("navigation", { name: "Open a desktop app" })).getByRole("link", { name: /^Resume/ }));
+    expect(push).toHaveBeenLastCalledWith(null, "", "/resume");
+    fireEvent.click(screen.getByRole("button", { name: "Skip startup" }));
+    expect(screen.getByTestId("selected-app")).toHaveTextContent("resume");
+    fireEvent.click(screen.getByRole("button", { name: "Test sidebar Contact" }));
+    expect(replace).toHaveBeenLastCalledWith(null, "", "/contact");
+    expect(document.title).toBe("Contact | Victor Ivanov");
+    fireEvent.click(screen.getByRole("button", { name: "Test close app" }));
+    expect(push).toHaveBeenLastCalledWith(null, "", "/");
+    expect(screen.getByTestId("selected-app")).toBeEmptyDOMElement();
+    expect(document.title).toBe("Victor Ivanov | Senior Full-Stack Engineer");
+    window.history.replaceState(null, "", "/resume");
+    const pushes = push.mock.calls.length;
+    fireEvent(window, new PopStateEvent("popstate"));
+    expect(screen.getByTestId("selected-app")).toHaveTextContent("resume");
+    expect(screen.getByTestId("computer")).toHaveAttribute("data-power", "on");
+    expect(push).toHaveBeenCalledTimes(pushes);
+    window.history.replaceState(null, "", "/");
+    fireEvent(window, new PopStateEvent("popstate"));
+    expect(screen.getByTestId("selected-app")).toBeEmptyDOMElement();
+  });
+
+  it.each(["about", "projects", "work", "resume", "interests", "contact"])("migrates the legacy #%s hash", hash => {
+    window.history.replaceState(null, "", `/#${hash}`);
+    render(<Workspace repos={[]} />);
+    const id = hash === "work" ? "projects" : hash;
+    expect(screen.getByTestId("selected-app")).toHaveTextContent(id);
+    expect(window.location.pathname).toBe(id === "interests" ? "/off-the-clock" : `/${id}`);
+    expect(window.location.hash).toBe("");
+  });
+
+  it("leaves modified link clicks to the browser", () => {
+    const push = vi.spyOn(window.history, "pushState");
+    render(<Workspace repos={[]} />);
+    const link = within(screen.getByRole("navigation", { name: "Portfolio navigation" })).getByRole("link", { name: "Resume" });
+    expect(link).toHaveAttribute("href", "/resume");
+    fireEvent.click(link, { ctrlKey: true });
+    expect(push).not.toHaveBeenCalled();
+    expect(screen.getByTestId("selected-app")).toBeEmptyDOMElement();
   });
 });

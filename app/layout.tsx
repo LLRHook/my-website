@@ -44,7 +44,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${serif.variable} ${handwriting.variable}`}>
       <body>
-        <a href="#main" className="skip-link">Skip to content</a>
+        <a href="#content" className="skip-link">Skip to content</a>
         <JsonLd />
           <main id="main">
             {children}

@@ -1,8 +1,10 @@
 "use client";
 
+/* eslint-disable @next/next/no-html-link-for-pages -- Progressive app links use viOS history without a Next route transition. */
+
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type MouseEvent } from "react";
 import type { RepoCardData } from "@/app/lib/types";
 import { Icon, type IconName } from "./RoomIcons";
 import WindowCat from "./WindowCat";
@@ -17,7 +19,9 @@ import RoomAudio from "./RoomAudio";
 import "./room-details.css";
 import "./room-mobile.css";
 
-export type AppId = "about" | "projects" | "resume" | "interests" | "contact";
+import { APP_METADATA, idFromPath, pathFor, type AppId } from "@/app/lib/apps";
+import { SITE_TITLE } from "@/app/lib/constants";
+export type { AppId } from "@/app/lib/apps";
 export const APPS: { id: AppId; label: string; icon: IconName; file: string }[] = [
   { id: "about", label: "About me", icon: "person", file: "hello.txt" },
   { id: "projects", label: "Projects", icon: "folder", file: "projects/" },
@@ -34,10 +38,10 @@ export const BOOT_LINES = [
   "Starting a good day. Welcome in.",
 ];
 
-export default function Workspace({ repos }: { repos: RepoCardData[] }) {
-  const [power, setPower] = useState<"off" | "booting" | "on">("off");
+export default function Workspace({ repos, initialApp }: { repos: RepoCardData[]; initialApp?: AppId }) {
+  const [power, setPower] = useState<"off" | "booting" | "on">(initialApp ? "on" : "off");
   const [bootStep, setBootStep] = useState(0);
-  const [app, setApp] = useState<AppId | null>(null);
+  const [app, setApp] = useState<AppId | null>(initialApp ?? null);
   const [night, setNight] = useState(false);
   const [lamp, setLamp] = useState(true);
   const [paused, setPaused] = useState(false);
@@ -70,21 +74,36 @@ export default function Workspace({ repos }: { repos: RepoCardData[] }) {
   }, []);
 
   useEffect(() => {
-    const openLinkedApp = () => {
-      const linkedApps: Record<string, AppId> = { work: "projects", projects: "projects", about: "about", resume: "resume", interests: "interests", contact: "contact" };
-      const linkedApp = linkedApps[window.location.hash.slice(1)];
-      if (linkedApp) {
-        pendingApp.current = null;
-        setComputerFocused(false);
-        setDetail(null);
-        setPower("on");
-        setApp(linkedApp);
-      }
+    const showLinkedApp = (id: AppId | null) => {
+      pendingApp.current = null;
+      setComputerFocused(false);
+      setDetail(null);
+      if (id) setPower("on");
+      setApp(id);
     };
-    openLinkedApp();
-    window.addEventListener("hashchange", openLinkedApp);
-    return () => window.removeEventListener("hashchange", openLinkedApp);
+    const openLegacyHash = () => {
+      const linkedApps: Record<string, AppId> = { work: "projects", projects: "projects", about: "about", resume: "resume", interests: "interests", contact: "contact" };
+      const id = linkedApps[window.location.hash.slice(1)];
+      if (!id) return false;
+      window.history.replaceState(window.history.state, "", pathFor(id));
+      showLinkedApp(id);
+      return true;
+    };
+    const followHistory = () => {
+      if (!openLegacyHash()) showLinkedApp(idFromPath(window.location.pathname));
+    };
+    openLegacyHash();
+    window.addEventListener("hashchange", openLegacyHash);
+    window.addEventListener("popstate", followHistory);
+    return () => {
+      window.removeEventListener("hashchange", openLegacyHash);
+      window.removeEventListener("popstate", followHistory);
+    };
   }, []);
+
+  useEffect(() => {
+    document.title = app ? APP_METADATA[app].title : SITE_TITLE;
+  }, [app]);
 
   useEffect(() => {
     if (power !== "booting") return;
@@ -105,6 +124,7 @@ export default function Workspace({ repos }: { repos: RepoCardData[] }) {
 
   function openApp(id: AppId, trigger?: HTMLElement | null) {
     lastTrigger.current = interactionSource(trigger);
+    window.history.pushState(window.history.state, "", pathFor(id));
     setDetail(null);
     setComputerFocused(false);
     if (power === "on") setApp(id);
@@ -113,6 +133,17 @@ export default function Workspace({ repos }: { repos: RepoCardData[] }) {
       if (power === "off") setBootStep(0);
       setPower("booting");
     }
+  }
+
+  function navigateApp(id: AppId) {
+    window.history.replaceState(window.history.state, "", pathFor(id));
+    setApp(id);
+  }
+
+  function followAppLink(event: MouseEvent<HTMLAnchorElement>, id: AppId) {
+    if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+    event.preventDefault();
+    openApp(id, event.currentTarget);
   }
 
   function focusComputer(trigger?: HTMLElement | null) {
@@ -146,6 +177,8 @@ export default function Workspace({ repos }: { repos: RepoCardData[] }) {
   }
 
   function closeApp() {
+    pendingApp.current = null;
+    window.history.pushState(window.history.state, "", "/");
     setApp(null);
     const trigger = lastTrigger.current;
     if (trigger?.isConnected) trigger.focus();
@@ -157,13 +190,13 @@ export default function Workspace({ repos }: { repos: RepoCardData[] }) {
       <header className="room-header">
         <Link className="wordmark" href="/"><span className="monogram">vi<span>.</span></span><span>VICTOR IVANOV<small>Senior Full-Stack Engineer</small></span></Link>
         <nav aria-label="Portfolio navigation">
-          <button onClick={(event) => openApp("projects", event.currentTarget)}>Projects</button>
-          <button onClick={(event) => openApp("resume", event.currentTarget)}>Resume</button>
-          <button className="header-contact" onClick={(event) => openApp("contact", event.currentTarget)}>Let&apos;s talk <Icon name="arrow" /></button>
+          <a href="/projects" onClick={(event) => followAppLink(event, "projects")}>Projects</a>
+          <a href="/resume" onClick={(event) => followAppLink(event, "resume")}>Resume</a>
+          <a href="/contact" className="header-contact" onClick={(event) => followAppLink(event, "contact")}>Let&apos;s talk <Icon name="arrow" /></a>
         </nav>
       </header>
 
-      <section className="room-intro" aria-labelledby="room-title">
+      <section id="content" tabIndex={-1} className="room-intro" aria-labelledby="room-title">
         <p className="eyebrow"><span /> A SMALL SPACE FOR BIG IDEAS</p>
         <h1 id="room-title">Make yourself <em>at home.</em></h1>
         <p>I&apos;m Victor. I build web products and developer tools, work across the stack, and climb rocks.</p>
@@ -234,10 +267,10 @@ export default function Workspace({ repos }: { repos: RepoCardData[] }) {
       <div className="room-toolbar">
         <div className="room-controls"><button onClick={() => setNight((value) => !value)} aria-label={night ? "Evening. Switch to daylight" : "Daylight. Switch to evening"} aria-pressed={night}><Icon name={night ? "moon" : "sun"} /><span>{night ? "Evening" : "Daylight"}</span></button><span className="control-divider" /><button onClick={() => setPaused((value) => !value)} aria-label={paused ? "Motion off. Resume ambient motion" : "Pause motion"} aria-pressed={paused}><Icon name={paused ? "play" : "pause"} /><span>{paused ? "Motion off" : "Pause motion"}</span></button><RoomAudio /></div>
       </div>
-      <nav className="quick-access" aria-label="Open a desktop app">{APPS.map((item) => <button key={item.id} onClick={(event) => openApp(item.id, event.currentTarget)}><Icon name={item.icon} /><span>{item.label}</span><span className="quick-arrow" aria-hidden="true">↗</span></button>)}</nav>
+      <nav className="quick-access" aria-label="Open a desktop app">{APPS.map((item) => <a key={item.id} href={pathFor(item.id)} onClick={(event) => followAppLink(event, item.id)}><Icon name={item.icon} /><span>{item.label}</span><span className="quick-arrow" aria-hidden="true">↗</span></a>)}</nav>
       <footer className="room-footer"><span>© {new Date().getFullYear()} Victor Ivanov</span></footer>
       <span className="sr-only" role="status" aria-live="polite">{power === "booting" ? "Computer is starting. You can skip startup." : power === "on" ? "Computer ready. Choose a desktop app." : "Computer is off."}</span>
-      <DesktopWindow app={app} onNavigate={setApp} onClose={closeApp} repos={repos} />
+      <DesktopWindow app={app} onNavigate={navigateApp} onClose={closeApp} repos={repos} />
       <ObjectDetail selected={detail} onClose={() => setDetail(null)} onOpenApp={(id) => openApp(id, detailTrigger.current)} returnFocus={detailTrigger} />
     </div>
   );
