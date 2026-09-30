@@ -29,6 +29,16 @@ function readmeHref(href: string | undefined, repositoryUrl: string): string {
   }
 }
 
+function isLocalLink(href: string | undefined): boolean {
+  if (!href || !/^(?:https?:)?\/\//i.test(href.trim())) return false;
+  try {
+    const host = new URL(decodeURI(href.trim()), "https://github.com").hostname.toLowerCase();
+    return ["localhost", "127.0.0.1", "0.0.0.0", "[::1]"].includes(host) || host.endsWith(".local");
+  } catch {
+    return false;
+  }
+}
+
 export default function ProjectReadme({ repo }: { repo: RepoCardData }) {
   const [readme, setReadme] = useState<{ text: string; truncated: boolean } | null>(null);
 
@@ -63,7 +73,7 @@ export default function ProjectReadme({ repo }: { repo: RepoCardData }) {
             skipHtml
             components={{
               img: () => null,
-              a: ({ href, children }) => <a href={readmeHref(href, repo.htmlUrl)} target="_blank" rel="noopener noreferrer">{children} ↗</a>,
+              a: ({ href, children }) => isLocalLink(href) ? <span>{children}</span> : <a href={readmeHref(href, repo.htmlUrl)} target="_blank" rel="noopener noreferrer">{children} ↗</a>,
               table: ({ children }) => <div className="readme-table-scroll" role="region" aria-label="Project documentation table" tabIndex={0}><table>{children}</table></div>,
             }}
           >{readme.text}</Markdown>

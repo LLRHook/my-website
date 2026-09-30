@@ -42,6 +42,7 @@ the end of their section, sorted by id on read.
 
 ---
 
+
 ## Open
 
 ### [FEAT-1788629556] Uncrowded phone room with subtle discovery and softer ambience
@@ -165,6 +166,20 @@ the end of their section, sorted by id on read.
 - **Status:** shipped-pending-migration
 
 ---
+
+### [FEAT-1790801371] Addressable desktop apps and public resume PDF
+- [x] **Priority:** high
+- **Area:** frontend, seo, accessibility, content
+- **File(s):** app/lib/apps.ts, app/[app]/page.tsx, app/page.tsx, app/components/room/WorkspacePage.tsx, Workspace.tsx, DesktopWindow.tsx, app/lib/constants.ts, app/layout.tsx, app/sitemap.ts, public/Victor_Ivanov_Resume.pdf, related tests
+- **Why:** Visitors need shareable app URLs and an accurate downloadable resume without a phone number.
+- **Approach:** One slug map and shared server component; direct initial app opening; push/replace/popstate navigation and legacy hash migration; progressive anchors; a phone-redacted conversion of the supplied DOCX; remove X from public profiles.
+- **Library / dependency notes:** Use existing Next.js, React, Vitest, Playwright and installed LibreOffice/Poppler; add no dependencies.
+- **Acceptance criteria:** Five static app URLs with metadata/sitemap entries; direct Resume/Contact access; browser Back closes a room-opened app; unknown route 404; PDF retains required text and original page count, with no phone number; no X link.
+- **Test plan:** Unit history and content regressions, full Playwright suite, PDF text/page/render verification, lint and production build.
+- **Out of scope:** Redesign, dependency upgrades, tsconfig.json, CHANGELOG.md, commits, pushes and deployment.
+- **Bump:** minor
+- **Status:** shipped-pending-migration
+- **Implementation:** Added five static app paths with one slug/metadata map and a shared server page body; direct initial app state, history push/replace/popstate, titles, legacy hash migration, progressive navigation anchors and sitemap entries. Added a one-page, 87,376-byte phone-redacted resume PDF and print-hidden download link; removed X profiles/icons/explicit metadata. Lint, 116 unit tests, build and all 68 browser tests pass (Chromium 54, WebKit mobile 14); PDF text, page count and rendered layout verified.
 
 ## Shipped
 - **Implementation:** Window toggles day/evening, lamp toggles its independent desk glow, and the cat responds directly with its wake gesture. Replaced the mountain print with a UMBC B.S. Computer Science May 2024 frame; removed both journal and pencil. Added control regressions and verified 320px/390px/desktop layouts and focus return.

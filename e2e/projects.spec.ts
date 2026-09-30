@@ -3,7 +3,7 @@ import { test, expect, type Page } from "@playwright/test";
 async function openProjects(page: Page) {
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/");
-  await page.getByRole("navigation", { name: "Open a desktop app" }).getByRole("button", { name: /^Projects(?:\s*↗)?$/ }).click();
+  await page.getByRole("navigation", { name: "Open a desktop app" }).getByRole("link", { name: /^Projects(?:\s*↗)?$/ }).click();
   const dialog = page.getByRole("dialog");
   await expect(dialog).toBeVisible();
   await expect(dialog).toHaveAccessibleName("Projects");

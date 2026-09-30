@@ -8,7 +8,7 @@ export const metadata: Metadata = {
 
 export default function NotFound() {
   return (
-    <section className="room-not-found">
+    <section id="content" tabIndex={-1} className="room-not-found">
       <p className="eyebrow">404 / A LITTLE OFF THE MAP</p>
       <h1>This room doesn&apos;t exist.</h1>
       <p>The page may have moved. My desk is still right here.</p>

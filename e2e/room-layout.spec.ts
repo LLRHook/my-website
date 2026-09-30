@@ -19,7 +19,7 @@ for (const viewport of [
       const quickAccess = page.getByRole("navigation", { name: "Open a desktop app" });
 
       for (const app of ["About me", "Projects", "Resume", "Off the clock", "Contact"]) {
-        await quickAccess.getByRole("button", { name: new RegExp(`^${app}(?:\\s*↗)?$`) }).click();
+        await quickAccess.getByRole("link", { name: new RegExp(`^${app}(?:\\s*↗)?$`) }).click();
         const dialog = page.getByRole("dialog", { name: app, exact: true });
         await expect(dialog).toBeVisible();
         const box = await dialog.boundingBox();
