@@ -70,7 +70,7 @@ the end of their section, sorted by id on read.
 - **Test plan:** Unit audio scheduling/lifecycle tests, native browser audio signal and suspension tests, desktop/mobile pointer and keyboard flows, production smoke, Lighthouse, repeated dialog cycles.
 - **Out of scope:** Inventing personal anecdotes or changing the source resume.
 - **Implementation:** Added a focused monitor, eleven native object dialogs, a verified Peru postcard, poker artwork, CSS breeze, and opt-in Web Audio with bounded voices and teardown. Mobile pointer/focus, native audio, accessibility, and production-build checks pass; see VERIFICATION.md.
-- **Bump:** minor (0.8.0)
+- **Bump:** minor
 - **Status:** shipped-pending-migration
 
 ### [FEAT-1788624000] Interactive cozy workspace portfolio
@@ -83,7 +83,7 @@ the end of their section, sorted by id on read.
 - **Acceptance criteria:** Power-on and skippable boot; profile/projects/resume/interests/contact apps; photo notes; sleeping/waking/grooming cat; hobby hints; mobile and keyboard support; reduced-motion control; production deployment verified.
 - **Test plan:** Unit lifecycle tests, Playwright desktop/mobile/keyboard/reduced-motion flows, repeated window cycles and browser heap check, production smoke.
 - **Out of scope:** Rewriting the original resume or adding unsupported professional claims.
-- **Bump:** minor (0.8.0)
+- **Bump:** minor
 - **Status:** shipped-pending-migration
 
 ### [FEAT-1781505473] Refine source-peek key-file heuristic
@@ -109,7 +109,7 @@ the end of their section, sorted by id on read.
 - **Acceptance criteria:** Featured evidence remains available if GitHub data fails; Billington is searchable by product and repository name; search and README flow still work; mobile layout is readable; no unverified metrics or completed Georgia Tech degree claims.
 - **Test plan:** Existing unit suite plus fallback/search regressions, lint/build, desktop/mobile browser checks of project search, modal navigation, resume, and contact.
 - **Out of scope:** Public profile writes, posting, deployment, historical job-title changes, Appshot and Billington code changes.
-- **Bump:** minor (0.8.0)
+- **Bump:** minor
 - **Status:** shipped-pending-migration
 - **Implementation:** Local review draft preserves the interactive room, adds three sourced project summaries and product aliases, aligns Senior Full-Stack Engineer / Virginia copy, and exposes X in Contact. Verified with 85 unit tests, lint, production build, and desktop/phone browser QA. Public deployment and profile application remain pending owner review.
 
@@ -123,7 +123,7 @@ the end of their section, sorted by id on read.
 - **Acceptance criteria:** Roulette replaces visible poker copy/art and remains secondary to professional work; an accessible wheel control and text result; accurate wheel/result mapping; no overlapping spins or orphan timers; immediate reduced-motion result; fits desktop and phone; result expiration cannot clear a newer spin; journal removed.
 - **Test plan:** Deterministic result/RNG tests, pending-spin locking/unmount/preference tests, existing unit suite, lint/build, computer-controlled desktop/mobile interaction and focus QA. Update existing E2E selectors for the renamed object.
 - **Out of scope:** Real stakes, monetary balances, payouts, wagering services, publishing.
-- **Bump:** minor (0.8.0)
+- **Bump:** minor
 - **Status:** shipped-pending-migration
 - **Implementation:** Replaced poker with a small keyboard-accessible in-room wheel, secure unbiased single-zero sampling, exact numbered landing, brief confetti, and a 2.5-second result followed by a 350ms fade. Removed the nearby journal. Spin/expiration timers clean up on new rounds and unmount; paused/reduced-motion results omit animation. Verified with deterministic RNG/lifecycle tests, browser desktop/mobile checks, lint, typecheck and build.
 
@@ -136,7 +136,7 @@ the end of their section, sorted by id on read.
 - **Library / dependency notes:** Existing React/CSS/SVG only.
 - **Acceptance criteria:** Window and other object details omit editorial prose/metadata; useful links and accessible labels remain; varied cat breathing, attention, tail and ear motion stop when requested.
 - **Test plan:** Unit/component checks, lint/build, browser keyboard and desktop/mobile visual QA.
-- **Bump:** minor (0.8.0)
+- **Bump:** minor
 - **Status:** shipped-pending-migration
 - **Implementation:** Removed redundant descriptions and scene/mood metadata from object close-ups, retaining concise headings, art and useful actions. Added independent quiet breathing, head/eye, ear, tail and stretch layers to the cat, including attached tail markings and pause guards. Desktop and320px close-up QA and existing lifecycle tests pass.
 
@@ -149,7 +149,7 @@ the end of their section, sorted by id on read.
 - **Library / dependency notes:** Reuse existing SVG, React and procedural Web Audio; no commercial recordings or new dependencies.
 - **Acceptance criteria:** Red Rising, Golden Son and Morning Star are represented without completion claims; journal stays removed. Default audio is quiet, mute is visible/persistent, blocked autoplay causes no errors or false playing state, motion remains independent.
 - **Test plan:** Audio preference/autoplay/cleanup tests, existing suite, lint/type/build, browser first gesture and mute checks; shelf desktop/mobile visual review.
-- **Bump:** minor (0.8.0)
+- **Bump:** minor
 - **Status:** shipped-pending-migration
 - **Implementation:** Added Red Rising, Golden Son, and Morning Star cloth-spine artwork and a Currently reading close-up/interest entry. Quiet nature ambience defaults to 18% with music optional, persisted mute/settings, first-gesture autoplay fallback, truthful waiting/on/silent/off labels, and bounded cleanup. Validated in the 99-test suite, lint/type/build checks, and desktop/phone browser walkthroughs.
 
@@ -162,7 +162,7 @@ the end of their section, sorted by id on read.
 - **Library / dependency notes:** Existing native React/CSS/SVG only.
 - **Acceptance criteria:** No window/lamp/cat zoom-only modal; direct controls have clear accessible names/states; pause/reduced motion work; concise education artwork uses supported facts; journal and pencil absent.
 - **Test plan:** Unit/control tests, lint/type/build, desktop/mobile keyboard and visual QA.
-- **Bump:** minor (0.8.0)
+- **Bump:** minor
 - **Status:** shipped-pending-migration
 
 ---
@@ -177,7 +177,7 @@ the end of their section, sorted by id on read.
 - **Acceptance criteria:** Five static app URLs with metadata/sitemap entries; direct Resume/Contact access; browser Back closes a room-opened app; unknown route 404; PDF retains required text and original page count, with no phone number; no X link.
 - **Test plan:** Unit history and content regressions, full Playwright suite, PDF text/page/render verification, lint and production build.
 - **Out of scope:** Redesign, dependency upgrades, tsconfig.json, CHANGELOG.md, commits, pushes and deployment.
-- **Bump:** minor (0.8.0)
+- **Bump:** minor
 - **Status:** shipped-pending-migration
 - **Implementation:** Added five static app paths with one slug/metadata map and a shared server page body; direct initial app state, history push/replace/popstate, titles, legacy hash migration, progressive navigation anchors and sitemap entries. Added a one-page, 87,376-byte phone-redacted resume PDF and print-hidden download link; removed X profiles/icons/explicit metadata. Lint, 116 unit tests, build and all 68 browser tests pass (Chromium 54, WebKit mobile 14); PDF text, page count and rendered layout verified.
 
@@ -220,7 +220,7 @@ the end of their section, sorted by id on read.
 - **Test plan:** live-site headless matrix (viewport × reduced-motion) + a hover-grab interactivity probe; existing Playwright suite (no regression).
 - **Out of scope:** new background concepts (WebGL shaders, etc.); changing the z-index stack.
 - **Implementation:** Restored the early interactive star-field per owner request. `ParticlesBackground` always renders client-side with the FULL animated + hover-grab config (twinkle opacity 0.2–0.6, drift, `detectsOn: window` grab, links 0.18 / grab 0.5, count 70, 35 on mobile). Removed the reduced-motion gate AND the earlier static fallback — the original (cc9a83e) had no reduced-motion gate; the gate added in 65c772b is what hid the stars for reduce-motion users (the likely cause of "it's gone"). Aurora opacities raised (0.07/0.06/0.05 → 0.12/0.10/0.09). **Deliberate owner decision:** the particle field intentionally ignores `prefers-reduced-motion` (the rest of the site still honors it via MotionConfig/CSS). Verified on live across the desktop/mobile × motion/reduce matrix + a hover-grab interactivity check.
-- **Bump:** minor (0.8.0)
+- **Bump:** minor
 - **Status:** shipped-pending-migration
 
 ### [FEAT-1781586642] Performance: lazy-load expanded card + defer particles; leak-harden card
@@ -248,7 +248,7 @@ the end of their section, sorted by id on read.
 - **Test plan:** `e2e/card-tabs.spec.ts` asserts mount on Run + unmount on switch (leak-safe); manual prod check of a live boot.
 - **Out of scope:** auto-booting the runtime; embeds for non-web repos; the `@stackblitz/sdk`.
 - **Implementation:** Added "Run" tab to `ProjectCardExpanded` gated on `RUNNABLE_LANGS`; StackBlitz click-to-load iframe (`ctl=1&view=preview`), mounted only while active → leak-safe unmount on tab-switch/collapse. First Load JS unchanged (155 kB; embed lives in the iframe). tsc clean, E2E 20/20 (incl. the leak-safe mount/unmount test).
-- **Bump:** minor (0.8.0)
+- **Bump:** minor
 - **Status:** shipped-pending-migration
 
 ### [FEAT-1781502127] Centralize animation/UI constants
@@ -290,7 +290,7 @@ the end of their section, sorted by id on read.
 - **Test plan:** manual scroll QA across viewports; Playwright (anchors still navigate); Lighthouse perf.
 - **Out of scope:** scroll-jacking / section-snapping; horizontal scroll.
 - **Implementation:** Added `lenis@1.3.23`; new `app/components/ui/SmoothScroll.tsx` wraps the app in `ReactLenis root` (lerp 0.1, smoothWheel, `anchors: true`), guarded so `prefers-reduced-motion` users get native scroll (Lenis never initialized). Removed CSS `scroll-behavior: smooth` and added Lenis's recommended CSS to `globals.css`; wired `<SmoothScroll>` into `layout.tsx`. E2E (`e2e/smooth-scroll.spec.ts`) proves Lenis activates (`html.lenis`) and anchor nav scrolls; centering suite still green; build green.
-- **Bump:** minor (0.8.0)
+- **Bump:** minor
 - **Status:** shipped-pending-migration
 
 ### [FEAT-1781502130] Section & element transitions
@@ -304,7 +304,7 @@ the end of their section, sorted by id on read.
 - **Test plan:** manual QA; Playwright centering still passes; check CLS in Lighthouse.
 - **Out of scope:** full route-level page transitions (single-page site).
 - **Implementation:** Staggered skill-badge entrance via motion `variants` container/item (AboutSection; `SKILL_STAGGER_STEP` in animationConfig; SkillBadge now accepts `variants`). Added `MotionConfig reducedMotion="user"` in SmoothScroll so motion-driven transform/parallax animations respect `prefers-reduced-motion` site-wide (NFR-1 — previously only CSS animations did). "Show More" card reveals and hero/section entrances already animate via the existing FadeInOnScroll/whileInView (verified unchanged). View Transitions API deferred per plan. Build + E2E (18/18) green.
-- **Bump:** minor (0.8.0)
+- **Bump:** minor
 - **Status:** shipped-pending-migration
 
 ### [FEAT-1781502131] Card facet: repo topics + recent commits
@@ -318,7 +318,7 @@ the end of their section, sorted by id on read.
 - **Test plan:** unit-test the new `github.ts` mapping if the unit layer (FEAT-1781501122) exists; manual card QA; E2E green.
 - **Out of scope:** commit pagination; commit diffs.
 - **Implementation:** Added `topics` + `recentCommits` (typed `CommitInfo`) to `RepoCardData`; `github.ts` maps `r.topics` (free from the repos response) and fetches `/commits?per_page=5` per repo (timeout-guarded, graceful, batched into the existing Promise.all). Rendered in the Activity tab as topic chips + a recent-commits list. (Topics are empty until repos are tagged on GitHub — graceful-hidden.) Build + E2E (19/19) green; prod smoke shows 35/36 repos with recent commits.
-- **Bump:** minor (0.8.0)
+- **Bump:** minor
 - **Status:** shipped-pending-migration
 
 ### [FEAT-1781502132] Card facet: syntax-highlighted source peek
@@ -332,7 +332,7 @@ the end of their section, sorted by id on read.
 - **Test plan:** unit-test the file-selection heuristic if the unit layer exists; manual QA across a Python, a JS/TS, and a Go repo; E2E green.
 - **Out of scope:** full file browser; editing; multi-file view.
 - **Implementation:** Added `shiki@4.2.0`; new `app/api/source/[owner]/[repo]/route.ts` picks a representative source file via `github.ts` `fetchKeyFile` (root/src entrypoint+extension heuristic, size- and line-capped, graceful null) and highlights it server-side (`github-dark`) — zero client bundle cost (First Load stayed flat). The Code tab lazy-loads it on open and renders the shiki-escaped HTML; degrades to "No source preview available." Build + E2E green; prod smoke renders highlighted source for 4/6 sampled repos (graceful null for the rest). Heuristic refinement filed as FEAT-1781505473.
-- **Bump:** minor (0.8.0)
+- **Bump:** minor
 - **Status:** shipped-pending-migration
 
 ### [FEAT-1781502133] Faceted/tabbed expanded card + skeleton loader
@@ -346,7 +346,7 @@ the end of their section, sorted by id on read.
 - **Test plan:** manual QA + a11y keyboard check; extend Playwright to assert tab presence; `npx tsc --noEmit`.
 - **Out of scope:** persisting the selected tab across cards; deep-linking to a tab.
 - **Implementation:** Restructured `ProjectCardExpanded` into accessible README / Code / Activity tabs (role=tablist/tab/tabpanel, aria-selected, aria-live). Activity uses already-loaded data (language bar, 52-week sparkline, recent commits, topics) — instant; README + Code lazy-load per tab. Replaced the spinner with a content-shaped skeleton. `TimelineCard` now passes the full `repo`. New `e2e/card-tabs.spec.ts` verifies tabs render + switch (19/19 E2E green).
-- **Bump:** minor (0.8.0)
+- **Bump:** minor
 - **Status:** shipped-pending-migration
 
 ### [FEAT-1781501122] Add a unit/component test layer (Vitest + Testing Library)
@@ -362,7 +362,7 @@ the end of their section, sorted by id on read.
   - `TimelineSection` empty vs populated rendering covered.
 - **Test plan:** the tests themselves; count recorded in `VERIFICATION.md § 2`.
 - **Out of scope:** rewriting the Playwright E2E layer; visual-regression snapshots.
-- **Bump:** minor (0.8.0)
+- **Bump:** minor
 - **Implementation:** Added Vitest 4 + `@testing-library/react` + `jsdom` + `vite-tsconfig-paths`. `vitest.config.ts` (jsdom env, `setupFiles`, scoped `include: app/**/*.test.{ts,tsx}` so Playwright keeps `e2e/`); `vitest.setup.ts` adds jest-dom matchers + IntersectionObserver/matchMedia stubs jsdom lacks. Tests: `app/lib/github.test.ts` (shikiLang, buildTimelineData, fetchAllRepos public / empty→public-fallback / non-ok — 6) and `app/components/work/TimelineSection.test.tsx` (empty + populated — 2). `npm test` → 8/8 green. Added `test` + `test:watch` scripts.
 - **Status:** shipped-pending-migration
 
@@ -378,7 +378,7 @@ the end of their section, sorted by id on read.
   - Stage 1 of `VERIFICATION.md` references the lint command.
 - **Test plan:** n/a (lint is the check); wire into CI via FEAT-1781501124.
 - **Out of scope:** Prettier/formatting enforcement.
-- **Bump:** minor (0.8.0)
+- **Bump:** minor
 - **Implementation:** Added ESLint 9 flat config `eslint.config.mjs` via `@eslint/eslintrc` FlatCompat extending `next/core-web-vitals` + `next/typescript`, ignoring `.next`/`node_modules`/`playwright-report`/`test-results`/`out`/`next-env.d.ts`. `lint` script = `eslint .`. `npm run lint` runs clean. Pinned `eslint` `^9` + `eslint-config-next` `^15.5` to match Next 15.5 (avoids the 16.x/eslint-10 mismatch).
 - **Status:** shipped-pending-migration
 
@@ -394,6 +394,6 @@ the end of their section, sorted by id on read.
   - Playwright report uploaded as an artifact on failure.
 - **Test plan:** verify by pushing a branch with a deliberately failing test and confirming CI goes red.
 - **Out of scope:** deploy steps (Vercel handles deploy via its Git integration).
-- **Bump:** minor (0.8.0)
+- **Bump:** minor
 - **Implementation:** Rewrote `.github/workflows/ci.yml` into one `verify` job (Node 22, `permissions: contents: read`): `npm ci` → Lint (`npm run lint`) → Unit tests (`npm test`) → Build → install Playwright chromium → E2E (`npm run test:e2e`) → upload `playwright-report` artifact (`if: ${{ !cancelled() }}`, covers the "on failure" criterion). Build + E2E steps pass `GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}` so the data-driven build authenticates the GitHub API (the unauthenticated 60/hr limit otherwise empties the timeline and breaks the card E2E). Each check is its own step, so a red lint/unit/E2E fails the job. Live CI-red confirmation deferred to the first pushed run (GitHub Actions can't execute locally); each command verified to exit non-zero on failure locally.
 - **Status:** shipped-pending-migration
