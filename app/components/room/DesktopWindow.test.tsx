@@ -18,7 +18,10 @@ const repos: RepoCardData[] = [
   },
 ];
 
-beforeAll(() => {
+beforeAll(async () => {
+  // Warm the next/dynamic ProjectReadme chunk (react-markdown + remark-gfm) so the first
+  // test that opens a project does not pay the cold transform inside findBy*'s 1s window.
+  await import("./ProjectReadme");
   Object.defineProperty(HTMLDialogElement.prototype, "showModal", { configurable: true, value: function (this: HTMLDialogElement) { this.setAttribute("open", ""); } });
   Object.defineProperty(HTMLDialogElement.prototype, "close", { configurable: true, value: function (this: HTMLDialogElement) { this.removeAttribute("open"); } });
   Object.defineProperty(HTMLElement.prototype, "scrollTo", { configurable: true, value: vi.fn() });

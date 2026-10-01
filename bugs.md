@@ -174,6 +174,17 @@ the end of their section, sorted by id on read.
 - **Status:** fixed-pending-migration
 - **Fix:** Darkened only the listed text hues to at least 4.6:1, including sidebar hover. The temporary Node WCAG script verifies every pair; the installed axe-core passes scoped rendered checks in About, Resume and Contact.
 
+### [BUG-1790822531] DesktopWindow local-link test times out on cold README import
+- [x] **Severity:** low
+- **Area:** tests
+- **File(s):** app/components/room/DesktopWindow.test.tsx
+- **Observation:** "renders local development links as plain text while preserving public links" failed once in a full `npm test -- --run` with "Unable to find an element with the text: Local 0", then passed in isolation and on rerun. It is the first test in the file to open a project, so its `findByText` (1s default) also covers the cold `next/dynamic` import of `ProjectReadme` (react-markdown + remark-gfm): 272ms isolated vs ~40ms for the same flow in later tests, and past 1s under full-suite worker contention.
+- **Expected:** The test is deterministic regardless of file order or suite load, with its assertions unchanged.
+- **Repro / Notes:** `npx vitest run app/components/room/DesktopWindow.test.tsx --reporter=verbose` shows the cold-import cost on that test only.
+- **Bump:** patch
+- **Status:** fixed-pending-migration
+- **Fix:** `beforeAll` awaits `import("./ProjectReadme")` so the module is cached before any test opens a project; assertions and timeouts unchanged. Test time 272ms to ~100ms; file passed 20/20 looped runs and the full suite (147/147) passes.
+
 ## Migrated to changelog
 
 Entries below have been ticked off and copied as a one-liner into `CHANGELOG.md`.
