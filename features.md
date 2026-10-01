@@ -181,6 +181,17 @@ the end of their section, sorted by id on read.
 - **Status:** shipped-pending-migration
 - **Implementation:** Added five static app paths with one slug/metadata map and a shared server page body; direct initial app state, history push/replace/popstate, titles, legacy hash migration, progressive navigation anchors and sitemap entries. Added a one-page, 87,376-byte phone-redacted resume PDF and print-hidden download link; removed X profiles/icons/explicit metadata. Lint, 116 unit tests, build and all 68 browser tests pass (Chromium 54, WebKit mobile 14); PDF text, page count and rendered layout verified.
 
+### [FEAT-1790806476] Photoreal room renders and web asset export
+- [x] **Priority:** high
+- **Area:** rendering
+- **File(s):** render/*, render/lib/*, .gitignore, public/room/*, app/lib/room-scene.json
+- **Why:** Replace the illustrated room with photoreal Blender stills, roulette rotor frames and object close-ups.
+- **Approach:** Deterministic metric scene built from a pinned CC0 manifest (Poly Haven) plus procedural props; four lighting variants (day/night x lamp on/off); website draws the roulette ball from exported projection geometry.
+- **Library / dependency notes:** Blender 5.2.2 (Cycles CUDA + OIDN); repo's existing sharp for textures and AVIF/WebP. No new npm dependencies.
+- **Acceptance criteria:** Four 2560x1440 1024-sample finals, 4x74 rotor crops, five details; AVIF/WebP at 1280/1920/2560; app/lib/room-scene.json with 14 hotspots, screen quad and roulette geometry. Window >=35% and floor plant >=50% visible, other hotspots fully in frame.
+- **Implementation:** render/ pipeline (fetch, build, render, export; ~1,750 Python lines, ruff clean). 42 web images, 3.34 MB total (stills 253/449/660 KB per width set, sprites 1.74 MB, details 238 KB). All 14 hotspots pass check_hotspots; rebuild after final cleanup reproduces identical hotspot geometry. Ball overlay formula error <=1.8 px across all 37 pockets x 74 frames.
+- **Status:** shipped-pending-migration
+
 ## Shipped
 - **Implementation:** Window toggles day/evening, lamp toggles its independent desk glow, and the cat responds directly with its wake gesture. Replaced the mountain print with a UMBC B.S. Computer Science May 2024 frame; removed both journal and pencil. Added control regressions and verified 320px/390px/desktop layouts and focus return.
 
