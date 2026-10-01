@@ -1,103 +1,139 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { drawPocketIndex, landingRotation, POCKET_ANGLE, ROULETTE_POCKETS, SPIN_DURATION_MS } from "@/app/lib/roulette";
-import "./roulette.css";
+import { drawPocketIndex, frameIndex, ringPoint, ROULETTE_POCKETS, SPIN_MS, spinPlan, spinState } from "@/app/lib/roulette";
+import { SCENE, type Variant } from "@/app/lib/room-scene";
 
-type Round = (typeof ROULETTE_POCKETS)[number];
 export const RESULT_VISIBLE_MS = 2500;
-const FILL = { red: "#a35040", black: "#34473c", green: "#59733f" };
-const halfAngle = POCKET_ANGLE * Math.PI / 360;
-function point(radius: number, direction: number) {
-  return `${180 + radius * Math.sin(halfAngle * direction)} ${180 - radius * Math.cos(halfAngle)}`;
-}
-const pocketPath = `M ${point(151, -1)} A 151 151 0 0 1 ${point(151, 1)} L ${point(111, 1)} A 111 111 0 0 0 ${point(111, -1)} Z`;
 
-export default function RouletteToy({ moving }: { moving: boolean }) {
-  const [rotation, setRotation] = useState(0);
-  const [pending, setPending] = useState<Round | null>(null);
-  const [result, setResult] = useState<Round | null>(null);
-  const [expired, setExpired] = useState(false);
+export default function RouletteToy({ variant, reducedMotion }: { variant: Variant; reducedMotion: boolean }) {
+  const rotor = useRef<HTMLDivElement>(null);
+  const ball = useRef<HTMLSpanElement>(null);
   const spinning = useRef(false);
+  const previousRotor = useRef(0);
+  const animation = useRef<number | null>(null);
+  const expiry = useRef<number | null>(null);
+  const sprites = useRef(new Map<Variant, HTMLImageElement>());
+  const [loaded, setLoaded] = useState<Variant[]>([]);
+  const [spun, setSpun] = useState(false);
+  const [pending, setPending] = useState(false);
+  const [result, setResult] = useState<(typeof ROULETTE_POCKETS)[number] | null>(null);
   const [error, setError] = useState(false);
-  const [round, setRound] = useState(0);
-  const [celebrating, setCelebrating] = useState(false);
-  const [previousMoving, setPreviousMoving] = useState(moving);
-
-  // A pause changes the rendered round immediately, before another frame paints.
-  if (previousMoving !== moving) {
-    setPreviousMoving(moving);
-    if (!moving) {
-      setCelebrating(false);
-      if (pending) {
-        setResult(pending);
-        setPending(null);
-      }
-    }
-  }
+  const [visible, setVisible] = useState(false);
+  const { crop, ballDiameter, columns, frames } = SCENE.roulette;
+  const rows = Math.ceil(frames / columns);
+  const initialPoint = ringPoint(0, SCENE.roulette.trackScale);
 
   useEffect(() => {
-    if (!pending) { spinning.current = false; return; }
-    const finish = () => {
-      setResult(pending);
-      setCelebrating(moving);
-      setPending(null);
-      spinning.current = false;
+    const images = sprites.current;
+    return () => {
+      if (animation.current !== null) cancelAnimationFrame(animation.current);
+      if (expiry.current !== null) window.clearTimeout(expiry.current);
+      for (const image of images.values()) image.onload = null;
     };
-    const timer = window.setTimeout(finish, SPIN_DURATION_MS);
-    return () => window.clearTimeout(timer);
-  }, [pending, moving]);
+  }, []);
 
-  useEffect(() => {
-    if (!result || pending || error) return;
-    const timer = window.setTimeout(() => setExpired(true), RESULT_VISIBLE_MS);
-    return () => window.clearTimeout(timer);
-  }, [result, pending, error]);
+  function preload() {
+    if (sprites.current.has(variant)) return;
+    const image = new Image();
+    sprites.current.set(variant, image);
+    image.onload = () => setLoaded((previous) => [...previous, variant]);
+    image.src = `/room/roulette-${variant}.webp`;
+  }
 
   function spin() {
     if (spinning.current) return;
     spinning.current = true;
-    setExpired(false);
+    if (expiry.current !== null) window.clearTimeout(expiry.current);
+    expiry.current = null;
+    setVisible(true);
+    preload();
     let index: number;
-    try { index = drawPocketIndex(); } catch { spinning.current = false; setError(true); return; }
-    setError(false);
-    setCelebrating(false);
-    setRound(previous => previous + 1);
-    const pocket = ROULETTE_POCKETS[index];
-    setRotation(previous => landingRotation(previous, index));
-    if (moving) setPending(pocket);
-    else {
-      // A new object restarts result expiry even when two spins land together.
-      setResult({ ...pocket });
+    try {
+      index = drawPocketIndex();
+    } catch {
       spinning.current = false;
+      setError(true);
+      return;
+    }
+    setError(false);
+    setPending(true);
+    setSpun(true);
+    const plan = spinPlan(index);
+    const startRotor = previousRotor.current;
+
+    const apply = (t: number) => {
+      const state = spinState(plan, index, t);
+      const frame = frameIndex(startRotor + state.rotor);
+      const col = frame % columns;
+      const row = Math.floor(frame / columns);
+      rotor.current!.style.backgroundPosition = `${col / (columns - 1) * 100}% ${row / (rows - 1) * 100}%`;
+      const point = ringPoint(startRotor + state.angle, state.scale);
+      ball.current!.style.left = `${(point[0] - crop.x) / crop.w * 100}%`;
+      ball.current!.style.top = `${(point[1] - crop.y) / crop.h * 100}%`;
+    };
+    const finish = () => {
+      previousRotor.current = startRotor + plan.rotorEnd;
+      spinning.current = false;
+      animation.current = null;
+      setPending(false);
+      setResult({ ...ROULETTE_POCKETS[index] });
+      expiry.current = window.setTimeout(() => {
+        setVisible(false);
+        expiry.current = null;
+      }, RESULT_VISIBLE_MS);
+    };
+
+    apply(0);
+    if (reducedMotion) {
+      apply(1);
+      finish();
+    } else {
+      const start = performance.now();
+      const animate = (now: number) => {
+        const t = Math.min((now - start) / SPIN_MS, 1);
+        apply(t);
+        if (t < 1) animation.current = requestAnimationFrame(animate);
+        else finish();
+      };
+      animation.current = requestAnimationFrame(animate);
     }
   }
 
-  return <div className="roulette-desk target-roulette">
-      <button className="roulette-wheel" aria-label="Spin roulette wheel" aria-disabled={pending !== null} aria-busy={pending !== null} onClick={spin} data-spinning={pending !== null && moving}>
-        <svg viewBox="0 0 360 360" preserveAspectRatio="none" aria-hidden="true">
-          <circle cx="180" cy="185" r="171" fill="#493c2c" opacity=".12" />
-          <circle cx="180" cy="180" r="170" fill="#9d8059" />
-          <circle cx="180" cy="180" r="163" fill="#d6bd87" stroke="#eadbb7" strokeWidth="2" />
-          <circle cx="180" cy="180" r="154" fill="#f6e8c7" />
-          <g className="roulette-rotor" style={{ transform: `rotate(${rotation}deg)`, transitionDuration: `${SPIN_DURATION_MS}ms` }}>
-            {ROULETTE_POCKETS.map((pocket, index) => <g key={pocket.number} transform={`rotate(${index * POCKET_ANGLE} 180 180)`}>
-              <path d={pocketPath} fill={FILL[pocket.color]} stroke="#e6d5af" strokeWidth=".75" />
-              <text x="180" y="49" textAnchor="middle" dominantBaseline="middle" fill="#fff8e7" fontSize="12" fontWeight="600">{pocket.number}</text>
-            </g>)}
-            <circle cx="180" cy="180" r="109" fill="#bf9e70" stroke="#e3cfa1" strokeWidth="3" />
-            <circle cx="180" cy="180" r="91" fill="#aa895d" stroke="#99764e" strokeWidth="1" />
-            <path d="M180 104v152M104 180h152" stroke="#dac18e" strokeWidth="5" strokeLinecap="round" />
-            <circle cx="180" cy="180" r="29" fill="#d8bf87" stroke="#f4e4bd" strokeWidth="2" />
-            <circle cx="180" cy="180" r="13" fill="#af8b53" />
-          </g>
-          <path d="m169 11 11 20 11-20" fill="#f9efd4" stroke="#907344" strokeWidth="1.5" />
-          <circle cx="180" cy="74" r="5" fill="#fffaf0" stroke="#7b715c" strokeWidth="1" />
-        </svg>
-      </button>
-      {!pending && celebrating && moving && <div key={round} className="roulette-confetti" aria-hidden="true">{Array.from({ length: 8 }, (_, index) => <i key={index} style={{ transform: `rotate(${index * 45}deg)` }}><b /></i>)}</div>}
-      <div className="roulette-result" data-visible={(pending !== null || result !== null || error) && !expired} data-still={!moving} role="status" aria-label="Roulette result" aria-live="polite" aria-atomic="true">
+  return (
+    <>
+      <div
+        className="roulette-rotor"
+        ref={rotor}
+        data-ready={loaded.includes(variant) && spun}
+        style={{
+          backgroundImage: `image-set(url("/room/roulette-${variant}.avif") type("image/avif"), url("/room/roulette-${variant}.webp") type("image/webp"))`,
+          backgroundSize: `${columns * 100}% ${rows * 100}%`,
+          backgroundPosition: "0% 0%",
+        }}
+      />
+      <span
+        className="roulette-ball"
+        ref={ball}
+        data-variant={variant}
+        style={{
+          left: `${(initialPoint[0] - crop.x) / crop.w * 100}%`,
+          top: `${(initialPoint[1] - crop.y) / crop.h * 100}%`,
+          width: `${ballDiameter / crop.w * 100}%`,
+        }}
+      />
+      <button
+        className="roulette-spin"
+        aria-label="Spin roulette wheel"
+        aria-disabled={pending}
+        aria-busy={pending}
+        onPointerEnter={preload}
+        onFocus={preload}
+        onClick={spin}
+      />
+      <div className="roulette-result" data-visible={visible} role="status" aria-label="Roulette result" aria-live="polite" aria-atomic="true">
         {error ? <span>Couldn’t spin. Try again.</span> : pending ? <span>Spinning…</span> : result ? <strong data-color={result.color}>{result.number} · {result.color}</strong> : null}
       </div>
-  </div>;
+    </>
+  );
 }

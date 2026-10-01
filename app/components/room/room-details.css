@@ -1,126 +1,232 @@
-.note-travel { left: 33.6%; top: 19.7%; width: 9.4%; transform: rotate(5deg); }
-.note-travel > img { aspect-ratio: 4 / 3; }
-.note-travel > span:last-child { font-size: .75cqw; }
-.monitor-inspect { display: flex; align-items: center; gap: .55cqw; min-height: 25px; font-size: inherit; letter-spacing: inherit; }
-.monitor-inspect svg { width: .75cqw; height: .75cqw; opacity: .7; }
-.object-target { position: absolute; z-index: 1; min-width: 24px; min-height: 24px; border-radius: 10%; background: transparent; transition: background .18s ease, box-shadow .18s ease; }
-.object-target:hover,.object-target:focus-visible { background: #fff4c51a; box-shadow: inset 0 0 0 1px #c6b58066; }
-.workspace .object-target:focus-visible { outline: 2px solid #846d46; outline-offset: 3px; }
-.room-scene .window-cat:hover,.room-scene .window-cat:focus-visible { filter: drop-shadow(0 2px 3px #dbc48070); }
-.hobby-hotspot { left: 78.26%; top: 37.41%; width: 12.4%; height: 8.47%; z-index: 4; }
-.climb-hotspot { left: 92.4%; top: 38.35%; width: 3.4%; height: 6.59%; transform: translateX(-50%); z-index: 4; }
-.target-roulette { left: 68%; top: 68%; width: 8%; height: 9%; z-index: 4; }
-.target-wings { left: 78.8%; top: 53.5%; width: 5%; height: 7%; z-index: 4; }
-.target-window { left: 4.8%; top: 17%; width: 21.5%; height: 42%; }
-.target-lamp { left: 24%; top: 49.5%; width: 8.5%; height: 26%; }
-.target-education { left: 58.3%; top: 15.2%; width: 9.9%; height: 15.8%; z-index: 4; }
-.target-plants { left: 85%; top: 69%; width: 10%; height: 23%; }
-
-/* The desk lamp pools a little warm light on the desk. It sits above the night
-   wash so the lamp still reads as lit in the evening. */
-.room-lamp-glow { position: absolute; inset: 0; pointer-events: none; z-index: -1; opacity: 0; transition: opacity .6s; mix-blend-mode: screen; background: radial-gradient(ellipse 13% 15% at 30% 63%, #ffd98a99 0, #ffcf7f40 45%, transparent 100%); }
-.workspace[data-lamp=true] .room-lamp-glow { opacity: .8; }
-.workspace[data-night=true][data-lamp=true] .room-lamp-glow { opacity: 1; }
-
-.computer-focus,.object-detail { color: #33442f; padding: 0; margin: auto; border: 1px solid #acb89c; max-width: none; max-height: calc(100dvh - 32px); }
-.computer-focus::backdrop,.object-detail::backdrop { background: #243a31bd; backdrop-filter: blur(8px); }
-.detail-close { display: flex; justify-content: center; align-items: center; gap: 8px; padding: 10px 13px; min-height: 44px; font-size: 12px; border: 1px solid #c1cbb5; border-radius: 6px; white-space: nowrap; }
-.detail-close:hover { background: #e1e8d7; }
-.detail-close svg { width: 16px; height: 16px; }
-.computer-focus { width: min(970px, calc(100% - 32px)); border: none; background: #f1f0e4; border-radius: 15px; box-shadow: 0 28px 100px #10211980; overflow: auto; }
-.computer-focus-inner { padding: 24px 28px 20px; background: radial-gradient(ellipse at 50% 62%, #d2debc 0, #e8ebdb 48%, #f3f1e7 90%); }
-.computer-focus-header { display: flex; align-items: center; justify-content: space-between; gap: 15px; margin-bottom: 18px; }
-.computer-focus-header .eyebrow { font-size: 8px; color: #657b58; }
-.computer-focus-header h2 { font: 30px/1.2 var(--font-room-serif), Georgia, serif; letter-spacing: -.6px; margin-top: 6px; }
-.computer-focus-caption { text-align: center; color: #637855; font-size: 12px; margin-top: 14px; line-height: 1.5; }
-.focused-monitor-wrap { container-type: inline-size; width: min(820px, 100%, calc((100dvh - 190px) * 1.36)); min-width: min(100%, 340px); margin: 0 auto; }
-.focused-monitor-wrap .computer { position: relative; left: auto; top: auto; width: 100%; aspect-ratio: 482 / 355; }
-.focused-monitor-wrap .monitor-body { height: 88%; padding: 2.8cqw 2.8cqw 0; border-radius: 3cqw 3cqw 1.8cqw 1.8cqw; border-width: .35cqw; border-bottom-width: .7cqw; box-shadow: 1.4cqw 2cqw 4cqw #38452b26, inset 0 0 0 .3cqw #ffffff70; }
-.focused-monitor-wrap .monitor-screen { height: 88%; border-width: .9cqw; border-radius: 1.2cqw; }
-.focused-monitor-wrap .camera-dot { width: .7cqw; height: .7cqw; top: .95cqw; }
-.focused-monitor-wrap .monitor-chin { height: 12%; font-size: clamp(7px, 1.3cqw, 11px); letter-spacing: .35cqw; padding: 0 1.1cqw; }
-.focused-monitor-wrap .power-button { min-height: 28px; gap: 1.6cqw; padding: .5cqw; }
-.focused-monitor-wrap .power-button svg { width: 2.6cqw; height: 2.6cqw; min-width: 12px; min-height: 12px; }
-.focused-monitor-wrap .power-led { width: .75cqw; height: .75cqw; }
-.focused-monitor-wrap .monitor-inspect { cursor: default; pointer-events: none; }
-.focused-monitor-wrap .monitor-inspect svg { display: none; }
-.focused-monitor-wrap .monitor-neck { transform: perspective(12cqw) rotateX(8deg); }
-.focused-monitor-wrap .monitor-base { border-bottom-width: .6cqw; box-shadow: 1cqw 1cqw 2cqw #37462f32; }
-.focused-monitor-wrap .screen-off > svg { width: 7cqw; height: 7cqw; margin-bottom: 3cqw; }
-.focused-monitor-wrap .screen-off > span:not(.screen-reflection) { font-size: clamp(12px, 3cqw, 26px); }
-.focused-monitor-wrap .screen-off strong { font-size: clamp(11px, 2.2cqw, 18px); padding: 2.5cqw 4cqw; margin-top: 4cqw; border-radius: .8cqw; }
-.focused-monitor-wrap .boot-screen { padding: 3.5cqw 4cqw; }
-.focused-monitor-wrap .bios-logo { font-size: clamp(24px, 7cqw, 52px); margin-bottom: 2.2cqw; }
-.focused-monitor-wrap .bios-logo span { font-size: 3.8cqw; }
-.focused-monitor-wrap .boot-lines { font-size: clamp(9px, 1.9cqw, 16px); line-height: 1.85; }
-.focused-monitor-wrap .boot-line-check { display: flex; align-items: baseline; gap: .6cqw; white-space: nowrap; }
-.focused-monitor-wrap .boot-leader { flex: 1; min-width: 0; overflow: hidden; }
-.focused-monitor-wrap .boot-progress { left: 4cqw; right: 4cqw; bottom: 10cqw; height: .9cqw; }
-.focused-monitor-wrap .skip-boot { bottom: 1.5cqw; right: 3cqw; min-height: 32px; font-size: clamp(10px, 1.9cqw, 16px); gap: 2cqw; }
-.focused-monitor-wrap .skip-boot svg { width: 2.4cqw; height: 2.4cqw; min-width: 12px; }
-.focused-monitor-wrap .desktop-menubar { height: 5cqw; font-size: clamp(7px, 1.5cqw, 13px); padding: 0 2.4cqw; gap: 3cqw; }
-.focused-monitor-wrap .desktop-menubar strong { font-size: 2.5cqw; }
-.focused-monitor-wrap .desktop-menubar svg { width: 2.2cqw; height: 2.2cqw; }
-.focused-monitor-wrap .mini-desktop::before { width: 85cqw; height: 65cqw; top: -40cqw; left: 28cqw; }
-.focused-monitor-wrap .desktop-welcome { padding: 4cqw 1cqw 3cqw; }
-.focused-monitor-wrap .desktop-welcome > span { font-size: clamp(6px, 1.35cqw, 11px); letter-spacing: .4cqw; }
-.focused-monitor-wrap .desktop-welcome h2 { font-size: clamp(23px, 6.2cqw, 48px); margin: .8cqw 0; letter-spacing: -.2cqw; }
-.focused-monitor-wrap .desktop-welcome p { font-size: clamp(9px, 1.7cqw, 14px); }
-.focused-monitor-wrap .desktop-folders { gap: 2cqw; padding: 0 2cqw; }
-.focused-monitor-wrap .desktop-folders button { min-width: 14cqw; min-height: 44px; padding: 1cqw; font-size: clamp(8px, 1.7cqw, 14px); gap: 1.6cqw; border-radius: 1cqw; }
-.focused-monitor-wrap .app-icon { width: 8cqw; height: 8cqw; border-radius: 1.4cqw; }
-.focused-monitor-wrap .app-icon svg { width: 4.2cqw; height: 4.2cqw; }
-.focused-monitor-wrap .desktop-status { padding: 1.3cqw 2.6cqw; font-size: clamp(7px, 1.35cqw, 11px); }
-.focused-monitor-wrap .desktop-status i { width: .8cqw; height: .8cqw; margin-right: 1cqw; }
-.focused-monitor-wrap .desktop-status button { visibility: hidden; }
-.computer-focus[open] { animation: computer-approach .28s ease-out both; }
-/* This is a user-triggered transition, separate from the paused room scenery. */
-.workspace[data-moving=false] .room-stage .computer-focus[open] { animation-play-state: running !important; }
-@keyframes computer-approach { from { opacity: 0; transform: translateY(20px) scale(.88); } to { opacity: 1; transform: none; } }
-
-.object-detail { width: min(660px, calc(100% - 40px)); background: #f8f6ed; border-radius: 14px; overflow: auto; box-shadow: 0 28px 100px #10211980; }
-.object-detail[open] { animation: detail-approach .22s ease-out; }
-.object-detail-header { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 17px 24px; border-bottom: 1px solid #d9dfcf; }
-.object-detail-header h2 { font: 28px/1.2 var(--font-room-serif), Georgia, serif; }
-.object-detail-visual { min-width: 0; display: flex; justify-content: center; align-items: center; padding: 28px; background: #e8eadc; position: relative; overflow: hidden; }
-.detail-photo { background: #e5e4d7; }
-.detail-photo > img { width: 100%; height: auto; max-height: min(440px, 65dvh); object-fit: contain; border: 8px solid #fffbed; box-shadow: 0 5px 20px #39472b24; transform: rotate(-1deg); }
-.detail-illustration { background: radial-gradient(ellipse at center, #f8f2df, #e8e9d9); }
-.detail-illustration > svg { display: block; width: 100%; max-height: min(390px, 65dvh); overflow: hidden; border-radius: 8px; }
-.object-detail-footer { padding: 16px 24px; display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; border-top: 1px solid #d9dfcf; }
-.object-detail-footer > a { font-size: 13px; color: #526645; padding: 12px 0; text-decoration: underline; text-underline-offset: 4px; }
-.detail-landscape { width: min(840px, calc(100% - 40px)); }
-@keyframes detail-approach { from { opacity: 0; transform: translateY(12px) scale(.96); } to { opacity: 1; transform: none; } }
-
-@media (max-width: 700px) {
-  .computer-focus,.object-detail { width: calc(100% - 16px); max-height: calc(100dvh - 20px); border-radius: 10px; }
-  .computer-focus-inner { padding: 19px 12px 17px; }
-  .computer-focus-header { align-items: flex-start; gap: 10px; margin-bottom: 18px; }
-  .computer-focus-header .eyebrow { font-size: 7px; letter-spacing: 1.1px; }
-  .computer-focus-header h2 { font-size: 23px; margin-top: 8px; max-width: 185px; }
-  .detail-close { padding: 8px 10px; gap: 5px; font-size: 10px; }
-  .detail-close svg { width: 14px; height: 14px; }
-  .computer-focus-caption { font-size: 10px; padding: 0 15px; }
-  .focused-monitor-wrap .computer { aspect-ratio: 482 / 490; }
-  .focused-monitor-wrap .boot-lines { font-size: 10px; line-height: 1.65; letter-spacing: -.15px; }
-  .focused-monitor-wrap .desktop-folders { display: grid; grid-template-columns: repeat(6, 1fr); gap: 5px 2px; padding: 0 3cqw; }
-  .focused-monitor-wrap .desktop-folders button { grid-column: span 2; font-size: 10px; min-width: 0; min-height: 55px; padding: 3px 1px; gap: 4px; }
-  .focused-monitor-wrap .desktop-folders button:nth-child(4) { grid-column: 2 / span 2; }
-  .focused-monitor-wrap .desktop-folders button:nth-child(5) { grid-column: 4 / span 2; }
-  .focused-monitor-wrap .app-icon { width: 32px; height: 32px; }
-  .focused-monitor-wrap .app-icon svg { width: 19px; height: 19px; }
-  .focused-monitor-wrap .desktop-welcome { padding: 3cqw 0 2.5cqw; }
-  .focused-monitor-wrap .desktop-welcome h2 { font-size: 6cqw; }
-  .focused-monitor-wrap .desktop-welcome p { font-size: 8px; }
-  .focused-monitor-wrap .desktop-welcome > span { font-size: 5px; }
-  .object-detail-header { padding: 12px 16px; }
-  .object-detail-header h2 { font-size: 23px; }
-  .object-detail-visual { min-height: 230px; padding: 25px 32px 38px; }
-  .detail-photo > img { max-height: 280px; width: auto; max-width: 100%; border-width: 7px; }
-  .detail-illustration > svg { max-height: 230px; }
-  .object-detail-footer { padding: 14px 20px; font-size: 8px; }
+.computer-focus,.object-detail {
+  color: #33442f;
+  padding: 0;
+  margin: auto;
+  border: 1px solid #acb89c;
+  max-width: none;
+  max-height: calc(100dvh - 32px);
 }
-@media (max-width: 360px) { .computer-focus-header h2 { font-size: 20px; }.focused-monitor-wrap .desktop-status { display: none; } }
-@media (prefers-reduced-motion: reduce) { .computer-focus[open],.object-detail[open] { animation: none !important; } }
-
-.target-reading { min-width: 24px; min-height: 24px; z-index: 4; }
+.computer-focus::backdrop,.object-detail::backdrop {
+  background: #243a31bd;
+  backdrop-filter: blur(8px);
+}
+.detail-close {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 13px;
+  min-height: 44px;
+  font-size: 12px;
+  border: 1px solid #c1cbb5;
+  border-radius: 6px;
+  white-space: nowrap;
+}
+.detail-close:hover {
+  background: #e1e8d7;
+}
+.detail-close svg {
+  width: 16px;
+  height: 16px;
+}
+.computer-focus {
+  width: min(970px, calc(100% - 32px));
+  border: none;
+  background: #f1f0e4;
+  border-radius: 15px;
+  box-shadow: 0 28px 100px #10211980;
+  overflow: auto;
+}
+.computer-focus-inner {
+  padding: 24px 28px 20px;
+  background: radial-gradient(ellipse at 50% 62%, #d2debc 0, #e8ebdb 48%, #f3f1e7 90%);
+}
+.computer-focus-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+  margin-bottom: 18px;
+}
+.computer-focus-header .eyebrow {
+  font-size: 8px;
+  color: #657b58;
+}
+.computer-focus-header h2 {
+  font: 30px/1.2 var(--font-room-serif), Georgia, serif;
+  letter-spacing: -.6px;
+  margin-top: 6px;
+}
+.computer-focus-caption {
+  text-align: center;
+  color: #637855;
+  font-size: 12px;
+  margin-top: 14px;
+  line-height: 1.5;
+}
+.computer-focus[open] {
+  animation: computer-approach .28s ease-out both;
+}
+@keyframes computer-approach {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(.88);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.object-detail {
+  width: min(660px, calc(100% - 40px));
+  background: #f8f6ed;
+  border-radius: 14px;
+  overflow: auto;
+  box-shadow: 0 28px 100px #10211980;
+}
+.object-detail[open] {
+  animation: detail-approach .22s ease-out;
+}
+.object-detail-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 17px 24px;
+  border-bottom: 1px solid #d9dfcf;
+}
+.object-detail-header h2 {
+  font: 28px/1.2 var(--font-room-serif), Georgia, serif;
+}
+.object-detail-visual {
+  min-width: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 28px;
+  background: #e8eadc;
+  position: relative;
+  overflow: hidden;
+}
+.detail-photo {
+  background: #e5e4d7;
+}
+.detail-photo > img {
+  width: 100%;
+  height: auto;
+  max-height: min(440px, 65dvh);
+  object-fit: contain;
+  border: 8px solid #fffbed;
+  box-shadow: 0 5px 20px #39472b24;
+  transform: rotate(-1deg);
+}
+.detail-illustration > picture {
+  display: block;
+  max-width: 100%;
+}
+.detail-illustration {
+  background: radial-gradient(ellipse at center, #f8f2df, #e8e9d9);
+}
+.detail-illustration > picture > img {
+  display: block;
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+  max-height: min(390px, 65dvh);
+  overflow: hidden;
+  border-radius: 8px;
+}
+.object-detail-footer {
+  padding: 16px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  border-top: 1px solid #d9dfcf;
+}
+.object-detail-footer > a {
+  font-size: 13px;
+  color: #526645;
+  padding: 12px 0;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.detail-landscape {
+  width: min(840px, calc(100% - 40px));
+}
+@keyframes detail-approach {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(.96);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@media (max-width: 700px) {
+  .computer-focus,.object-detail {
+    width: calc(100% - 16px);
+    max-height: calc(100dvh - 20px);
+    border-radius: 10px;
+  }
+  .computer-focus-inner {
+    padding: 19px 12px 17px;
+  }
+  .computer-focus-header {
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 18px;
+  }
+  .computer-focus-header .eyebrow {
+    font-size: 7px;
+    letter-spacing: 1.1px;
+  }
+  .computer-focus-header h2 {
+    font-size: 23px;
+    margin-top: 8px;
+    max-width: 185px;
+  }
+  .detail-close {
+    padding: 8px 10px;
+    gap: 5px;
+    font-size: 10px;
+  }
+  .detail-close svg {
+    width: 14px;
+    height: 14px;
+  }
+  .computer-focus-caption {
+    font-size: 10px;
+    padding: 0 15px;
+  }
+  .object-detail-header {
+    padding: 12px 16px;
+  }
+  .object-detail-header h2 {
+    font-size: 23px;
+  }
+  .object-detail-visual {
+    min-height: 230px;
+    padding: 25px 32px 38px;
+  }
+  .detail-photo > img {
+    max-height: 280px;
+    width: auto;
+    max-width: 100%;
+    border-width: 7px;
+  }
+  .detail-illustration > picture > img {
+    max-height: 230px;
+  }
+  .object-detail-footer {
+    padding: 14px 20px;
+    font-size: 8px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .computer-focus[open],.object-detail[open] {
+    animation: none !important;
+  }
+}

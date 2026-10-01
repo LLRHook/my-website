@@ -15,7 +15,7 @@ for (const viewport of [
       const pageOverflow = () => page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
       expect(await pageOverflow()).toBeLessThanOrEqual(1);
       await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
-      await expect(page.getByRole("button", { name: "Power on computer", exact: true })).toBeVisible();
+      await expect(page.getByRole("button", { name: "Turn on Victor's computer", exact: true })).toBeVisible();
       const quickAccess = page.getByRole("navigation", { name: "Open a desktop app" });
 
       for (const app of ["About me", "Projects", "Resume", "Off the clock", "Contact"]) {

@@ -1,6 +1,6 @@
 import type { SVGProps } from "react";
 
-export type IconName = "person" | "folder" | "resume" | "heart" | "mail" | "power" | "sun" | "moon" | "pause" | "play" | "arrow" | "close" | "expand" | "code" | "leaf";
+export type IconName = "person" | "folder" | "resume" | "heart" | "mail" | "power" | "sun" | "moon" | "lamp" | "arrow" | "close" | "expand" | "code" | "leaf";
 
 const paths: Record<IconName, React.ReactNode> = {
   person: <><circle cx="12" cy="8" r="4" /><path d="M4 21v-2a8 8 0 0 1 16 0v2" /></>,
@@ -11,8 +11,7 @@ const paths: Record<IconName, React.ReactNode> = {
   power: <><path d="M12 2v9M6 5a9 9 0 1 0 12 0" /></>,
   sun: <><circle cx="12" cy="12" r="4" /><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5" /></>,
   moon: <path d="M21 13a9 9 0 0 1-10-10 9 9 0 1 0 10 10Z" />,
-  pause: <><path d="M8 5v14M16 5v14" /></>,
-  play: <path d="m8 4 12 8-12 8Z" />,
+  lamp: <path d="M9 2h6l3 8H6l3-8ZM12 10v9M8 21h8" />,
   arrow: <path d="M5 12h14m-6-6 6 6-6 6" />,
   close: <path d="m6 6 12 12M6 18 18 6" />,
   expand: <path d="M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5" />,

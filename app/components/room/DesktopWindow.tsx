@@ -7,7 +7,7 @@ import type { RepoCardData } from "@/app/lib/types";
 import { GITHUB_HREF, EMAIL_HREF, SKILLS, SOCIAL_BY_ICON } from "@/app/lib/constants";
 import FeaturedProjects from "./FeaturedProjects";
 import { presentProject } from "@/app/lib/projectPresentation";
-import { APPS, type AppId } from "./Workspace";
+import { APPS, type AppId } from "@/app/lib/apps";
 import { Icon } from "./RoomIcons";
 
 const ProjectReadme = dynamic(() => import("./ProjectReadme"), { loading: () => <p role="status">Opening project notes…</p> });
