@@ -24,7 +24,7 @@ export default function ComputerFocus({ active, onClose, returnFocus, fallbackFo
   active: boolean;
   onClose: () => void;
   returnFocus: RefObject<HTMLElement | null>;
-  fallbackFocus: RefObject<HTMLButtonElement | null>;
+  fallbackFocus: RefObject<HTMLDivElement | null>;
   children: ReactNode;
 }) {
   const dialog = useRef<HTMLDialogElement>(null);
@@ -59,14 +59,37 @@ export default function ComputerFocus({ active, onClose, returnFocus, fallbackFo
     onClose();
   }
 
-  return <>
-    {!active && children}
-    <dialog ref={dialog} className="computer-focus" aria-labelledby="computer-focus-title" onKeyDown={containRoomTab} onCancel={(event) => { event.preventDefault(); close(); }} onClick={(event) => { if (event.target === event.currentTarget) close(); }}>
-      <div className="computer-focus-inner">
-        <header className="computer-focus-header"><div><span className="eyebrow">A CLOSER LOOK</span><h2 id="computer-focus-title">Your seat at my desk.</h2></div><button ref={closeButton} className="detail-close" onClick={close}><Icon name="close" /><span>Back to room</span></button></header>
-        <div className="focused-monitor-wrap">{active && children}</div>
-        <p className="computer-focus-caption">Open a folder to explore. Your place on the computer stays here.</p>
-      </div>
-    </dialog>
-  </>;
+  return (
+    <>
+      {!active && children}
+      <dialog
+        ref={dialog}
+        className="computer-focus"
+        aria-labelledby="computer-focus-title"
+        onKeyDown={containRoomTab}
+        onCancel={(event) => {
+          event.preventDefault();
+          close();
+        }}
+        onClick={(event) => {
+          if (event.target === event.currentTarget) close();
+        }}
+      >
+        <div className="computer-focus-inner">
+          <header className="computer-focus-header">
+            <div>
+              <span className="eyebrow">A CLOSER LOOK</span>
+              <h2 id="computer-focus-title">Your seat at my desk.</h2>
+            </div>
+            <button ref={closeButton} className="detail-close" onClick={close}>
+              <Icon name="close" />
+              <span>Back to room</span>
+            </button>
+          </header>
+          <div className="focused-screen">{active && children}</div>
+          <p className="computer-focus-caption">Open a folder to explore. Your place on the computer stays here.</p>
+        </div>
+      </dialog>
+    </>
+  );
 }

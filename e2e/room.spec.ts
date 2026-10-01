@@ -14,10 +14,10 @@ test("computer begins off, completes every boot stage, and can shut down and res
   await page.goto("/");
   await expect(page.getByTestId("computer")).toHaveAttribute("data-power", "off");
   await expect(page.getByTestId("desktop")).toHaveCount(0);
-  await page.getByRole("button", { name: "Power on computer", exact: true }).click();
+  await page.getByRole("button", { name: "Turn on Victor's computer", exact: true }).click();
 
   const boot = page.getByTestId("boot-screen");
-  for (const line of ["VI BIOS", "Checking memory", "Mounting /home/victor", "Loading projects", "Checking window cat", "Starting a good day"]) {
+  for (const line of ["VI BIOS", "Memory check", "Mounting /home/victor", "Loading projects", "Network", "Ready."]) {
     await expect(boot.locator("p").filter({ hasText: line })).toBeAttached();
   }
   await expect(page.getByRole("progressbar", { name: "Starting computer" })).toHaveAttribute("aria-valuenow", "100");
@@ -33,7 +33,7 @@ test("computer begins off, completes every boot stage, and can shut down and res
 
 test("a photo opens its close-up and its experience link starts the requested app", async ({ page }) => {
   await page.goto("/");
-  const note = page.getByRole("button", { name: /Open experience note$/ });
+  const note = page.getByRole("button", { name: "Conference photo" });
   await note.click();
   const photo = page.getByRole("dialog", { name: "At the podium" });
   await expect(photo).toBeVisible();
@@ -58,7 +58,7 @@ test("public app links open the requested content and migrate hash navigation to
   await expect(page.getByRole("dialog", { name: "Resume", exact: true })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Experience", exact: true })).toBeVisible();
   await page.keyboard.press("Escape");
-  await expect(page.getByRole("button", { name: "Shut down computer", exact: true })).toBeFocused();
+  await expect(page.locator(".scene-screen")).toBeFocused();
 });
 
 test("all apps open, sidebar navigation works, and Escape returns focus to the launcher", async ({ page }) => {
@@ -109,40 +109,26 @@ test("repeated app visits and power cycles leave one window and restore room scr
   expect(errors).toEqual([]);
 });
 
-test("room controls pause motion, change lighting, and let the cat return to sleep", async ({ page }) => {
+test("toolbar controls switch the lighting independently", async ({ page }) => {
   await page.goto("/");
   const room = page.locator(".workspace");
-  await expect(room).toHaveAttribute("data-moving", "true");
-  await page.getByRole("button", { name: "Pause motion", exact: true }).click();
-  await expect(room).toHaveAttribute("data-moving", "false");
-  await page.getByRole("button", { name: /Switch to evening$/ }).click();
+  await page.getByRole("button", { name: "Daylight. Switch to evening", exact: true }).click();
   await expect(room).toHaveAttribute("data-night", "true");
-  await page.getByRole("button", { name: /Switch to daylight$/ }).click();
+  await page.getByRole("button", { name: "Evening. Switch to daylight", exact: true }).click();
   await expect(room).toHaveAttribute("data-night", "false");
-  await page.getByRole("button", { name: /Resume ambient motion$/ }).click();
-  await expect(room).toHaveAttribute("data-moving", "true");
-  await expect(page.getByRole("button", { name: "Meet the window cat up close", exact: true })).toHaveCount(0);
-  await page.getByRole("button", { name: "Say hello to the cat", exact: true }).click();
-  await expect(page.locator("dialog[open]")).toHaveCount(0);
-  await expect(page.getByRole("button", { name: "Let the cat sleep", exact: true })).toHaveAttribute("aria-pressed", "true");
-  await expect(page.getByRole("button", { name: "Say hello to the cat", exact: true })).toBeVisible({ timeout: 8000 });
+  await page.getByRole("button", { name: "Lamp on. Switch off", exact: true }).click();
+  await expect(room).toHaveAttribute("data-lamp", "false");
+  await page.getByRole("button", { name: "Lamp off. Switch on", exact: true }).click();
+  await expect(room).toHaveAttribute("data-lamp", "true");
 });
 
-test("reduced motion skips the timed boot and pauses ambient CSS", async ({ page }) => {
+test("reduced motion skips the timed boot and still transitions", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/");
-  await expect(page.locator(".workspace")).toHaveAttribute("data-moving", "false");
-  await page.getByRole("button", { name: "Power on computer", exact: true }).click();
+  await page.getByRole("button", { name: "Turn on Victor's computer", exact: true }).click();
   await expect(page.getByTestId("desktop")).toBeVisible({ timeout: 1000 });
   await expect(page.getByTestId("boot-screen")).toHaveCount(0);
-  const animations = await page.locator(".cat-body, .cat-head, .cat-tail, .cat-paw, .cat-zzz").evaluateAll((elements) => elements.map((element) => {
-    const css = getComputedStyle(element);
-    return { name: css.animationName, state: css.animationPlayState, duration: css.animationDuration };
-  }));
-  expect(animations.length).toBeGreaterThan(0);
-  for (const animation of animations) {
-    expect(animation.name === "none" || animation.state.split(",").every((state) => state.trim() === "paused") || animation.duration.split(",").every((duration) => parseFloat(duration) <= 0.01)).toBe(true);
-  }
+  await expect(page.locator(".room-scene > picture > img[data-active=true]")).toHaveCSS("transition-duration", "0s");
 });
 
 test("contact uses the public email and professional profile links", async ({ page }) => {

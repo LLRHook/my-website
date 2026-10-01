@@ -1,3 +1,5 @@
+import { SCENE, type Point } from "./room-scene";
+
 export type RouletteColor = "red" | "black" | "green";
 
 // Single-zero wheel order. One source drives the drawing, result and landing.
@@ -9,13 +11,51 @@ export const ROULETTE_POCKETS = [
   color: (number === 0 ? "green" : index % 2 ? "red" : "black") as RouletteColor,
 }));
 
-export const POCKET_ANGLE = 360 / ROULETTE_POCKETS.length;
-export const SPIN_DURATION_MS = 2600;
+export const SPIN_MS = 4200;
 
-export function landingRotation(previous: number, pocketIndex: number) {
-  const target = (360 - pocketIndex * POCKET_ANGLE) % 360;
-  const remaining = (target - (previous % 360) + 360) % 360;
-  return previous + 1080 + remaining;
+export function ringPoint(angle: number, scale: number): Point {
+  const { center, u, v } = SCENE.roulette;
+  return [
+    center[0] + scale * (u[0] * Math.cos(angle) + v[0] * Math.sin(angle)),
+    center[1] + scale * (u[1] * Math.cos(angle) + v[1] * Math.sin(angle)),
+  ];
+}
+
+export function pocketAngle(index: number, rotor: number): number {
+  return SCENE.roulette.pocketZero + index * SCENE.roulette.pocketStep + rotor;
+}
+
+export function frameIndex(rotor: number): number {
+  const { frameStep, frames } = SCENE.roulette;
+  return ((Math.round(rotor / frameStep) % frames) + frames) % frames;
+}
+
+export function spinPlan(index: number): { rotorEnd: number; ballTurns: number } {
+  return {
+    rotorEnd: Math.sign(SCENE.roulette.frameStep) * (3 * 2 * Math.PI + (index * 0.37 % 1) * 2 * Math.PI),
+    ballTurns: 6,
+  };
+}
+
+export function spinState(
+  plan: { rotorEnd: number; ballTurns: number },
+  index: number,
+  t: number,
+): { rotor: number; angle: number; scale: number } {
+  const LAND = 0.72;
+  const rotor = plan.rotorEnd * (1 - (1 - t) ** 3);
+  const { trackScale, frameStep } = SCENE.roulette;
+  if (t < LAND) {
+    const B = -Math.sign(frameStep) * plan.ballTurns * 2 * Math.PI;
+    const A = pocketAngle(index, plan.rotorEnd * (1 - (1 - LAND) ** 3)) - B;
+    return { rotor, angle: A + B * (1 - (1 - t / LAND) ** 2), scale: trackScale };
+  }
+  const progress = Math.min((t - LAND) / 0.1, 1);
+  return {
+    rotor,
+    angle: pocketAngle(index, rotor),
+    scale: trackScale + (1 - trackScale) * (1 - (1 - progress) ** 2),
+  };
 }
 
 // Reject the incomplete final bucket before modulo, so every pocket has exactly

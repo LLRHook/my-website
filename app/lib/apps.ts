@@ -1,3 +1,5 @@
+import type { IconName } from "@/app/components/room/RoomIcons";
+
 export const APP_SLUGS = {
   about: "about",
   projects: "projects",
@@ -23,3 +25,11 @@ export function idFromPath(pathname: string): AppId | null {
 export function pathFor(id: AppId): string {
   return `/${APP_SLUGS[id]}`;
 }
+
+export const APPS: { id: AppId; label: string; icon: IconName; file: string }[] = [
+  { id: "about", label: "About me", icon: "person", file: "hello.txt" },
+  { id: "projects", label: "Projects", icon: "folder", file: "projects/" },
+  { id: "resume", label: "Resume", icon: "resume", file: "resume.md" },
+  { id: "interests", label: "Off the clock", icon: "heart", file: "interests.txt" },
+  { id: "contact", label: "Contact", icon: "mail", file: "say-hello" },
+];
