@@ -12,3 +12,12 @@ tsconfig.tsbuildinfo
 /playwright-report/
 /playwright/.cache/
 .vercel
+
+# Generated Blender assets and render outputs
+/render/assets/
+/render/out/
+/render/room.blend
+/render/*.blend1
+/render/**/__pycache__/
+/render/*.log
+/render/.ruff_cache/
