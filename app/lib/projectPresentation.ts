@@ -1,10 +1,10 @@
-import type { RepoCardData } from "./types";
+import type { RepoSummary } from "./types";
 
 // Presentation only: keep repository IDs and source URLs intact.
 const PRESENTATION: Record<string, { name: string; description: string }> = {
   "LLRHook/my-website": {
-    name: "Personal website",
-    description: "An interactive room for exploring my projects, experience, and interests. Next.js and TypeScript.",
+    name: "This home page",
+    description: "Hand-written HTML and CSS, served by Next.js. No JavaScript reaches your browser.",
   },
   "LLRHook/checksinmyhead": {
     name: "Billington",
@@ -16,7 +16,7 @@ const PRESENTATION: Record<string, { name: string; description: string }> = {
   },
 };
 
-export function presentProject(repo: RepoCardData): RepoCardData {
+export function presentProject(repo: RepoSummary): RepoSummary {
   const presentation = PRESENTATION[`${repo.owner}/${repo.name}`];
   return presentation ? { ...repo, ...presentation } : repo;
 }

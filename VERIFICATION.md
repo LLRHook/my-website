@@ -1,91 +1,54 @@
-# Workspace release verification
+# Release verification
 
-This checklist covers the interactive room, professional project content,
-roulette, mobile composition, motion, and remembered sound preferences. It
-supersedes the old timeline and Lenis UI checks. The GitHub API tests and public
-route contracts remain in scope.
+This checklist covers the 1990s HTML/CSS home page (FEAT-1790963490): every
+route ships HTML and CSS only, the live GitHub projects table, and the public
+route contracts. Dated evidence sections below describe earlier versions.
 
 ## Build and automated checks
 
 1. Record `git rev-parse HEAD` and inspect `git status --short`. Keep unrelated
    user changes out of the release.
-2. Use Node 24.15 or later within Node 24 (`.nvmrc`) and the committed npm lockfile. On a clean checkout,
-   run `npm ci`.
-3. Run `npm run lint`, `npm test`, and `npm run build`.
-4. Start the production artifact with `npm run start` on port 3000, then run
-   `npm run test:e2e`. Playwright reuses that server.
-5. For a deployed build, set `PLAYWRIGHT_BASE_URL` to the HTTPS deployment URL
-   and run the same E2E command. This skips local startup.
+2. Use Node 24.15 or later within Node 24 (`.nvmrc`) and the committed npm lockfile.
+   On a clean checkout, run `npm ci`.
+3. Run `npm run lint` (zero warnings), `npx tsc --noEmit`, `npm test`, and
+   `npm run build`. A build must work without `app/layout.tsx`.
+4. Start the production artifact with `npm run start -- -p 3100`, set
+   `PLAYWRIGHT_BASE_URL=http://localhost:3100`, and run `npx playwright test`.
+   Stop the server by the PID listening on its port when checks finish.
+5. For a deployment, set `PLAYWRIGHT_BASE_URL` to its HTTPS URL and run the same
+   E2E command. This skips local startup.
 
-Current baseline: 104 Vitest cases across 11 files and 64 Playwright cases
-across 8 files (50 Chromium and 14 WebKit). Playwright runs the
-complete suite in Chromium and the mobile, motion, and roulette suites in WebKit.
-Test runners provide the authoritative browser counts; run
-`npx playwright test --list` when updating the baseline. Historical counts below
-refer to their recorded builds.
+Current baseline: 28 Vitest cases across 3 files and 22 Playwright cases across
+1 file (11 Chromium and 11 WebKit). Both browser projects run the whole site suite.
+Vitest covers repository listing, filtering, mapping and fallback; HTML escaping,
+metadata and navigation; and pure body renderers. Test runners provide the
+authoritative counts. Historical counts below refer to their recorded builds.
 
 ## Acceptance coverage
 
-- Power off, full six-stage startup, skipped startup, immediate startup under
-  reduced motion, shutdown during startup, and subsequent reboot.
-- About, Projects, Resume, Off the clock, and Contact apps open correctly.
-- The native dialog contains focus. Escape and the close button return focus to
-  the launcher, including notes used before startup. Project details focus their
-  heading and the back button restores search focus.
-- Every app stays inside 320, 390, 768, and 1440px viewports. Main reading copy
-  is at least 14px; content scrolls without horizontal page overflow.
-- Search works for names, descriptions, topics, and languages. Missing projects
-  show a direct GitHub link. README requests use the actual text/plain endpoint;
-  errors have a usable fallback and requests abort when their view closes.
-- Featured Billington, Citybase, and Kilo work remains readable in the Projects
-  app on desktop and phone widths, alongside the searchable repository collection.
-- README tables render and relative links resolve correctly. Raw HTML and remote
-  images do not execute or load; unsafe link schemes are rejected.
-- Existing #work/#about/#contact links open the right app. #resume/#interests
-  also work. JavaScript-disabled users get a summary and contact/project links.
-- Resume print mode shows readable professional content without room controls.
-- Daylight/evening and pause controls work; reduced motion is respected. Tapping
-  the window changes the time of day directly, and the lamp toggles its glow.
-- True touch/DPR emulation covers 320, 375, 390, 393, 412, and 430px phone widths
-  plus landscape. Photos stay clear of the monitor; the keyboard, lamp, roulette,
-  and wings carton remain exposed. Check dialog bounds again after shrinking the
-  viewport height to represent browser controls expanding.
-- Pointer and touch response stays small, settles without a JavaScript frame
-  loop, and resets when paused, hidden, under a dialog, or using reduced motion.
-- The official winged-buffalo mark appears on the gold carton and in Interests.
-  The footer contains only copyright; no construction or inspiration copy remains.
-- The computer zooms into a readable startup and returns with its power state
-  intact. Photo/object close-ups respond to ordinary pointer clicks
-  at 320, 390, and 1440px, contain Tab focus, and restore their launcher's focus.
-- True touch cases spin roulette once, show a valid 0–36 result without opening
-  a dialog, and keep the result within the viewport. Reading and diploma notes
-  open, fit the screen, close, and restore focus at every touch configuration.
-- Roulette locks repeat activation during a spin, preserves keyboard focus,
-  and hides the result after its display interval. Pausing or reduced motion
-  settles the round immediately without confetti; later motion does not replay it.
-- The Peru original returns a 2400×1800 WebP; vector details crop the original
-  SVG. The breeze follows pause, page visibility, and reduced-motion preferences.
-- First-visit audio requests nature only at 18% volume. A blocked browser reports
-  waiting and retries on the first gesture. Remembered mute prevents context
-  creation; volume and layer preferences survive remounts. The sound toggle does
-  not accidentally trigger the fallback before muting.
-- Real browser audio produces signal with either layer enabled and silence at
-  zero volume or with both layers disabled. Hidden pages suspend audio; repeated
-  sound cycles close each context. Failed playback permits a later retry.
-- The cat sleeps, looks around, blinks, flicks its ears and tail, and stretches.
-  Clicking or tapping triggers a temporary greeting without opening a dialog.
-  Ambient animation pauses when hidden or while a reading window is open.
+- All six PAGES paths return 200 and text/html, one visible h1, and no script tags.
+- Every response includes CSP with `script-src 'none'`; navigation marks only the
+  current page with `aria-current`.
+- Projects use hourly GitHub listing and show a table or a usable empty notice
+  without `GITHUB_TOKEN`. Descriptions are escaped, profile and undescribed repos
+  are filtered, rows sort newest first, and demo links use HTTP(S).
+- Resume HTML links the downloadable PDF; the PDF returns 200.
+- `/interests` redirects permanently to `/off-the-clock`; unknown paths return 404
+  with a link home.
+- No page has horizontal document overflow at 320x700. Capture all six pages at
+  desktop 1280x900 and phone 390x844 for visual inspection.
+- Reduced motion disables the CSS marquee. The sitemap lists all six URLs.
+- Production curl checks verify script-free HTML, CSP, the 308 redirect and 404.
+  Confirm sitemap, robots, stylesheet, favicon and PDF bypass the catch-all.
 
 ## Runtime and deployment checks
 
-- GET /, /api/repos, /robots.txt, /sitemap.xml, /manifest.webmanifest,
-  /opengraph-image, /twitter-image, /room-studio.svg and public photos return 200.
-- /api/readme/LLRHook/my-website returns text, not JSON. Source-peek API behavior
-  remains covered by the existing provider abstraction.
-- An unknown route returns 404 with a readable return-to-workspace link.
-- Browser console has no page exceptions or hydration errors.
-- Repeated app cycles do not accumulate DOM nodes or listeners. Check retained
-  heap after warm-up and forced GC; report measurements, not a leak-free claim.
+- GET /, /about, /projects, /resume, /off-the-clock, /contact, /robots.txt,
+  /sitemap.xml, /retro.css, /favicon.svg, the resume PDF and public photos return 200.
+- No page contains a `<script>` element; every response carries a CSP with
+  `script-src 'none'`. /interests redirects (308) to /off-the-clock; unknown
+  paths return the HTML 404 page.
+- The 404 page links back to the home page.
 - Run mobile Lighthouse against the production artifact/domain. Existing targets
   are Performance>=90, Accessibility>=95, and LCP<2.5s. Report the measured LCP
   separately; a high aggregate score does not establish that the LCP target passed.

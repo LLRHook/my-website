@@ -1,5 +1,6 @@
 /** @type {import('next').NextConfig} */
 const securityHeaders = [
+  { key: "Content-Security-Policy", value: "default-src 'self'; script-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'; img-src 'self'; style-src 'self'" },
   { key: "X-Content-Type-Options", value: "nosniff" },
   { key: "X-Frame-Options", value: "DENY" },
   { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
@@ -17,7 +18,9 @@ const nextConfig = {
   devIndicators: false,
   compress: true,
   poweredByHeader: false,
-  images: { qualities: [75, 90] },
+  async redirects() {
+    return [{ source: "/interests", destination: "/off-the-clock", permanent: true }];
+  },
   async headers() {
     return [
       {
