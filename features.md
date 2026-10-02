@@ -206,6 +206,20 @@ the end of their section, sorted by id on read.
 - **Status:** shipped-pending-migration
 - **Implementation:** Replaced the illustrated room with four encoded lighting stills, eleven sorted hotspots, a container-scaled computer, projected sprite roulette, and five encoded close-ups; removed the illustrated components, SVG, styles, and motion tests. Preserved app history, boot, native-dialog focus, audio, and print behavior. Recognized stills decoded before hydration and centered the audio panel within the mobile toolbar. Lint exits 0 (two requested img suppressions reported unused), 148 unit tests and 59 E2E tests pass, and production build succeeds. Chrome review on port 3100 at 1440×900 and 390×844 passed; mobile initial screen center error was 3.3px. Five screenshots are saved in C:/Users/Victor/AppData/Local/Temp/m2-shots/.
 
+### [FEAT-1790963490] Rebuild the site as a 1990s HTML/CSS home page
+- [x] **Priority:** high
+- **Area:** site, ui, content
+- **File(s):** app/ (route handlers, app/lib/html.ts, app/lib/pages.ts, github.ts), public/retro.css, next.config.js, package.json, vitest.config.ts, e2e/site.spec.ts, README.md, CLAUDE.md, VERIFICATION.md
+- **Why:** Owner decision 2026-10-02: scrap the photoreal room, audio and React UI; the site should look like a 1990s personal home page built with only HTML and CSS.
+- **Approach:** Every page is a Next.js route handler returning a hand-written HTML string plus one stylesheet; no `<script>` reaches the browser, enforced by `script-src 'none'`. Pages: home, about, projects (live GitHub table, hourly ISR), resume, off the clock, contact, and a 404 catch-all. Room components, audio, API routes, render pipeline, room assets and unused dependencies are deleted.
+- **Library / dependency notes:** Removes Tailwind/PostCSS, tsparticles, lenis, motion, react-markdown, rehype-raw, remark-gfm, shiki, Testing Library, jsdom and the Vite React plugin. No new dependencies.
+- **Acceptance criteria:** Every page returns 200 text/html with zero `<script>` elements and a CSP that forbids scripts. Existing URLs keep working and /interests redirects. The page reads as a 1990s home page: silver background, Times, default blue/purple links, `<hr>`, bevelled boxes, a marquee strip, a "NEW!" badge and 88x31 buttons, with motion disabled under reduced motion. No horizontal overflow at 320px. Lint, unit tests, build and E2E pass.
+- **Test plan:** Unit tests for HTML escaping, the document shell and the projects table (escaping, filtering, sorting, empty state). E2E across every route on Chromium and mobile WebKit, covering no scripts, the CSP header, the redirect, the 404, overflow and reduced motion.
+- **Out of scope:** CHANGELOG migration, release and version bump, GitHub repository descriptions.
+- **Bump:** major
+- **Implementation:** Every page is a route handler returning an HTML string from `app/lib/html.ts` (document shell, nav, footer) and `app/lib/pages.ts` (bodies; resume and about copy carried over), styled by `public/retro.css`: silver page, Times, default link colors, grooved rules, outset boxes, CSS marquee, blinking NEW!, under-construction stripes, 88x31 badges, mailto guestbook; motion off under reduced motion. Projects is a GitHub table (`fetchRepoList`, hourly ISR, error fallback). CSP `script-src 'none'`; /interests 308; HTML 404 catch-all. Deleted the room, audio, React UI, API routes, render/ pipeline, room assets and 14 dependencies. Lint clean, 28 unit tests, production build, 22/22 Chromium and mobile WebKit E2E; production curl shows no `<script>` on any page.
+- **Status:** shipped-pending-migration
+
 ## Shipped
 - **Implementation:** Window toggles day/evening, lamp toggles its independent desk glow, and the cat responds directly with its wake gesture. Replaced the mountain print with a UMBC B.S. Computer Science May 2024 frame; removed both journal and pencil. Added control regressions and verified 320px/390px/desktop layouts and focus return.
 

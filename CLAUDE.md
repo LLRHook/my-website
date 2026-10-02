@@ -2,7 +2,7 @@
 
 Personal portfolio (Next.js App Router, React, TypeScript, Tailwind CSS),
 deployed on Vercel at [victorivanov.engineer](https://victorivanov.engineer). The
-interactive room's Projects app is populated from the owner's public GitHub repositories via
+Projects page is a table populated from the owner's public GitHub repositories via
 `app/lib/github.ts` (server-side, ISR `revalidate=3600`, keyed by `GITHUB_TOKEN`).
 No database, no auth. Use `.nvmrc` for the Node version and `package.json` for
 the current toolchain. E2E tests are Playwright (`e2e/`).
@@ -45,6 +45,8 @@ shipped or fixed entries are *migrated* into `CHANGELOG.md` as a permanent recor
   person at a release.
 
 ### Stack notes
+
+- Pages ship HTML and CSS only: route handlers return strings built in `app/lib/html.ts` / `app/lib/pages.ts`; never add client components, `<script>` tags or client JS (CSP `script-src 'none'` enforces it).
 
 - Package manager: **npm** (`package-lock.json`). CI: `.github/workflows/ci.yml`
   (`npm ci`, lint, unit tests, production build, Chromium and mobile WebKit tests).

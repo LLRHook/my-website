@@ -4,17 +4,6 @@ export const SITE_TITLE = "Victor Ivanov | Senior Full-Stack Engineer";
 export const SITE_DESCRIPTION =
   "Senior full-stack engineer in Virginia. Explore web products, developer tools, and open-source contributions across Java, Spring Boot, React, and TypeScript.";
 
-export interface NavLink {
-  label: string;
-  href: string;
-}
-
-export const NAV_LINKS: readonly NavLink[] = [
-  { label: "Work", href: "#work" },
-  { label: "About", href: "#about" },
-  { label: "Contact", href: "#contact" },
-];
-
 export type SocialIcon = "github" | "linkedin" | "email";
 
 export interface SocialLink {
