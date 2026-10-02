@@ -38,14 +38,14 @@ export function projectsBody(repos: RepoSummary[]): string {
 
 export function offTheClockBody(): string {
   const interests = [
-    ["01 / MOVE", "One more attempt.", "Rock climbing is my regular break from the screen. Different holds, the same satisfaction of working through a problem."],
-    ["02 / COLLECT", "A place for the cards.", "Hunting for Pokémon cards and opening packs with friends are part of the fun. Magic: The Gathering has a place on the shelf, too."],
-    ["03 / RECHARGE", "Wings after a long week.", "A small nod to Buffalo Wild Wings."],
-    ["04 / GET OUTSIDE", "A postcard from Peru.", "The mountain-and-river photo below comes from my September 2026 Peru trip."],
-    ["05 / TINKER", "Probably building a tool for that.", "Agentic workflows, deployment automation, and little utilities that make the next development cycle easier."],
-    ["06 / READ", "Red Rising trilogy", "Currently reading Pierce Brown’s Red Rising trilogy."],
+    ["Climbing", "Rock climbing is my regular break from the screen."],
+    ["Cards", "I collect Pokémon cards and open packs with friends. Some Magic: The Gathering too."],
+    ["Wings", "Buffalo Wild Wings after a long week."],
+    ["Travel", "Most recently Peru, in September 2026."],
+    ["Side projects", "Agentic workflows, deployment automation, and small developer tools."],
+    ["Reading", "Pierce Brown’s Red Rising trilogy."],
   ];
-  return `<h1>Off the clock</h1>${paragraph("There's usually another problem to solve. Some of them involve climbing shoes.")}<dl class="interests">${interests.map(([number, heading, text], index) => `<dt>${esc(number)}: ${esc(heading)}</dt><dd>${esc(text)}${index === 3 ? '<p><img src="/peru-travel.webp" alt="Mountains and a river in Peru" width="320" height="240"></p>' : ""}</dd>`).join("")}</dl>`;
+  return `<h1>Off the clock</h1>${paragraph("What I do when I'm not working.")}<dl class="interests">${interests.map(([heading, text], index) => `<dt>${esc(heading)}</dt><dd>${esc(text)}${index === 3 ? '<p><img src="/peru-travel.webp" alt="Mountains and a river in Peru" width="320" height="240"></p>' : ""}</dd>`).join("")}</dl>`;
 }
 
 export function contactBody(): string {
