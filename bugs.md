@@ -185,6 +185,17 @@ the end of their section, sorted by id on read.
 - **Status:** fixed-pending-migration
 - **Fix:** `beforeAll` awaits `import("./ProjectReadme")` so the module is cached before any test opens a project; assertions and timeouts unchanged. Test time 272ms to ~100ms; file passed 20/20 looped runs and the full suite (147/147) passes.
 
+### [BUG-1790964596] next 16.3.4 is vulnerable to remote code execution (GHSA-vcvr-r3jv-pc5j)
+- [x] **Severity:** high
+- **Area:** security, dependencies
+- **File(s):** package.json, package-lock.json
+- **Observation:** `npm audit` reports a critical advisory for next >=16.2.0 <16.3.6 (remote code execution in `next/og` ImageResponse), plus a high brace-expansion denial-of-service in the eslint toolchain. The live site ran next 16.3.4 with `next/og` image routes.
+- **Expected:** No known critical or high advisories in the dependency tree.
+- **Repro / Notes:** `npm audit` on main at FEAT-1790963490.
+- **Bump:** patch
+- **Status:** fixed-pending-migration
+- **Fix:** next and eslint-config-next 16.3.8; `npm audit fix` for brace-expansion. `npm audit` reports 0 vulnerabilities; lint, unit, build and E2E pass.
+
 ## Migrated to changelog
 
 Entries below have been ticked off and copied as a one-liner into `CHANGELOG.md`.
