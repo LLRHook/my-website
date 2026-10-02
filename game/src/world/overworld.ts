@@ -112,7 +112,14 @@ export class OverworldScene implements Scene, ScriptHost, OverworldHooks {
   get mon(): string {
     return this.starters[Math.max(0, this.state.x - 3)]?.name ?? "CODELING";
   }
+  private publishPosition(): void {
+    const position = `${this.state.x},${this.state.y},${this.state.dir}`;
+    if (this.root.dataset.pos !== position) {
+      this.root.dataset.pos = position;
+    }
+  }
   enter(): void {
+    this.publishPosition();
     this.root.dataset.map = this.map.id;
     if (this.map.id === "center") {
       setFlag(this.state, "lastCenter");
@@ -124,6 +131,7 @@ export class OverworldScene implements Scene, ScriptHost, OverworldHooks {
     this.closed = true;
   }
   update(dt: number): void {
+    this.publishPosition();
     this.frames++;
     this.state.playTimeSec += dt;
     this.heading = Math.max(0, this.heading - 1);

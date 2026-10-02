@@ -17,6 +17,7 @@ export interface Options {
   music: number;
   sfx: number;
   anims: boolean;
+  haptics: boolean;
 }
 
 export interface GameRepo {

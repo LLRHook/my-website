@@ -304,7 +304,7 @@ the end of their section, sorted by id on read.
 - **Status:** shipped-pending-migration
 
 ### [FEAT-1790978717] Codelings on phones: fullscreen play, sliding D-pad, haptics
-- [ ] **Priority:** high
+- [x] **Priority:** high
 - **Area:** projects, game, mobile
 - **File(s):** public/retro.css, app/lib/pages.ts, game/src/engine/input.ts, game/src/engine/audio.ts, game/src/main.ts, game/src/ui/options.ts, game/src/engine/storage.ts, playwright.config.ts, e2e/game.spec.ts
 - **Why:** Owner wants the game fully playable on mobile. Today the D-pad captures each button separately (no sliding between directions), the page scrolls and zooms under the thumbs, there is no fullscreen or landscape layout, iOS audio may stay locked, and phones get the keyboard legend.
@@ -314,7 +314,8 @@ the end of their section, sorted by id on read.
 - **Test plan:** Playwright projects with iPhone and Pixel device emulation (touch) for the game spec: fullscreen enter/exit, sliding D-pad changes data-map position, multi-touch run, landscape layout fits without scrolling; unit tests for D-pad direction resolution.
 - **Out of scope:** Installable PWA, offline mode, native app wrappers.
 - **Bump:** minor
-- **Status:** open
+- **Implementation:** PLAY FULLSCREEN pins the handheld as a fixed overlay (Fullscreen API where available, safe-area padding, `html.game-locked` scroll lock with scroll position restored) and picks the largest integer screen scale whose bezel and controls fit, with portrait and landscape layouts; narrow portrait collapses the shell padding, moves EXIT beside the bezel and hides the wordmark, so 320x568 plays at 2x. One `.dpad` touch zone resolves direction through `resolveDpad` (18% dead zone, sliding thumb, `data-pressed` visuals); other buttons keep per-pointer capture for multi-touch. Touch hygiene on the device, audio resume on pointerup/touchend, 8ms vibration behind a new HAPTICS option (old saves default it to true), pause and mute when under 25% visible, touch hint on coarse pointers, `data-pos` hook. Playwright gains iPhone 15 and Pixel 7 projects for the game suite. Verified: lint, tsc, 157 Vitest, build, 62 Playwright passed with 10 expected skips; six device screenshots inspected. Physical-device audio unlock, vibration and notch insets not verified (emulation only).
+- **Status:** shipped-pending-migration
 
 ## Shipped
 - **Implementation:** Window toggles day/evening, lamp toggles its independent desk glow, and the cat responds directly with its wake gesture. Replaced the mountain print with a UMBC B.S. Computer Science May 2024 frame; removed both journal and pencil. Added control regressions and verified 320px/390px/desktop layouts and focus return.

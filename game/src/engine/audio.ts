@@ -25,28 +25,37 @@ export class Audio {
   private readonly waves: PeriodicWave[] = [];
   private sequencer?: Sequencer;
   private unavailable = false;
+  private paused = false;
   private track: TrackId = "title";
 
   constructor(private options: Options) {
-    document.addEventListener("visibilitychange", () => {
-      if (!this.context || !this.master) {
-        return;
-      }
-      this.master.gain.value = document.hidden ? 0 : 0.65;
-      if (document.hidden) {
-        void this.context.suspend().catch(() => {
-        });
-      } else {
-        this.resume();
-      }
-    });
+    document.addEventListener("visibilitychange", () => this.syncPause());
   }
+
+  setPaused(paused: boolean): void {
+    this.paused = paused;
+    this.syncPause();
+  }
+
+  private syncPause(): void {
+    if (!this.context || !this.master) {
+      return;
+    }
+    const paused = this.paused || document.hidden;
+    this.master.gain.value = paused ? 0 : 0.65;
+    if (paused) {
+      void this.context.suspend().catch(() => {});
+    } else {
+      this.resume();
+    }
+  }
+
   get time(): number {
     return this.context?.currentTime ?? 0;
   }
 
   resume(): void {
-    if (this.unavailable || document.hidden) {
+    if (this.unavailable || document.hidden || this.paused) {
       return;
     }
     try {
@@ -159,7 +168,8 @@ export class Audio {
     const end = when + note.duration * 0.92;
     envelope.gain.setValueAtTime(0, when);
     envelope.gain.linearRampToValueAtTime(note.volume / 15 * (channel === 3 ? 0.07 : 0.16), when + 0.005);
-    envelope.gain.setValueAtTime(note.volume / 15 * (channel === 3 ? 0.07 : 0.16), Math.max(when + 0.005, end - 0.015));
+    envelope.gain.setValueAtTime(note.volume / 15 * (channel === 3 ? 0.07 : 0.16),
+      Math.max(when + 0.005, end - 0.015));
     envelope.gain.linearRampToValueAtTime(0, end);
     let source: OscillatorNode | AudioBufferSourceNode;
     if (channel === 3) {

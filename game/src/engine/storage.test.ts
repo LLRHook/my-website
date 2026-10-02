@@ -121,6 +121,21 @@ describe("versioned local storage", () => {
     values.set(OPTIONS_KEY, '{"music":5}');
     expect(loadOptions()).toEqual(DEFAULT_OPTIONS);
   });
+  it("defaults missing legacy haptics in saves and separate options to true", () => {
+    const legacy: Record<string, unknown> = { ...DEFAULT_OPTIONS };
+    delete legacy.haptics;
+    values.set(OPTIONS_KEY, JSON.stringify(legacy));
+    expect(loadOptions().haptics).toBe(true);
+    values.set(SAVE_KEY, JSON.stringify({ ...fixture(), options: legacy }));
+    expect(loadSave()?.options.haptics).toBe(true);
+    expect(loadOptions().haptics).toBe(true);
+  });
+  it("preserves disabled haptics and rejects invalid haptics", () => {
+    expect(writeOptions({ ...DEFAULT_OPTIONS, haptics: false })).toBe(true);
+    expect(loadOptions().haptics).toBe(false);
+    values.set(SAVE_KEY, JSON.stringify({ ...fixture(), options: { ...DEFAULT_OPTIONS, haptics: "on" } }));
+    expect(loadSave()).toBeNull();
+  });
   it("takes options from the save and updates both storage locations", () => {
     writeSave(fixture());
     values.set(OPTIONS_KEY, JSON.stringify({

@@ -2,7 +2,7 @@
 
 This checklist covers the 1990s HTML/CSS home page (FEAT-1790963490) and the
 Codelings game on /projects (FEAT-1790968447, FEAT-1790968448, FEAT-1790968449,
-design in `docs/game-design.md`): every route except /projects ships HTML and
+FEAT-1790978717, design in `docs/game-design.md`): every route except /projects ships HTML and
 CSS only, /projects adds the compiled game under a route-specific CSP, the live
 GitHub projects table stays below the game, and the public route contracts hold.
 Dated evidence sections below describe earlier versions.
@@ -22,9 +22,11 @@ Dated evidence sections below describe earlier versions.
 5. For a deployment, set `PLAYWRIGHT_BASE_URL` to its HTTPS URL and run the same
    E2E command. This skips local startup.
 
-Current baseline: 146 Vitest cases across 12 files and 40 Playwright cases across
-2 files (20 Chromium and 20 WebKit: 14 site and 6 game each). Both browser
-projects run both suites. Vitest covers repository listing, filtering, mapping
+Current baseline: 157 Vitest cases across 13 files and 72 Playwright cases across
+2 files: Chromium and WebKit run both suites (14 site and 11 game each, 4 game
+cases skipped as touch-only), and the iPhone 15 (WebKit) and Pixel 7 (Chromium)
+touch projects run only the game suite (11 each, 1 desktop-only case skipped),
+so 62 run and 10 skip. Vitest covers repository listing, filtering, mapping
 and fallback; HTML escaping, metadata, microdata and navigation; pure body
 renderers; and the game's pure modules (RNG, storage validation, text wrapping,
 MML parser and music data, maps, scripts, NPC sight lines, species, formulas,
@@ -44,6 +46,13 @@ authoritative counts. Historical counts below refer to their recorded builds.
   chosen, a tall-grass step starts a battle, a Fork Ball can be thrown, and the
   Codex opens; repository links ask YES/NO before opening. Test-only query
   parameters are documented in README.md and change no persisted state.
+- On the iPhone and Pixel touch projects PLAY FULLSCREEN covers the viewport and
+  locks scrolling; a thumb sliding across the D-pad without lifting turns and
+  walks (`data-pos`); holding B while sliding runs farther than walking in the
+  same time; landscape and 320x568 portrait fit every control in the viewport at
+  screen scale 2 or more; EXIT restores scrolling. On desktop the power LED stays
+  inside the bezel in fullscreen. Audio unlock, vibration and notch insets need a
+  physical-device check; emulation cannot prove them.
 - Projects use hourly GitHub listing and show a table or a usable empty notice
   without `GITHUB_TOKEN`. Descriptions are escaped, profile and undescribed repos
   are filtered, rows sort newest first, and demo links use HTTP(S).

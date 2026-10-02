@@ -1,4 +1,4 @@
-import { defineConfig } from "@playwright/test";
+import { defineConfig, devices } from "@playwright/test";
 
 const deployedBaseURL = process.env.PLAYWRIGHT_BASE_URL;
 const localBaseURL = "http://localhost:3000";
@@ -16,6 +16,8 @@ export default defineConfig({
     screenshot: "only-on-failure",
   },
   projects: [
+    { name: "iphone", testMatch: /game\.spec\.ts/, use: { ...devices["iPhone 15"], browserName: "webkit" } },
+    { name: "pixel", testMatch: /game\.spec\.ts/, use: { ...devices["Pixel 7"], browserName: "chromium" } },
     {
       name: "chromium",
       use: { browserName: "chromium" },

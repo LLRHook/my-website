@@ -32,12 +32,27 @@ function gameSection(projects: (RepoSummary & { sourceName: string })[]): string
     language: repo.language, stars: repo.stars, pushedAt: repo.pushedAt, url: repo.htmlUrl,
     homepage: repo.homepage && /^https?:\/\//i.test(repo.homepage) ? repo.homepage : null,
   }));
-  const button = (action: string, label: string, text: string) => `<button type="button" data-button="${action}" aria-label="${label}">${text}</button>`;
-  return `<div id="game" class="handheld" data-repos="${esc(JSON.stringify(payload))}" data-scene="loading" tabindex="-1">
-<div class="game-bezel"><span class="power-led" aria-hidden="true"></span><div class="game-display"><canvas width="160" height="144" aria-label="Codelings: Victor's Repo Quest. Play with the controls below; every project is also available in the accessible table below."></canvas><div class="game-nojs">Press START requires JavaScript; every project is in the table below</div></div><span class="game-wordmark">VI-BOY</span></div>
-<div class="game-controls"><div class="dpad">${button("up", "Move up", "&#9650;")}${button("left", "Move left", "&#9664;")}${button("right", "Move right", "&#9654;")}${button("down", "Move down", "&#9660;")}</div><div class="game-ab">${button("b", "B: cancel or run", "B")}${button("a", "A: confirm", "A")}</div></div>
+  const button = (action: string, label: string, text: string) =>
+    `<button type="button" data-button="${action}" aria-label="${label}">${text}</button>`;
+  const label = "Codelings: Victor's Repo Quest. Play with the controls below; " +
+    "every project is also available in the accessible table below.";
+  return `<div id="game" class="handheld" data-repos="${esc(JSON.stringify(payload))}"
+data-scene="loading" tabindex="-1">
+<button type="button" class="game-exit" data-action="exit-fullscreen">EXIT</button>
+<div class="game-bezel"><span class="power-led" aria-hidden="true"></span>
+<div class="game-display"><canvas width="160" height="144" aria-label="${esc(label)}"></canvas>
+<div class="game-nojs">Press START requires JavaScript; every project is in the table below</div></div>
+<span class="game-wordmark">VI-BOY</span></div>
+<div class="game-controls"><div class="dpad">
+${button("up", "Move up", "&#9650;")}${button("left", "Move left", "&#9664;")}
+${button("right", "Move right", "&#9654;")}${button("down", "Move down", "&#9660;")}</div>
+<div class="game-ab">${button("b", "B: cancel or run", "B")}${button("a", "A: confirm", "A")}</div></div>
 <div class="game-system">${button("select", "SELECT", "SELECT")}${button("start", "START", "START")}</div></div>
-<p class="game-legend">Click the device to play. Arrows / WASD: move &middot; Z / Space: A &middot; X / Backspace / Shift: B &middot; Enter: START &middot; Tab: SELECT &middot; Esc: release keyboard.</p>`;
+<button type="button" class="game-fullscreen" data-action="fullscreen">PLAY FULLSCREEN</button>
+<p class="game-touch-hint">Tap PLAY FULLSCREEN for the best fit.
+Slide your thumb on the D-pad; hold B to run.</p>
+<p class="game-legend">Click the device to play. Arrows / WASD: move &middot; Z / Space: A &middot;
+X / Backspace / Shift: B &middot; Enter: START &middot; Tab: SELECT &middot; Esc: release keyboard.</p>`;
 }
 
 export function projectsBody(repos: RepoSummary[]): string {
