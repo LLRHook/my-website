@@ -1,0 +1,50 @@
+import type { TrackId } from "./ids.js";
+import { parseMml, TITLE_THEME, type Track } from "../engine/sequencer.js";
+
+function score(tempo: number, melody: string, harmony: string, bass: string, beat: string): readonly Track[] {
+  return [
+    parseMml(`t${tempo} o5 v8 @1 l8 L [${melody}]4`),
+    parseMml(`t${tempo} o4 v5 @0 l8 L [${harmony}]4`),
+    parseMml(`t${tempo} o2 v8 l4 L [${bass}]4`),
+    parseMml(`t${tempo} o2 v3 l8 L [${beat}]4`),
+  ];
+}
+// Original compositions, written for pulse/pulse/triangle/noise; each phrase lasts eight beats.
+export const MUSIC: Readonly<Record<TrackId, readonly Track[]>> = {
+  title: TITLE_THEME,
+  intro: score(88,
+    "e4 g4 a4 r8 g8 f4 e4 d4 g4",
+    "c2 e2 d2 b2",
+    "c2 g2 d2 g2",
+    "r2 r2 r2 c2"),
+  town: score(112,
+    "g8 e8 d4 e8 a8 g4 f8 d8 c4 e8 g8 c4",
+    "c8 r8 e8 r8 a8 r8 e8 r8 f8 r8 a8 r8 g8 r8 e8 r8",
+    "c4 g4 a4 e4 f4 c4 g4 c4",
+    "c8 r8 r8 c8 c8 r8 c8 r8 c8 r8 r8 c8 c8 r8 c8 r8"),
+  route: score(136,
+    "d8 f8 a8 g8 f4 d4 e8 g8 b8 a8 g4 e4",
+    "d8 r8 f8 r8 a8 r8 f8 r8 e8 r8 g8 r8 b8 r8 g8 r8",
+    "d4 a4 d4 f4 e4 b4 e4 g4",
+    "c8 c8 r8 c8 r8 c8 c8 r8 c8 c8 r8 c8 r8 c8 c8 r8"),
+  cave: score(72,
+    "c8 r8 d+4 g4 f+4 d8 r8 f4 g+4 g4",
+    "c2 g2 d2 g+2",
+    "c2 g2 d2 g+2",
+    "r4 c4 r4 r4 c4 r4 r4 c4"),
+  lab: score(104,
+    "b8 g8 e8 r8 f+4 a4 g8 e8 c8 r8 d4 e4",
+    "e8 b8 r8 b8 d8 a8 r8 a8 c8 g8 r8 g8 b8 g8 r8 g8",
+    "e4 b4 d4 a4 c4 g4 b4 e4",
+    "c4 r4 c4 r4 c4 r4 c4 r4"),
+  center: score(92,
+    "c4 e4 d8 f8 a4 g4 e4 d4 c4",
+    "c2 f2 e2 g2",
+    "c2 f2 e2 c2",
+    "r4 c4 r4 c4 r4 c4 r4 c4"),
+  gym: score(124,
+    "e8 e8 b4 a8 g8 f+4 e8 g8 a4 b8 a8 g4",
+    "e8 b8 e8 b8 d8 a8 d8 a8 c8 g8 c8 g8 d8 a8 d8 a8",
+    "e4 e4 d4 d4 c4 c4 d4 b4",
+    "c8 r8 c8 c8 r8 c8 c8 r8 c8 r8 c8 c8 r8 c8 c8 r8"),
+};

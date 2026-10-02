@@ -9,6 +9,9 @@ import { drawSmallText, drawText, measureSmallText, measureText } from "../gfx/f
 import { pixels } from "../gfx/pixels.js";
 import { Menu } from "./menu.js";
 import { OptionsScene } from "./options.js";
+import { professorPortrait } from "../gfx/sprites.js";
+import { OverworldScene, newGame } from "../world/overworld.js";
+import { NameEntryScene } from "./nameEntry.js";
 import { Textbox } from "./textbox.js";
 
 const CREATURE = [
@@ -76,13 +79,13 @@ export class TitleScene implements Scene {
   private frames = 0;
   private menu?: Menu;
   private transition = 0;
-  private greeting = TEXT.intro as string;
+  private continuing = false;
   private readonly save: SaveV1 | null;
   private readonly art = titleArt();
 
   constructor(private readonly input: Input, private readonly audio: Audio,
     private readonly stack: SceneStack, private readonly options: Options,
-    private readonly repos: readonly GameRepo[]) {
+    private readonly repos: readonly GameRepo[], private readonly root: HTMLElement, private readonly hour?: number) {
     const save = loadSave();
     const ids = new Set(repos.map((repo) => repo.id));
     this.save = save ? {
@@ -94,6 +97,7 @@ export class TitleScene implements Scene {
 
   enter(): void {
     this.frames = 0;
+    this.audio.play("title");
   }
 
   update(): void {
@@ -101,8 +105,18 @@ export class TitleScene implements Scene {
     if (this.transition) {
       this.transition++;
       if (this.transition > 24) {
-        this.stack.replace(new IntroScene(this.input, this.greeting, this.options, this.stack, () =>
-          new TitleScene(this.input, this.audio, this.stack, this.options, this.repos)));
+        if (this.continuing && this.save) {
+          Object.assign(this.options, this.save.options);
+          this.stack.replace(new OverworldScene(this.input, this.audio, this.stack, this.root,
+            { ...this.save, options: this.options }, this.repos, this.hour));
+        } else {
+          this.stack.replace(new IntroScene(this.input, this.audio, this.options, () => {
+            this.stack.replace(new NameEntryScene(this.input, (name) => {
+              this.stack.replace(new OverworldScene(this.input, this.audio, this.stack, this.root,
+                newGame(name, this.options), this.repos, this.hour));
+            }));
+          }));
+        }
       }
       return;
     }
@@ -117,7 +131,7 @@ export class TitleScene implements Scene {
         if (entries[index] === TEXT.options) {
           this.stack.push(new OptionsScene(this.input, this.audio, this.stack, this.options));
         } else {
-          this.greeting = entries[index] === TEXT.continue ? TEXT.welcome(this.save!.name) : TEXT.intro;
+          this.continuing = entries[index] === TEXT.continue;
           this.transition = 1;
         }
       }, () => {
@@ -157,21 +171,21 @@ class IntroScene implements Scene {
   readonly id = "intro";
   private frames = 0;
   private readonly textbox: Textbox;
+  private readonly portrait = professorPortrait();
 
-  constructor(private readonly input: Input, greeting: string, options: Options, stack: SceneStack,
-    title: () => TitleScene) {
-    this.textbox = new Textbox(greeting, options, () => stack.replace(title()));
+  constructor(private readonly input: Input, audio: Audio, options: Options, complete: () => void) {
+    audio.play("intro");
+    this.textbox = new Textbox(TEXT.intro, options, complete);
   }
-
   update(): void {
     this.frames++;
     this.textbox.update(this.input);
   }
-
   draw(screen: Screen): void {
     screen.fill(6);
-    drawLogo(screen, 35);
-    drawSubtitle(screen, 60);
+    screen.fill(7, 24, 84, 112, 8);
+    screen.blit(this.portrait, 0, 0, 48, 64, 56, 20);
+    drawSmallText(screen, "PROF. IVANOV", 45, 93, 1);
     this.textbox.draw(screen);
     screen.fadeFromBlack(screen.reducedMotion ? 1 : Math.min(1, this.frames / 24));
   }

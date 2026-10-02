@@ -66,6 +66,7 @@ NEW label, disables both for reduced motion, and supplies print styles.
 - `app/lib/github.ts`: repository listing, pagination, authentication, public fallback.
 - `app/lib/projectPresentation.ts`: display names and descriptions for selected repos.
 - `game/`: Codelings engine, pixel art, title screen, options, and unit tests; see [the game design](docs/game-design.md).
+- `game/src/world/`: overworld movement, typed map data, NPCs, and story scripts.
 - `public/game/`: generated browser modules, excluded from Git.
 - `public/retro.css`: the site's only stylesheet, including the CSS handheld.
 - `scripts/render-assets.mjs`: regenerates the committed favicon set and 1200x630 share card (`npm run assets`).

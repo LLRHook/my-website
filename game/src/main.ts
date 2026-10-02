@@ -5,6 +5,9 @@ import { startLoop } from "./engine/loop.js";
 import { SceneStack } from "./engine/scenes.js";
 import { Screen } from "./engine/screen.js";
 import { loadOptions } from "./engine/storage.js";
+import { initScenery } from "./gfx/scenery.js";
+import { initSprites } from "./gfx/sprites.js";
+import { initTiles } from "./gfx/tiles.js";
 import { initFont } from "./gfx/font.js";
 import { TitleScene } from "./ui/title.js";
 
@@ -54,10 +57,16 @@ if (root) {
     const options = loadOptions();
     const screen = new Screen(canvas);
     initFont();
+    initTiles();
+    initScenery();
+    initSprites();
     const audio = new Audio(options);
     const input = new Input(root, () => audio.resume());
     const scenes = new SceneStack(root);
-    scenes.push(new TitleScene(input, audio, scenes, options, repos));
+    const rawHour = new URLSearchParams(location.search).get("hour");
+    const forcedHour = rawHour !== null && /^([0-9]|1[0-9]|2[0-3])$/.test(rawHour)
+      ? Number(rawHour) : undefined;
+    scenes.push(new TitleScene(input, audio, scenes, options, repos, root, forcedHour));
     const draw = () => {
       scenes.draw(screen);
       screen.present();

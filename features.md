@@ -262,7 +262,7 @@ the end of their section, sorted by id on read.
 - **Status:** shipped-pending-migration
 
 ### [FEAT-1790968448] Codelings game, part 2: overworld, maps and story
-- [ ] **Priority:** high
+- [x] **Priority:** high
 - **Area:** projects, game
 - **File(s):** game/src/world/**, game/src/gfx/tiles.ts, game/src/gfx/sprites.ts, game/src/data/text.ts, game/src/ui/**, game/src/engine/sequencer.ts tracks
 - **Why:** Part 2 of the Projects page game: the world to explore.
@@ -272,7 +272,8 @@ the end of their section, sorted by id on read.
 - **Test plan:** Vitest for map validity, script interpreter; Playwright walks out of the house.
 - **Out of scope:** Multiplayer, trading, evolution, online saves.
 - **Bump:** minor
-- **Status:** open
+- **Implementation:** Original tileset, scenery and outlined 4-direction character sprites; 11 hand-dressed maps (`game/src/world/maps/`) with grid walking/running, ledges, warps, connections, overhead layer, NPC wander/look, trainer sight lines, typed script interpreter, intro with Prof. Ivanov portrait, name entry, START menu, trainer card, save/continue, seven original map tracks with crossfade, and day/dusk/night palette remaps. Encounter, trainer battle, starter, Codex/party/bag, Mart and PC are hooks for part 3. 113 unit tests, 36/36 E2E.
+- **Status:** shipped-pending-migration
 
 ### [FEAT-1790968449] Codelings game, part 3: Codelings, battles, Codex and ending
 - [ ] **Priority:** high
@@ -285,7 +286,7 @@ the end of their section, sorted by id on read.
 - **Test plan:** Vitest for formulas, species, battle machine, catch odds; Playwright reaches a wild battle.
 - **Out of scope:** Multiplayer, trading, evolution, online saves.
 - **Bump:** minor
-- **Status:** open
+- **Status:** in-progress
 
 ### [FEAT-1790969283] Plain Off the Clock copy
 - [x] **Priority:** low
