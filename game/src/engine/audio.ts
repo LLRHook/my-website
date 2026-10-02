@@ -1,10 +1,15 @@
+import { MUSIC } from "../data/music.js";
+import type { TrackId } from "../data/ids.js";
 import type { Options } from "../data/ids.js";
 import { mulberry32 } from "./rng.js";
-import { Sequencer, TITLE_THEME, type Note } from "./sequencer.js";
+import { Sequencer, type Note } from "./sequencer.js";
 
-export type Sfx = "cursor" | "confirm" | "cancel" | "bump" | "save";
+export type Sfx = "cursor" | "confirm" | "cancel" | "bump" | "save"
+  | "door" | "ledge" | "grass" | "heal" | "item" | "badge";
 
 const EFFECTS: Readonly<Record<Sfx, readonly number[]>> = {
+  door: [48, 55], ledge: [60, 67, 72], grass: [42, 46],
+  heal: [72, 76, 79, 74, 77, 81, 79, 84], item: [72, 79, 76, 84], badge: [72, 76, 79, 84, 83, 86, 91],
   cursor: [76], confirm: [72, 79], cancel: [67, 60], bump: [36, 32], save: [72, 76, 79, 84],
 };
 
@@ -17,6 +22,7 @@ export class Audio {
   private readonly waves: PeriodicWave[] = [];
   private sequencer?: Sequencer;
   private unavailable = false;
+  private track: TrackId = "title";
 
   constructor(private options: Options) {
     document.addEventListener("visibilitychange", () => {
@@ -67,7 +73,7 @@ export class Audio {
         for (let index = 0; index < samples.length; index++) {
           samples[index] = random() * 2 - 1;
         }
-        this.sequencer = new Sequencer(this, TITLE_THEME);
+        this.sequencer = new Sequencer(this, MUSIC[this.track]);
       }
       if (this.context.state === "suspended") {
         void this.context.resume().catch(() => {
@@ -90,6 +96,29 @@ export class Audio {
     }
   }
 
+  play(track: TrackId): void {
+    if (track === this.track) {
+      return;
+    }
+    this.track = track;
+    const context = this.context;
+    if (!context || !this.master) {
+      return;
+    }
+    const old = this.music;
+    if (old) {
+      old.gain.cancelScheduledValues(this.time);
+      old.gain.setValueAtTime(old.gain.value, this.time);
+      old.gain.linearRampToValueAtTime(0, this.time + 0.3);
+      window.setTimeout(() => old.disconnect(), 600);
+    }
+    this.music = context.createGain();
+    this.music.connect(this.master);
+    this.music.gain.setValueAtTime(0, this.time);
+    this.music.gain.linearRampToValueAtTime(this.options.music / 10, this.time + 0.3);
+    this.sequencer = new Sequencer(this, MUSIC[track]);
+  }
+
   update(): void {
     if (this.context?.state === "running" && !document.hidden) {
       this.sequencer?.update();
@@ -102,7 +131,7 @@ export class Audio {
 
   sfx(effect: Sfx): void {
     this.resume();
-    EFFECTS[effect].forEach((midi, index) => this.voice(effect === "bump" ? 3 : 0, {
+    EFFECTS[effect].forEach((midi, index) => this.voice((effect === "bump" || effect === "grass") ? 3 : 0, {
       time: 0, duration: 0.07, midi, volume: 9, duty: 2
     }, this.time + index * 0.07, this.effects));
   }
