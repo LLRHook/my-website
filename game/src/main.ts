@@ -1,4 +1,5 @@
 import type { GameRepo } from "./data/ids.js";
+import { mulberry32 } from "./engine/rng.js";
 import { Audio } from "./engine/audio.js";
 import { Input } from "./engine/input.js";
 import { startLoop } from "./engine/loop.js";
@@ -63,10 +64,14 @@ if (root) {
     const audio = new Audio(options);
     const input = new Input(root, () => audio.resume());
     const scenes = new SceneStack(root);
+    const parameters = new URLSearchParams(location.search);
+    const rawSeed = parameters.get("seed");
+    const rng = rawSeed !== null && /^-?\d+$/.test(rawSeed) ? mulberry32(Number(rawSeed)) : Math.random;
+    const encounter = parameters.get("encounter") === "1";
     const rawHour = new URLSearchParams(location.search).get("hour");
     const forcedHour = rawHour !== null && /^([0-9]|1[0-9]|2[0-3])$/.test(rawHour)
       ? Number(rawHour) : undefined;
-    scenes.push(new TitleScene(input, audio, scenes, options, repos, root, forcedHour));
+    scenes.push(new TitleScene(input, audio, scenes, options, repos, root, forcedHour, rng, encounter));
     const draw = () => {
       scenes.draw(screen);
       screen.present();

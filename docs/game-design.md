@@ -270,7 +270,11 @@ Maps (sizes in metatiles, approximate):
 
 Habitats: species are distributed across `route1`, `route2`, `cave` by recency
 (newest on Route 1, oldest in the cave) so all are catchable; tall grass on each
-route draws from its own list with `rarity` weights.
+route draws from its own list with `rarity` weights. With fewer than four species,
+only the **chosen** starter is excluded from wild encounters; the other starter
+candidates remain catchable. The chosen starter is already registered as caught.
+With four or more species, every species, including all starter candidates,
+appears in the wild. This exception keeps a small-payload Codex completable.
 
 Overworld rules: grid movement 16px per step at 1px/frame walking, 2px/frame
 running (B); 3-frame walk cycle; turning in place on tap; bump sound on walls;

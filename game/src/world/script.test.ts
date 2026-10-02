@@ -59,6 +59,10 @@ it("external pages open only after affirmative consent", async () => {
 
 it("the authored lab script grants the Codex, unlocks the north exit, and gives Fork Balls once", async () => {
   const h = host();
+  h.starter = vi.fn(async () => {
+    h.state.flags.push("hasCodex", "hasStarter");
+    h.state.bag.forkBall = 5;
+  });
   const script = MAPS.lab.npcs.find((npc) => npc.id === "prof")!.script;
   await runScript(script, h);
   expect(h.state.flags).toEqual(["hasCodex", "hasStarter"]);

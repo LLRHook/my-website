@@ -5,9 +5,12 @@ import { mulberry32 } from "./rng.js";
 import { Sequencer, type Note } from "./sequencer.js";
 
 export type Sfx = "cursor" | "confirm" | "cancel" | "bump" | "save"
-  | "door" | "ledge" | "grass" | "heal" | "item" | "badge";
+  | "door" | "ledge" | "grass" | "heal" | "item" | "badge"
+  | "hit" | "super" | "weak" | "faint" | "throw" | "shake" | "catch" | "run";
 
 const EFFECTS: Readonly<Record<Sfx, readonly number[]>> = {
+  hit: [44, 39], super: [55, 43, 36], weak: [40], faint: [55, 48, 40, 32],
+  throw: [60, 67, 76], shake: [52, 57], catch: [72, 79, 86, 84], run: [64, 60, 55],
   door: [48, 55], ledge: [60, 67, 72], grass: [42, 46],
   heal: [72, 76, 79, 74, 77, 81, 79, 84], item: [72, 79, 76, 84], badge: [72, 76, 79, 84, 83, 86, 91],
   cursor: [76], confirm: [72, 79], cancel: [67, 60], bump: [36, 32], save: [72, 76, 79, 84],
@@ -134,6 +137,16 @@ export class Audio {
     EFFECTS[effect].forEach((midi, index) => this.voice((effect === "bump" || effect === "grass") ? 3 : 0, {
       time: 0, duration: 0.07, midi, volume: 9, duty: 2
     }, this.time + index * 0.07, this.effects));
+  }
+
+  cry(seed: number): void {
+    this.resume();
+    const rng = mulberry32(seed);
+    const base = 44 + Math.floor(rng() * 32);
+    for (let i = 0; i < 5; i++) {
+      this.voice(i % 2 ? 2 : 0, { time: 0, duration: 0.08, midi: base + Math.floor(rng() * 12) - i * 2,
+        volume: 8, duty: seed % 3 }, this.time + i * 0.08, this.effects);
+    }
   }
 
   private voice(channel: number, note: Note, when: number, output?: GainNode): void {

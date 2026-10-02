@@ -2,9 +2,65 @@ export const TEXT = {
   logo: "CODELINGS", subtitle: "Victor's Repo Quest", start: "PRESS START", copyright: "© 2026 VICTOR IVANOV",
   newGame: "NEW GAME", continue: "CONTINUE", options: "OPTIONS", back: "BACK",
   intro: "Hello! I am Prof. Ivanov. Codelings grow from projects people share. Some are tiny experiments. Some have years of stories. Take a walk and meet their makers. First, what should I call you?",
-  welcome: (name: string) => `Welcome back, ${name}! Your journey begins in part 2.`,
   speed: "TEXT", music: "MUSIC", sfx: "SFX", animations: "ANIMS", on: "ON", off: "OFF",
   optionsHelp: "◀ ▶ CHANGE  B BACK", yes: "YES", no: "NO",
+} as const;
+
+export const CREDITS = ["MERGE APPROVED", "", "Prof. Ivanov:", "Thank you for taking", "these little projects",
+  "out into the world.", "", "CODELINGS", "Game by Victor Ivanov", "", "Every repo has a story.",
+  "Thanks for playing.", "", "Your next branch awaits."] as const;
+
+export const BATTLE_TEXT = {
+  trainerRun: "A review needs an answer. You cannot run!",
+  escaped: "Slipped away safely.", blockedPath: "The path is blocked!",
+  owned: "That Codeling already has a team.", throw: "Fork sent! Hold steady...",
+  caught: (name: string) => `${name} joined your branch!`,
+  almost: "Almost! It popped the fork.", burst: "It slipped out at once!",
+  noEffect: "That would have no effect.", fixed: "Applied the fix.", empty: "None left in the bag.",
+  sent: (name: string, foe: boolean) => `${foe ? "Foe sends" : "Go,"} ${name}!`,
+  wild: (name: string) => `Wild ${name} appeared!`,
+  trainer: (trainer: string, name: string) => `${trainer} sends out ${name}!`,
+  deprecated: (name: string) => `${name} is deprecated.`,
+  frozen: (name: string) => `${name} is frozen!`, thawed: (name: string) => `${name} thawed out.`,
+  blocked: (name: string) => `${name} is blocked!`, confused: (name: string) => `${name} tangled its own code!`,
+  move: (name: string, move: string) => `${name}: ${move}!`,
+  missed: "The move missed.", critical: "A critical hit!", super: "Super effective!", weak: "Not very effective.",
+  strikes: (count: number) => `${count} strikes!`,
+  stage: (stat: string, amount: number) => `${stat.toUpperCase()} ${amount > 0 ? "rose" : "fell"}!`,
+  status: (name: string, status: string) => `${name}: ${status.toUpperCase()}!`,
+  recoil: "Recoil from the overload!", fainted: (name: string) => `${name} fainted.`,
+  learned: (name: string, move: string) => `${name} learned ${move}!`,
+  level: (name: string, level: number) => `${name} reached L${level}!`,
+  newMove: (move: string) => `Learned ${move}!`,
+  exp: (amount: number) => `Gained ${amount} EXP!`,
+  shift: (name: string) => `Next: ${name}. Switch? TEAM to switch; B to keep.`,
+} as const;
+
+const FLAVOUR: Readonly<Record<string, readonly string[]>> = {
+  python: ["It coils around warm notebooks.", "Its tracks leave neat indents.", "It naps between long loops."],
+  javascript: ["Its sparks answer every event.", "It keeps a promise in each ember.", "Its flame waits for no clock."],
+  typescript: ["It checks every stone before stacking.", "Its broad shoulders guard narrow paths.",
+    "It likes to know what comes next."],
+  go: ["It digs two tunnels at once.", "Its burrow has buffered doors.", "It shares the work with its neighbors."],
+  swift: ["It nests where the wind feels safe.", "Its wings carry tiny labels.", "It circles once before each landing."],
+  shell: ["Its claws redirect fallen leaves.", "It echoes from inside its armor.", "It collects pebbles in tidy pipes."],
+  dart: ["It swims straight through a stream.", "Its fins turn ripples into arrows.", "It waits for the next current."],
+  csharp: ["Its facets shine in ordered rows.", "It keeps spare light in its crystal.", "Its prism hums when a task ends."],
+  java: ["It brews steam before sunrise.", "Its kettle rattles during long builds.", "It warms the oldest cave shelves."],
+  normal: ["It leaves soft prints on every path.", "It keeps company with quiet projects.", "It enjoys a clean page."],
+};
+export function codexFlavour(type: string, seed: number): string {
+  const lines = FLAVOUR[type] ?? FLAVOUR.normal;
+  return lines[seed % lines.length];
+}
+
+export const QUEST_TEXT = {
+  remainingStarters: "These two friends are waiting for their next researcher.",
+  starterGift: "Your friend is level 5. Take this Codex and five Fork Balls. Route 1 is waiting!",
+  blackout: "A rest, a fresh build, then try again.",
+  openRepository: "Open on GitHub?",
+  diploma: (name: string, count: number): string[] => ["CODEX DIPLOMA", "", `Awarded to ${name}`, "",
+    `CODEX COMPLETE: ${count}`, "Every branch has a home", "", "Prof. Ivanov", "Sterling Research Lab"],
 } as const;
 
 export const WORLD_TEXT = {
@@ -15,23 +71,20 @@ export const WORLD_TEXT = {
   "bed": "You made the bed. That counts as a small release.",
   "gran": "Gran: Two Patches for a fresh start! Come home when you need a rest.",
   "granAgain": "Gran: I left soup on the stove. Save your work before supper.",
-  "prof": "Prof. Ivanov: Ah, {PLAYER}! The table holds three promising Codelings. Their first outing is coming in part 3. Take this Codex and five Fork Balls. Go see what our neighbors are building!",
+  "prof": "Prof. Ivanov: Ah, {PLAYER}! The table holds three promising Codelings. Choose one to join your team. Go see what our neighbors are building!",
   "profAgain": "Prof. Ivanov: Your Codex will record the projects you meet. Reviewer Rhea runs the Merge Gym in Commit City. Say hello for me.",
   "gate": "Prof. Ivanov: Wait, {PLAYER}! Visit my lab by the east pond first. A little preparation saves a long walk home.",
-  "starter": "{MON} is waiting for part 3.",
+  "starter": "Examine this Fork Ball?",
   "aide1": "Aide Nell: A good README tells you why a project exists. Mine explains where I put my lunch.",
   "aide2": "Aide Oren: Three Fork Balls, three possibilities. I label the shelves twice and still lose my pencil.",
-  "ada": "Medic Ada: Let us take a breather. Even an empty party deserves a welcome tune.",
+  "ada": "Medic Ada: Let us take a breather. Let us patch up your team.",
   "healed": "Medic Ada: All rested! The PC is beside the bookshelves.",
   "box": "BOX is empty.",
-  "clerk": "Clerk Pip: Prices are on the board. Our stock arrives in part 3.",
-  "mart": "FORK BALL  200\nPATCH      300\nHOTFIX     700\nComing in part 3.",
-  "noData": "No data yet.",
+  "clerk": "Clerk Pip: Prices are on the board. Pick a fix for the road.",
+  "mart": "FORK BALL  200\nPATCH      300\nHOTFIX     700\nGreat forks, fresh stock.",
   "saved": "Your journey was saved.",
   "saveFailed": "Could not save. Storage may be full or disabled.",
-  "rustle": "Something rustled... (battles arrive in part 3)",
   "badge": "You earned the green-check badge!",
-  "ending": "Prof. Ivanov: Thank you, {PLAYER}. Keep asking how things work. There is plenty left to explore. Game by Victor Ivanov. The full ending arrives in part 3.",
   "item": "Found three Fork Balls tucked beside the trail.",
   "sterlingSign": "STERLING TOWN\nSmall projects start here. Lab: east. Route 1: north.",
   "labSign": "IVANOV LAB\nVisitors welcome. Please do not feed the compiler.",
@@ -57,7 +110,7 @@ export const WORLD_TEXT = {
   "gymB": "Builder Bram: I review one step at a time. Your turn.",
   "gymBLose": "Bram: That path checks out. Rhea is just ahead.",
   "rhea": "Reviewer Rhea: Welcome, {PLAYER}. A careful review can help a rough idea grow. Show me your next step!",
-  "rheaLose": "Rhea: Approved. Wear this green check with care. The battle review arrives in part 3.",
+  "rheaLose": "Rhea: Approved. Wear this green check with care. Your team has earned this.",
   "r1a": "Scout Leni: I found a shortcut! It only works in one direction.",
   "r1aLose": "Leni: You saw the ledge before I did. Here are 80 coins.",
   "r1b": "Runner Kit: I race my own best time. Want a practice round?",

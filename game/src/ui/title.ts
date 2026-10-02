@@ -4,8 +4,10 @@ import type { Audio } from "../engine/audio.js";
 import type { Input } from "../engine/input.js";
 import type { Scene, SceneStack } from "../engine/scenes.js";
 import type { Screen } from "../engine/screen.js";
-import { loadSave, type SaveV1 } from "../engine/storage.js";
+import { loadSave, reconcileSpecies, type SaveV1 } from "../engine/storage.js";
 import { drawSmallText, drawText, measureSmallText, measureText } from "../gfx/font.js";
+import { buildSpecies } from "../data/species.js";
+import { drawCreature } from "../gfx/creatures.js";
 import { pixels } from "../gfx/pixels.js";
 import { Menu } from "./menu.js";
 import { OptionsScene } from "./options.js";
@@ -13,13 +15,6 @@ import { professorPortrait } from "../gfx/sprites.js";
 import { OverworldScene, newGame } from "../world/overworld.js";
 import { NameEntryScene } from "./nameEntry.js";
 import { Textbox } from "./textbox.js";
-
-const CREATURE = [
-  "................", "...nn.....nn....", "..nyyn...nyyn...", "..nyyyn.nyyyn...",
-  "...ntttttttn....", "..ntttttttttn...", ".ntttttttttttn..", ".nttnnttnntttn..",
-  ".nttyyttyytttn..", ".ntttttttttttn..", "..ntttyyytttn...", "...ntttttttn....",
-  "....nnnnnnn.....", "...nyyn.nyyn....", "...nnnn.nnnn....", "................",
-] as const;
 
 const CLOUD = [
   "................................", "........wwwwww..................", "......wwwwwwwwww................",
@@ -29,7 +24,6 @@ const CLOUD = [
 ] as const;
 
 interface TitleArt {
-  creature: HTMLCanvasElement;
   cloud: HTMLCanvasElement;
   hills: HTMLCanvasElement;
 }
@@ -38,9 +32,6 @@ let art: TitleArt | undefined;
 
 function titleArt(): TitleArt {
   return art ??= {
-    creature: pixels(CREATURE, {
-      n: 1, t: 30, y: 4
-    }),
     cloud: pixels(CLOUD, {
       w: 5, s: 12
     }),
@@ -82,17 +73,17 @@ export class TitleScene implements Scene {
   private continuing = false;
   private readonly save: SaveV1 | null;
   private readonly art = titleArt();
+  private readonly species;
 
   constructor(private readonly input: Input, private readonly audio: Audio,
     private readonly stack: SceneStack, private readonly options: Options,
-    private readonly repos: readonly GameRepo[], private readonly root: HTMLElement, private readonly hour?: number) {
+    private readonly repos: readonly GameRepo[], private readonly root: HTMLElement, private readonly hour?: number,
+    private readonly rng: () => number = Math.random, private readonly forceEncounter = false) {
+    const list = buildSpecies([...repos]);
+    this.species = list[Math.floor(rng() * list.length)];
     const save = loadSave();
-    const ids = new Set(repos.map((repo) => repo.id));
-    this.save = save ? {
-      ...save, party: save.party.filter((entry) => ids.has(entry.species)),
-        box: save.box.filter((entry) => ids.has(entry.species)),
-      seen: save.seen.filter((id) => ids.has(id)), caught: save.caught.filter((id) => ids.has(id))
-    } : null;
+    const ids = new Set(list.map((species) => species.id));
+    this.save = save ? reconcileSpecies(save, ids) : null;
   }
 
   enter(): void {
@@ -108,12 +99,12 @@ export class TitleScene implements Scene {
         if (this.continuing && this.save) {
           Object.assign(this.options, this.save.options);
           this.stack.replace(new OverworldScene(this.input, this.audio, this.stack, this.root,
-            { ...this.save, options: this.options }, this.repos, this.hour));
+            { ...this.save, options: this.options }, this.repos, this.hour, this.rng, this.forceEncounter));
         } else {
           this.stack.replace(new IntroScene(this.input, this.audio, this.options, () => {
             this.stack.replace(new NameEntryScene(this.input, (name) => {
               this.stack.replace(new OverworldScene(this.input, this.audio, this.stack, this.root,
-                newGame(name, this.options), this.repos, this.hour));
+                newGame(name, this.options), this.repos, this.hour, this.rng, this.forceEncounter));
             }));
           }));
         }
@@ -157,11 +148,19 @@ export class TitleScene implements Scene {
     drawSubtitle(screen, 47);
     const walkX = screen.reducedMotion ? 72 : ((Math.floor(this.frames / 5) + 56) % 184) - 16;
     const step = screen.reducedMotion ? 0 : Math.floor(this.frames / 12) % 2;
-    screen.blit(this.art.creature, 0, 0, 16, 16, walkX, (this.menu ? 112 : 97) - step);
+    const creature = drawCreature(this.species.sprite.seed, this.species.sprite.body, this.species.type, "front");
+    screen.blit(creature, 0, 0, 32, 32, walkX, (this.menu ? 95 : 76) - step);
+    if (!this.menu) {
+      const width = measureSmallText(this.species.name);
+      const nameX = Math.max(6, Math.min(154 - width, walkX + 16 - width / 2));
+      screen.fill(10, nameX - 2, 108, width + 4, 12);
+      screen.fill(6, nameX - 1, 109, width + 2, 10);
+      drawSmallText(screen, this.species.name, nameX, 111, 1);
+    }
     if (!this.menu && (screen.reducedMotion || this.frames % 90 < 60)) {
       drawText(screen, TEXT.start, Math.round((160 - measureText(TEXT.start)) / 2), 122, 4);
     }
-    drawSmallText(screen, TEXT.copyright, Math.round((160 - measureSmallText(TEXT.copyright)) / 2), 136, 6);
+    drawSmallText(screen, TEXT.copyright, Math.round((160 - measureSmallText(TEXT.copyright)) / 2), 133, 6);
     this.menu?.draw(screen, (160 - 112) / 2, 64, 112);
     screen.fadeToBlack(this.transition ? (screen.reducedMotion ? 1 : this.transition / 24) : 0);
   }

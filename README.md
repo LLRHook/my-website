@@ -65,7 +65,7 @@ NEW label, disables both for reduced motion, and supplies print styles.
 - `app/lib/pages.ts`: pure body renderers and resume content.
 - `app/lib/github.ts`: repository listing, pagination, authentication, public fallback.
 - `app/lib/projectPresentation.ts`: display names and descriptions for selected repos.
-- `game/`: Codelings engine, pixel art, title screen, options, and unit tests; see [the game design](docs/game-design.md).
+- `game/`: Codelings engine, procedural creatures, battles, collection menus, and unit tests; see [the game design](docs/game-design.md).
 - `game/src/world/`: overworld movement, typed map data, NPCs, and story scripts.
 - `public/game/`: generated browser modules, excluded from Git.
 - `public/retro.css`: the site's only stylesheet, including the CSS handheld.
@@ -97,3 +97,24 @@ The existing GitHub integration deploys `main` to the Vercel `my-website`
 project and `victorivanov.engineer`. Follow [VERIFICATION.md](VERIFICATION.md)
 before release and inspect deployment status afterward. Roll back with a
 normal revert and the same deployment path.
+
+### Codelings battles and collection
+
+Choose a level-5 starter in Prof. Ivanov's lab, then explore Route 1, Route 2 and
+Stack Cave. Each public repository has a deterministic Codeling, with older
+repositories deeper in the cave. Fight, catch and train a party of six, store
+extras in the Center PC, buy or sell supplies at the Mart, and challenge Reviewer
+Rhea for the green-check badge and credits. Completing the Codex earns a diploma.
+Caught Codex entries open the repository after a YES/NO confirmation; HTTP(S)
+homepages also offer a demo link. Saves stay in this browser's local storage.
+
+Keyboard: arrows/WASD to walk, Z/Space to confirm, X/Shift to cancel or run,
+Enter for START and Tab for SELECT. In battle, FIGHT opens moves, BAG uses supplies,
+TEAM switches a Codeling and RUN attempts to escape a wild battle. SELECT switches
+buy/sell at the Mart and party/box at the PC. On the trainer card, SELECT reopens
+an earned diploma.
+
+For browser tests only, `/projects?hour=12&seed=1&encounter=1` fixes the local
+lighting hour (0-23), seeds the runtime RNG, and forces the next eligible grass
+or cave step to encounter a Codeling. Parameters are parsed only in `main.ts`
+when present and do not modify persisted state. They are not cheats or save fields.

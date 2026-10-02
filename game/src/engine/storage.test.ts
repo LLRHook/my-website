@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { clearSave, DEFAULT_OPTIONS, loadOptions, loadSave, OPTIONS_KEY, SAVE_KEY, writeOptions, writeSave,
+import { clearSave, DEFAULT_OPTIONS, loadOptions, loadSave, OPTIONS_KEY, reconcileSpecies,
+  SAVE_KEY, writeOptions, writeSave,
   type SaveV1 } from "./storage.js";
 
 const fixture = (): SaveV1 => ({
@@ -14,11 +15,31 @@ const fixture = (): SaveV1 => ({
     uid: "caught-1", species: 42, level: 5, exp: 125, hp: 22, ivs: {
       hp: 1, atk: 2, def: 3, spd: 4, spc: 5
     }, moves: [{
-      id: "type-guard", pp: 10
+      id: "guard-rise", pp: 10
     }], status: null
   }],
 });
 describe("versioned local storage", () => {
+  it("recovers a part-2 placeholder starter save without losing other progress", () => {
+    const save = { ...fixture(), party: [], flags: ["hasStarter", "hasCodex", "badge", "defeated:rhea", "granGift"] };
+    const result = reconcileSpecies(save, new Set([42]));
+    expect(result.flags).toEqual(["granGift"]);
+    expect(result.coins).toBe(save.coins);
+    expect(result.bag).toEqual(save.bag);
+    expect(save.flags).toContain("badge");
+  });
+  it("skips missing species, reopens starter choice and preserves a real team's earned badge", () => {
+    const save = { ...fixture(), flags: ["hasStarter", "hasCodex", "starter:42", "badge", "defeated:rhea"] };
+    const result = reconcileSpecies(save, new Set());
+    expect(result.party).toEqual([]);
+    expect(result.seen).toEqual([]);
+    expect(result.caught).toEqual([]);
+    expect(result.flags).toEqual(["badge", "defeated:rhea"]);
+  });
+  it("retains a real party and starter flags when its species still exists", () => {
+    const save = { ...fixture(), flags: ["hasStarter", "hasCodex", "starter:42", "badge"] };
+    expect(reconcileSpecies(save, new Set([42]))).toEqual(save);
+  });
   let values: Map<string, string>;
   beforeEach(() => {
     values = new Map();

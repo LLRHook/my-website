@@ -27,6 +27,10 @@ export class Screen {
     this.context.fillRect(x, y, width, height);
   }
 
+  describe(text: string): void {
+    this.visible.canvas.setAttribute("aria-label", `Codelings. ${text} Projects are also in the table below.`);
+  }
+
   blit(atlas: HTMLCanvasElement, sx: number, sy: number, width: number, height: number, dx: number,
     dy: number, flip = false): void {
     const context = this.context;

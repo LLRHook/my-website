@@ -99,3 +99,27 @@ export function drawText(screen: Screen, text: string, x: number, y: number, col
       Math.round(y), 8 * scale, 8 * scale);
   });
 }
+
+const COMPACT: Readonly<Record<string, string>> = {
+  "0": "75557", "1": "26227", "2": "71247", "3": "71217", "4": "55711", "5": "74717",
+  "6": "74757", "7": "71222", "8": "75757", "9": "75717", "/": "11244", ":": "02020",
+  "A": "25755", "B": "65656", "C": "74447", "D": "65556", "E": "74647", "F": "74644",
+  "G": "74557", "H": "55755", "I": "72227", "J": "11156", "K": "55655", "L": "44447",
+  "M": "57755", "N": "57775", "O": "25552", "P": "65644", "Q": "25573", "R": "65655",
+  "S": "74217", "T": "72222", "U": "55557", "V": "55552", "W": "55775", "X": "55255",
+  "Y": "55222", "Z": "71247", "-": "00700", " ": "00000", "?": "71202",
+};
+
+export function drawCompactText(screen: Screen, text: string, x: number, y: number, colour = 1): void {
+  [...text.toUpperCase()].forEach((character, index) => {
+    const rows = COMPACT[character] ?? COMPACT["?"];
+    for (let row = 0; row < 5; row++) {
+      const bits = Number(rows[row]);
+      for (let column = 0; column < 3; column++) {
+        if (bits & (1 << (2 - column))) {
+          screen.fill(colour, x + index * 4 + column, y + row, 1, 1);
+        }
+      }
+    }
+  });
+}

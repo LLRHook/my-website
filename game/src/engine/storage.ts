@@ -1,3 +1,4 @@
+import { MOVES } from "../battle/moves.js";
 import type { Dir, ItemId, MapId, MoveId, Options, Status } from "../data/ids.js";
 
 export interface Stats {
@@ -73,8 +74,10 @@ function validCodeling(value: unknown): value is Codeling {
     && record(value.ivs) && ["hp", "atk", "def", "spd", "spc"].every((stat) =>
       integer((value.ivs as Record<string, unknown>)[stat], 0, 31))
     && arrayOf(value.moves, (move) => record(move) && typeof move.id === "string" &&
-      /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(move.id) && integer(move.pp))
-    && value.moves.length <= 4 && (value.status === null || member(value.status, ["blocked", "deprecated", "frozen"]));
+      /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(move.id) && !!MOVES[move.id]
+      && integer(move.pp, 0, MOVES[move.id]?.pp ?? 0))
+    && value.moves.length >= 1 && value.moves.length <= 4
+    && (value.status === null || member(value.status, ["blocked", "deprecated", "frozen"]));
 }
 
 export function validSave(value: unknown): value is SaveV1 {
@@ -112,6 +115,26 @@ function write(key: string, value: unknown): boolean {
 export function loadSave(): SaveV1 | null {
   const value = read(SAVE_KEY);
   return validSave(value) ? value : null;
+}
+
+export function reconcileSpecies(save: SaveV1, ids: ReadonlySet<number>): SaveV1 {
+  const result: SaveV1 = {
+    ...save, party: save.party.filter((mon) => ids.has(mon.species)),
+    box: save.box.filter((mon) => ids.has(mon.species)),
+    seen: save.seen.filter((id) => ids.has(id)), caught: save.caught.filter((id) => ids.has(id)),
+    flags: [...save.flags],
+  };
+  if (!result.party.length && !result.box.length) {
+    result.flags = result.flags.filter((flag) => flag !== "hasStarter" && flag !== "hasCodex"
+      && !flag.startsWith("starter:"));
+    // Part 2 granted placeholder starter and battle flags without creating a team.
+    // A real team lost through payload changes keeps its legitimately earned badge.
+    if (!save.party.length && !save.box.length && save.flags.includes("hasStarter")) {
+      result.flags = result.flags.filter((flag) => flag !== "badge" && flag !== "diploma"
+        && !flag.startsWith("defeated:"));
+    }
+  }
+  return result;
 }
 
 export function writeSave(save: SaveV1): boolean {
