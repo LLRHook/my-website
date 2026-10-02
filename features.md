@@ -247,6 +247,46 @@ the end of their section, sorted by id on read.
 - **Implementation:** `npm run assets` also renders `public/og-image.png` (1200x630 retro card). `page()` adds author, `index,follow,max-image-preview:large`, og:site_name/locale, og:image type/size/alt, `summary_large_image`, theme-color, `profile` og:type on /about, "You are here" BreadcrumbList microdata on subpages, and rel=me GitHub/LinkedIn footer links (Contact and Resume links too). Home and Off the Clock descriptions name Victor; sitemap carries build-time lastmod; seo-audit.json history updated. 36 unit tests, 28/28 E2E.
 - **Status:** shipped-pending-migration
 
+### [FEAT-1790968447] Codelings game, part 1: engine, embed and title screen
+- [x] **Priority:** high
+- **Area:** projects, game
+- **File(s):** app/lib/html.ts, app/lib/pages.ts, app/projects/route.ts, next.config.js, public/retro.css, game/**, package.json, vitest.config.ts, eslint.config.mjs, .gitignore, e2e/game.spec.ts, CLAUDE.md, README.md
+- **Why:** The owner wants the Projects page to be a professional-grade 8-bit monster-collecting game, keeping the 1990s style. Part 1 lays the platform.
+- **Approach:** Per `docs/game-design.md` §1-4, §8 (title, options, save), §10 (synth, sequencer, title theme, menu SFX): TypeScript compiled by `tsc` into `public/game/`, loaded only on /projects under a per-route `script-src 'self'` CSP; CSS handheld with on-screen buttons; fixed-step loop, input, font, text box, menus, title screen, options, versioned save. HTML table stays below.
+- **Library / dependency notes:** none: compiled with the existing `typescript` dev dependency, no bundler or engine.
+- **Acceptance criteria:** /projects shows the handheld and boots to an animated title screen with music after first input; other pages unchanged (`script-src 'none'`, 0 scripts); lint, unit, build, E2E green.
+- **Test plan:** Vitest for rng, storage, text wrap, MML parser; Playwright `e2e/game.spec.ts` boot, CSP split, buttons, 320px overflow.
+- **Out of scope:** Multiplayer, trading, evolution, online saves.
+- **Bump:** minor
+- **Implementation:** `game/src` TypeScript compiled by `tsc` to `public/game/` (`build:game`, run before `next build`); `/projects` loads `/game/main.js` under a route-specific `script-src 'self'` CSP, other routes keep `'none'` and 0 scripts. CSS VI-BOY handheld with 8 on-screen buttons above the table; fixed-step loop, keyboard/gamepad/touch input with focus capture, 8x8 and compact fonts, text box, menus, centred animated title with original 4-channel WebAudio theme, options, validated SaveV1 storage. 90 unit tests, 34/34 E2E.
+- **Status:** shipped-pending-migration
+
+### [FEAT-1790968448] Codelings game, part 2: overworld, maps and story
+- [ ] **Priority:** high
+- **Area:** projects, game
+- **File(s):** game/src/world/**, game/src/gfx/tiles.ts, game/src/gfx/sprites.ts, game/src/data/text.ts, game/src/ui/**, game/src/engine/sequencer.ts tracks
+- **Why:** Part 2 of the Projects page game: the world to explore.
+- **Approach:** Per `docs/game-design.md` §6-8: tileset and character sprites, the 11 maps, grid movement, running, ledges, warps, connections, NPCs, signs, scripts, intro and name entry, START menu shell, trainer card, map music, day/night tint.
+- **Library / dependency notes:** none: compiled with the existing `typescript` dev dependency, no bundler or engine.
+- **Acceptance criteria:** A new game goes intro, bedroom, town, lab (starter choice stubbed until part 3) and every map is walkable with working warps, NPC dialogue and music; save/continue restores position.
+- **Test plan:** Vitest for map validity, script interpreter; Playwright walks out of the house.
+- **Out of scope:** Multiplayer, trading, evolution, online saves.
+- **Bump:** minor
+- **Status:** open
+
+### [FEAT-1790968449] Codelings game, part 3: Codelings, battles, Codex and ending
+- [ ] **Priority:** high
+- **Area:** projects, game
+- **File(s):** game/src/battle/**, game/src/data/**, game/src/gfx/creatures.ts, game/src/ui/{codex,party,summary,bag,pcBox,mart}.ts, app/lib/pages.ts
+- **Why:** Part 3: the repositories become catchable Codelings and the Codex becomes the project browser.
+- **Approach:** Per `docs/game-design.md` §5, §8-9: species from repos, procedural sprites, types, moves, formulas, battle state machine and scene, wild and trainer battles, catching, EXP, party, items, Center, Mart, PC box, Gym, ending, Codex with GitHub/demo links, diploma.
+- **Library / dependency notes:** none: compiled with the existing `typescript` dev dependency, no bundler or engine.
+- **Acceptance criteria:** Every listed repository is catchable and its Codex entry opens the repository; the Gym can be beaten and the ending plays; lint, unit, build, E2E green.
+- **Test plan:** Vitest for formulas, species, battle machine, catch odds; Playwright reaches a wild battle.
+- **Out of scope:** Multiplayer, trading, evolution, online saves.
+- **Bump:** minor
+- **Status:** open
+
 ### [FEAT-1790969283] Plain Off the Clock copy
 - [x] **Priority:** low
 - **Area:** content

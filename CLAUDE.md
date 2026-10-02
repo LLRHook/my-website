@@ -46,7 +46,7 @@ shipped or fixed entries are *migrated* into `CHANGELOG.md` as a permanent recor
 
 ### Stack notes
 
-- Pages ship HTML and CSS only: route handlers return strings built in `app/lib/html.ts` / `app/lib/pages.ts`; never add client components, `<script>` tags or client JS (CSP `script-src 'none'` enforces it).
+- Pages ship HTML and CSS only, except `/projects`, which loads the compiled Codelings game (`game/src` -> `public/game/`, see `docs/game-design.md`) as a module script under a per-route `script-src 'self'`; never add client components, inline scripts or JS on any other route.
 
 - Package manager: **npm** (`package-lock.json`). CI: `.github/workflows/ci.yml`
   (`npm ci`, lint, unit tests, production build, Chromium and mobile WebKit tests).

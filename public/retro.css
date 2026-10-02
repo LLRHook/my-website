@@ -43,3 +43,32 @@ footer { text-align: center; font-size: 14px; }
 @media (max-width: 600px) { body { padding: 0; } .page { border-width: 0; padding: 10px 12px; } .site-name { font-size: 24px; } .portrait { width: 80px; height: 80px; } ul.columns { columns: 1; } }
 @media (prefers-reduced-motion: reduce) { .marquee span { animation: none; padding-left: 0; white-space: normal; } .marquee { white-space: normal; } .new { animation: none; } }
 @media print { html { background: #fff; } .page { border: 0; } .marquee, nav, .buttons, .skip { display: none; } }
+.handheld { --screen-width: 480px; width: max-content; margin: 22px auto 12px; padding: 24px 24px 28px; box-sizing: border-box; background: linear-gradient(120deg, #e4e4e4, #c0c0c0 60%, #a9a9a9); border: 2px solid #888; border-radius: 16px 16px 72px 16px; box-shadow: 3px 6px 0 #777, inset 2px 2px 0 #fff; font-family: Arial, sans-serif; }
+.game-bezel { position: relative; background: #25254e; padding: 18px 18px 10px; border-radius: 10px 10px 36px 10px; box-shadow: inset 2px 3px 0 #16162e; }
+.game-display { margin-inline: auto; width: var(--screen-width); height: calc(var(--screen-width) * .9); position: relative; background: #e8f4ce; box-shadow: 0 0 0 3px #111129; }
+.game-display canvas { display: none; width: var(--screen-width); height: calc(var(--screen-width) * .9); image-rendering: pixelated; }
+.handheld[data-ready] canvas { display: block; }
+.handheld[data-ready] .game-nojs { display: none; }
+.game-nojs { position: absolute; inset: 0; display: grid; place-content: center; padding: 24px; text-align: center; color: #000080; font: bold 16px/1.7 monospace; }
+.power-led { position: absolute; left: 5px; top: 32px; width: 7px; height: 7px; background: #e43838; border-radius: 50%; box-shadow: 0 0 3px #f77; }
+.game-wordmark { display: block; color: #000080; font-size: 16px; font-weight: bold; font-style: italic; letter-spacing: 2px; padding: 4px 8px; margin-top: 8px; background: #c0c0c0; width: max-content; border-radius: 2px; }
+.game-controls { display: flex; justify-content: space-between; align-items: center; margin: 24px 8px 12px; }
+.handheld button { border: 0; cursor: pointer; touch-action: none; user-select: none; -webkit-user-select: none; font: bold 13px/1 Arial, sans-serif; }
+.handheld button:focus-visible, .handheld:focus-visible { outline: 3px solid #000080; outline-offset: 4px; }
+.dpad { display: grid; grid-template: repeat(3, 44px) / repeat(3, 44px); position: relative; }
+.dpad::before { content: ""; position: absolute; inset: 44px; background: #222; }
+.dpad button { color: #888; background: #222; box-shadow: 0 3px 0 #080808; }
+.dpad [data-button="up"] { grid-area: 1 / 2; border-radius: 5px 5px 0 0; }
+.dpad [data-button="left"] { grid-area: 2 / 1; border-radius: 5px 0 0 5px; }
+.dpad [data-button="right"] { grid-area: 2 / 3; border-radius: 0 5px 5px 0; }
+.dpad [data-button="down"] { grid-area: 3 / 2; border-radius: 0 0 5px 5px; }
+.game-ab { display: flex; align-items: center; gap: 16px;  }
+.game-ab button { width: 54px; height: 54px; border-radius: 50%; background: #800000; color: #fff; box-shadow: 0 4px 0 #480000, inset 2px 2px 0 #a73939;  font-size: 18px; }
+.game-ab [data-button="a"] { translate: 0 -16px; }
+.game-system { display: flex; justify-content: center; gap: 18px; }
+.game-system button { color: #000080; background: #999; border-radius: 16px; padding: 12px 14px; min-height: 44px; box-shadow: 0 3px 0 #666, inset 1px 1px 0 #ddd; font-size: 10px; letter-spacing: 1px; }
+.handheld button:active { box-shadow: inset 1px 2px 2px #000; translate: 0 2px; }
+.game-legend { margin: 16px auto 24px; max-width: 540px; text-align: center; font-size: 14px; }
+@media (max-width: 630px) { .handheld { --screen-width: 320px; padding: 16px 14px 24px; } .game-bezel { padding: 16px 12px 8px; } .game-controls { margin-inline: 0; } }
+@media (max-width: 399px) { .handheld { padding: 14px 0 24px; border-inline-width: 0; margin-inline: calc((100% - min(376px, 100vw)) / 2); width: min(376px, 100vw); box-shadow: inset 0 2px #fff; } .game-bezel { padding: 16px 0 8px; } .power-led { top: 4px; left: 12px; } .game-wordmark { padding-left: 14px; } .game-controls { margin-inline: 12px; } }
+@media print { .handheld, .game-legend { display: none; } }

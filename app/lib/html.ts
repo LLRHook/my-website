@@ -8,7 +8,7 @@ export interface SitePage { path: string; label: string; title: string; descript
 export const PAGES: readonly SitePage[] = [
   { path: "/", label: "Home", title: SITE_TITLE, description: SITE_DESCRIPTION },
   { path: "/about", label: "About Me", title: "About | Victor Ivanov", description: "Meet Victor Ivanov, a senior full-stack engineer in Sterling, Virginia building certification software and developer tools." },
-  { path: "/projects", label: "Projects", title: "Projects | Victor Ivanov", description: "Explore Victor Ivanov's web products, developer tools, and open-source contributions, including MailIt, Citybase, and Kilo." },
+  { path: "/projects", label: "Projects", title: "Projects | Victor Ivanov", description: "Victor Ivanov's projects: play Codelings, an original handheld game, and explore web products, developer tools, and open-source repositories." },
   { path: "/resume", label: "Resume", title: "Resume | Victor Ivanov", description: "Victor Ivanov's September 2026 resume: engineering experience, selected projects, education, technical skills, and a downloadable PDF." },
   { path: "/off-the-clock", label: "Off the Clock", title: "Off the clock | Victor Ivanov", description: "Victor Ivanov away from the desk: rock climbing, Pokémon and Magic cards, books, travel, and side projects." },
   { path: "/contact", label: "Contact", title: "Contact | Victor Ivanov", description: "Contact Victor Ivanov by email or connect on GitHub and LinkedIn. Based in Virginia, on Eastern time." },
@@ -26,7 +26,7 @@ export function personMicrodata(attributes = ""): string {
     + `${KNOWS_ABOUT.map((topic) => meta("knowsAbout", topic)).join("")}</div>`;
 }
 
-export function page(options: { path: string; title: string; description: string; body: string }): string {
+export function page(options: { path: string; title: string; description: string; body: string; scripts?: string[] }): string {
   const url = esc(SITE_URL + options.path);
   const title = esc(options.title);
   const description = esc(options.description);
@@ -50,17 +50,17 @@ export function page(options: { path: string; title: string; description: string
 <header class="masthead"><p class="site-name"><a href="/">Victor Ivanov's Home Page</a></p>
 <div class="marquee" aria-hidden="true"><span>&#9733; Welcome to my home page! &#9733; Senior Full-Stack Engineer &#9733; Java &middot; Spring Boot &middot; React &middot; TypeScript &#9733; Open to on-site and hybrid roles &#9733;</span></div>
 <nav aria-label="Site">[ ${navigation} ]</nav></header><hr><main id="main">${breadcrumbs}${options.body}</main><hr>
-<footer><p class="buttons"><span class="badge badge-any">Best viewed with<br><b>ANY</b> browser</span><span class="badge badge-nojs"><b>100%</b><br>JavaScript free</span><span class="badge badge-next">Served by<br><b>Next.js</b></span></p>
+<footer><p class="buttons"><span class="badge badge-any">Best viewed with<br><b>ANY</b> browser</span><span class="badge badge-nojs">${options.path === "/projects" ? "<b>No JavaScript?</b><br>Use the table" : "<b>100%</b><br>JavaScript free"}</span><span class="badge badge-next">Served by<br><b>Next.js</b></span></p>
 <p>&copy; ${esc(String(now.getFullYear()))} Victor Ivanov &middot; <a href="${esc(EMAIL_HREF)}">victor.n.ivanov@gmail.com</a> &middot; <a href="${esc(GITHUB_HREF)}" rel="me">GitHub</a> &middot; <a href="${esc(SOCIAL_BY_ICON.linkedin.href)}" rel="me">LinkedIn</a> &middot; <a href="mailto:victor.n.ivanov@gmail.com?subject=Guestbook">Sign my guestbook</a></p>
 <p class="updated">Last updated: ${esc(now.toLocaleDateString("en-US", { month: "long", year: "numeric" }))}</p></footer>
-</div></body></html>`;
+</div>${(options.scripts ?? []).map((src) => `<script type="module" src="${esc(src)}"></script>`).join("")}</body></html>`;
 }
 
 export function htmlResponse(html: string, status = 200): Response {
   return new Response(html, { status, headers: { "content-type": "text/html; charset=utf-8" } });
 }
 
-export function render(path: string, body: string, status = 200): Response {
+export function render(path: string, body: string, status = 200, scripts?: string[]): Response {
   const item = PAGES.find((item) => item.path === path)!;
-  return htmlResponse(page({ path, title: item.title, description: item.description, body }), status);
+  return htmlResponse(page({ path, title: item.title, description: item.description, body, scripts }), status);
 }
