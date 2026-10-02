@@ -234,6 +234,20 @@ the end of their section, sorted by id on read.
 - **Implementation:** `scripts/render-assets.mjs` draws one 16x16 grid (silver Windows 95 bevel, navy "VI") to `favicon.svg` with `crispEdges`, then uses Playwright Chromium to rasterize a PNG-in-ICO (16/32/48) and a 180px Apple touch icon. `page()` links all three; E2E checks status, content type and head links.
 - **Status:** shipped-pending-migration
 
+### [FEAT-1790966740] SEO pass: share card, name-focused metadata, breadcrumbs
+- [x] **Priority:** med
+- **Area:** seo
+- **File(s):** app/lib/constants.ts, app/lib/html.ts, app/sitemap.ts, scripts/render-assets.mjs, public/og-image.png, seo-audit.json, tests
+- **Why:** Link previews use a small square portrait with a `summary` card. The title and description do not name Victor as a software engineer, which is the query the audit tracks. There are no breadcrumbs, and the sitemap has no lastmod.
+- **Approach:** A 1200x630 share card in the site's 1990s style, served with `summary_large_image`, og:site_name/locale and image dimensions/alt. Name-first title and description. `rel="me"` profile links. Visible "You are here" breadcrumbs with BreadcrumbList microdata. Robots `max-image-preview:large`. Sitemap lastmod. An improvement-history entry in seo-audit.json.
+- **Library / dependency notes:** none.
+- **Acceptance criteria:** Every page has a unique title and description, a canonical URL, OG/Twitter tags pointing at the 1200x630 card, and (subpages) breadcrumbs; sitemap entries have lastmod; no `<script>`; lint, unit, build, E2E green.
+- **Test plan:** Unit tests for head tags and breadcrumb microdata; E2E for the card image and breadcrumbs.
+- **Out of scope:** Search Console submission and backlinks (owner actions in seo-backlink-strategy.md).
+- **Bump:** minor
+- **Implementation:** `npm run assets` also renders `public/og-image.png` (1200x630 retro card). `page()` adds author, `index,follow,max-image-preview:large`, og:site_name/locale, og:image type/size/alt, `summary_large_image`, theme-color, `profile` og:type on /about, "You are here" BreadcrumbList microdata on subpages, and rel=me GitHub/LinkedIn footer links (Contact and Resume links too). Home and Off the Clock descriptions name Victor; sitemap carries build-time lastmod; seo-audit.json history updated. 36 unit tests, 28/28 E2E.
+- **Status:** shipped-pending-migration
+
 ## Shipped
 - **Implementation:** Window toggles day/evening, lamp toggles its independent desk glow, and the cat responds directly with its wake gesture. Replaced the mountain print with a UMBC B.S. Computer Science May 2024 frame; removed both journal and pencil. Added control regressions and verified 320px/390px/desktop layouts and focus return.
 

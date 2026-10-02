@@ -94,6 +94,18 @@
       "issuesResolved": [],
       "note": "Final automated SEO improvement. Score 80/100 — remaining 5 points require Google indexation (external action).",
       "auditedScoreAfter": 80
+    },
+    {
+      "date": "2026-10-02",
+      "change": "Restored structured data and improved metadata on the HTML/CSS-only rebuild (BUG-1790966738, FEAT-1790966740)",
+      "details": "Person, WebSite and ProfilePage as schema.org microdata (CSP forbids <script>, so no JSON-LD); BreadcrumbList microdata with visible breadcrumbs on subpages; 404 noindex without canonical; name-first meta descriptions; author, og:site_name, og:locale, profile og:type on /about; 1200x630 og-image.png with summary_large_image; max-image-preview:large; rel=me GitHub/LinkedIn links on every page; sitemap lastmod.",
+      "issuesResolved": [
+        "JSON-LD Person/WebSite/BreadcrumbList dropped by the HTML/CSS-only rebuild",
+        "404 page canonicalized to the home page",
+        "Square portrait share image with summary card",
+        "Home meta description did not name Victor Ivanov",
+        "Sitemap had no lastmod"
+      ]
     }
   ]
 }

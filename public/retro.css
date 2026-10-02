@@ -33,6 +33,7 @@ table.projects tbody tr:nth-child(even) { background: #eeeeee; }
 dl.interests dt { font-weight: bold; margin-top: 12px; color: #000080; }
 dl.interests dd { margin: 2px 0 0 24px; }
 .big { font-size: 24px; margin: 0 0 8px; }
+nav.crumbs { text-align: left; font-weight: normal; font-size: 14px; margin: 0 0 10px; } .crumbs ol, .crumbs li { display: inline; margin: 0; padding: 0; } .crumbs li + li::before { content: " \00bb  "; }
 footer { text-align: center; font-size: 14px; }
 .buttons { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; }
 .badge { display: inline-flex; flex-direction: column; justify-content: center; width: 88px; height: 31px; box-sizing: border-box; border: 2px outset #dfdfdf; font: 8px/1 Verdana, Geneva, sans-serif; text-align: center; overflow: hidden; }

@@ -22,6 +22,31 @@ describe("HTML documents", () => {
       expect(html).toContain(`<a href="${item.path}">${item.label}</a>`);
     }
   });
+  it("emits share-card and indexing metadata", () => {
+    const html = page({ path: "/", title: "Home", description: "Home", body: "" });
+    expect(html).toContain('<meta name="robots" content="index,follow,max-image-preview:large">');
+    expect(html).toContain(`<meta property="og:image" content="${SITE_URL}/og-image.png">`);
+    expect(html).toContain('<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">');
+    expect(html).toContain('<meta name="twitter:card" content="summary_large_image">');
+    expect(html).toContain('<meta property="og:type" content="website">');
+    expect(html).not.toContain('class="crumbs"');
+  });
+  it("gives subpages breadcrumbs and About a profile type", () => {
+    const html = page({ path: "/about", title: "About", description: "About", body: "" });
+    expect(html).toContain('<nav class="crumbs" aria-label="Breadcrumb">You are here: <ol itemscope itemtype="https://schema.org/BreadcrumbList">');
+    expect(html).toContain('<a itemprop="item" href="/"><span itemprop="name">Home</span></a><meta itemprop="position" content="1">');
+    expect(html).toContain('<span itemprop="name">About Me</span><meta itemprop="position" content="2">');
+    expect(html).toContain('<meta property="og:type" content="profile">');
+  });
+  it("links Victor's profiles with rel=me", () => {
+    const html = page({ path: "/", title: "Home", description: "Home", body: "" });
+    expect(html).toContain('href="https://github.com/LLRHook" rel="me"');
+    expect(html).toContain('href="https://www.linkedin.com/in/victorivanovofficial/" rel="me"');
+  });
+  it("gives every page a unique title and description", () => {
+    expect(new Set(PAGES.map((item) => item.title)).size).toBe(PAGES.length);
+    expect(new Set(PAGES.map((item) => item.description)).size).toBe(PAGES.length);
+  });
   it("keeps unknown pages out of the index", () => {
     const html = page({ path: "", title: "Page not found", description: "Missing", body: "" });
     expect(html).toContain('<meta name="robots" content="noindex">');
