@@ -1,4 +1,4 @@
-import { EMAIL_HREF, SITE_URL, SITE_TITLE, SITE_DESCRIPTION } from "./constants";
+import { EMAIL_HREF, KNOWS_ABOUT, SITE_URL, SITE_TITLE, SITE_DESCRIPTION, SOCIAL_LINKS } from "./constants";
 
 export function esc(value: string): string {
   return value.replace(/[&<>"']/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[character]!);
@@ -14,18 +14,31 @@ export const PAGES: readonly SitePage[] = [
   { path: "/contact", label: "Contact", title: "Contact | Victor Ivanov", description: "Contact Victor Ivanov by email or connect on GitHub and LinkedIn. Based in Virginia, on Eastern time." },
 ];
 
+// schema.org Person as microdata (no <script>, so no JSON-LD). `attributes`
+// lets a wrapper claim it, e.g. ProfilePage's mainEntity.
+export function personMicrodata(attributes = ""): string {
+  const meta = (property: string, content: string) => `<meta itemprop="${property}" content="${esc(content)}">`;
+  const link = (property: string, href: string) => `<link itemprop="${property}" href="${esc(href)}">`;
+  return `<div ${attributes ? `${attributes} ` : ""}itemscope itemtype="https://schema.org/Person" itemid="${esc(SITE_URL)}/#person">${meta("name", "Victor Ivanov")}${meta("jobTitle", "Senior Full-Stack Engineer")}${link("url", SITE_URL + "/")}${link("image", SITE_URL + "/victor-profile.jpg")}${SOCIAL_LINKS.filter((item) => item.external).map((item) => link("sameAs", item.href)).join("")}`
+    + `<div itemprop="worksFor" itemscope itemtype="https://schema.org/Organization">${meta("name", "Paradigm Testing")}</div>`
+    + `<div itemprop="address" itemscope itemtype="https://schema.org/PostalAddress">${meta("addressLocality", "Sterling")}${meta("addressRegion", "VA")}${meta("addressCountry", "US")}</div>`
+    + `<div itemprop="alumniOf" itemscope itemtype="https://schema.org/CollegeOrUniversity">${meta("name", "University of Maryland, Baltimore County")}${link("sameAs", "https://umbc.edu")}</div>`
+    + `${KNOWS_ABOUT.map((topic) => meta("knowsAbout", topic)).join("")}</div>`;
+}
+
 export function page(options: { path: string; title: string; description: string; body: string }): string {
   const url = esc(SITE_URL + options.path);
   const title = esc(options.title);
   const description = esc(options.description);
+  const known = PAGES.some((item) => item.path === options.path);
   const now = new Date();
   const navigation = PAGES.map((item) => item.path === options.path
     ? `<strong aria-current="page">${esc(item.label)}</strong>`
     : `<a href="${esc(item.path)}">${esc(item.label)}</a>`).join(" | ");
   return `<!DOCTYPE html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>${title}</title><meta name="description" content="${description}"><link rel="canonical" href="${url}">
-<meta property="og:title" content="${title}"><meta property="og:description" content="${description}"><meta property="og:url" content="${url}"><meta property="og:type" content="website"><meta property="og:image" content="${esc(SITE_URL + "/victor-profile.jpg")}"><meta name="twitter:card" content="summary">
+<title>${title}</title><meta name="description" content="${description}">${known ? `<link rel="canonical" href="${url}">` : '<meta name="robots" content="noindex">'}
+<meta property="og:title" content="${title}"><meta property="og:description" content="${description}">${known ? `<meta property="og:url" content="${url}">` : ""}<meta property="og:type" content="website"><meta property="og:image" content="${esc(SITE_URL + "/victor-profile.jpg")}"><meta name="twitter:card" content="summary">
 <link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48"><link rel="icon" href="/favicon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="stylesheet" href="/retro.css"></head>
 <body><a class="skip" href="#main">Skip to content</a><div class="page">
 <header class="masthead"><p class="site-name"><a href="/">Victor Ivanov's Home Page</a></p>

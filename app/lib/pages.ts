@@ -1,5 +1,5 @@
-import { EMAIL_HREF, GITHUB_HREF, SKILLS, SOCIAL_BY_ICON } from "./constants";
-import { esc, PAGES } from "./html";
+import { EMAIL_HREF, GITHUB_HREF, SITE_NAME, SITE_URL, SKILLS, SOCIAL_BY_ICON } from "./constants";
+import { esc, PAGES, personMicrodata } from "./html";
 import { presentProject } from "./projectPresentation";
 import type { RepoSummary } from "./types";
 
@@ -10,7 +10,8 @@ const portrait = '<img class="portrait" src="/victor-profile.jpg" width="120" he
 export function homeBody(): string {
   const lines = ["who I am and what I work on", "everything public on my GitHub, updated hourly", "experience, projects and education (PDF too)", "climbing, cards, books and travel", "email, GitHub and LinkedIn"];
   return `<h1>Welcome to Victor Ivanov's Home Page!</h1>${portrait}${paragraph("Hi, I'm Victor, a Senior Full-Stack Engineer in Sterling, Virginia. I build web products and developer tools, work across the stack, and climb rocks.")}
-<div class="construction"><p><b>This page is always under construction.</b></p></div><h2>What's New</h2><ul><li><span class="new">NEW!</span> October 2026: the site is now a hand-written HTML and CSS home page. No JavaScript.</li><li>September 2026: resume updated.</li></ul><h2>Start here</h2><ul>${PAGES.slice(1).map((item, index) => `<li><a href="${esc(item.path)}">${esc(item.label)}</a>: ${esc(lines[index])}</li>`).join("")}</ul>`;
+<div class="construction"><p><b>This page is always under construction.</b></p></div><h2>What's New</h2><ul><li><span class="new">NEW!</span> October 2026: the site is now a hand-written HTML and CSS home page. No JavaScript.</li><li>September 2026: resume updated.</li></ul><h2>Start here</h2><ul>${PAGES.slice(1).map((item, index) => `<li><a href="${esc(item.path)}">${esc(item.label)}</a>: ${esc(lines[index])}</li>`).join("")}</ul>
+<div itemscope itemtype="https://schema.org/WebSite"><meta itemprop="name" content="${esc(SITE_NAME)}"><link itemprop="url" href="${esc(SITE_URL)}/"></div>${personMicrodata()}`;
 }
 
 export function aboutBody(): string {
@@ -20,7 +21,8 @@ ${paragraph("I work on certification software at Paradigm Testing. That means AP
 ${paragraph("Most days, I work with Java, Spring Boot, React, and PostgreSQL. Outside of that, I build tools in Go and TypeScript and spend a lot of time exploring agentic development workflows.")}
 ${paragraph("I studied computer science at UMBC and I'm pursuing an M.S. in Computer Science at Georgia Tech, expected December 2027. Away from the desk, you'll usually find me climbing or thinking about the next project.")}
 <blockquote>Build fast. Always test.<br><small>A good test suite is part of the work.</small></blockquote><h2>Tools I use</h2><ul class="columns">${[...SKILLS, "Go"].map((skill) => `<li>${esc(skill)}</li>`).join("")}</ul>
-<figure><img src="/conference-photo.jpg" alt="A moment at the conference podium" width="320" height="320"><figcaption>At the podium.</figcaption></figure><p><a href="/projects">See what I'm building &raquo;</a></p>`;
+<figure><img src="/conference-photo.jpg" alt="A moment at the conference podium" width="320" height="320"><figcaption>At the podium.</figcaption></figure><p><a href="/projects">See what I'm building &raquo;</a></p>
+<div itemscope itemtype="https://schema.org/ProfilePage">${personMicrodata('itemprop="mainEntity"')}</div>`;
 }
 
 export function projectsBody(repos: RepoSummary[]): string {

@@ -25,6 +25,8 @@ test("interests redirects to off the clock", async ({ page }) => {
 test("unknown routes return a readable 404", async ({ page }) => {
   expect((await page.goto("/nope"))?.status()).toBe(404);
   await expect(page.getByRole("link", { name: "Back to the home page" })).toHaveAttribute("href", "/");
+  await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", "noindex");
+  await expect(page.locator('link[rel="canonical"]')).toHaveCount(0);
 });
 test("resume PDF remains available", async ({ request }) => {
   expect((await request.get("/Victor_Ivanov_Resume.pdf")).status()).toBe(200);
@@ -50,4 +52,11 @@ test("favicon set is served and linked", async ({ page, request }) => {
   await page.goto("/");
   for (const href of ["/favicon.ico", "/favicon.svg"]) await expect(page.locator(`link[rel="icon"][href="${href}"]`)).toHaveCount(1);
   await expect(page.locator('link[rel="apple-touch-icon"]')).toHaveAttribute("href", "/apple-touch-icon.png");
+});
+test("home and about carry Person structured data", async ({ page }) => {
+  for (const path of ["/", "/about"]) {
+    await page.goto(path);
+    await expect(page.locator('[itemtype="https://schema.org/Person"] > meta[itemprop="name"]')).toHaveAttribute("content", "Victor Ivanov");
+  }
+  await expect(page.locator('[itemtype="https://schema.org/ProfilePage"] > [itemprop="mainEntity"]')).toHaveCount(1);
 });
