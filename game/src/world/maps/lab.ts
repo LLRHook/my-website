@@ -53,19 +53,8 @@ export const lab: GameMap = {
             },
             {
               starter: true
-            },
-            {
-              flag: "hasCodex",
-              set: true
-            },
-            {
-              give: "forkBall",
-              qty: 5
-            },
-            {
-              flag: "hasStarter",
-              set: true
             }
+
           ]
         }
       ]

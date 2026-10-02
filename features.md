@@ -276,7 +276,7 @@ the end of their section, sorted by id on read.
 - **Status:** shipped-pending-migration
 
 ### [FEAT-1790968449] Codelings game, part 3: Codelings, battles, Codex and ending
-- [ ] **Priority:** high
+- [x] **Priority:** high
 - **Area:** projects, game
 - **File(s):** game/src/battle/**, game/src/data/**, game/src/gfx/creatures.ts, game/src/ui/{codex,party,summary,bag,pcBox,mart}.ts, app/lib/pages.ts
 - **Why:** Part 3: the repositories become catchable Codelings and the Codex becomes the project browser.
@@ -286,7 +286,8 @@ the end of their section, sorted by id on read.
 - **Test plan:** Vitest for formulas, species, battle machine, catch odds; Playwright reaches a wild battle.
 - **Out of scope:** Multiplayer, trading, evolution, online saves.
 - **Bump:** minor
-- **Status:** in-progress
+- **Implementation:** Every listed repository becomes a deterministic species (`data/species.ts`: unique distinctive names, language type, stats, habitats by recency) with procedural front/back sprites (`gfx/creatures.ts`: 10 body plans x 3 silhouettes, seeded features, edge shading). Pure battle machine plus animated scene (`battle/`), 62 original moves, status, catching with Fork Ball wobble sequence, EXP and move learning, trainers and Reviewer Rhea, Center, Mart, PC box, party/summary/bag, Codex entries that open the repository after a YES/NO, ending credits and diploma, original battle/victory/badge/ending music and cries. Test-only `?seed=`/`?encounter=` params documented in README. 146 unit tests, 40/40 E2E.
+- **Status:** shipped-pending-migration
 
 ### [FEAT-1790969283] Plain Off the Clock copy
 - [x] **Priority:** low
@@ -301,6 +302,19 @@ the end of their section, sorted by id on read.
 - **Bump:** minor
 - **Implementation:** Rewrote `offTheClockBody()` interests as heading/sentence pairs and the intro line.
 - **Status:** shipped-pending-migration
+
+### [FEAT-1790978717] Codelings on phones: fullscreen play, sliding D-pad, haptics
+- [ ] **Priority:** high
+- **Area:** projects, game, mobile
+- **File(s):** public/retro.css, app/lib/pages.ts, game/src/engine/input.ts, game/src/engine/audio.ts, game/src/main.ts, game/src/ui/options.ts, game/src/engine/storage.ts, playwright.config.ts, e2e/game.spec.ts
+- **Why:** Owner wants the game fully playable on mobile. Today the D-pad captures each button separately (no sliding between directions), the page scrolls and zooms under the thumbs, there is no fullscreen or landscape layout, iOS audio may stay locked, and phones get the keyboard legend.
+- **Approach:** A PLAY FULLSCREEN control that pins the handheld to the viewport (CSS overlay everywhere, Fullscreen API where available, safe-area insets, body scroll lock, portrait and landscape layouts, largest integer screen scale); one D-pad touch zone resolving direction from the thumb position with a dead zone and sliding; no scroll, pinch, double-tap zoom, callouts or tap highlight on the device; audio unlock on pointerup too; optional haptic tick via navigator.vibrate with a HAPTICS option; pause while the device is scrolled off screen; touch hint instead of the keyboard legend on coarse pointers.
+- **Library / dependency notes:** none.
+- **Acceptance criteria:** On iPhone and Android viewports (portrait and landscape) a player can enter fullscreen, walk with a sliding thumb, hold B to run while steering, use menus, battle, and exit fullscreen; nothing scrolls or zooms during play; no horizontal overflow at 320px; desktop unchanged; lint, unit, build, E2E green.
+- **Test plan:** Playwright projects with iPhone and Pixel device emulation (touch) for the game spec: fullscreen enter/exit, sliding D-pad changes data-map position, multi-touch run, landscape layout fits without scrolling; unit tests for D-pad direction resolution.
+- **Out of scope:** Installable PWA, offline mode, native app wrappers.
+- **Bump:** minor
+- **Status:** open
 
 ## Shipped
 - **Implementation:** Window toggles day/evening, lamp toggles its independent desk glow, and the cat responds directly with its wake gesture. Replaced the mountain print with a UMBC B.S. Computer Science May 2024 frame; removed both journal and pencil. Added control regressions and verified 320px/390px/desktop layouts and focus return.

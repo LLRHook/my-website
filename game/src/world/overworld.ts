@@ -1,5 +1,5 @@
 import type { Dir, GameRepo, MapId, Options, TrackId } from "../data/ids.js";
-import { WORLD_TEXT as T } from "../data/text.js";
+import { QUEST_TEXT as Q, WORLD_TEXT as T } from "../data/text.js";
 import type { Audio } from "../engine/audio.js";
 import type { Input } from "../engine/input.js";
 import type { Scene, SceneStack } from "../engine/scenes.js";
@@ -10,7 +10,17 @@ import { drawMapTile, drawScenery } from "../gfx/scenery.js";
 import { drawSprite } from "../gfx/sprites.js";
 import { drawTile, lightAt, type Light } from "../gfx/tiles.js";
 import { windowFrame } from "../gfx/ui.js";
-import { PlaceholderScene } from "../ui/placeholder.js";
+import { buildSpecies, starterCandidates, type Species } from "../data/species.js";
+import { trainerParty } from "../data/trainers.js";
+import { createCodeling, stats } from "../battle/stats.js";
+import { MOVES } from "../battle/moves.js";
+import { Battle, type BattleResult } from "../battle/battle.js";
+import { BattleScene } from "../battle/battleScene.js";
+import { StarterScene } from "../ui/starter.js";
+import { MartScene } from "../ui/mart.js";
+import { PcBoxScene } from "../ui/pcBox.js";
+import { EndingScene } from "../ui/ending.js";
+import { DiplomaScene } from "../ui/diploma.js";
 import { StartMenuScene } from "../ui/startMenu.js";
 import { Textbox } from "../ui/textbox.js";
 import { YesNo } from "../ui/yesno.js";
@@ -28,7 +38,7 @@ export interface OverworldHooks {
 export function newGame(name: string, options: Options): SaveV1 {
   return {
     v: 1, name, map: "bedroom", x: 4, y: 4, dir: "down", party: [], box: [], bag: {},
-    coins: 0, flags: [], seen: [], caught: [], playTimeSec: 0, options,
+    coins: 500, flags: [], seen: [], caught: [], playTimeSec: 0, options,
   };
 }
 interface Step {
@@ -68,17 +78,19 @@ export class OverworldScene implements Scene, ScriptHost, OverworldHooks {
   private alert?: NpcState;
   private timers: Timer[] = [];
   private warpLocked = true;
-  private encounterShown = false;
   private steps = 0;
   private heading = 100;
   private arrowCount = 0;
   private turnUntil = 0;
-  private readonly starters: string[];
+  private readonly starters: Species[];
+  readonly species: Species[];
+  private readonly fallback: boolean;
   private closed = false;
 
   constructor(private readonly input: Input, private readonly audio: Audio,
     private readonly stack: SceneStack, private readonly root: HTMLElement, readonly state: SaveV1,
-    repos: readonly GameRepo[], private readonly hour?: number) {
+    repos: readonly GameRepo[], private readonly hour?: number,
+    private readonly rng: () => number = Math.random, private forceEncounter = false) {
     this.map = MAPS[state.map];
     if (!walkable(this.map, state.x, state.y)) {
       state.map = "bedroom";
@@ -89,25 +101,24 @@ export class OverworldScene implements Scene, ScriptHost, OverworldHooks {
     this.px = state.x * 16;
     this.py = state.y * 16;
     this.npcs = createNpcs(this.map);
-    const languages = new Set<string | null>();
-    this.starters = [...repos].sort((a, b) => b.stars - a.stars || b.pushedAt.localeCompare(a.pushedAt))
-      .filter((repo) => {
-        if (languages.has(repo.language)) {
-          return false;
-        }
-        languages.add(repo.language);
-        return true;
-      }).slice(0, 3).map((repo) => repo.name.toUpperCase().slice(0, 10));
+    this.species = buildSpecies([...repos]);
+    this.fallback = repos.length === 0;
+    this.starters = starterCandidates(this.species);
+    this.syncCaught();
   }
   get stepCount(): number {
     return this.steps;
   }
   get mon(): string {
-    return this.starters[Math.max(0, this.state.x - 3)] ?? "CODELING";
+    return this.starters[Math.max(0, this.state.x - 3)]?.name ?? "CODELING";
   }
   enter(): void {
     this.root.dataset.map = this.map.id;
+    if (this.map.id === "center") {
+      setFlag(this.state, "lastCenter");
+    }
     this.audio.play(this.map.music);
+    void this.diploma();
   }
   exit(): void {
     this.closed = true;
@@ -147,7 +158,8 @@ export class OverworldScene implements Scene, ScriptHost, OverworldHooks {
       return;
     }
     if (this.input.pressed("start")) {
-      this.stack.push(new StartMenuScene(this.input, this.audio, this.stack, this.state, (s) => this.draw(s)));
+      this.stack.push(new StartMenuScene(this.input, this.audio, this.stack, this.state, (s) => this.draw(s),
+        this.species, this.fallback));
       return;
     }
     if (this.input.pressed("a")) {
@@ -188,7 +200,7 @@ export class OverworldScene implements Scene, ScriptHost, OverworldHooks {
       npc.py += Math.sign(dy);
       npc.frame = dx || dy ? Math.floor(this.frames / 6) % 3 : 0;
       if (!this.busy && !this.step && !this.textbox && this.frames % 120 === 0 && npc.movement !== "static") {
-        const dir = DIRECTIONS[Math.floor(Math.random() * DIRECTIONS.length)];
+        const dir = DIRECTIONS[Math.floor(this.rng() * DIRECTIONS.length)];
         if (npc.movement === "look") {
           npc.dir = dir;
         } else {
@@ -269,7 +281,8 @@ export class OverworldScene implements Scene, ScriptHost, OverworldHooks {
       return;
     }
     const tile = this.map.tiles[this.state.y][this.state.x];
-    if ((tile === "g" || tile === "c") && this.map.encounters && Math.random() < this.map.encounters.rate) {
+    if ((tile === "g" || tile === "c") && this.map.encounters
+      && (this.forceEncounter || this.rng() < this.map.encounters.rate)) {
       this.onEncounter(this.map);
     }
   }
@@ -290,12 +303,14 @@ export class OverworldScene implements Scene, ScriptHost, OverworldHooks {
     this.py = y * 16;
     this.npcs = createNpcs(this.map);
     this.warpLocked = true;
-    this.encounterShown = false;
     this.steps = 0;
     this.heading = 100;
     this.arrowCount = 0;
     this.root.dataset.map = id;
     this.audio.play(this.map.music);
+    if (id === "center") {
+      setFlag(this.state, "lastCenter");
+    }
   }
   private interact(): void {
     const [dx, dy] = VECTORS[this.state.dir];
@@ -316,7 +331,13 @@ export class OverworldScene implements Scene, ScriptHost, OverworldHooks {
     if (!sign) {
       return;
     }
-    if (sign.text === T.box) {
+    if (sign.text === T.starter) {
+      if (this.state.flags.includes("hasStarter")) {
+        this.launch([{ say: Q.remainingStarters }]);
+      } else {
+        this.launch([{ starter: true }]);
+      }
+    } else if (sign.text === T.box || sign.text === T.pcHome) {
       this.launch([{ pc: true }]);
     } else if (sign.text === T.item) {
       if (!this.state.flags.includes("route1Gift")) {
@@ -355,31 +376,95 @@ export class OverworldScene implements Scene, ScriptHost, OverworldHooks {
       this.activeNpc = undefined;
     })();
   }
-  // Part 3 replaces these two hooks while preserving map movement and trainer scripts.
-  onEncounter(map: GameMap): void {
-    if (!map.encounters) {
-      return;
-    }
-    this.audio.sfx("grass");
-    if (!this.encounterShown) {
-      this.encounterShown = true;
-      this.launch([{ say: T.rustle }]);
+  private syncCaught(): void {
+    this.root.dataset.caught = String(this.state.caught.length);
+  }
+  private async diploma(): Promise<void> {
+    if (this.species.every((species) => this.state.caught.includes(species.id))
+      && !this.state.flags.includes("diploma")) {
+      setFlag(this.state, "diploma");
+      await this.showScene(new DiplomaScene(this.input, this.stack, this.state.name, this.species.length));
     }
   }
-  async startTrainerBattle(npc: NpcDef): Promise<void> {
-    if (!npc.trainer || this.state.flags.includes(`defeated:${npc.id}`)) {
+  onEncounter(map: GameMap): void {
+    if (!map.encounters || !this.state.party.some((mon) => mon.hp > 0)) {
       return;
     }
-    await this.say(npc.trainer.lose);
+    this.forceEncounter = false;
+    const starterId = Number(this.state.flags.find((flag) => flag.startsWith("starter:"))?.split(":")[1]);
+    const excluded = this.species.length < 4
+      ? new Set([Number.isFinite(starterId) ? starterId : this.state.party[0].species]) : new Set<number>();
+    let pool = this.species.filter((species) => species.habitat.includes(map.id) && !excluded.has(species.id));
+    if (!pool.length) {
+      pool = this.species.filter((species) => !excluded.has(species.id));
+    }
+    if (!pool.length) {
+      return;
+    }
+    let roll = this.rng() * pool.reduce((sum, species) => sum + species.rarity, 0);
+    const species = pool.find((entry) => {
+      roll -= entry.rarity;
+      return roll < 0;
+    }) ?? pool[pool.length - 1];
+    const level = map.encounters.minLevel + Math.floor(this.rng()
+      * (map.encounters.maxLevel - map.encounters.minLevel + 1));
+    const foe = createCodeling(species, level, this.rng);
+    this.busy = true;
+    void this.playBattle([foe]).then(async (result) => {
+      if (result === "caught") {
+        (this.state.party.length < 6 ? this.state.party : this.state.box).push(foe);
+        if (!this.state.caught.includes(species.id)) {
+          this.state.caught.push(species.id);
+        }
+        this.syncCaught();
+        await this.diploma();
+        if (await this.ask(Q.openRepository)) {
+          this.open(species.repo.url);
+        }
+      }
+      this.busy = false;
+    });
+  }
+  private playBattle(foes: SaveV1["party"], npc?: NpcDef): Promise<BattleResult> {
+    for (const foe of foes) {
+      if (!this.state.seen.includes(foe.species)) {
+        this.state.seen.push(foe.species);
+      }
+    }
+    return new Promise((resolve) => {
+      const battle = new Battle({ party: this.state.party, foes, species: this.species,
+        bag: this.state.bag, trainer: npc?.trainer?.name, rhea: npc?.id === "rhea" }, this.rng);
+      this.stack.push(new BattleScene(this.input, this.audio, this.stack, battle, this.state, (result) => {
+        if (result === "lose") {
+          this.state.coins = Math.floor(this.state.coins / 2);
+          this.restoreParty();
+          this.changeMap(this.state.flags.includes("lastCenter") ? "center" : "bedroom",
+            this.state.flags.includes("lastCenter") ? 5 : 4, 4, "down");
+        }
+        this.audio.play(this.map.music);
+        resolve(result);
+      }));
+    });
+  }
+  async startTrainerBattle(npc: NpcDef): Promise<void> {
+    if (!npc.trainer || this.state.flags.includes(`defeated:${npc.id}`) || !this.state.party.length) {
+      return;
+    }
+    const result = await this.playBattle(trainerParty(npc, this.species), npc);
+    if (result !== "win") {
+      await this.say(Q.blackout);
+      return;
+    }
     setFlag(this.state, `defeated:${npc.id}`);
     this.state.coins += npc.trainer.reward;
+    await this.say(`${npc.trainer.lose} Received ${npc.trainer.reward} coins.`);
     if (npc.id === "rhea") {
       setFlag(this.state, "badge");
+      this.audio.play("badge");
       this.audio.sfx("badge");
       await this.say(T.badge);
-      this.root.dataset.scene = "ending";
-      await this.say(T.ending);
-      this.root.dataset.scene = "overworld";
+      await this.showScene(new EndingScene(this.input, this.audio, this.stack));
+      this.audio.play(this.map.music);
     }
   }
   say(text: string): Promise<void> {
@@ -403,6 +488,7 @@ export class OverworldScene implements Scene, ScriptHost, OverworldHooks {
     this.audio.sfx("item");
   }
   async heal(): Promise<void> {
+    this.restoreParty();
     this.audio.sfx("heal");
     await this.wait(1.2);
   }
@@ -434,7 +520,24 @@ export class OverworldScene implements Scene, ScriptHost, OverworldHooks {
     }
   }
   async starter(): Promise<void> {
-    // Part 3 inserts the starter selection here, before the lab grants hasStarter.
+    if (this.state.flags.includes("hasStarter")) {
+      return;
+    }
+    await new Promise<void>((resolve) => {
+      this.stack.push(new StarterScene(this.input, this.audio, this.stack, this.starters, (species) => {
+        this.state.party.push(createCodeling(species, 5, this.rng));
+        this.state.seen.push(species.id);
+        this.state.caught.push(species.id);
+        this.state.bag.forkBall = (this.state.bag.forkBall ?? 0) + 5;
+        setFlag(this.state, `starter:${species.id}`);
+        setFlag(this.state, "hasStarter");
+        setFlag(this.state, "hasCodex");
+        this.syncCaught();
+        resolve();
+      }, Math.max(0, this.state.x - 3)));
+    });
+    await this.say(Q.starterGift);
+    await this.diploma();
   }
   open(url: string): void {
     const links: Readonly<Record<string, string>> = {
@@ -445,15 +548,24 @@ export class OverworldScene implements Scene, ScriptHost, OverworldHooks {
       window.open(target, "_blank", "noopener");
     }
   }
+  private restoreParty(): void {
+    for (const mon of this.state.party) {
+      const species = this.species.find((entry) => entry.id === mon.species)!;
+      mon.hp = stats(species.base, mon.ivs, mon.level).hp;
+      mon.status = null;
+      for (const move of mon.moves) {
+        move.pp = MOVES[move.id].pp;
+      }
+    }
+  }
   async mart(): Promise<void> {
-    await this.placeholder(T.clerk.split(":")[0], T.mart);
+    await this.showScene(new MartScene(this.input, this.audio, this.stack, this.state));
   }
   async pc(): Promise<void> {
-    await this.placeholder("BOX", T.box);
+    await this.showScene(new PcBoxScene(this.input, this.audio, this.stack, this.state, this.species));
   }
-  private placeholder(title: string, text: string): Promise<void> {
+  private showScene(scene: Scene): Promise<void> {
     return new Promise((resolve) => {
-      const scene = new PlaceholderScene(this.input, this.stack, title, text);
       this.stack.push(Object.assign(scene, { exit: resolve }));
     });
   }
@@ -464,6 +576,8 @@ export class OverworldScene implements Scene, ScriptHost, OverworldHooks {
     return new Promise((resolve) => this.timers.push({ remaining: Math.max(0, seconds), resolve }));
   }
   draw(screen: Screen): void {
+    screen.describe(this.yesno ? "YES / NO" : this.textbox ? `Dialogue: ${this.textbox.text}`
+      : `Overworld: ${this.map.name}`);
     screen.fill(this.map.outdoor ? 7 : 29);
     const light: Light = this.map.outdoor ? lightAt(this.hour ?? new Date().getHours()) : "day";
     const cx = Math.max(0, Math.min(this.px - 72, this.map.width * 16 - 160));

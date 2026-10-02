@@ -38,7 +38,7 @@ export class Textbox {
   private revealed = 0;
   private frames = 0;
 
-  constructor(text: string, private readonly options: Options, private readonly complete: () => void) {
+  constructor(readonly text: string, private readonly options: Options, private readonly complete: () => void) {
     this.lines = wrapText(text, 18);
   }
 
