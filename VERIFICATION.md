@@ -44,7 +44,7 @@ authoritative counts. Historical counts below refer to their recorded builds.
 ## Runtime and deployment checks
 
 - GET /, /about, /projects, /resume, /off-the-clock, /contact, /robots.txt,
-  /sitemap.xml, /retro.css, /favicon.svg, the resume PDF and public photos return 200.
+  /sitemap.xml, /retro.css, /favicon.svg, /favicon.ico, /apple-touch-icon.png, the resume PDF and public photos return 200.
 - No page contains a `<script>` element; every response carries a CSP with
   `script-src 'none'`. /interests redirects (308) to /off-the-clock; unknown
   paths return the HTML 404 page.

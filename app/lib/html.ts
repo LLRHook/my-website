@@ -26,7 +26,7 @@ export function page(options: { path: string; title: string; description: string
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>${title}</title><meta name="description" content="${description}"><link rel="canonical" href="${url}">
 <meta property="og:title" content="${title}"><meta property="og:description" content="${description}"><meta property="og:url" content="${url}"><meta property="og:type" content="website"><meta property="og:image" content="${esc(SITE_URL + "/victor-profile.jpg")}"><meta name="twitter:card" content="summary">
-<link rel="icon" href="/favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/retro.css"></head>
+<link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48"><link rel="icon" href="/favicon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="stylesheet" href="/retro.css"></head>
 <body><a class="skip" href="#main">Skip to content</a><div class="page">
 <header class="masthead"><p class="site-name"><a href="/">Victor Ivanov's Home Page</a></p>
 <div class="marquee" aria-hidden="true"><span>&#9733; Welcome to my home page! &#9733; Senior Full-Stack Engineer &#9733; Java &middot; Spring Boot &middot; React &middot; TypeScript &#9733; Open to on-site and hybrid roles &#9733;</span></div>

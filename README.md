@@ -61,6 +61,7 @@ NEW label, disables both for reduced motion, and supplies print styles.
 - `app/lib/github.ts`: repository listing, pagination, authentication, public fallback.
 - `app/lib/projectPresentation.ts`: display names and descriptions for selected repos.
 - `public/retro.css`: the site's only stylesheet.
+- `scripts/render-assets.mjs`: regenerates the committed favicon set (`npm run assets`).
 - `app/route.ts` and the route folders: Home, About, Projects, Resume, Off the Clock, Contact, and the catch-all 404.
 - `app/sitemap.ts` and `app/robots.ts`: crawler metadata.
 - `e2e/site.spec.ts`: HTML, navigation, headers, routing, narrow layouts, and reduced motion.

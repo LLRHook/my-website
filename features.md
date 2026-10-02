@@ -220,6 +220,20 @@ the end of their section, sorted by id on read.
 - **Implementation:** Every page is a route handler returning an HTML string from `app/lib/html.ts` (document shell, nav, footer) and `app/lib/pages.ts` (bodies; resume and about copy carried over), styled by `public/retro.css`: silver page, Times, default link colors, grooved rules, outset boxes, CSS marquee, blinking NEW!, under-construction stripes, 88x31 badges, mailto guestbook; motion off under reduced motion. Projects is a GitHub table (`fetchRepoList`, hourly ISR, error fallback). CSP `script-src 'none'`; /interests 308; HTML 404 catch-all. Deleted the room, audio, React UI, API routes, render/ pipeline, room assets and 14 dependencies. Lint clean, 28 unit tests, production build, 22/22 Chromium and mobile WebKit E2E; production curl shows no `<script>` on any page.
 - **Status:** shipped-pending-migration
 
+### [FEAT-1790966739] 1990s pixel-art favicon set
+- [x] **Priority:** med
+- **Area:** ui, seo
+- **File(s):** scripts/render-assets.mjs, public/favicon.svg, public/favicon.ico, public/apple-touch-icon.png, app/lib/html.ts, e2e/site.spec.ts
+- **Why:** The favicon is still the old green rounded "VI" tile; /favicon.ico and /apple-touch-icon.png fall through to the HTML 404.
+- **Approach:** A 16x16 pixel-art "VI" on a silver bevelled tile (navy letters) generated from one grid by a Playwright script into SVG, a 16/32/48 ICO and a 180px Apple touch icon.
+- **Library / dependency notes:** none (uses the existing Playwright dev dependency).
+- **Acceptance criteria:** All three icons are served with image content types and linked from every page; the icon matches the site palette; lint, unit, build, E2E green.
+- **Test plan:** E2E asserts status and content type for each icon and the head links.
+- **Out of scope:** Web app manifest.
+- **Bump:** minor
+- **Implementation:** `scripts/render-assets.mjs` draws one 16x16 grid (silver Windows 95 bevel, navy "VI") to `favicon.svg` with `crispEdges`, then uses Playwright Chromium to rasterize a PNG-in-ICO (16/32/48) and a 180px Apple touch icon. `page()` links all three; E2E checks status, content type and head links.
+- **Status:** shipped-pending-migration
+
 ## Shipped
 - **Implementation:** Window toggles day/evening, lamp toggles its independent desk glow, and the cat responds directly with its wake gesture. Replaced the mountain print with a UMBC B.S. Computer Science May 2024 frame; removed both journal and pencil. Added control regressions and verified 320px/390px/desktop layouts and focus return.
 
