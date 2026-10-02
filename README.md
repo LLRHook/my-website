@@ -56,7 +56,7 @@ web fonts. The Content Security Policy includes `script-src 'none'` and limits
 styles and images to the same origin. CSS provides the marquee and blinking
 NEW label, disables both for reduced motion, and supplies print styles.
 
-- `app/lib/html.ts`: escaping, page metadata, navigation, document shell, responses.
+- `app/lib/html.ts`: escaping, page metadata, schema.org Person microdata, navigation, document shell, responses.
 - `app/lib/pages.ts`: pure body renderers and resume content.
 - `app/lib/github.ts`: repository listing, pagination, authentication, public fallback.
 - `app/lib/projectPresentation.ts`: display names and descriptions for selected repos.

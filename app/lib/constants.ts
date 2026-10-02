@@ -26,8 +26,8 @@ export const SOCIAL_BY_ICON: Record<SocialIcon, SocialLink> = Object.fromEntries
 export const EMAIL_HREF = SOCIAL_BY_ICON.email.href;
 export const GITHUB_HREF = SOCIAL_BY_ICON.github.href;
 
-// Skill badges shown in the About section. (JsonLd.knowsAbout is a deliberately
-// curated SEO subset and is intentionally kept separate.)
+// Skills listed on the About page. (KNOWS_ABOUT is a deliberately curated
+// structured-data subset and is intentionally kept separate.)
 export const SKILLS: readonly string[] = [
   "Java",
   "Spring Boot",
@@ -45,4 +45,17 @@ export const SKILLS: readonly string[] = [
   "Tailwind CSS",
   "Linux",
   "CI/CD",
+];
+
+export const KNOWS_ABOUT: readonly string[] = [
+  "Java",
+  "Spring Boot",
+  "TypeScript",
+  "React",
+  "Next.js",
+  "Node.js",
+  "Python",
+  "PostgreSQL",
+  "Full-Stack Development",
+  "Artificial Intelligence",
 ];

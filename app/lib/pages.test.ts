@@ -30,6 +30,18 @@ describe("page bodies", () => {
   it.each([homeBody, aboutBody, () => projectsBody([repo()]), resumeBody, offTheClockBody, contactBody, notFoundBody])("contains no script tags: %s", (body) => {
     expect(body()).not.toContain("<script");
   });
+  it("marks up the home page as a WebSite and Victor as a Person", () => {
+    const html = homeBody();
+    expect(html).toContain('itemtype="https://schema.org/WebSite"');
+    expect(html).toContain('itemtype="https://schema.org/Person"');
+    expect(html).toContain('<meta itemprop="name" content="Victor Ivanov">');
+    expect(html).toContain('<link itemprop="sameAs" href="https://github.com/LLRHook">');
+    expect(html).toContain('<link itemprop="sameAs" href="https://www.linkedin.com/in/victorivanovofficial/">');
+    expect(html).not.toContain('itemprop="sameAs" href="mailto:');
+  });
+  it("marks up About as a ProfilePage whose main entity is Victor", () => {
+    expect(aboutBody()).toMatch(/itemtype="https:\/\/schema\.org\/ProfilePage"><div itemprop="mainEntity" itemscope itemtype="https:\/\/schema\.org\/Person"/);
+  });
   it("links the downloadable resume PDF", () => {
     expect(resumeBody()).toContain('<a href="/Victor_Ivanov_Resume.pdf" download>');
   });

@@ -196,6 +196,17 @@ the end of their section, sorted by id on read.
 - **Status:** fixed-pending-migration
 - **Fix:** next and eslint-config-next 16.3.8; `npm audit fix` for brace-expansion. `npm audit` reports 0 vulnerabilities; lint, unit, build and E2E pass.
 
+### [BUG-1790966738] Structured data dropped and 404 page canonicalizes to home
+- [x] **Severity:** med
+- **Area:** seo
+- **File(s):** app/lib/html.ts, app/lib/pages.ts, app/[...slug]/route.ts
+- **Observation:** FEAT-1790963490 removed the Person/WebSite/BreadcrumbList JSON-LD that disambiguated Victor from Viktor Petrovich Ivanov (seo-audit.json). The 404 page emits `<link rel="canonical" href="https://victorivanov.engineer">` and no noindex.
+- **Expected:** Person (with sameAs, jobTitle, worksFor, address, alumniOf, knowsAbout) and WebSite structured data, expressed as HTML microdata so no `<script>` ships; /about is a ProfilePage; the 404 page has `noindex` and no canonical.
+- **Repro / Notes:** `curl -s https://victorivanov.engineer/nope | grep canonical`.
+- **Bump:** patch
+- **Fix:** `personMicrodata()` in `app/lib/html.ts` emits the Person (name, jobTitle, url, image, GitHub/LinkedIn sameAs, worksFor, address, alumniOf UMBC, knowsAbout) as `<meta>`/`<link>` microdata; Home adds a WebSite, About wraps the Person as a ProfilePage mainEntity. `page()` gives paths outside `PAGES` `noindex` and drops their canonical and og:url. Unit and E2E tests cover both.
+- **Status:** fixed-pending-migration
+
 ## Migrated to changelog
 
 Entries below have been ticked off and copied as a one-liner into `CHANGELOG.md`.
