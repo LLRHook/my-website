@@ -1,8 +1,11 @@
 # Release verification
 
-This checklist covers the 1990s HTML/CSS home page (FEAT-1790963490): every
-route ships HTML and CSS only, the live GitHub projects table, and the public
-route contracts. Dated evidence sections below describe earlier versions.
+This checklist covers the 1990s HTML/CSS home page (FEAT-1790963490) and the
+Codelings game on /projects (FEAT-1790968447, FEAT-1790968448, FEAT-1790968449,
+design in `docs/game-design.md`): every route except /projects ships HTML and
+CSS only, /projects adds the compiled game under a route-specific CSP, the live
+GitHub projects table stays below the game, and the public route contracts hold.
+Dated evidence sections below describe earlier versions.
 
 ## Build and automated checks
 
@@ -11,43 +14,59 @@ route contracts. Dated evidence sections below describe earlier versions.
 2. Use Node 24.15 or later within Node 24 (`.nvmrc`) and the committed npm lockfile.
    On a clean checkout, run `npm ci`.
 3. Run `npm run lint` (zero warnings), `npx tsc --noEmit`, `npm test`, and
-   `npm run build`. A build must work without `app/layout.tsx`.
+   `npm run build`. The build first compiles `game/src` into the gitignored
+   `public/game/` (`npm run build:game`) and must work without `app/layout.tsx`.
 4. Start the production artifact with `npm run start -- -p 3100`, set
    `PLAYWRIGHT_BASE_URL=http://localhost:3100`, and run `npx playwright test`.
    Stop the server by the PID listening on its port when checks finish.
 5. For a deployment, set `PLAYWRIGHT_BASE_URL` to its HTTPS URL and run the same
    E2E command. This skips local startup.
 
-Current baseline: 28 Vitest cases across 3 files and 22 Playwright cases across
-1 file (11 Chromium and 11 WebKit). Both browser projects run the whole site suite.
-Vitest covers repository listing, filtering, mapping and fallback; HTML escaping,
-metadata and navigation; and pure body renderers. Test runners provide the
+Current baseline: 146 Vitest cases across 12 files and 40 Playwright cases across
+2 files (20 Chromium and 20 WebKit: 14 site and 6 game each). Both browser
+projects run both suites. Vitest covers repository listing, filtering, mapping
+and fallback; HTML escaping, metadata, microdata and navigation; pure body
+renderers; and the game's pure modules (RNG, storage validation, text wrapping,
+MML parser and music data, maps, scripts, NPC sight lines, species, formulas,
+type chart, catching and the battle state machine). Test runners provide the
 authoritative counts. Historical counts below refer to their recorded builds.
 
 ## Acceptance coverage
 
-- All six PAGES paths return 200 and text/html, one visible h1, and no script tags.
-- Every response includes CSP with `script-src 'none'`; navigation marks only the
-  current page with `aria-current`.
+- All six PAGES paths return 200 and text/html with one visible h1. Every page
+  except /projects has no script tags and a CSP with `script-src 'none'`;
+  /projects has exactly one script (`/game/main.js`, type module) and a CSP with
+  `script-src 'self'`. Navigation marks only the current page with `aria-current`.
+- The game boots to `data-ready` and `data-scene="title"` with zero console and
+  page errors; keyboard and on-screen START reach the intro; a new game reaches
+  the overworld, changes maps through the stairs and door, and SAVE then reload
+  then CONTINUE restores the map. With `?seed=1&encounter=1` a starter can be
+  chosen, a tall-grass step starts a battle, a Fork Ball can be thrown, and the
+  Codex opens; repository links ask YES/NO before opening. Test-only query
+  parameters are documented in README.md and change no persisted state.
 - Projects use hourly GitHub listing and show a table or a usable empty notice
   without `GITHUB_TOKEN`. Descriptions are escaped, profile and undescribed repos
   are filtered, rows sort newest first, and demo links use HTTP(S).
 - Resume HTML links the downloadable PDF; the PDF returns 200.
 - `/interests` redirects permanently to `/off-the-clock`; unknown paths return 404
   with a link home.
-- No page has horizontal document overflow at 320x700. Capture all six pages at
-  desktop 1280x900 and phone 390x844 for visual inspection.
-- Reduced motion disables the CSS marquee. The sitemap lists all six URLs.
-- Production curl checks verify script-free HTML, CSP, the 308 redirect and 404.
-  Confirm sitemap, robots, stylesheet, favicon and PDF bypass the catch-all.
+- No page has horizontal document overflow at 320x700, including the handheld.
+  Capture all six pages at desktop 1280x900 and phone 390x844 for visual
+  inspection, plus the game's title, overworld, battle and Codex screens.
+- Reduced motion stops the CSS marquee and keeps it to one static line; the game
+  drops shakes and flashes. The sitemap lists all six URLs with lastmod.
+- Production curl checks verify script-free HTML outside /projects, the per-route
+  CSP, the 308 redirect and 404. Confirm sitemap, robots, stylesheet, icons, share
+  card, game modules and PDF bypass the catch-all.
 
 ## Runtime and deployment checks
 
 - GET /, /about, /projects, /resume, /off-the-clock, /contact, /robots.txt,
-  /sitemap.xml, /retro.css, /favicon.svg, /favicon.ico, /apple-touch-icon.png, /og-image.png, the resume PDF and public photos return 200.
-- No page contains a `<script>` element; every response carries a CSP with
-  `script-src 'none'`. /interests redirects (308) to /off-the-clock; unknown
-  paths return the HTML 404 page.
+  /sitemap.xml, /retro.css, /favicon.svg, /favicon.ico, /apple-touch-icon.png,
+  /og-image.png, /game/main.js, the resume PDF and public photos return 200.
+- Only /projects contains a `<script>` element and carries `script-src 'self'`;
+  every other response carries `script-src 'none'`. /interests redirects (308)
+  to /off-the-clock; unknown paths return the HTML 404 page.
 - The 404 page links back to the home page.
 - Run mobile Lighthouse against the production artifact/domain. Existing targets
   are Performance>=90, Accessibility>=95, and LCP<2.5s. Report the measured LCP

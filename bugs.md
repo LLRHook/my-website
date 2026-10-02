@@ -218,6 +218,17 @@ the end of their section, sorted by id on read.
 - **Fix:** The reduced-motion rule keeps `nowrap` and renders the span as a centred block with `text-overflow: ellipsis`; the reduced-motion E2E now asserts a single line.
 - **Status:** fixed-pending-migration
 
+### [BUG-1790979920] VERIFICATION.md still describes a script-free site and the old test baseline
+- [x] **Severity:** med
+- **Area:** docs
+- **File(s):** VERIFICATION.md
+- **Observation:** After FEAT-1790968447 and FEAT-1790968448, VERIFICATION.md still says every route ships HTML and CSS only, that no page has a script and every CSP is `script-src 'none'`, and records a baseline of 28 Vitest and 22 Playwright cases. /projects now loads the Codelings game under `script-src 'self'` and the suites are larger.
+- **Expected:** The checklist covers the game (build step, /projects CSP exception, game E2E, test-only query parameters, mobile checks) and the current baseline from the test runners.
+- **Repro / Notes:** Compare VERIFICATION.md "Current baseline" and "Runtime and deployment checks" with `npm test` / `npx playwright test` output and `curl -sI /projects`.
+- **Bump:** patch
+- **Fix:** VERIFICATION.md now scopes the game (build step, /projects-only `script-src 'self'` and single module script, game boot/overworld/save/battle/Codex E2E, test-only params) and records the runner baseline: 146 Vitest cases in 12 files, 40 Playwright cases in 2 files (20 Chromium, 20 WebKit).
+- **Status:** fixed-pending-migration
+
 ## Migrated to changelog
 
 Entries below have been ticked off and copied as a one-liner into `CHANGELOG.md`.
