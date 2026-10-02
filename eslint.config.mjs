@@ -5,6 +5,7 @@ const eslintConfig = [
   {
     ignores: [
       ".next/**",
+      "public/game/**",
       "node_modules/**",
       "out/**",
       "render/out/**",

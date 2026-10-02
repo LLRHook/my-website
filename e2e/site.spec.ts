@@ -7,10 +7,10 @@ for (const item of PAGES) {
     const response = await page.goto(item.path);
     expect(response?.status()).toBe(200);
     expect(response?.headers()["content-type"]).toContain("text/html");
-    expect(response?.headers()["content-security-policy"]).toContain("script-src 'none'");
+    expect(response?.headers()["content-security-policy"]).toContain(item.path === "/projects" ? "script-src 'self'" : "script-src 'none'");
     await expect(page.locator("h1")).toHaveCount(1);
     await expect(page.locator("h1")).toBeVisible();
-    await expect(page.locator("script")).toHaveCount(0);
+    await expect(page.locator("script")).toHaveCount(item.path === "/projects" ? 1 : 0);
     await expect(page.locator('nav [aria-current="page"]')).toHaveText(item.label);
     await page.setViewportSize({ width: 320, height: 700 });
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);

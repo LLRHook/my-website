@@ -26,14 +26,28 @@ ${paragraph("I studied computer science at UMBC and I'm pursuing an M.S. in Comp
 <div itemscope itemtype="https://schema.org/ProfilePage">${personMicrodata('itemprop="mainEntity"')}</div>`;
 }
 
+function gameSection(projects: (RepoSummary & { sourceName: string })[]): string {
+  const payload = projects.map((repo) => ({
+    id: repo.id, name: repo.sourceName, title: repo.name, description: repo.description!,
+    language: repo.language, stars: repo.stars, pushedAt: repo.pushedAt, url: repo.htmlUrl,
+    homepage: repo.homepage && /^https?:\/\//i.test(repo.homepage) ? repo.homepage : null,
+  }));
+  const button = (action: string, label: string, text: string) => `<button type="button" data-button="${action}" aria-label="${label}">${text}</button>`;
+  return `<div id="game" class="handheld" data-repos="${esc(JSON.stringify(payload))}" data-scene="loading" tabindex="-1">
+<div class="game-bezel"><span class="power-led" aria-hidden="true"></span><div class="game-display"><canvas width="160" height="144" aria-label="Codelings: Victor's Repo Quest. Play with the controls below; every project is also available in the accessible table below."></canvas><div class="game-nojs">Press START requires JavaScript; every project is in the table below</div></div><span class="game-wordmark">VI-BOY</span></div>
+<div class="game-controls"><div class="dpad">${button("up", "Move up", "&#9650;")}${button("left", "Move left", "&#9664;")}${button("right", "Move right", "&#9654;")}${button("down", "Move down", "&#9660;")}</div><div class="game-ab">${button("b", "B: cancel or run", "B")}${button("a", "A: confirm", "A")}</div></div>
+<div class="game-system">${button("select", "SELECT", "SELECT")}${button("start", "START", "START")}</div></div>
+<p class="game-legend">Click the device to play. Arrows / WASD: move &middot; Z / Space: A &middot; X / Backspace / Shift: B &middot; Enter: START &middot; Tab: SELECT &middot; Esc: release keyboard.</p>`;
+}
+
 export function projectsBody(repos: RepoSummary[]): string {
-  const projects = repos.filter((repo) => repo.name.toLowerCase() !== repo.owner.toLowerCase()).map(presentProject).filter((repo) => repo.description).sort((a, b) => b.pushedAt.localeCompare(a.pushedAt));
+  const projects = repos.filter((repo) => repo.name.toLowerCase() !== repo.owner.toLowerCase()).map((repo) => ({ ...presentProject(repo), sourceName: repo.name })).filter((repo) => repo.description).sort((a, b) => b.pushedAt.localeCompare(a.pushedAt));
   const rows = projects.map((repo) => {
     const demo = repo.homepage && /^https?:\/\//i.test(repo.homepage) ? ` &middot; <a href="${esc(repo.homepage)}" ${external}>demo</a>` : "";
     const date = repo.pushedAt.slice(0, 10);
     return `<tr><td><a href="${esc(repo.htmlUrl)}" ${external}>${esc(repo.name)}</a>${demo}</td><td>${esc(repo.description!)}</td><td>${repo.language ? esc(repo.language) : "&mdash;"}</td><td>${esc(String(repo.stars))}</td><td><time datetime="${esc(repo.pushedAt)}">${esc(date)}</time></td></tr>`;
   }).join("");
-  return `<h1>Projects</h1><p>Products, developer tools, and the engineering behind them. This list comes straight from my GitHub and refreshes every hour.</p>${projects.length ? `<div class="table-wrap"><table class="projects"><caption>Public repositories</caption><thead><tr><th scope="col">Project</th><th scope="col">What it is</th><th scope="col">Language</th><th scope="col">Stars</th><th scope="col">Updated</th></tr></thead><tbody>${rows}</tbody></table></div>` : `<p class="notice">The project list did not load. See all my work on <a href="${esc(GITHUB_HREF)}" ${external}>GitHub</a>.</p>`}<p>More on <a href="${esc(GITHUB_HREF)}" ${external}>github.com/LLRHook</a>.</p>`;
+  return `<h1>Projects</h1><p>Products, developer tools, and the engineering behind them. This list comes straight from my GitHub and refreshes every hour.</p>${gameSection(projects)}<h2>Every project, as a table</h2>${projects.length ? `<div class="table-wrap"><table class="projects"><caption>Public repositories</caption><thead><tr><th scope="col">Project</th><th scope="col">What it is</th><th scope="col">Language</th><th scope="col">Stars</th><th scope="col">Updated</th></tr></thead><tbody>${rows}</tbody></table></div>` : `<p class="notice">The project list did not load. See all my work on <a href="${esc(GITHUB_HREF)}" ${external}>GitHub</a>.</p>`}<p>More on <a href="${esc(GITHUB_HREF)}" ${external}>github.com/LLRHook</a>.</p>`;
 }
 
 export function offTheClockBody(): string {

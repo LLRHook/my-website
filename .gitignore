@@ -21,3 +21,5 @@ tsconfig.tsbuildinfo
 /render/**/__pycache__/
 /render/*.log
 /render/.ruff_cache/
+
+/public/game/

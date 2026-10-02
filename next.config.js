@@ -27,6 +27,12 @@ const nextConfig = {
         source: "/:path*",
         headers: securityHeaders,
       },
+      {
+        source: "/projects",
+        headers: securityHeaders.map((header) => header.key === "Content-Security-Policy"
+          ? { ...header, value: header.value.replace("script-src 'none'", "script-src 'self'") }
+          : header),
+      },
     ];
   },
 };

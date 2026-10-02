@@ -22,7 +22,7 @@ export default defineConfig({
     },
     {
       name: "webkit-mobile",
-      testMatch: /site\.spec\.ts/,
+      testMatch: /(site|game)\.spec\.ts/,
       use: { browserName: "webkit" },
     },
   ],

@@ -5,6 +5,19 @@ import type { RepoSummary } from "./types";
 const repo = (overrides: Partial<RepoSummary> = {}): RepoSummary => ({ id: 1, name: "demo-project", owner: "owner", description: "A project", htmlUrl: "https://github.com/owner/demo-project", homepage: null, language: "Go", stars: 3, pushedAt: "2026-01-01T00:00:00Z", ...overrides });
 
 describe("page bodies", () => {
+  it("embeds the same presented list and all eight accessible game controls", () => {
+    const html = projectsBody([repo({ name: "my-website", owner: "LLRHook", homepage: "javascript:bad" }), repo({ id: 2, name: 'quote"&', description: "<tag>" })]);
+    const encoded = html.match(/data-repos="([^"]*)"/)![1];
+    const payload = JSON.parse(encoded.replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&amp;/g, "&"));
+    expect(payload).toHaveLength(2);
+    expect(payload[0]).toMatchObject({ name: "my-website", title: "This home page", homepage: null });
+    expect(payload[1]).toMatchObject({ name: 'quote"&', description: "<tag>" });
+    expect(encoded).toContain("&lt;tag&gt;");
+    for (const button of ["up", "down", "left", "right", "a", "b", "start", "select"]) expect(html).toContain(`data-button="${button}" aria-label=`);
+    expect(html.match(/data-button=/g)).toHaveLength(8);
+    expect(html).toContain("Every project, as a table");
+    expect(html.indexOf('id="game"')).toBeLessThan(html.indexOf('class="projects"'));
+  });
   it("escapes malicious project descriptions", () => {
     const html = projectsBody([repo({ description: "<img src=x onerror=alert(1)>" })]);
     expect(html).toContain("&lt;img src=x onerror=alert(1)&gt;");

@@ -4,13 +4,14 @@
 
 A 1990s personal home page with blue links, a CSS marquee, an under-construction
 notice, and browser badges. Pages ship hand-written HTML and one CSS file.
-No JavaScript reaches the browser.
+The Projects page also loads Codelings, an original pixel-art game written in
+TypeScript. The repository table remains the accessible version of the same data.
 
 ## Pages
 
 - Home (`/`): welcome and updates.
 - About Me (`/about`): biography, tools, and conference photo.
-- Projects (`/projects`): public GitHub repositories.
+- Projects (`/projects`): Codelings and an accessible table of public GitHub repositories.
 - Resume (`/resume`): experience, projects, education, skills, and a PDF download.
 - Off the Clock (`/off-the-clock`): climbing, cards, books, travel, and side projects.
 - Contact (`/contact`): email, GitHub, LinkedIn, and an email guestbook.
@@ -36,7 +37,9 @@ Set production variables in Vercel; never commit secrets.
 ## Scripts and checks
 
 - `npm run dev`: development server.
-- `npm run build`: production build.
+- `npm run build:game`: compile `game/src` into generated `public/game/` browser modules.
+- `npm run dev:game`: watch and recompile the game alongside `npm run dev`.
+- `npm run build`: compile the game, then create the Next.js production build.
 - `npm run start`: serve the production build.
 - `npm run lint`: ESLint.
 - `npm test`: Vitest unit tests; `npm run test:watch` watches changes.
@@ -51,8 +54,10 @@ without starting a local server.
 ## Implementation
 
 Next.js App Router route handlers return complete HTML documents as
-`Response` objects. There are no React page components, layouts, scripts, or
-web fonts. The Content Security Policy includes `script-src 'none'` and limits
+`Response` objects. There are no React page components, layouts, or web fonts.
+Only `/projects` loads a module script, compiled with the existing TypeScript
+compiler; its Content Security Policy uses `script-src 'self'`. All other pages
+use `script-src 'none'`. The policy limits
 styles and images to the same origin. CSS provides the marquee and blinking
 NEW label, disables both for reduced motion, and supplies print styles.
 
@@ -60,7 +65,9 @@ NEW label, disables both for reduced motion, and supplies print styles.
 - `app/lib/pages.ts`: pure body renderers and resume content.
 - `app/lib/github.ts`: repository listing, pagination, authentication, public fallback.
 - `app/lib/projectPresentation.ts`: display names and descriptions for selected repos.
-- `public/retro.css`: the site's only stylesheet.
+- `game/`: Codelings engine, pixel art, title screen, options, and unit tests; see [the game design](docs/game-design.md).
+- `public/game/`: generated browser modules, excluded from Git.
+- `public/retro.css`: the site's only stylesheet, including the CSS handheld.
 - `scripts/render-assets.mjs`: regenerates the committed favicon set and 1200x630 share card (`npm run assets`).
 - `app/route.ts` and the route folders: Home, About, Projects, Resume, Off the Clock, Contact, and the catch-all 404.
 - `app/sitemap.ts` and `app/robots.ts`: crawler metadata.

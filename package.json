@@ -4,13 +4,15 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "npm run build:game && next build",
     "start": "next start",
     "lint": "eslint .",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "npx playwright test",
-    "assets": "node scripts/render-assets.mjs"
+    "assets": "node scripts/render-assets.mjs",
+    "build:game": "tsc -p game/tsconfig.json",
+    "dev:game": "tsc -p game/tsconfig.json --watch"
   },
   "dependencies": {
     "next": "^16.3.8",
