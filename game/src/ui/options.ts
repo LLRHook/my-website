@@ -16,14 +16,15 @@ export class OptionsScene implements Scene {
   constructor(private readonly input: Input, private readonly audio: Audio,
     private readonly stack: SceneStack, private readonly options: Options) {
     this.refresh();
-    this.menu = new Menu(this.labels, (index) => index === 4 ? stack.pop() : this.change(1), () =>
-      stack.pop(), (effect) => audio.sfx(effect), 5);
+    this.menu = new Menu(this.labels, (index) => index === 5 ? stack.pop() : this.change(1), () =>
+      stack.pop(), (effect) => audio.sfx(effect), 6);
   }
 
   private refresh(): void {
     this.labels.splice(0, this.labels.length, `${TEXT.speed}  ${this.options.textSpeed.toUpperCase()}`,
       `${TEXT.music} ${this.options.music}`, `${TEXT.sfx}   ${this.options.sfx}`,
-      `${TEXT.animations} ${this.options.anims ? TEXT.on : TEXT.off}`, TEXT.back);
+      `${TEXT.animations} ${this.options.anims ? TEXT.on : TEXT.off}`,
+      `HAPTICS ${this.options.haptics ? TEXT.on : TEXT.off}`, TEXT.back);
   }
 
   private change(direction: number): void {
@@ -36,6 +37,8 @@ export class OptionsScene implements Scene {
       this.options[key] = Math.max(0, Math.min(10, this.options[key] + direction));
     } else if (index === 3) {
       this.options.anims = !this.options.anims;
+    } else if (index === 4) {
+      this.options.haptics = !this.options.haptics;
     } else {
       return;
     }
@@ -57,7 +60,7 @@ export class OptionsScene implements Scene {
     screen.fill(6);
     screen.fill(1, 0, 0, 160, 27);
     drawText(screen, TEXT.options, 52, 10, 5);
-    this.menu.draw(screen, 4, 35, 152);
+    this.menu.draw(screen, 4, 28, 152);
     drawText(screen, TEXT.optionsHelp, 8, 131, 1);
   }
 }

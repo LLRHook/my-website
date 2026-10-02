@@ -62,7 +62,100 @@ if (root) {
     initScenery();
     initSprites();
     const audio = new Audio(options);
-    const input = new Input(root, () => audio.resume());
+    const input = new Input(root, () => audio.resume(), () => {
+      if (options.haptics) {
+        navigator.vibrate?.(8);
+      }
+    });
+    let scrollY = 0;
+    let visible = true;
+    let paused = false;
+    const fullscreen = () => root.hasAttribute("data-fullscreen");
+    const syncPause = () => {
+      paused = document.hidden || (!visible && !fullscreen());
+      audio.setPaused(paused);
+    };
+    const resize = () => {
+      if (!fullscreen()) {
+        return;
+      }
+      const width = root.clientWidth;
+      const height = root.clientHeight;
+      root.toggleAttribute("data-landscape", width > height);
+      const style = getComputedStyle(root);
+      const left = parseFloat(style.paddingLeft);
+      const right = width - parseFloat(style.paddingRight);
+      const top = parseFloat(style.paddingTop);
+      const bottom = height - parseFloat(style.paddingBottom);
+      const parts = root.querySelectorAll<HTMLElement>(".game-bezel, .dpad, .game-ab, .game-system, .game-exit");
+      for (let scale = Math.max(1, Math.floor(Math.min(width / 160, height / 144))); scale >= 1; scale--) {
+        root.style.setProperty("--screen-width", `calc(160px * ${scale})`);
+        const fits = [...parts].every((part) => {
+          const bounds = part.getBoundingClientRect();
+          return bounds.left >= left && bounds.right <= right && bounds.top >= top && bounds.bottom <= bottom;
+        });
+        if (fits) {
+          break;
+        }
+      }
+    };
+    const exitFullscreen = () => {
+      if (!fullscreen()) {
+        return;
+      }
+      root.removeAttribute("data-fullscreen");
+      root.removeAttribute("data-landscape");
+      root.style.removeProperty("--screen-width");
+      document.documentElement.classList.remove("game-locked");
+      document.body.style.removeProperty("top");
+      window.scrollTo(0, scrollY);
+      if (document.fullscreenElement === root) {
+        void document.exitFullscreen().catch(() => {});
+      }
+      syncPause();
+    };
+    document.querySelector('[data-action="fullscreen"]')?.addEventListener("click", () => {
+      if (fullscreen()) {
+        exitFullscreen();
+        return;
+      }
+      scrollY = window.scrollY;
+      document.body.style.top = `${-scrollY}px`;
+      root.dataset.fullscreen = "";
+      document.documentElement.classList.add("game-locked");
+      syncPause();
+      resize();
+      root.focus({ preventScroll: true });
+      audio.resume();
+      void root.requestFullscreen?.({ navigationUI: "hide" }).catch(() => {});
+    });
+    root.querySelector('[data-action="exit-fullscreen"]')?.addEventListener("click", exitFullscreen);
+    document.addEventListener("keydown", (event) => {
+      if (event.code === "Escape" && fullscreen()) {
+        exitFullscreen();
+      }
+    });
+    document.addEventListener("fullscreenchange", () => {
+      if (!document.fullscreenElement) {
+        exitFullscreen();
+      } else if (!fullscreen() && document.fullscreenElement === root) {
+        // An API request can finish after the user has already left the CSS overlay.
+        void document.exitFullscreen().catch(() => {});
+      } else {
+        resize();
+      }
+    });
+    window.addEventListener("resize", resize);
+    window.addEventListener("orientationchange", resize);
+    window.visualViewport?.addEventListener("resize", resize);
+    document.addEventListener("visibilitychange", syncPause);
+    new IntersectionObserver(([entry]) => {
+      visible = entry.intersectionRatio >= 0.25;
+      syncPause();
+    }, { threshold: [0, 0.25] }).observe(root);
+    root.addEventListener("contextmenu", (event) => event.preventDefault());
+    root.addEventListener("pointerup", () => audio.resume());
+    root.addEventListener("touchend", () => audio.resume());
     const scenes = new SceneStack(root);
     const parameters = new URLSearchParams(location.search);
     const rawSeed = parameters.get("seed");
@@ -73,11 +166,17 @@ if (root) {
       ? Number(rawHour) : undefined;
     scenes.push(new TitleScene(input, audio, scenes, options, repos, root, forcedHour, rng, encounter));
     const draw = () => {
+      if (paused) {
+        return;
+      }
       scenes.draw(screen);
       screen.present();
     };
     draw();
     startLoop((dt) => {
+      if (paused) {
+        return;
+      }
       input.update();
       audio.update();
       scenes.update(dt);

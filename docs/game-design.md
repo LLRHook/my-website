@@ -64,9 +64,17 @@ maps, music or text from any Nintendo / Game Freak / The Pokémon Company produc
   shell, navy screen surround, "VI-BOY" wordmark, maroon A/B, black D-pad,
   START/SELECT pills). The control buttons are real `<button>`s with
   `aria-label`s, driven by pointer events, sized for thumbs, shown on every
-  device. Keyboard legend under the device.
+  device. Keyboard legend under the device; coarse touch pointers get a touch hint.
+- PLAY FULLSCREEN pins the silver shell to the viewport, locks page scrolling,
+  and uses the Fullscreen API where available. The CSS overlay also works on
+  iPhone Safari. EXIT, Esc and browser fullscreen exit restore the page.
+  Safe-area padding protects the controls. Resize, orientation and visual viewport
+  changes select the largest integer screen scale that fits the screen and controls.
+  Portrait places controls below the screen; landscape places the D-pad left,
+  A/B right and START/SELECT beneath the screen.
 - Fixed 60 Hz simulation with an accumulator on `requestAnimationFrame`; pauses
-  when the tab is hidden. `prefers-reduced-motion`: no screen shake, no flashes,
+  when the tab is hidden or less than 25% of the device is visible outside fullscreen.
+  Music mutes during the pause. `prefers-reduced-motion`: no screen shake, no flashes,
   instant battle transition.
 - `aria-label` on the canvas describes the game and points to the table.
 
@@ -85,7 +93,15 @@ Keyboard, gamepad (standard mapping) and the on-screen buttons all feed one `Inp
 
 Keys are captured (default prevented) only while the game has focus: clicking
 or tapping the device focuses it; Esc or clicking outside releases it, so page
-scrolling still works.
+scrolling still works outside fullscreen.
+
+The D-pad captures a pointer across the whole zone. A thumb beyond a dead zone
+of 18% of the zone width selects the dominant axis; sliding changes direction
+without lifting. A/B and START/SELECT capture independent pointers, so holding B
+while steering runs. Controls and screen prevent touch scrolling, zoom and callouts.
+Audio resumes on pointerdown, pointerup and touchend. HAPTICS defaults to ON,
+including existing saves without the field, and can be toggled in Options on any
+device. Supported browsers vibrate for 8ms on each on-screen press.
 
 ## 4. Engine modules (`game/src/`)
 

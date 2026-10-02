@@ -108,6 +108,11 @@ Rhea for the green-check badge and credits. Completing the Codex earns a diploma
 Caught Codex entries open the repository after a YES/NO confirmation; HTTP(S)
 homepages also offer a demo link. Saves stay in this browser's local storage.
 
+On phones, tap PLAY FULLSCREEN for a screen and controls fitted to portrait or
+landscape. Slide your thumb across the D-pad and hold B with your other thumb to
+run. EXIT returns to the scrolling page. HAPTICS in Options toggles button ticks
+on browsers that support vibration. The game pauses when scrolled out of view.
+
 Keyboard: arrows/WASD to walk, Z/Space to confirm, X/Shift to cancel or run,
 Enter for START and Tab for SELECT. In battle, FIGHT opens moves, BAG uses supplies,
 TEAM switches a Codeling and RUN attempts to escape a wild battle. SELECT switches

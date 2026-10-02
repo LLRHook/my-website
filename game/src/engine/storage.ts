@@ -43,7 +43,7 @@ export interface SaveV1 {
 export const SAVE_KEY = "codelings.save.v1";
 export const OPTIONS_KEY = "codelings.options.v1";
 export const DEFAULT_OPTIONS: Readonly<Options> = {
-  textSpeed: "mid", music: 6, sfx: 7, anims: true
+  textSpeed: "mid", music: 6, sfx: 7, anims: true, haptics: true
 };
 
 const maps: readonly MapId[] = ["bedroom", "house", "sterling", "lab", "route1", "commit", "center", "mart",
@@ -63,9 +63,12 @@ const member = <T extends string>(value: unknown, values: readonly T[]): value i
 const arrayOf = (value: unknown, validate: (entry: unknown) => boolean): value is unknown[] =>
   Array.isArray(value) && value.every(validate);
 
-export function validOptions(value: unknown): value is Options {
+type StoredOptions = Omit<Options, "haptics"> & { haptics?: boolean };
+
+export function validOptions(value: unknown): value is StoredOptions {
   return record(value) && member(value.textSpeed, ["slow", "mid", "fast"])
-    && integer(value.music, 0, 10) && integer(value.sfx, 0, 10) && typeof value.anims === "boolean";
+    && integer(value.music, 0, 10) && integer(value.sfx, 0, 10) && typeof value.anims === "boolean"
+    && (value.haptics === undefined || typeof value.haptics === "boolean");
 }
 
 function validCodeling(value: unknown): value is Codeling {
@@ -114,7 +117,10 @@ function write(key: string, value: unknown): boolean {
 
 export function loadSave(): SaveV1 | null {
   const value = read(SAVE_KEY);
-  return validSave(value) ? value : null;
+  if (!validSave(value)) {
+    return null;
+  }
+  return { ...value, options: { ...value.options, haptics: value.options.haptics ?? true } };
 }
 
 export function reconcileSpecies(save: SaveV1, ids: ReadonlySet<number>): SaveV1 {
@@ -155,7 +161,7 @@ export function loadOptions(): Options {
     return save.options;
   }
   const value = read(OPTIONS_KEY);
-  return validOptions(value) ? value : {
+  return validOptions(value) ? { ...value, haptics: value.haptics ?? true } : {
     ...DEFAULT_OPTIONS
   };
 }

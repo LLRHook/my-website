@@ -15,6 +15,9 @@ describe("page bodies", () => {
     expect(encoded).toContain("&lt;tag&gt;");
     for (const button of ["up", "down", "left", "right", "a", "b", "start", "select"]) expect(html).toContain(`data-button="${button}" aria-label=`);
     expect(html.match(/data-button=/g)).toHaveLength(8);
+    expect(html).toContain('class="game-fullscreen" data-action="fullscreen">PLAY FULLSCREEN');
+    expect(html).toContain('data-action="exit-fullscreen">EXIT');
+    expect(html).toContain('class="game-touch-hint"');
     expect(html).toContain("Every project, as a table");
     expect(html.indexOf('id="game"')).toBeLessThan(html.indexOf('class="projects"'));
   });

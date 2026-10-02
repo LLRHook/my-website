@@ -1,6 +1,15 @@
+import type { Dir } from "../data/ids.js";
+
 export const BUTTONS = ["up", "down", "left", "right", "a", "b", "start", "select"] as const;
 
 export type Button = typeof BUTTONS[number];
+
+export function resolveDpad(dx: number, dy: number, size: number): Dir | null {
+  if (size <= 0 || Math.hypot(dx, dy) <= size * 0.18) {
+    return null;
+  }
+  return Math.abs(dx) > Math.abs(dy) ? (dx < 0 ? "left" : "right") : (dy < 0 ? "up" : "down");
+}
 
 const KEYS: Readonly<Record<string, Button>> = {
   ArrowUp: "up", KeyW: "up", ArrowDown: "down", KeyS: "down", ArrowLeft: "left", KeyA: "left",
@@ -15,7 +24,8 @@ export class Input {
   private readonly edges = new Set<Button>();
   private readonly frames = new Map<Button, number>();
 
-  constructor(private readonly root: HTMLElement, private readonly activate: () => void) {
+  constructor(private readonly root: HTMLElement, private readonly activate: () => void,
+    private readonly haptic: () => void = () => {}) {
     root.addEventListener("pointerdown", () => root.focus({
       preventScroll: true
     }));
@@ -56,9 +66,59 @@ export class Input {
         this.clear();
       }
     });
+    const dpad = root.querySelector<HTMLElement>(".dpad");
+    if (dpad) {
+      const steer = (event: PointerEvent) => {
+        const bounds = dpad.getBoundingClientRect();
+        const direction = resolveDpad(event.clientX - bounds.x - bounds.width / 2,
+          event.clientY - bounds.y - bounds.height / 2, bounds.width);
+        const previous = this.pointers.get(event.pointerId);
+        this.pointers.delete(event.pointerId);
+        if (direction) {
+          this.pointers.set(event.pointerId, direction);
+          if (direction !== previous) {
+            this.pending.add(direction);
+            this.haptic();
+          }
+        }
+        this.paint();
+      };
+      dpad.addEventListener("pointerdown", (event) => {
+        event.preventDefault();
+        root.focus({ preventScroll: true });
+        if (event.isTrusted) {
+          dpad.setPointerCapture(event.pointerId);
+        }
+        steer(event);
+        this.activate();
+      });
+      dpad.addEventListener("pointermove", (event) => {
+        if (dpad.hasPointerCapture(event.pointerId) || this.pointers.has(event.pointerId)) {
+          steer(event);
+        }
+      });
+      for (const name of ["pointerup", "pointercancel", "lostpointercapture"] as const) {
+        dpad.addEventListener(name, (event) => {
+          this.pointers.delete(event.pointerId);
+          this.paint();
+        });
+      }
+    }
     for (const element of root.querySelectorAll<HTMLButtonElement>("[data-button]")) {
+      element.addEventListener("click", (event) => {
+        if (event.detail !== 0) {
+          return;
+        }
+        const button = element.dataset.button as Button;
+        if (BUTTONS.includes(button)) {
+          root.focus({ preventScroll: true });
+          this.pending.add(button);
+          this.haptic();
+          this.activate();
+        }
+      });
       const button = element.dataset.button as Button;
-      if (!BUTTONS.includes(button)) {
+      if (!BUTTONS.includes(button) || element.closest(".dpad")) {
         continue;
       }
       element.addEventListener("pointerdown", (event) => {
@@ -66,18 +126,29 @@ export class Input {
         root.focus({
           preventScroll: true
         });
-        element.setPointerCapture(event.pointerId);
+        if (event.isTrusted) {
+          element.setPointerCapture(event.pointerId);
+        }
         this.pointers.set(event.pointerId, button);
         this.pending.add(button);
+        this.haptic();
+        this.paint();
         this.activate();
       });
-      for (const name of ["pointerup", "pointercancel", "pointerleave", "lostpointercapture"] as const) {
+      for (const name of ["pointerup", "pointercancel", "lostpointercapture"] as const) {
         element.addEventListener(name, (event) => {
           this.pointers.delete(event.pointerId);
+          this.paint();
         });
       }
     }
   }
+  private paint(): void {
+    for (const element of this.root.querySelectorAll<HTMLElement>("[data-button]")) {
+      element.toggleAttribute("data-pressed", [...this.pointers.values()].includes(element.dataset.button as Button));
+    }
+  }
+
   private get focused(): boolean {
     return document.activeElement === this.root;
   }
@@ -85,6 +156,7 @@ export class Input {
   private clear(): void {
     this.keys.clear();
     this.pointers.clear();
+    this.paint();
     this.pending.clear();
     this.edges.clear();
     this.frames.clear();
