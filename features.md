@@ -42,7 +42,6 @@ the end of their section, sorted by id on read.
 
 ---
 
-
 ## Open
 
 ### [FEAT-1788629556] Uncrowded phone room with subtle discovery and softer ambience
@@ -246,6 +245,20 @@ the end of their section, sorted by id on read.
 - **Out of scope:** Search Console submission and backlinks (owner actions in seo-backlink-strategy.md).
 - **Bump:** minor
 - **Implementation:** `npm run assets` also renders `public/og-image.png` (1200x630 retro card). `page()` adds author, `index,follow,max-image-preview:large`, og:site_name/locale, og:image type/size/alt, `summary_large_image`, theme-color, `profile` og:type on /about, "You are here" BreadcrumbList microdata on subpages, and rel=me GitHub/LinkedIn footer links (Contact and Resume links too). Home and Off the Clock descriptions name Victor; sitemap carries build-time lastmod; seo-audit.json history updated. 36 unit tests, 28/28 E2E.
+- **Status:** shipped-pending-migration
+
+### [FEAT-1790969283] Plain Off the Clock copy
+- [x] **Priority:** low
+- **Area:** content
+- **File(s):** app/lib/pages.ts
+- **Why:** Owner: the numbered labels ("01 / MOVE", "COLLECT", "RECHARGE") and taglines get in the way; just say it.
+- **Approach:** One-word headings (Climbing, Cards, Wings, Travel, Side projects, Reading) with one plain sentence each; intro becomes "What I do when I'm not working."
+- **Library / dependency notes:** none.
+- **Acceptance criteria:** No numbered labels or taglines on /off-the-clock; Peru photo kept; unit tests green.
+- **Test plan:** Existing page-body tests.
+- **Out of scope:** Other pages.
+- **Bump:** minor
+- **Implementation:** Rewrote `offTheClockBody()` interests as heading/sentence pairs and the intro line.
 - **Status:** shipped-pending-migration
 
 ## Shipped
