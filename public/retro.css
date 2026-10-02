@@ -41,7 +41,7 @@ footer { text-align: center; font-size: 14px; }
 .badge-nojs { background: #ffcc00; color: #000; } .badge-next { background: #fff; color: #000; }
 .updated { font-style: italic; color: #595959; }
 @media (max-width: 600px) { body { padding: 0; } .page { border-width: 0; padding: 10px 12px; } .site-name { font-size: 24px; } .portrait { width: 80px; height: 80px; } ul.columns { columns: 1; } }
-@media (prefers-reduced-motion: reduce) { .marquee span { animation: none; padding-left: 0; white-space: normal; } .marquee { white-space: normal; } .new { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .marquee span { display: block; animation: none; padding: 0 8px; overflow: hidden; text-overflow: ellipsis; text-align: center; } .new { animation: none; } }
 @media print { html { background: #fff; } .page { border: 0; } .marquee, nav, .buttons, .skip { display: none; } }
 .handheld { --screen-width: 480px; width: max-content; margin: 22px auto 12px; padding: 24px 24px 28px; box-sizing: border-box; background: linear-gradient(120deg, #e4e4e4, #c0c0c0 60%, #a9a9a9); border: 2px solid #888; border-radius: 16px 16px 72px 16px; box-shadow: 3px 6px 0 #777, inset 2px 2px 0 #fff; font-family: Arial, sans-serif; }
 .game-bezel { position: relative; background: #25254e; padding: 18px 18px 10px; border-radius: 10px 10px 36px 10px; box-shadow: inset 2px 3px 0 #16162e; }

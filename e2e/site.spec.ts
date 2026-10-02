@@ -35,6 +35,8 @@ test("reduced motion stops the marquee", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/");
   expect(await page.locator(".marquee span").evaluate((element) => getComputedStyle(element).animationName)).toBe("none");
+  const marquee = await page.locator(".marquee span").evaluate((element) => ({ height: element.clientHeight, lineHeight: parseFloat(getComputedStyle(element).lineHeight) }));
+  expect(marquee.height).toBe(marquee.lineHeight);
 });
 test("sitemap lists all six pages", async ({ request }) => {
   const response = await request.get("/sitemap.xml");

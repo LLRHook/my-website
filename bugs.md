@@ -207,6 +207,17 @@ the end of their section, sorted by id on read.
 - **Fix:** `personMicrodata()` in `app/lib/html.ts` emits the Person (name, jobTitle, url, image, GitHub/LinkedIn sameAs, worksFor, address, alumniOf UMBC, knowsAbout) as `<meta>`/`<link>` microdata; Home adds a WebSite, About wraps the Person as a ProfilePage mainEntity. `page()` gives paths outside `PAGES` `noindex` and drops their canonical and og:url. Unit and E2E tests cover both.
 - **Status:** fixed-pending-migration
 
+### [BUG-1790972091] Marquee wraps onto two static lines under reduced motion
+- [x] **Severity:** low
+- **Area:** ui
+- **File(s):** public/retro.css, e2e/site.spec.ts
+- **Observation:** With the OS animation setting off (prefers-reduced-motion), the banner stops scrolling and its text wraps onto two left-aligned lines, which looks broken (owner report, Windows Chrome).
+- **Expected:** Reduced motion shows one static, centred line in the banner, truncated with an ellipsis if it does not fit.
+- **Repro / Notes:** Chrome DevTools > Rendering > Emulate prefers-reduced-motion: reduce, any page.
+- **Bump:** patch
+- **Fix:** The reduced-motion rule keeps `nowrap` and renders the span as a centred block with `text-overflow: ellipsis`; the reduced-motion E2E now asserts a single line.
+- **Status:** fixed-pending-migration
+
 ## Migrated to changelog
 
 Entries below have been ticked off and copied as a one-liner into `CHANGELOG.md`.
