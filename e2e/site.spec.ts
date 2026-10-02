@@ -42,6 +42,7 @@ test("sitemap lists all six pages", async ({ request }) => {
   const xml = await response.text();
   expect(xml.match(/<loc>/g)).toHaveLength(6);
   for (const item of PAGES) expect(xml).toContain(`<loc>${SITE_URL}${item.path}</loc>`);
+  expect(xml.match(/<lastmod>/g)).toHaveLength(6);
 });
 test("favicon set is served and linked", async ({ page, request }) => {
   for (const [path, type] of [["/favicon.svg", "image/svg+xml"], ["/favicon.ico", "image/"], ["/apple-touch-icon.png", "image/png"]]) {
@@ -59,4 +60,15 @@ test("home and about carry Person structured data", async ({ page }) => {
     await expect(page.locator('[itemtype="https://schema.org/Person"] > meta[itemprop="name"]')).toHaveAttribute("content", "Victor Ivanov");
   }
   await expect(page.locator('[itemtype="https://schema.org/ProfilePage"] > [itemprop="mainEntity"]')).toHaveCount(1);
+});
+test("share card is served at 1200x630 and subpages show breadcrumbs", async ({ page, request }) => {
+  const card = await request.get("/og-image.png");
+  expect(card.status()).toBe(200);
+  expect(card.headers()["content-type"]).toContain("image/png");
+  await page.goto("/");
+  await expect(page.locator('meta[property="og:image"]')).toHaveAttribute("content", `${SITE_URL}/og-image.png`);
+  await expect(page.locator("nav.crumbs")).toHaveCount(0);
+  await page.goto("/contact");
+  await expect(page.locator("nav.crumbs")).toBeVisible();
+  await expect(page.locator("nav.crumbs li")).toHaveText(["Home", "Contact"]);
 });

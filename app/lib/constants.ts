@@ -2,7 +2,7 @@ export const SITE_URL = "https://victorivanov.engineer";
 export const SITE_NAME = "Victor Ivanov — Senior Full-Stack Engineer";
 export const SITE_TITLE = "Victor Ivanov | Senior Full-Stack Engineer";
 export const SITE_DESCRIPTION =
-  "Senior full-stack engineer in Virginia. Explore web products, developer tools, and open-source contributions across Java, Spring Boot, React, and TypeScript.";
+  "Victor Ivanov is a senior full-stack engineer in Sterling, Virginia, building web products and developer tools with Java, Spring Boot, React, and TypeScript.";
 
 export type SocialIcon = "github" | "linkedin" | "email";
 
