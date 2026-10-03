@@ -57,11 +57,17 @@ footer { text-align: center; font-size: 14px; }
 .handheld button:focus-visible, .handheld:focus-visible { outline: 3px solid #000080; outline-offset: 4px; }
 .dpad { display: grid; grid-template: repeat(3, 44px) / repeat(3, 44px); position: relative; }
 .dpad::before { content: ""; position: absolute; inset: 44px; background: #222; }
-.dpad button { color: #888; background: #222; box-shadow: 0 3px 0 #080808; }
-.dpad [data-button="up"] { grid-area: 1 / 2; border-radius: 5px 5px 0 0; }
+.dpad button { position: relative; color: #888; background: #222; box-shadow: 0 3px 0 #080808; }
+.dpad [data-button="up"] { grid-area: 1 / 2; border-radius: 5px 5px 0 0; box-shadow: none; }
 .dpad [data-button="left"] { grid-area: 2 / 1; border-radius: 5px 0 0 5px; }
 .dpad [data-button="right"] { grid-area: 2 / 3; border-radius: 0 5px 5px 0; }
 .dpad [data-button="down"] { grid-area: 3 / 2; border-radius: 0 0 5px 5px; }
+.dpad button::after { content: ""; position: absolute; inset: 0; margin: auto; width: 36%; height: 36%; background: currentColor; }
+.dpad [data-button="up"]::after { clip-path: polygon(50% 10%, 95% 85%, 5% 85%); }
+.dpad [data-button="down"]::after { clip-path: polygon(5% 15%, 95% 15%, 50% 90%); }
+.dpad [data-button="left"]::after { clip-path: polygon(10% 50%, 85% 5%, 85% 95%); }
+.dpad [data-button="right"]::after { clip-path: polygon(90% 50%, 15% 5%, 15% 95%); }
+.dpad button[data-pressed] { color: #bbb; }
 .game-ab { display: flex; align-items: center; gap: 16px;  }
 .game-ab button { width: 54px; height: 54px; border-radius: 50%; background: #800000; color: #fff; box-shadow: 0 4px 0 #480000, inset 2px 2px 0 #a73939;  font-size: 18px; }
 .game-ab [data-button="a"] { translate: 0 -16px; }
