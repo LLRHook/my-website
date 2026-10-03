@@ -11,12 +11,29 @@ for (const item of PAGES) {
     await expect(page.locator("h1")).toHaveCount(1);
     await expect(page.locator("h1")).toBeVisible();
     await expect(page.locator("script")).toHaveCount(item.path === "/projects" ? 1 : 0);
+    await expect(page.locator('link[rel="stylesheet"]')).toHaveAttribute("href", /^\/retro\.css(\?v=[0-9a-f]{10})?$/);
     await expect(page.locator('nav [aria-current="page"]')).toHaveText(item.label);
     await page.setViewportSize({ width: 320, height: 700 });
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
     if (item.path === "/projects") await expect(page.locator("table.projects, .notice")).toBeVisible();
   });
 }
+
+test("production assets have long-lived cache headers", async ({ page, request }) => {
+  await page.goto("/projects");
+  const stylesheet = await page.locator('link[rel="stylesheet"]').getAttribute("href");
+  const script = await page.locator('script[type="module"]').getAttribute("src");
+  expect(stylesheet).not.toBeNull();
+  expect(script).not.toBeNull();
+  for (const url of [stylesheet!, script!]) {
+    const response = await request.get(url);
+    expect(response.status()).toBe(200);
+    expect(response.headers()["cache-control"]).toContain("immutable");
+  }
+  const photo = await request.get("/peru-travel.webp");
+  expect(photo.status()).toBe(200);
+  expect(photo.headers()["cache-control"]).toContain("max-age=86400");
+});
 
 test("interests redirects to off the clock", async ({ page }) => {
   await page.goto("/interests");

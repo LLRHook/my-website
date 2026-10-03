@@ -1,4 +1,5 @@
 import { test, expect, type Page } from "@playwright/test";
+import { loadGameModules } from "./support/load-game-modules";
 
 test("game boots cleanly with a single module, route CSP, and keyboard title flow", async ({ page }) => {
   const errors: string[] = [];
@@ -8,7 +9,7 @@ test("game boots cleanly with a single module, route CSP, and keyboard title flo
   const response = await page.goto("/projects");
   expect(response?.headers()["content-security-policy"]).toContain("script-src 'self'");
   await expect(page.locator("script")).toHaveCount(1);
-  await expect(page.locator("script")).toHaveAttribute("src", "/game/main.js");
+  await expect(page.locator("script")).toHaveAttribute("src", /^\/game\/main\.js(\?v=[0-9a-f]{10})?$/);
   await expect(page.locator("script")).toHaveAttribute("type", "module");
   const game = page.locator("#game");
   await expect(game).toHaveAttribute("data-ready", ""); await expect(game).toHaveAttribute("data-scene", "title");
@@ -20,6 +21,19 @@ test("game boots cleanly with a single module, route CSP, and keyboard title flo
   await press(page, "Enter"); await expect(game).toHaveAttribute("data-scene", "intro");
   expect(errors).toEqual([]);
   await press(page, "Escape"); await expect(game).not.toBeFocused();
+});
+
+test("projects loads one game request and reaches data-ready", async ({ page }, info) => {
+  test.skip(!["chromium", "webkit-mobile"].includes(info.project.name), "Desktop browser projects only");
+  const requests: string[] = [];
+  page.on("request", (request) => {
+    if (new URL(request.url()).pathname.startsWith("/game/")) {
+      requests.push(request.url());
+    }
+  });
+  await page.goto("/projects");
+  await expect(page.locator("#game")).toHaveAttribute("data-ready", "");
+  expect(requests).toHaveLength(1);
 });
 
 test.describe("touch controls", () => {
@@ -235,12 +249,10 @@ test("choose a starter, encounter, use a Fork Ball and open the Codex without er
 test("every live species has encounters and reproducible four-colour front and back sprites", async ({ page }) => {
   await page.goto("/projects?seed=1");
   await expect(page.locator("#game")).toHaveAttribute("data-ready", "");
-  const result = await page.evaluate(async () => {
-    // These imports are confined to the test; the game exposes no JavaScript globals.
-    const base = "/game/";
-    const { buildSpecies } = await import(base + "data/species.js") as typeof import("../game/src/data/species.js");
-    const { drawCreature } = await import(base + "gfx/creatures.js") as typeof import("../game/src/gfx/creatures.js");
-    const { MAPS } = await import(base + "world/maps/index.js") as typeof import("../game/src/world/maps/index.js");
+  await loadGameModules(page);
+  const result = await page.evaluate(() => {
+    // This global is confined to the test; the game itself exposes no JavaScript globals.
+    const { buildSpecies, drawCreature, MAPS } = globalThis.__codelings;
     const species = buildSpecies(JSON.parse(document.querySelector<HTMLElement>("#game")!.dataset.repos!));
     return species.map((entry) => {
       const front = drawCreature(entry.sprite.seed, entry.sprite.body, entry.type, "front");
@@ -448,13 +460,12 @@ test.describe("phone fullscreen", () => {
 
   test("independent B pointer makes sliding movement faster", async ({ page, browserName }) => {
     const game = page.locator("#game");
+    await expect(game).toHaveAttribute("data-ready", "");
+    await loadGameModules(page);
     // Persist the same unobstructed starting position for both runs.
-    await page.evaluate(async () => {
-      const base = "/game/";
-      const { newGame } = await import(base + "world/overworld.js") as
-        typeof import("../game/src/world/overworld.js");
-      const { DEFAULT_OPTIONS, writeSave } = await import(base + "engine/storage.js") as
-        typeof import("../game/src/engine/storage.js");
+    await page.evaluate(() => {
+      // This global is confined to the test; the game itself exposes no JavaScript globals.
+      const { newGame, DEFAULT_OPTIONS, writeSave } = globalThis.__codelings;
       writeSave({ ...newGame("DEV", { ...DEFAULT_OPTIONS }), x: 2, y: 4, dir: "right" });
     });
     const distances: number[] = [];

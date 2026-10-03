@@ -12,15 +12,21 @@ maps, music or text from any Nintendo / Game Freak / The Pokémon Company produc
 
 ## 1. Platform and delivery
 
-- Source: `game/src/**/*.ts`, compiled by the existing `typescript` dev dependency
-  with `game/tsconfig.json` (`target`/`module` `es2022`, `lib` `["es2022","dom"]`,
-  `strict`, `rootDir: src`, `outDir: ../public/game`, tests excluded). No bundler,
-  no new dependency. Import specifiers use `.js` extensions so the emitted ES
-  modules load directly in the browser.
-- `public/game/` is generated and gitignored. `package.json`: `build:game`
-  (`tsc -p game/tsconfig.json`), `build` runs `build:game` then `next build`,
-  `dev:game` runs the compiler in watch mode.
-- Only `/projects` loads JavaScript: `<script type="module" src="/game/main.js">`
+- Source: `game/src/**/*.ts`, strictly type-checked with `game/tsconfig.json`
+  before esbuild bundles and minifies it into one ESM file, `public/game/main.js`.
+  The bundle targets ES2022 and Safari 15, without source maps or legal comments.
+  Import specifiers retain `.js` extensions in the TypeScript source.
+- `public/game/` is generated and gitignored. `game/build.mjs` removes stale output
+  before bundling and logs the output size in bytes. `package.json`: `build:game`
+  (`tsc -p game/tsconfig.json --noEmit && node game/build.mjs`), `build` runs
+  `build:game` then `next build`, `dev:game` uses esbuild context watch mode and
+  logs each rebuild's size.
+- `next.config.js` adds a content-derived, 10-hex-character SHA-256 `?v=` query
+  to the game script and stylesheet URLs at config load. Missing files use the
+  plain URL. Production serves both assets with
+  `public, max-age=31536000, immutable`; images, icons and the resume PDF use
+  `public, max-age=86400, stale-while-revalidate=604800`.
+- Only `/projects` loads JavaScript: `<script type="module" src="/game/main.js?v=<hash>">`
   at the end of `<body>`. `next.config.js` adds a header rule for `/projects`,
   after the catch-all, overriding the CSP with `script-src 'self'` (everything
   else identical). Every other route keeps `script-src 'none'` and zero

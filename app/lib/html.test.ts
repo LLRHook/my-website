@@ -16,7 +16,7 @@ describe("HTML documents", () => {
     expect(html.startsWith("<!DOCTYPE html>")).toBe(true);
     expect(html).toContain("<title>&lt;Title &amp; &quot;test&quot;&gt;</title>");
     expect(html).toContain(`<link rel="canonical" href="${SITE_URL}/">`);
-    expect(html).toContain('<link rel="stylesheet" href="/retro.css">');
+    expect(html).toMatch(/<link rel="stylesheet" href="\/retro\.css(\?v=[0-9a-f]{10})?">/);
     expect(html).not.toContain("<script");
   });
   it("marks only the current page and links every other page", () => {

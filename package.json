@@ -11,8 +11,8 @@
     "test:watch": "vitest",
     "test:e2e": "npx playwright test",
     "assets": "node scripts/render-assets.mjs",
-    "build:game": "tsc -p game/tsconfig.json",
-    "dev:game": "tsc -p game/tsconfig.json --watch"
+    "build:game": "tsc -p game/tsconfig.json --noEmit && node game/build.mjs",
+    "dev:game": "node game/build.mjs --watch"
   },
   "dependencies": {
     "next": "^16.3.8",
@@ -23,6 +23,7 @@
     "@playwright/test": "^1.63.0",
     "@types/node": "24.13.3",
     "@types/react": "19.2.18",
+    "esbuild": "0.28.2",
     "eslint": "^9.39.5",
     "eslint-config-next": "^16.3.8",
     "typescript": "6.0.3",
