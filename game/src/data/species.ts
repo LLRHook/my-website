@@ -5,7 +5,17 @@ import { bodyMask } from "../gfx/creatures.js";
 import type { TypeId } from "../battle/types.js";
 import { MOVES } from "../battle/moves.js";
 export type BodyPlan = readonly string[];
+export interface Form {
+  stage: 1 | 2 | 3;
+  name: string;
+  base: Stats;
+  expYield: number;
+  catchRate: number;
+}
 export interface Species {
+  stages: 2 | 3;
+  evolveAt: number[];
+  forms: Form[];
   id: number;
   dex: number;
   name: string;
@@ -26,6 +36,8 @@ export const FALLBACK_REPOS: GameRepo[] = ["Sitebud", "Pagewing", "Linkstone"].m
 }));
 const languages: Record<string, TypeId> = { python: "python", javascript: "javascript", typescript: "typescript",
   go: "go", swift: "swift", shell: "shell", dart: "dart", "c#": "csharp", java: "java" };
+const BLOCKED_FORM_SUBSTRINGS = ["CUM", "ASS", "TIT", "FAG", "SEX", "NIG", "FUK", "FUC", "COC", "CUN",
+  "KKK", "NAZ", "RAPE", "PORN", "SLUT", "WANK", "HOE", "POO", "PEE", "DIK"];
 function speciesNames(repos: readonly GameRepo[]): Map<number, string> {
   const common = new Set(["app", "tool", "the", "my", "a", "an", "to", "for", "of", "project", "code",
     "helper", "printer", "converter", "fix", "guide", "what", "made", "me"]);
@@ -73,7 +85,13 @@ export function buildSpecies(repos: GameRepo[]): Species[] {
   const sorted = [...(repos.length ? repos : FALLBACK_REPOS)]
     .sort((a, b) => a.pushedAt.localeCompare(b.pushedAt) || a.id - b.id);
   const names = speciesNames(sorted);
-  return sorted.map((repo, index) => {
+  const ranked = [...sorted].sort((a, b) => b.stars - a.stars
+    || b.pushedAt.localeCompare(a.pushedAt) || a.id - b.id);
+  const fallback = sorted.every((repo) => FALLBACK_REPOS.some((entry) => entry.id === repo.id
+    && entry.name === repo.name));
+  const threeStages = new Set(fallback ? [] : ranked.slice(0, Math.ceil(sorted.length / 3)).map((repo) => repo.id));
+  const used = new Set(names.values());
+  return sorted.map((repo, index): Species => {
     const seed = hashString(repo.name);
     const rng = mulberry32(seed);
     const type = languages[(repo.language ?? "").toLowerCase()] ?? "normal";
@@ -99,9 +117,55 @@ export function buildSpecies(repos: GameRepo[]): Species[] {
     }
     const third = Math.min(2, Math.floor(index * 3 / sorted.length));
     const habitat: MapId[] = [["cave", "route2", "route1"][third] as MapId];
-    return { id: repo.id, dex: index + 1, name: names.get(repo.id)!, repo, type,
-      base: { hp: values[0], atk: values[1], def: values[2], spd: values[3], spc: values[4] },
-      catchRate: Math.max(45, 255 - Math.floor(Math.log2(repo.stars + 1) * 30)), expYield: Math.floor(total / 3),
+    const stages = threeStages.has(repo.id) ? 3 : 2;
+    const base = { hp: values[0], atk: values[1], def: values[2], spd: values[3], spc: values[4] };
+    const catchRate = Math.max(45, 255 - Math.floor(Math.log2(repo.stars + 1) * 30));
+    const expYield = Math.floor(total / 3);
+    const name = names.get(repo.id)!;
+    const forms: Form[] = [{ stage: 1, name, base, expYield, catchRate }];
+    for (const stage of [2, 3] as const) {
+      if (stage > stages) {
+        break;
+      }
+      const suffixes = stage === 2 ? ["ON", "IX", "ARA", "EL", "OS", "UM"]
+        : ["ULON", "AREX", "ITAN", "OTH", "ARCH", "ORIS"];
+      let formName = "";
+      const blocked = (candidate: string) => BLOCKED_FORM_SUBSTRINGS.some((part) =>
+        candidate.includes(part) && !name.includes(part));
+      for (let attempt = 0; attempt < suffixes.length; attempt++) {
+        const suffix = suffixes[(seed + attempt) % suffixes.length];
+        formName = name.slice(0, 10 - suffix.length) + suffix;
+        if (!used.has(formName) && !blocked(formName)) {
+          break;
+        }
+      }
+      if (used.has(formName) || blocked(formName)) {
+        throw new Error(`Evolution suffixes exhausted for ${name}`);
+      }
+      used.add(formName);
+      const target = Math.min(stage === 2 ? 540 : 600, Math.round(total * (stage === 2 ? 1.22 : 1.42)));
+      const keys = ["hp", "atk", "def", "spd", "spc"] as const;
+      const shares = keys.map((key) => base[key] * target / total);
+      const grown = shares.map((share) => Math.min(150, Math.floor(share)));
+      const order = keys.map((_, slot) => slot).sort((a, b) =>
+        shares[b] - Math.floor(shares[b]) - (shares[a] - Math.floor(shares[a])) || a - b);
+      let remaining = target - grown.reduce((sum, value) => sum + value, 0);
+      while (remaining > 0) {
+        for (const slot of order) {
+          if (remaining && grown[slot] < 150) {
+            grown[slot]++;
+            remaining--;
+          }
+        }
+      }
+      forms.push({ stage, name: formName,
+        base: { hp: grown[0], atk: grown[1], def: grown[2], spd: grown[3], spc: grown[4] },
+        expYield: expYield * (stage === 2 ? 1.3 : 1.6),
+        catchRate: Math.max(stage === 2 ? 30 : 15, Math.floor(catchRate * (stage === 2 ? 0.6 : 0.35))) });
+    }
+    return { stages, forms, evolveAt: stages === 3 ? [16 + seed % 5, 32 + seed % 5] : [18 + seed % 5],
+      id: repo.id, dex: index + 1, name: names.get(repo.id)!, repo, type,
+      base, catchRate, expYield,
       learnset, habitat, rarity: 10 + Math.floor(index * 90 / sorted.length), sprite: { seed, body: bodyMask(type) } };
   });
 }
@@ -123,4 +187,17 @@ export function starterCandidates(species: readonly Species[]): Species[] {
     }
   }
   return result;
+}
+
+export function formOf(species: Species, stage: 1 | 2 | 3): Form {
+  return species.forms[stage - 1];
+}
+export function stageCount(species: Species): 2 | 3 {
+  return species.stages;
+}
+export function evolutionLevels(species: Species): readonly number[] {
+  return species.evolveAt;
+}
+export function stageAt(species: Species, level: number): 1 | 2 | 3 {
+  return (1 + species.evolveAt.filter((threshold) => level >= threshold).length) as 1 | 2 | 3;
 }

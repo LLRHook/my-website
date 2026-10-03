@@ -10,6 +10,7 @@ export interface Stats {
 }
 
 export interface Codeling {
+  stage: 1 | 2 | 3;
   uid: string;
   species: number;
   level: number;
@@ -71,8 +72,16 @@ export function validOptions(value: unknown): value is StoredOptions {
     && (value.haptics === undefined || typeof value.haptics === "boolean");
 }
 
-function validCodeling(value: unknown): value is Codeling {
+type StoredCodeling = Omit<Codeling, "stage"> & { stage?: 1 | 2 | 3 };
+type StoredSave = Omit<SaveV1, "party" | "box" | "options"> & {
+  party: StoredCodeling[];
+  box: StoredCodeling[];
+  options: StoredOptions;
+};
+
+function validCodeling(value: unknown): value is StoredCodeling {
   return record(value) && typeof value.uid === "string" && value.uid.length > 0
+    && (value.stage === undefined || integer(value.stage, 1, 3))
     && integer(value.species, 1) && integer(value.level, 1, 100) && integer(value.exp) && integer(value.hp)
     && record(value.ivs) && ["hp", "atk", "def", "spd", "spc"].every((stat) =>
       integer((value.ivs as Record<string, unknown>)[stat], 0, 31))
@@ -83,7 +92,7 @@ function validCodeling(value: unknown): value is Codeling {
     && (value.status === null || member(value.status, ["blocked", "deprecated", "frozen"]));
 }
 
-export function validSave(value: unknown): value is SaveV1 {
+export function validSave(value: unknown): value is StoredSave {
   return record(value) && value.v === 1 && typeof value.name === "string" && value.name.length > 0 &&
     value.name.length <= 7
     && member(value.map, maps) && integer(value.x) && integer(value.y) && member(value.dir, ["up", "down",
@@ -120,7 +129,10 @@ export function loadSave(): SaveV1 | null {
   if (!validSave(value)) {
     return null;
   }
-  return { ...value, options: { ...value.options, haptics: value.options.haptics ?? true } };
+  return { ...value,
+    party: value.party.map((mon) => ({ ...mon, stage: mon.stage ?? 1 })),
+    box: value.box.map((mon) => ({ ...mon, stage: mon.stage ?? 1 })),
+    options: { ...value.options, haptics: value.options.haptics ?? true } };
 }
 
 export function reconcileSpecies(save: SaveV1, ids: ReadonlySet<number>): SaveV1 {

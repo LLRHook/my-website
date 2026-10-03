@@ -12,7 +12,7 @@ const fixture = (): SaveV1 => ({
     forkBall: 5
   }, box: [],
   party: [{
-    uid: "caught-1", species: 42, level: 5, exp: 125, hp: 22, ivs: {
+    stage: 1, uid: "caught-1", species: 42, level: 5, exp: 125, hp: 22, ivs: {
       hp: 1, atk: 2, def: 3, spd: 4, spc: 5
     }, moves: [{
       id: "guard-rise", pp: 10
@@ -49,6 +49,19 @@ describe("versioned local storage", () => {
     });
   });
   afterEach(() => vi.unstubAllGlobals());
+  it("normalizes legacy party and box stages and rejects invalid stages", () => {
+    const mon: Record<string, unknown> = { ...fixture().party[0] };
+    delete mon.stage;
+    values.set(SAVE_KEY, JSON.stringify({ ...fixture(), party: [mon], box: [mon] }));
+    expect(loadSave()?.party[0].stage).toBe(1);
+    expect(loadSave()?.box[0].stage).toBe(1);
+    for (const stage of [0, 4, 1.5, "2"]) {
+      values.set(SAVE_KEY, JSON.stringify({ ...fixture(), party: [{ ...mon, stage }] }));
+      expect(loadSave()).toBeNull();
+    }
+    values.set(SAVE_KEY, JSON.stringify({ ...fixture(), box: [{ ...mon, stage: 3 }] }));
+    expect(loadSave()?.box[0].stage).toBe(3);
+  });
   it("round-trips a complete save and clears it", () => {
     expect(writeSave(fixture())).toBe(true);
     expect(loadSave()).toEqual(fixture());

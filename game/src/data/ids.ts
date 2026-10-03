@@ -8,7 +8,7 @@ export type ItemId = "forkBall" | "greatFork" | "patch" | "hotfix" | "fullRebuil
 export type MoveId = string;
 
 export type TrackId = "title" | "intro" | "town" | "route" | "cave" | "lab" | "center" | "gym"
-  | "wild" | "trainer" | "leader" | "victory" | "levelUp" | "badge" | "ending";
+  | "wild" | "trainer" | "leader" | "victory" | "levelUp" | "badge" | "ending" | "evolve" | "evolveSuccess";
 
 export type Status = "blocked" | "deprecated" | "frozen";
 

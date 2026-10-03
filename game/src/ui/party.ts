@@ -1,4 +1,4 @@
-import type { Species } from "../data/species.js";
+import { formOf, type Species } from "../data/species.js";
 import type { SaveV1 } from "../engine/storage.js";
 import type { Input } from "../engine/input.js";
 import type { Audio } from "../engine/audio.js";
@@ -56,6 +56,8 @@ export class PartyScene implements Scene {
     }
   }
   draw(screen: Screen): void {
+    screen.describe(`Party: ${this.state.party.map((mon) =>
+      formOf(this.species.find((entry) => entry.id === mon.species)!, mon.stage).name).join(" / ")}`);
     screen.fill(14);
     windowFrame(screen, 4, 4, 152, 136);
     drawSmallText(screen, this.reorder === undefined ? "CODELINGS" : "CHOOSE NEW POSITION", 12, 12, 1);
@@ -68,10 +70,10 @@ export class PartyScene implements Scene {
       if (this.selected === index) {
         drawSmallText(screen, "▶", 10, y + 4, 1);
       }
-      screen.blit(creatureIcon(species), 0, 0, 16, 16, 18, y);
-      drawSmallText(screen, species.name, 38, y, 1);
+      screen.blit(creatureIcon(species, mon.stage), 0, 0, 16, 16, 18, y);
+      drawSmallText(screen, formOf(species, mon.stage).name, 38, y, 1);
       drawCompactText(screen, `Lv${mon.level}`, 126, y + 1, 1);
-      const max = stats(species.base, mon.ivs, mon.level).hp;
+      const max = stats(formOf(species, mon.stage).base, mon.ivs, mon.level).hp;
       screen.fill(1, 38, y + 10, 54, 5);
       screen.fill(6, 39, y + 11, 52, 3);
       screen.fill(mon.hp / max > 0.2 ? 9 : 24, 39, y + 11, Math.ceil(mon.hp / max * 52), 3);

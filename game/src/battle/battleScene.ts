@@ -12,6 +12,8 @@ import { forkBall, groundPlatform, windowFrame } from "../gfx/ui.js";
 import { BagScene } from "../ui/bag.js";
 import { Menu } from "../ui/menu.js";
 import { Textbox } from "../ui/textbox.js";
+import { formOf } from "../data/species.js";
+import { LearnMoveMenu } from "../ui/learnMove.js";
 import { MOVES } from "./moves.js";
 import { expForLevel, stats } from "./stats.js";
 import { Battle, type BattleAction, type BattleEvent, type BattleResult } from "./battle.js";
@@ -50,6 +52,7 @@ const SPIRAL = spiralTiles();
 export class BattleScene implements Scene {
   readonly id = "battle";
   private menu?: Menu;
+  private learn?: LearnMoveMenu;
   private mode: "main" | "moves" | "team" | "learn" = "main";
   private textbox?: Textbox;
   private queue: BattleEvent[] = [];
@@ -62,11 +65,11 @@ export class BattleScene implements Scene {
   private readonly displayExp: number[];
   private expTarget = 0;
   private fainted = [false, false];
-  private ended?: BattleResult;
+  private ended?: Extract<BattleEvent, { kind: "end" }>;
   private readonly reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
   constructor(private readonly input: Input, private readonly audio: Audio, private readonly stack: SceneStack,
     readonly battle: Battle, private readonly state: SaveV1,
-    private readonly complete: (result: BattleResult) => void) {
+    private readonly complete: (result: BattleResult, levelledUp: ReadonlySet<string>) => void) {
     this.hp = [battle.mon(0).hp, battle.mon(1).hp];
     this.displayActive[0] = battle.active[0];
     this.displayLevels = [battle.config.party.map((mon) => mon.level), battle.config.foes.map((mon) => mon.level)];
@@ -76,8 +79,8 @@ export class BattleScene implements Scene {
     this.audio.play(this.battle.config.rhea ? "leader" : this.battle.config.trainer ? "trainer" : "wild");
     this.audio.cry(this.battle.species(this.battle.mon(1)).sprite.seed);
     this.queue.push({ kind: "message", text: this.battle.config.trainer
-      ? T.trainer(this.battle.config.trainer, this.battle.species(this.battle.mon(1)).name)
-      : T.wild(this.battle.species(this.battle.mon(1)).name) });
+      ? T.trainer(this.battle.config.trainer, this.battle.name(this.battle.mon(1)))
+      : T.wild(this.battle.name(this.battle.mon(1))) });
     this.animation = this.motion ? 24 : 0;
   }
   private get motion(): boolean {
@@ -86,6 +89,7 @@ export class BattleScene implements Scene {
   private choose(action: BattleAction): void {
     if (this.battle.choose(action)) {
       this.menu = undefined;
+      this.learn = undefined;
       this.queue.push(...this.battle.step());
     }
   }
@@ -117,7 +121,7 @@ export class BattleScene implements Scene {
   private teamMenu(): void {
     this.mode = "team";
     this.menu = new Menu(this.state.party.map((mon) =>
-      `${this.battle.species(mon).name} ${mon.hp ? "L" + mon.level : "FNT"}`),
+      `${this.battle.name(mon)} ${mon.hp ? "L" + mon.level : "FNT"}`),
     (index) => this.choose({ kind: "switch", index }), () => {
       if (!this.battle.forcedSwitch) {
         if (this.battle.mon(1).hp === 0) {
@@ -131,10 +135,9 @@ export class BattleScene implements Scene {
   private learnMenu(): void {
     this.mode = "learn";
     const pending = this.battle.pendingLearn!;
-    const entries = [...this.state.party[pending.index].moves.map((move) => MOVES[move.id].name), "KEEP OLD MOVES"];
-    this.menu = new Menu(entries,
-      (slot) => this.choose({ kind: "learn", slot: slot === 4 ? -1 : slot }),
-      () => this.choose({ kind: "learn", slot: -1 }), (effect) => this.audio.sfx(effect), 4);
+    this.learn = new LearnMoveMenu(this.state.party[pending.index], pending.move, this.audio,
+      (slot) => this.choose({ kind: "learn", slot }));
+    this.menu = this.learn.menu;
   }
   update(): void {
     this.frames++;
@@ -183,9 +186,9 @@ export class BattleScene implements Scene {
     }
     this.event = undefined;
     if (this.ended) {
-      const result = this.ended;
+      const end = this.ended;
       this.stack.pop();
-      this.complete(result);
+      this.complete(end.result, end.levelledUp);
       return;
     }
     if (!this.menu) {
@@ -239,7 +242,7 @@ export class BattleScene implements Scene {
       this.textbox = new Textbox(T.shift(event.name), this.state.options,
         () => { this.textbox = undefined; });
     } else if (event.kind === "end") {
-      this.ended = event.result;
+      this.ended = event;
       if (event.result === "win" || event.result === "caught") {
         this.audio.play("victory");
       }
@@ -264,11 +267,11 @@ export class BattleScene implements Scene {
       const mon = (side ? this.battle.config.foes : this.battle.config.party)[this.displayActive[side]];
       const level = this.displayLevels[side][this.displayActive[side]];
       const species = this.battle.species(mon);
-      const max = stats(species.base, mon.ivs, level).hp;
+      const max = stats(formOf(species, mon.stage).base, mon.ivs, level).hp;
       const x = side ? 6 : 78;
       const y = side ? 8 : 55;
       windowFrame(screen, x, y, 76, side ? 31 : 37);
-      drawSmallText(screen, species.name, x + 5, y + 5, 1);
+      drawSmallText(screen, formOf(species, mon.stage).name, x + 5, y + 5, 1);
       drawCompactText(screen, `Lv${level}`, x + 6, y + 15, 1);
       drawCompactText(screen, mon.status?.slice(0, 3) ?? "", x + 38, y + 15, 1);
       drawCompactText(screen, "HP", x + 6, y + 23, 1);
@@ -285,7 +288,8 @@ export class BattleScene implements Scene {
         screen.fill(13, x + 6, y + 33, Math.floor(progress * 28), 1);
       }
       if (!this.fainted[side]) {
-        const sprite = drawCreature(species.sprite.seed, species.sprite.body, species.type, side ? "front" : "back");
+        const sprite = drawCreature(species.sprite.seed, species.sprite.body, species.type,
+          side ? "front" : "back", mon.stage);
         const blink = this.event?.kind === "damage" && this.event.side === side && this.motion
           && this.animation % 6 < 3;
         if (!blink) {
@@ -388,13 +392,10 @@ export class BattleScene implements Scene {
         drawCompactText(screen, "TYPE", 98, 104, 1);
         drawCompactText(screen, move?.type ?? "NORMAL", 98, 113, 1);
         drawCompactText(screen, move ? `PP ${entry.pp}/${move.pp}` : "NO PP", 98, 127, 1);
+      } else if (this.mode === "learn") {
+        this.learn?.draw(screen);
       } else {
         this.menu.draw(screen, 4, 70, 152);
-      }
-      if (this.mode === "learn") {
-        windowFrame(screen, 4, 51, 152, 28);
-        drawSmallText(screen, `Learn ${MOVES[this.battle.pendingLearn!.move].name}?`, 12, 57, 1);
-        drawSmallText(screen, "Choose a move to forget.", 12, 69, 1);
       }
     } else if (!this.textbox) {
       windowFrame(screen, 4, 109, 152, 31);

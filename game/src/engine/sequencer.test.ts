@@ -52,3 +52,17 @@ describe("MML", () => {
     expect(calls[1]).toBeCloseTo(0.54);
   });
 });
+
+
+it("one-shot scores finish without rescheduling or reading past the final note", () => {
+  const calls: number[] = [];
+  const player = { time: 0, note: (_channel: number, _note: unknown, when: number) => calls.push(when) };
+  const sequencer = new Sequencer(player, [parseMml("t120 c8 d8")], false);
+  for (let step = 0; step < 30; step++) {
+    player.time = step / 10;
+    sequencer.update();
+  }
+  expect(calls).toHaveLength(2);
+  expect(calls[0]).toBeCloseTo(0.04);
+  expect(calls[1]).toBeCloseTo(0.29);
+});

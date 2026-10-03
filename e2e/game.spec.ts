@@ -530,3 +530,66 @@ test("fullscreen power LED stays inside the desktop bezel", async ({ page }, inf
     expect(inset).toBeGreaterThanOrEqual(3);
   }
 });
+
+
+test("a live three-stage Codeling evolves after winning at its threshold", async ({ page }) => {
+  test.setTimeout(60_000);
+  const errors: string[] = [];
+  page.on("pageerror", (error) => errors.push(error.message));
+  await page.goto("/projects?seed=1&encounter=1");
+  const game = page.locator("#game");
+  const canvas = game.locator("canvas");
+  await expect(game).toHaveAttribute("data-ready", "");
+  await loadGameModules(page);
+  const evolvedName = await page.evaluate(() => {
+    const { buildSpecies, createCodeling, newGame, DEFAULT_OPTIONS, writeSave } = globalThis.__codelings;
+    const species = buildSpecies(JSON.parse(document.querySelector<HTMLElement>("#game")!.dataset.repos!));
+    const entry = species.find((candidate) => candidate.stages === 3)!;
+    const level = entry.evolveAt[0];
+    const mon = createCodeling(entry, level - 1, () => 0.5);
+    mon.exp = level ** 3 - 1;
+    const state = newGame("DEV", { ...DEFAULT_OPTIONS, textSpeed: "fast", music: 0, sfx: 0 });
+    Object.assign(state, { map: "route1", x: 4, y: 27, dir: "up", party: [mon],
+      flags: ["hasStarter", "hasCodex", "defeated:leni", "defeated:kit"],
+      seen: [entry.id], caught: [entry.id] });
+    if (!writeSave(state)) {
+      throw new Error("Evolution fixture did not save");
+    }
+    return entry.forms[1].name;
+  });
+  await page.reload();
+  await expect(game).toHaveAttribute("data-ready", "");
+  await game.focus();
+  await press(page, "Enter", { delay: 35 });
+  await press(page, "ArrowDown", { delay: 35 });
+  await press(page, "z", { delay: 35 });
+  await expect(game).toHaveAttribute("data-scene", "overworld");
+  await walk(page, "ArrowUp", 1);
+  await expect(game).toHaveAttribute("data-scene", "battle");
+  for (let tick = 0; tick < 220 && await game.getAttribute("data-scene") === "battle"; tick++) {
+    const label = await canvas.getAttribute("aria-label") ?? "";
+    if (/Battle (main|moves|learn) menu:|Battle dialogue:/.test(label)) {
+      await press(page, "z", { delay: 35 });
+    } else {
+      await page.waitForTimeout(60);
+    }
+  }
+  await expect(game).toHaveAttribute("data-scene", "evolution");
+  await expect(canvas).toHaveAttribute("aria-label", /What\? .* is evolving!/);
+  for (let tick = 0; tick < 160 && await game.getAttribute("data-scene") === "evolution"; tick++) {
+    const label = await canvas.getAttribute("aria-label") ?? "";
+    if (label.includes("Evolution animation:")) {
+      await page.waitForTimeout(100);
+    } else if (label.includes("Evolution learn:") && label.includes(" / ")) {
+      await press(page, "x", { delay: 35 });
+    } else {
+      await press(page, "z", { delay: 35 });
+    }
+  }
+  await expect(game).toHaveAttribute("data-scene", "overworld");
+  await press(page, "Enter", { delay: 35 });
+  await press(page, "ArrowDown", { delay: 35 });
+  await press(page, "z", { delay: 35 });
+  await expect(canvas).toHaveAttribute("aria-label", new RegExp(`Party: ${evolvedName}`));
+  expect(errors).toEqual([]);
+});

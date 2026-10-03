@@ -85,7 +85,8 @@ export class Audio {
         for (let index = 0; index < samples.length; index++) {
           samples[index] = random() * 2 - 1;
         }
-        this.sequencer = new Sequencer(this, MUSIC[this.track]);
+        this.sequencer = new Sequencer(this, MUSIC[this.track],
+          this.track !== "evolve" && this.track !== "evolveSuccess");
       }
       if (this.context.state === "suspended") {
         void this.context.resume().catch(() => {
@@ -128,7 +129,7 @@ export class Audio {
     this.music.connect(this.master);
     this.music.gain.setValueAtTime(0, this.time);
     this.music.gain.linearRampToValueAtTime(this.options.music / 10, this.time + 0.3);
-    this.sequencer = new Sequencer(this, MUSIC[track]);
+    this.sequencer = new Sequencer(this, MUSIC[track], track !== "evolve" && track !== "evolveSuccess");
   }
 
   update(): void {

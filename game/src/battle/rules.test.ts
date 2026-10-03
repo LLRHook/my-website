@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildSpecies, FALLBACK_REPOS, starterCandidates } from "../data/species.js";
+import { buildSpecies, FALLBACK_REPOS, formOf, starterCandidates } from "../data/species.js";
 import type { Species } from "../data/species.js";
 import { mulberry32 } from "../engine/rng.js";
 import { DEFAULT_OPTIONS, validSave } from "../engine/storage.js";
@@ -160,7 +160,8 @@ describe("battle state machine", () => {
     mon.status = "blocked";
     const battle = new Battle({ party: [mon], foes: [foe], species, bag: {} }, () => 0);
     battle.choose({ kind: "fight", move: 0 });
-    expect(battle.step()).toContainEqual({ kind: "message", text: `${species[0].name} is blocked!` });
+    expect(battle.step()).toContainEqual({ kind: "message",
+      text: `${formOf(species[0], mon.stage).name} is blocked!` });
     expect(mon.moves[0].pp).toBe(10);
     mon.status = null;
     foe.moves = [{ id: "queue-haze", pp: 10 }];
@@ -225,7 +226,7 @@ describe("battle state machine", () => {
     losing.mon(0).hp = 1;
     losing.mon(1).moves = [{ id: "soft-tap", pp: 20 }];
     losing.choose({ kind: "fight", move: 0 });
-    expect(losing.step()).toContainEqual({ kind: "end", result: "lose" });
+    expect(losing.step()).toContainEqual({ kind: "end", result: "lose", levelledUp: new Set() });
   });
   it("ticks deprecated damage and thaws frozen within three turns", () => {
     const battle = fight([make(species[0], 40)], [make(species[1], 40)]);
@@ -274,7 +275,7 @@ describe("battle state machine", () => {
     expect(battle.pendingLearn).toBeDefined();
     const move = battle.pendingLearn!.move;
     battle.choose({ kind: "learn", slot: 2 });
-    expect(battle.step()).toContainEqual({ kind: "end", result: "win" });
+    expect(battle.step()).toContainEqual({ kind: "end", result: "win", levelledUp: new Set([mon.uid]) });
     expect(mon.moves[2].id).toBe(move);
   });
   it("splits EXP only among living participants", () => {
