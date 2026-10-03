@@ -106,6 +106,7 @@ Stack Cave. Each public repository has a deterministic Codeling, with older
 repositories deeper in the cave. Fight, catch and train a party of six, store
 extras in the Center PC, buy or sell supplies at the Mart, and challenge Reviewer
 Rhea for the green-check badge and credits. Completing the Codex earns a diploma.
+Codelings evolve after levelling up in battle; press B during the animation to cancel.
 Caught Codex entries open the repository after a YES/NO confirmation; HTTP(S)
 homepages also offer a demo link. Saves stay in this browser's local storage.
 

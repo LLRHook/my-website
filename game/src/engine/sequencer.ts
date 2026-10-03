@@ -210,7 +210,8 @@ export class Sequencer {
   private readonly positions: number[];
   private readonly starts: number[];
 
-  constructor(private readonly player: NotePlayer, private readonly tracks: readonly Track[]) {
+  constructor(private readonly player: NotePlayer, private readonly tracks: readonly Track[],
+    private readonly loop = true) {
     this.positions = tracks.map(() => 0);
     this.starts = tracks.map(() => player.time + 0.04);
   }
@@ -221,6 +222,9 @@ export class Sequencer {
       while (scheduled++ < 128) {
         const index = this.positions[channel];
         const note = track.notes[index];
+        if (!note) {
+          break;
+        }
         const when = this.starts[channel] + note.time;
         if (when > this.player.time + 0.15) {
           break;
@@ -229,7 +233,7 @@ export class Sequencer {
           this.player.note(channel, note, Math.max(this.player.time, when));
         }
         this.positions[channel]++;
-        if (this.positions[channel] === track.notes.length) {
+        if (this.loop && this.positions[channel] === track.notes.length) {
           this.starts[channel] += track.duration - track.loopStart;
           this.positions[channel] = track.notes.findIndex((entry) => entry.time >= track.loopStart);
         }

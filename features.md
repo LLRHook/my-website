@@ -45,7 +45,7 @@ Priority guide: crit / high / med / low.
 - **Status:** shipped-pending-migration
 
 ### [FEAT-1790991962] Codelings evolve
-- [ ] **Priority:** high
+- [x] **Priority:** high
 - **Area:** game
 - **File(s):** game/src/data/species.ts, game/src/gfx/creatures.ts, game/src/battle/*, game/src/ui/*, game/src/engine/storage.ts, docs/game-design.md
 - **Why:** Owner asked to build out the rest of the game; evolution is the classic progression beat the current game lacks.
@@ -55,7 +55,8 @@ Priority guide: crit / high / med / low.
 - **Test plan:** Unit: stage derivation determinism and constraints, stat growth, evolution trigger and cancel, save migration. E2E: seeded save at the threshold evolves after a battle.
 - **Out of scope:** Trade or item evolution, branching evolutions.
 - **Bump:** minor
-- **Status:** open
+- **Implementation:** Per docs/game-design.md §5.6: buildSpecies gives each species `stages` (top third by stars get 3), `evolveAt` levels and stored `forms` (unique names with a blocked-substring guard, scaled stats, EXP yield, catch rate); `stageAt` sets wild/trainer stages; Codelings carry `stage` (old saves default to 1). `pendingEvolutions` (battle/evolution.ts) queues members that levelled up in a won or caught battle; `EvolutionScene` plays the accelerating silhouette flash with one-shot `evolve`/`evolveSuccess` cues (sequencer gained an optional `loop` flag), B cancels and retries next level-up, reduced motion fades, HP damage carries over and the type's strong move goes through the extracted `ui/learnMove.ts`. Stage 1 sprites are pixel-identical to before; stage 2 switches to the next type sub-silhouette with the same ramp, face, markings and features plus one more feature; stage 3 doubles features and adds symmetric plating. Party, summary, PC, bag, battle and a Codex LINE page use forms. Four art review passes (recolouring, slabs, lost faces, too-subtle and shrinking stages) before acceptance. Verified: lint, tsc, 185 Vitest, build, 70 Playwright passed with 12 expected skips, forms sheet of all 66 live forms and eight scene captures inspected.
+- **Status:** shipped-pending-migration
 
 ### [FEAT-1790991963] Codelings region expansion: two towns, two routes, two gyms and the Champion
 - [ ] **Priority:** high

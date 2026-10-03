@@ -1,5 +1,5 @@
 import type { Codeling } from "../engine/storage.js";
-import type { Species } from "../data/species.js";
+import { formOf, type Species } from "../data/species.js";
 import type { Input } from "../engine/input.js";
 import type { Scene, SceneStack } from "../engine/scenes.js";
 import type { Screen } from "../engine/screen.js";
@@ -22,16 +22,18 @@ export class SummaryScene implements Scene {
     }
   }
   draw(screen: Screen): void {
+    screen.describe(`Summary: ${formOf(this.species, this.mon.stage).name}`);
     screen.fill(14);
     windowFrame(screen, 4, 4, 152, 136);
-    drawSmallText(screen, `${this.species.name} L${this.mon.level}`, 12, 13, 1);
-    const sprite = drawCreature(this.species.sprite.seed, this.species.sprite.body, this.species.type, "front");
+    drawSmallText(screen, `${formOf(this.species, this.mon.stage).name} L${this.mon.level}`, 12, 13, 1);
+    const sprite = drawCreature(this.species.sprite.seed, this.species.sprite.body, this.species.type,
+      "front", this.mon.stage);
     screen.blit(sprite, 0, 0, 32, 32, 12, 28);
     drawSmallText(screen, this.species.type.toUpperCase(), 52, 31, 1);
     drawSmallText(screen, this.mon.status?.toUpperCase() ?? "READY", 52, 43, 1);
-    drawSmallText(screen, `HP ${this.mon.hp}/${stats(this.species.base, this.mon.ivs, this.mon.level).hp}`, 52, 55, 1);
+    const values = stats(formOf(this.species, this.mon.stage).base, this.mon.ivs, this.mon.level);
+    drawSmallText(screen, `HP ${this.mon.hp}/${values.hp}`, 52, 55, 1);
     if (this.page === 0) {
-      const values = stats(this.species.base, this.mon.ivs, this.mon.level);
       drawSmallText(screen, `ATK ${values.atk}  DEF ${values.def}`, 12, 73, 1);
       drawSmallText(screen, `SPD ${values.spd}  SPC ${values.spc}`, 12, 86, 1);
       drawSmallText(screen, `NEXT ${this.mon.level === 100 ? 0 : expForLevel(this.mon.level + 1) - this.mon.exp} EXP`,

@@ -22,11 +22,11 @@ Dated evidence sections below describe earlier versions.
 5. For a deployment, set `PLAYWRIGHT_BASE_URL` to its HTTPS URL and run the same
    E2E command. This skips local startup.
 
-Current baseline: 157 Vitest cases across 13 files and 78 Playwright cases across
-2 files: Chromium and WebKit run both suites (15 site and 12 game each, 4 game
+Current baseline: 185 Vitest cases across 17 files and 82 Playwright cases across
+2 files: Chromium and WebKit run both suites (15 site and 13 game each, 4 game
 cases skipped as touch-only), and the iPhone 15 (WebKit) and Pixel 7 (Chromium)
-touch projects run only the game suite (12 each, 2 desktop-only cases skipped),
-so 66 run and 12 skip. Vitest covers repository listing, filtering, mapping
+touch projects run only the game suite (13 each, 2 desktop-only cases skipped),
+so 70 run and 12 skip. Vitest covers repository listing, filtering, mapping
 and fallback; HTML escaping, metadata, microdata and navigation; pure body
 renderers; and the game's pure modules (RNG, storage validation, text wrapping,
 MML parser and music data, maps, scripts, NPC sight lines, species, formulas,
@@ -53,6 +53,11 @@ authoritative counts. Historical counts below refer to their recorded builds.
   screen scale 2 or more; EXIT restores scrolling. On desktop the power LED stays
   inside the bezel in fullscreen. Audio unlock, vibration and notch insets need a
   physical-device check; emulation cannot prove them.
+- Evolution (FEAT-1790991962): a seeded save whose lead Codeling sits one level
+  below its first evolution level wins a wild battle and reaches
+  `data-scene="evolution"`; afterwards the party shows the stage 2 name. Unit
+  tests pin stage-1 sprites to their pre-evolution pixels and require each later
+  stage to grow (>= 110% area), keep its features and differ visibly (>= 25%).
 - Low-bandwidth delivery (FEAT-1790991961): the game is one minified esbuild
   bundle, so a cold /projects load makes one `/game/` request (3 requests in
   total). In production `/retro.css` and `/game/main.js` (always linked with a

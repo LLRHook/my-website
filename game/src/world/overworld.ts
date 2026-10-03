@@ -10,12 +10,14 @@ import { drawMapTile, drawScenery } from "../gfx/scenery.js";
 import { drawSprite } from "../gfx/sprites.js";
 import { drawTile, lightAt, type Light } from "../gfx/tiles.js";
 import { windowFrame } from "../gfx/ui.js";
-import { buildSpecies, starterCandidates, type Species } from "../data/species.js";
+import { buildSpecies, formOf, starterCandidates, type Species } from "../data/species.js";
 import { trainerParty } from "../data/trainers.js";
 import { createCodeling, stats } from "../battle/stats.js";
 import { MOVES } from "../battle/moves.js";
 import { Battle, type BattleResult } from "../battle/battle.js";
 import { BattleScene } from "../battle/battleScene.js";
+import { pendingEvolutions } from "../battle/evolution.js";
+import { EvolutionScene } from "../ui/evolution.js";
 import { StarterScene } from "../ui/starter.js";
 import { MartScene } from "../ui/mart.js";
 import { PcBoxScene } from "../ui/pcBox.js";
@@ -442,16 +444,23 @@ export class OverworldScene implements Scene, ScriptHost, OverworldHooks {
     return new Promise((resolve) => {
       const battle = new Battle({ party: this.state.party, foes, species: this.species,
         bag: this.state.bag, trainer: npc?.trainer?.name, rhea: npc?.id === "rhea" }, this.rng);
-      this.stack.push(new BattleScene(this.input, this.audio, this.stack, battle, this.state, (result) => {
-        if (result === "lose") {
-          this.state.coins = Math.floor(this.state.coins / 2);
-          this.restoreParty();
-          this.changeMap(this.state.flags.includes("lastCenter") ? "center" : "bedroom",
-            this.state.flags.includes("lastCenter") ? 5 : 4, 4, "down");
-        }
-        this.audio.play(this.map.music);
-        resolve(result);
-      }));
+      this.stack.push(new BattleScene(this.input, this.audio, this.stack, battle, this.state,
+        async (result, levelledUp) => {
+          if (result === "lose") {
+            this.state.coins = Math.floor(this.state.coins / 2);
+            this.restoreParty();
+            this.changeMap(this.state.flags.includes("lastCenter") ? "center" : "bedroom",
+              this.state.flags.includes("lastCenter") ? 5 : 4, 4, "down");
+          }
+          for (const pending of pendingEvolutions(this.state.party, this.species, levelledUp, result)) {
+            const mon = this.state.party.find((candidate) => candidate.uid === pending.uid)!;
+            const species = this.species.find((candidate) => candidate.id === mon.species)!;
+            await this.showScene(new EvolutionScene(this.input, this.audio, this.stack,
+              this.state, mon, species, pending.to));
+          }
+          this.audio.play(this.map.music);
+          resolve(result);
+        }));
     });
   }
   async startTrainerBattle(npc: NpcDef): Promise<void> {
@@ -559,7 +568,7 @@ export class OverworldScene implements Scene, ScriptHost, OverworldHooks {
   private restoreParty(): void {
     for (const mon of this.state.party) {
       const species = this.species.find((entry) => entry.id === mon.species)!;
-      mon.hp = stats(species.base, mon.ivs, mon.level).hp;
+      mon.hp = stats(formOf(species, mon.stage).base, mon.ivs, mon.level).hp;
       mon.status = null;
       for (const move of mon.moves) {
         move.pp = MOVES[move.id].pp;

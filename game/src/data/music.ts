@@ -9,9 +9,26 @@ function score(tempo: number, melody: string, harmony: string, bass: string, bea
     parseMml(`t${tempo} o2 v3 l8 L [${beat}]4`),
   ];
 }
+// Original evolution cue: four seconds of rising pulse arpeggios, then a two-second payoff.
+// These scores have no MML loops; the scene selects the fanfare only after success.
+export const EVOLVE: readonly Track[] = [
+  parseMml("t120 o4 v6 @0 l8 c e g b o5 c e g b v8 @1 l16 c d e g c d e g o6 c d e g c d e g"),
+  parseMml("t120 o4 v4 @1 l8 e r g r b r o5 d r v6 l16 e g b g e g b g o6 e g b g e g b g"),
+  parseMml("t120 o2 v7 l4 c g e b o3 c g e b"),
+  parseMml("t120 o2 v2 l8 c r c r c r c c v3 l16 c r c c c r c c c r c c c c c c"),
+];
+export const EVOLVE_SUCCESS: readonly Track[] = [
+  parseMml("t120 o5 v9 @1 l16 c e g8 o6 c4 o5 b8 o6 c8 g4"),
+  parseMml("t120 o4 v6 @0 l16 e g o5 c8 e4 d8 e8 g4"),
+  parseMml("t120 o3 v8 l4 c g o4 c2"),
+  parseMml("t120 o2 v3 l8 c c r c c r c4"),
+];
+
 // Original compositions, written for pulse/pulse/triangle/noise; each phrase lasts eight beats.
 export const MUSIC: Readonly<Record<TrackId, readonly Track[]>> = {
   title: TITLE_THEME,
+  evolve: EVOLVE,
+  evolveSuccess: EVOLVE_SUCCESS,
   intro: score(88,
     "e4 g4 a4 r8 g8 f4 e4 d4 g4",
     "c2 e2 d2 b2",

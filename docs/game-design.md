@@ -253,6 +253,71 @@ Status conditions: `BLOCKED` (25% chance to lose the turn, speed halved),
   `b = 1048560 / sqrt(sqrt(16711680 / a))`), each shake animated.
 - Run from wild: speed-based odds, increasing each attempt. Cannot run from trainers.
 
+### 5.6 Evolution (FEAT-1790991962)
+
+Every repository species is a line of forms. The Codex keeps one entry per
+repository; forms are stages of that entry.
+
+- Stage count: species ranked by stars (desc, ties by newer `pushedAt`); the top
+  third (rounded up, at least 1 when 3+ species exist) have 3 stages, all others
+  2. Fallback species have 2.
+- Evolution levels: 3-stage lines evolve at `16 + seed % 5` and `32 + seed % 5`;
+  2-stage lines at `18 + seed % 5`.
+- `formOf(species, stage): Form` (pure, `data/species.ts`), with
+  `Form = { stage: 1 | 2 | 3; name: string; base: Stats; expYield: number;
+  catchRate: number }`. Stage 1 returns the species' own values.
+  - Name: stage suffix chosen by seed from `["ON", "IX", "ARA", "EL", "OS", "UM"]`
+    (stage 2) and `["ULON", "AREX", "ITAN", "OTH", "ARCH", "ORIS"]` (stage 3),
+    appended to the stage 1 name truncated so the total is at most 10 chars. On a
+    collision with any other form name, or when the result contains a blocked
+    substring that the stage 1 name does not (`CUM`, `ASS`, `TIT`, `FAG`,
+    `SEX`, `NIG`, `FUK`, `FUC`, `COC`, `CUN`, `KKK`, `NAZ`, `RAPE`, `PORN`,
+    `SLUT`, `WANK`, `HOE`, `POO`, `PEE`, `DIK`), try the next suffix
+    (wrapping); names stay unique across every form of every species.
+  - Stats: stage 2 total `min(540, round(total * 1.22))`, stage 3
+    `min(600, round(total * 1.42))`, distributed in proportion to the stage 1
+    stats (largest remainders), each at most 150.
+  - `expYield` x1.3 / x1.6; `catchRate` `max(30, floor(rate * 0.6))` /
+    `max(15, floor(rate * 0.35))`.
+- `stageAt(species, level)`: the highest stage whose level is <= `level`. Wild
+  and trainer Codelings use `stageAt` for their level.
+- Sprites: `drawCreature(seed, body, type, facing, stage = 1)`. Stage 1 is
+  pixel-identical to the pre-evolution sprite. Identity carries through ramp,
+  eye style, mouth, markings and every earlier feature. The silhouette changes
+  visibly: stage 2 switches to the next sub-silhouette variant of the type
+  (`(seed + 1) % 3`) with stage-2 proportions (taller or wider within the
+  frame) and adds a second seeded feature; stage 3 keeps the stage 2
+  silhouette, doubles feature size (longer horns, bigger fins), adds a third
+  feature and plating/crest markings. Silhouettes scale uniformly, keep a 1px
+  margin left/right/top and never flatten into a slab. Consecutive stages must
+  differ at a glance: at least 25% of the union of their opaque pixels differs.
+  At most 4 colours; back view cropped as today; cache key includes the stage.
+- Moves: on evolving, the form queues the type's strong move (the type's power
+  slot used today for "strong") if not known, through the normal learn flow.
+- Trigger: after a battle that ends in a win or a catch, each party member that
+  levelled up in that battle and has `level >= next evolution level` evolves, in
+  party order. Losing or running never triggers. Scene `ui/evolution.ts`: text
+  "What? {MON} is evolving!", the sprite alternates between the old and new form
+  as white silhouettes at an accelerating rate for about 4s with the new
+  `evolve` track; B cancels ("{MON} stopped evolving.") and the check repeats
+  after the next battle in which it levels up. Success: cry, flash, "{MON}
+  evolved into {NEW}!", then any queued move learn. Animations off or reduced
+  motion: a single fade between forms.
+- Codeling gains `stage: 1 | 2 | 3` (save: optional, missing => 1, so old saves
+  stay valid). Party, summary, PC box, battle HUD and sprites use the form name,
+  stats and sprite. Stats use `formOf(...).base` in the existing formula.
+- Codex: entry shows the highest stage owned (party or box), else stage 1; the
+  entry page lists the line as `NAME > NAME2 > NAME3` with unowned stages shown
+  as `?????` and the evolution levels as "LV 16".
+- Tests (Vitest): stage count rule, evolution levels, form name uniqueness and
+  length across the live-like fixture, stat totals and caps, `stageAt`, the
+  evolution check (levelled-up-only, win/catch only, cancel retries), save
+  without `stage` loads as 1. E2E: the test reads the first 3-stage species
+  and its first evolution level `L` from the payload, injects a save on Route 1
+  whose lead Codeling is that species at level `L - 1` with `exp = L^3 - 1`, uses
+  `?seed=1&encounter=1`, wins one wild battle with FIGHT, reaches
+  `data-scene="evolution"`, and afterwards the party shows the stage 2 name.
+
 ## 6. World
 
 Maps are `GameMap` data, one metatile character per cell:

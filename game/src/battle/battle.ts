@@ -1,6 +1,6 @@
 import { BATTLE_TEXT as T } from "../data/text.js";
 import type { ItemId, Status } from "../data/ids.js";
-import type { Species } from "../data/species.js";
+import { formOf, type Species } from "../data/species.js";
 import { applyItem } from "../data/items.js";
 import type { Codeling, Stats } from "../engine/storage.js";
 import { chooseMove } from "./ai.js";
@@ -27,7 +27,7 @@ export type BattleEvent =
   | { kind: "learn"; index: number; move: string }
   | { kind: "switch"; side: number; index: number }
   | { kind: "shift"; name: string }
-  | { kind: "end"; result: BattleResult };
+  | { kind: "end"; result: BattleResult; readonly levelledUp: ReadonlySet<string> };
 export interface BattleConfig {
   party: Codeling[];
   foes: Codeling[];
@@ -45,6 +45,7 @@ const volatile = (): Volatile => ({ stages: { atk: 0, def: 0, spd: 0, spc: 0, ac
   frozen: 0, confused: 0 });
 export class Battle {
   readonly active = [0, 0];
+  private readonly levelled = new Set<string>();
   result?: BattleResult;
   forcedSwitch = false;
   pendingLearn?: { index: number; move: string };
@@ -72,8 +73,11 @@ export class Battle {
     }
     return species;
   }
+  name(mon: Codeling): string {
+    return formOf(this.species(mon), mon.stage).name;
+  }
   stats(mon: Codeling): Stats {
-    return stats(this.species(mon).base, mon.ivs, mon.level);
+    return stats(formOf(this.species(mon), mon.stage).base, mon.ivs, mon.level);
   }
   choose(action: BattleAction): boolean {
     if (this.result || this.action) {
@@ -103,7 +107,7 @@ export class Battle {
   }
   private end(result: BattleResult): void {
     this.result = result;
-    this.events.push({ kind: "end", result });
+    this.events.push({ kind: "end", result, levelledUp: new Set(this.levelled) });
   }
   private hp(side: number, value: number): void {
     const mon = this.mon(side);
@@ -119,7 +123,7 @@ export class Battle {
       this.participants.add(index);
     }
     this.events.push({ kind: "switch", side, index });
-    this.say(T.sent(this.species(this.mon(side)).name, side === 1));
+    this.say(T.sent(this.name(this.mon(side)), side === 1));
   }
   private speed(side: number): number {
     const mon = this.mon(side);
@@ -137,7 +141,7 @@ export class Battle {
       const { index, move } = this.pendingLearn;
       if (action.slot >= 0 && action.slot < 4) {
         this.config.party[index].moves[action.slot] = { id: move, pp: MOVES[move].pp };
-        this.say(T.learned(this.species(this.config.party[index]).name, MOVES[move].name));
+        this.say(T.learned(this.name(this.config.party[index]), MOVES[move].name));
       }
       this.pendingLearn = undefined;
       this.advanceLearning();
@@ -180,11 +184,11 @@ export class Battle {
       }
       const foe = this.mon(1);
       const shakes = catchShakes(catchValue(this.stats(foe).hp, foe.hp,
-        this.species(foe).catchRate, action.item === "greatFork" ? 1.5 : 1, foe.status), this.rng);
+        formOf(this.species(foe), foe.stage).catchRate, action.item === "greatFork" ? 1.5 : 1, foe.status), this.rng);
       this.say(T.throw);
       this.events.push({ kind: "shake", count: shakes, caught: shakes === 4 });
       if (shakes === 4) {
-        this.say(T.caught(this.species(foe).name));
+        this.say(T.caught(this.name(foe)));
         this.end("caught");
         return [...this.events];
       }
@@ -232,7 +236,7 @@ export class Battle {
     }
     for (const side of [0, 1]) {
       if (this.mon(side).hp && this.mon(side).status === "deprecated") {
-        this.say(T.deprecated(this.species(this.mon(side)).name));
+        this.say(T.deprecated(this.name(this.mon(side))));
         this.hp(side, this.mon(side).hp - Math.max(1, Math.floor(this.stats(this.mon(side)).hp / 8)));
       }
     }
@@ -257,7 +261,7 @@ export class Battle {
     const mon = this.mon(side);
     const foe = this.mon(1 - side);
     const effect = this.effects[side];
-    const name = this.species(mon).name;
+    const name = this.name(mon);
     if (mon.status === "frozen") {
       if (!effect.frozen) {
         effect.frozen = 1 + Math.floor(this.rng() * 3);
@@ -338,7 +342,7 @@ export class Battle {
         foe.status = extra.status;
       }
       this.events.push({ kind: "status", side: 1 - side, status: extra.status });
-      this.say(T.status(this.species(foe).name, extra.status));
+      this.say(T.status(this.name(foe), extra.status));
     }
     if (extra?.heal || extra?.drain) {
       this.hp(side, mon.hp + Math.floor(extra.heal ? this.stats(mon).hp * extra.heal : dealt * extra!.drain!));
@@ -351,7 +355,7 @@ export class Battle {
   private checkFaint(): void {
     if (!this.mon(0).hp) {
       this.events.push({ kind: "faint", side: 0 });
-      this.say(T.fainted(this.species(this.mon(0)).name));
+      this.say(T.fainted(this.name(this.mon(0))));
       if (!this.config.party.some((mon) => mon.hp)) {
         this.end("lose");
         return;
@@ -360,7 +364,7 @@ export class Battle {
     }
     if (!this.mon(1).hp) {
       this.events.push({ kind: "faint", side: 1 });
-      this.say(T.fainted(this.species(this.mon(1)).name));
+      this.say(T.fainted(this.name(this.mon(1))));
       this.awardExp();
       this.pendingEnd = !this.config.foes.some((mon) => mon.hp);
       this.nextFoe = !this.pendingEnd;
@@ -370,7 +374,8 @@ export class Battle {
   private awardExp(): void {
     const alive = [...this.participants].filter((index) => this.config.party[index].hp > 0);
     const foe = this.mon(1);
-    const amount = expGain(this.species(foe).expYield, foe.level, !!this.config.trainer, alive.length || 1);
+    const amount = expGain(formOf(this.species(foe), foe.stage).expYield, foe.level,
+      !!this.config.trainer, alive.length || 1);
     for (const index of alive) {
       const mon = this.config.party[index];
       const species = this.species(mon);
@@ -380,13 +385,14 @@ export class Battle {
         const old = this.stats(mon).hp;
         const oldHp = mon.hp;
         mon.level++;
+        this.levelled.add(mon.uid);
         const next = this.stats(mon);
         mon.hp += next.hp - old;
         this.events.push({ kind: "level", index, level: mon.level, stats: next });
         if (index === this.active[0]) {
           this.events.push({ kind: "hp", side: 0, from: oldHp, to: mon.hp, max: next.hp });
         }
-        this.say(T.level(species.name, mon.level));
+        this.say(T.level(this.name(mon), mon.level));
         for (const learn of species.learnset.filter((entry) => entry.level === mon.level)) {
           if (mon.moves.some((entry) => entry.id === learn.move)) {
             continue;
@@ -409,7 +415,7 @@ export class Battle {
       this.end("win");
     } else if (this.nextFoe) {
       this.nextFoeIndex = this.config.foes.findIndex((mon) => mon.hp > 0);
-      this.events.push({ kind: "shift", name: this.species(this.config.foes[this.nextFoeIndex]).name });
+      this.events.push({ kind: "shift", name: this.name(this.config.foes[this.nextFoeIndex]) });
     }
   }
 }

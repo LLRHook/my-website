@@ -138,3 +138,14 @@ export const WORLD_TEXT = {
   "yesBadge": "GREEN CHECK",
   "noBadge": "NONE"
 } as const;
+
+export const EVOLUTION_TEXT = {
+  start: "What? {MON} is evolving!",
+  cancelled: "{MON} stopped evolving.",
+  success: "Congratulations! {MON} evolved into {NEW}!",
+} as const;
+
+// NEW is scoped to evolution; world dialogue still accepts only PLAYER and MON.
+export function evolutionText(text: string, mon: string, next: string): string {
+  return text.replaceAll("{MON}", mon).replaceAll("{NEW}", next);
+}
