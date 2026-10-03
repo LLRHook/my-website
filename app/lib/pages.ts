@@ -44,8 +44,8 @@ data-scene="loading" tabindex="-1">
 <div class="game-nojs">Press START requires JavaScript; every project is in the table below</div></div>
 <span class="game-wordmark">VI-BOY</span></div>
 <div class="game-controls"><div class="dpad">
-${button("up", "Move up", "&#9650;")}${button("left", "Move left", "&#9664;")}
-${button("right", "Move right", "&#9654;")}${button("down", "Move down", "&#9660;")}</div>
+${button("up", "Move up", "")}${button("left", "Move left", "")}
+${button("right", "Move right", "")}${button("down", "Move down", "")}</div>
 <div class="game-ab">${button("b", "B: cancel or run", "B")}${button("a", "A: confirm", "A")}</div></div>
 <div class="game-system">${button("select", "SELECT", "SELECT")}${button("start", "START", "START")}</div></div>
 <button type="button" class="game-fullscreen" data-action="fullscreen">PLAY FULLSCREEN</button>

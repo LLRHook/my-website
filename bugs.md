@@ -229,6 +229,17 @@ the end of their section, sorted by id on read.
 - **Fix:** VERIFICATION.md now scopes the game (build step, /projects-only `script-src 'self'` and single module script, game boot/overworld/save/battle/Codex E2E, test-only params) and records the runner baseline: 146 Vitest cases in 12 files, 40 Playwright cases in 2 files (20 Chromium, 20 WebKit).
 - **Status:** fixed-pending-migration
 
+### [BUG-1790991960] Handheld D-pad left and right arrows render as emoji on phones
+- [x] **Severity:** med
+- **Area:** projects, game, mobile
+- **File(s):** app/lib/pages.ts, public/retro.css
+- **Observation:** The D-pad labels are text glyphs: up/down use U+25B2/U+25BC, left/right use U+25C0/U+25B6. U+25C0 and U+25B6 are emoji-capable, so iOS and Android draw them as coloured emoji tiles in a different size and position from the up/down triangles. The owner reports the left and right arrows "don't look right".
+- **Expected:** All four arrows are identical, centred triangles in the D-pad colour on every platform, scaling with the button.
+- **Repro / Notes:** Open /projects on an iPhone; compare the left/right arrows with up/down. Fix: draw the arrows in CSS (clip-path triangles) instead of text glyphs; aria-labels already name the buttons.
+- **Bump:** patch
+- **Fix:** The D-pad buttons carry no glyph text (their aria-labels name them); each draws a CSS `clip-path` triangle in `currentColor` sized 36% of the button, so all four arrows match and scale in fullscreen, and the pressed arrow brightens. The up arm's shadow no longer draws a seam across the centre. Verified by screenshots (desktop Chromium, iPhone 15 WebKit, page and fullscreen) and game E2E on Chromium and iPhone.
+- **Status:** fixed-pending-migration
+
 ## Migrated to changelog
 
 Entries below have been ticked off and copied as a one-liner into `CHANGELOG.md`.
