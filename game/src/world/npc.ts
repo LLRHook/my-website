@@ -8,8 +8,13 @@ export interface NpcState extends NpcDef {
   py: number;
   frame: number;
 }
-export function createNpcs(map: GameMap): NpcState[] {
-  return map.npcs.map((npc) => ({ ...npc, homeX: npc.x, homeY: npc.y, px: npc.x * 16, py: npc.y * 16, frame: 0 }));
+export function createNpcs(map: GameMap, flags: readonly string[] = []): NpcState[] {
+  return map.npcs.filter((npc) => !(npc.id === "prof" && flags.includes("badge:release")
+    && !flags.includes("champion")) && !flags.includes(`item:${npc.id}`)).map((npc) => {
+    const aside = ["warden", "ranger", "guard"].includes(npc.id) && flags.includes(`gate:${npc.id}`);
+    const x = npc.x + (aside ? 1 : 0);
+    return { ...npc, x, homeX: x, homeY: npc.y, px: x * 16, py: npc.y * 16, frame: 0 };
+  });
 }
 export function trainerSees(map: GameMap, npc: NpcDef, x: number, y: number,
   occupied: readonly { x: number; y: number }[] = []): boolean {

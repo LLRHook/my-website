@@ -4,6 +4,11 @@ import type { Codeling } from "../engine/storage.js";
 import { createCodeling } from "../battle/stats.js";
 import { hashString, mulberry32 } from "../engine/rng.js";
 export function trainerParty(npc: NpcDef, species: readonly Species[]): Codeling[] {
+  if (!species.length) {
+    return [];
+  }
+  const ranked = [...species].sort((a, b) => b.repo.stars - a.repo.stars
+    || b.repo.pushedAt.localeCompare(a.repo.pushedAt) || a.id - b.id);
   const rng = mulberry32(hashString(npc.id));
   const choices: Species[] = [];
   const ordered = [...species].sort((a, b) => a.id - b.id);
@@ -17,8 +22,10 @@ export function trainerParty(npc: NpcDef, species: readonly Species[]): Codeling
       createCodeling(choices[index % choices.length], level, rng));
   }
   return (npc.trainer?.party ?? []).map((entry, index) => {
-    const pick = ordered.find((mon) => mon.type === entry.pick.toLowerCase())
-      ?? ordered[(hashString(npc.id) + index) % ordered.length];
+    const rank = /^star:([1-9]\d*)$/.exec(entry.pick);
+    const pick = rank ? ranked[(Number(rank[1]) - 1) % ranked.length]
+      : ordered.find((mon) => mon.type === entry.pick.toLowerCase())
+        ?? ordered[(hashString(npc.id) + index) % ordered.length];
     return createCodeling(pick, entry.level, rng);
   });
 }

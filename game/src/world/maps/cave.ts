@@ -1,4 +1,5 @@
-import { WORLD_TEXT as T } from "../../data/text.js";
+import { REGION_TEXT as R } from "../../data/text.js";
+import { gate } from "./regionHelpers.js";
 import type { GameMap } from "../map.js";
 export const cave: GameMap = {
   id: "cave",
@@ -10,10 +11,10 @@ export const cave: GameMap = {
   tiles: [
     "AAAAAAAAAAAAAAAAAAAA",
     "AccccccccccccccccccA",
-    "AccccccccccccccccccA",
-    "AccOOOOOcsccccccGccA",
-    "AccOOOOOcccccccccccA",
-    "AccccccccccsAAAAcccA",
+    "AcccccccAAAAcccccccA",
+    "AccOOOOOAsAcccccGccA",
+    "AccOOOOOcccAcccccccA",
+    "AcccccccccAsAAAAcccA",
     "AccccccccccccccccccA",
     "AcGGcccccccccccccccA",
     "AcccccccccccccccGOcA",
@@ -30,6 +31,7 @@ export const cave: GameMap = {
     "AAAAAAAAAAAAAAAAAAAA",
   ],
   warps: [
+    { x: 9, y: 3, to: "route3", tx: 11, ty: 28, dir: "up" },
     {
       "x": 9,
       "y": 18,
@@ -39,14 +41,8 @@ export const cave: GameMap = {
       "dir": "down"
     },
   ],
-  npcs: [],
-  signs: [
-    {
-      x: 9,
-      y: 3,
-      text: T.ladder
-    },
-  ],
+  npcs: [gate("warden", 9, 4, ["badge:merge"], R.warden, R.wardenOpen)],
+  signs: [],
   encounters: {
     rate: 0.1,
     minLevel: 10,

@@ -1,3 +1,4 @@
+import type { TrackId } from "../data/ids.js";
 import { BATTLE_TEXT as T } from "../data/text.js";
 import type { ItemId } from "../data/ids.js";
 import type { SaveV1 } from "../engine/storage.js";
@@ -7,7 +8,7 @@ import type { Scene, SceneStack } from "../engine/scenes.js";
 import type { Screen } from "../engine/screen.js";
 import { drawCompactText, drawSmallText } from "../gfx/font.js";
 import { CREATURE_RAMPS, drawCreature } from "../gfx/creatures.js";
-import { drawSprite } from "../gfx/sprites.js";
+import { drawSprite, trainerPortrait, type SpriteId } from "../gfx/sprites.js";
 import { forkBall, groundPlatform, windowFrame } from "../gfx/ui.js";
 import { BagScene } from "../ui/bag.js";
 import { Menu } from "../ui/menu.js";
@@ -69,14 +70,16 @@ export class BattleScene implements Scene {
   private readonly reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
   constructor(private readonly input: Input, private readonly audio: Audio, private readonly stack: SceneStack,
     readonly battle: Battle, private readonly state: SaveV1,
-    private readonly complete: (result: BattleResult, levelledUp: ReadonlySet<string>) => void) {
+    private readonly complete: (result: BattleResult, levelledUp: ReadonlySet<string>) => void,
+    private readonly battleTrack?: TrackId, private readonly trainerSprite?: SpriteId) {
     this.hp = [battle.mon(0).hp, battle.mon(1).hp];
     this.displayActive[0] = battle.active[0];
     this.displayLevels = [battle.config.party.map((mon) => mon.level), battle.config.foes.map((mon) => mon.level)];
     this.displayExp = battle.config.party.map((mon) => mon.exp);
   }
   enter(): void {
-    this.audio.play(this.battle.config.rhea ? "leader" : this.battle.config.trainer ? "trainer" : "wild");
+    this.audio.play(this.battleTrack ?? (this.battle.config.rhea ? "leader"
+      : this.battle.config.trainer ? "trainer" : "wild"));
     this.audio.cry(this.battle.species(this.battle.mon(1)).sprite.seed);
     this.queue.push({ kind: "message", text: this.battle.config.trainer
       ? T.trainer(this.battle.config.trainer, this.battle.name(this.battle.mon(1)))
@@ -162,7 +165,8 @@ export class BattleScene implements Scene {
         this.fainted[this.event.side] = true;
       }
       if (!this.animation && this.event?.kind === "level") {
-        this.audio.play(this.battle.config.rhea ? "leader" : this.battle.config.trainer ? "trainer" : "wild");
+        this.audio.play(this.battleTrack ?? (this.battle.config.rhea ? "leader"
+          : this.battle.config.trainer ? "trainer" : "wild"));
       }
       if (this.event?.kind === "shake") {
         const elapsed = this.catchDuration(this.event) - this.animation;
@@ -261,6 +265,8 @@ export class BattleScene implements Scene {
       : `Battle animation: ${this.event?.kind ?? "arrival"}${this.event?.kind === "shake" ? " / " + catchPhase : ""}`);
     screen.fill(6);
     const slide = this.motion && this.frames < 24 ? 24 - this.frames : 0;
+    const portrait = this.battle.config.trainer && this.frames < 90 && this.trainerSprite
+      ? trainerPortrait(this.trainerSprite) : undefined;
     groundPlatform(screen, 121, 49, 66, this.state.map === "cave");
     groundPlatform(screen, 40, 87, 68, this.state.map === "cave");
     for (const side of [0, 1]) {
@@ -287,7 +293,7 @@ export class BattleScene implements Scene {
         const progress = Math.max(0, Math.min(1, (currentExp - expForLevel(level)) / range));
         screen.fill(13, x + 6, y + 33, Math.floor(progress * 28), 1);
       }
-      if (!this.fainted[side]) {
+      if (!this.fainted[side] && !(side && portrait)) {
         const sprite = drawCreature(species.sprite.seed, species.sprite.body, species.type,
           side ? "front" : "back", mon.stage);
         const blink = this.event?.kind === "damage" && this.event.side === side && this.motion
@@ -312,7 +318,12 @@ export class BattleScene implements Scene {
       }
     }
     if (this.battle.config.trainer && this.frames < 90) {
-      drawSprite(screen, this.battle.config.rhea ? "rhea" : "trainer", "down", 0, 138 + slide, 4);
+      const sprite = this.trainerSprite ?? (this.battle.config.rhea ? "rhea" : "trainer");
+      if (portrait) {
+        screen.blit(portrait, 0, 0, 32, 40, 108 + slide, 12);
+      } else {
+        drawSprite(screen, sprite, "down", 0, 138 + slide, 4);
+      }
     }
     if (this.battle.config.trainer) {
       this.battle.config.foes.forEach((mon, index) => {

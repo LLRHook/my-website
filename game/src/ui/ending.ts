@@ -5,7 +5,7 @@ import type { Screen } from "../engine/screen.js";
 import { drawSmallText, measureSmallText } from "../gfx/font.js";
 import { Menu } from "./menu.js";
 import { YesNo } from "./yesno.js";
-import { CREDITS } from "../data/text.js";
+import { CREDITS, REGION_TEXT as R } from "../data/text.js";
 export class EndingScene implements Scene {
   readonly id = "ending";
   private frames = 0;
@@ -43,6 +43,7 @@ export class EndingScene implements Scene {
     }
   }
   draw(screen: Screen): void {
+    screen.describe(this.menu ? R.endingMenuLabel : R.endingLabel);
     screen.fill(1);
     const scroll = Math.floor(this.frames / 4);
     this.lines.forEach((line, index) => {

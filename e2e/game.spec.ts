@@ -1,5 +1,6 @@
 import { test, expect, type Page } from "@playwright/test";
 import { loadGameModules } from "./support/load-game-modules";
+import type { Dir, MapId } from "../game/src/data/ids";
 
 test("game boots cleanly with a single module, route CSP, and keyboard title flow", async ({ page }) => {
   const errors: string[] = [];
@@ -592,4 +593,293 @@ test("a live three-stage Codeling evolves after winning at its threshold", async
   await press(page, "z", { delay: 35 });
   await expect(canvas).toHaveAttribute("aria-label", new RegExp(`Party: ${evolvedName}`));
   expect(errors).toEqual([]);
+});
+
+
+const REGION_BADGES = ["badge:merge", "badge:pipeline", "badge:release"];
+
+async function regionWalk(page: Page, key: string, count: number): Promise<void> {
+  const game = page.locator("#game");
+  for (let index = 0; index < count; index++) {
+    const before = (await game.getAttribute("data-pos"))!.split(",").slice(0, 2).join(",");
+    await page.keyboard.down(key);
+    try {
+      await expect.poll(async () => (await game.getAttribute("data-pos"))!.split(",").slice(0, 2).join(","),
+        { intervals: [16], timeout: 2500 }).not.toBe(before);
+    } finally {
+      await page.keyboard.up(key);
+    }
+    await page.waitForTimeout(700);
+  }
+}
+
+async function seedRegion(page: Page, map: MapId, x: number, y: number, dir: Dir = "up",
+  extraFlags: readonly string[] = REGION_BADGES, hour = 12): Promise<void> {
+  await page.goto(`/projects?seed=1&hour=${hour}`);
+  const game = page.locator("#game");
+  await expect(game).toHaveAttribute("data-ready", "");
+  await loadGameModules(page);
+  await page.evaluate(({ map, x, y, dir, extraFlags }) => {
+    const { buildSpecies, createCodeling, newGame, DEFAULT_OPTIONS, writeSave, MAPS } = globalThis.__codelings;
+    const species = buildSpecies(JSON.parse(document.querySelector<HTMLElement>("#game")!.dataset.repos!));
+    const state = newGame("DEV", { ...DEFAULT_OPTIONS, textSpeed: "fast", music: 0, sfx: 0, anims: false });
+    const party = Array.from({ length: 6 }, (_, index) => {
+      const mon = createCodeling(species[index % species.length], 100, () => 0.5);
+      mon.uid = `region-${index}`;
+      mon.moves = [{ id: "repo-pulse", pp: 25 }];
+      return mon;
+    });
+    const leaders = new Set(["rhea", "otto", "mira", "champion"]);
+    const defeated = Object.values(MAPS).flatMap((entry) => entry.npcs
+      .filter((npc) => npc.trainer && !leaders.has(npc.id)).map((npc) => `defeated:${npc.id}`));
+    Object.assign(state, { map, x, y, dir, party, seen: [species[0].id], caught: [species[0].id],
+      flags: ["hasStarter", "hasCodex", ...defeated, ...extraFlags] });
+    if (!writeSave(state)) {
+      throw new Error("Region fixture did not save");
+    }
+  }, { map, x, y, dir, extraFlags: [...extraFlags] });
+  await page.reload();
+  await expect(game).toHaveAttribute("data-ready", "");
+  await game.scrollIntoViewIfNeeded();
+  await game.focus();
+  await press(page, "Enter", { delay: 100 });
+  await press(page, "ArrowDown", { delay: 100 });
+  await press(page, "z", { delay: 100 });
+  await expect(game).toHaveAttribute("data-scene", "overworld");
+  await expect(game).toHaveAttribute("data-map", map);
+}
+
+async function clearRegionDialogue(page: Page): Promise<void> {
+  const canvas = page.locator("#game canvas");
+  for (let index = 0; index < 60 && (await canvas.getAttribute("aria-label"))?.includes("Dialogue:"); index++) {
+    await press(page, "z", { delay: 35 });
+    await page.waitForTimeout(50);
+  }
+}
+
+for (const [route, town, x] of [["route3", "bay", 11], ["route4", "ridge", 9]] as const) {
+  test(`region: enter ${town} from ${route}`, async ({ page }) => {
+    await seedRegion(page, route, x, 1);
+    await regionWalk(page, "ArrowUp", 2);
+    await expect(page.locator("#game")).toHaveAttribute("data-map", town);
+  });
+}
+
+async function solvePipeline(page: Page): Promise<void> {
+  await regionWalk(page, "ArrowLeft", 2);
+  await regionWalk(page, "ArrowUp", 1);
+  for (const stage of [0, 1, 2]) {
+    await press(page, "z", { delay: 35 });
+    await expect(page.locator("#game canvas")).toHaveAttribute("aria-label", /Dialogue:/);
+    await clearRegionDialogue(page);
+    if (stage < 2) {
+      await regionWalk(page, "ArrowRight", 2);
+    }
+  }
+
+}
+
+for (const [map, name, x, y] of [["gym", "Rhea", 4, 3], ["pipeGym", "Otto", 5, 14],
+  ["releaseGym", "Mira", 8, 3], ["tower", "Champion", 5, 3]] as const) {
+  test(`region: start ${name} battle`, async ({ page }) => {
+    test.setTimeout(120_000);
+    const errors: string[] = [];
+    page.on("pageerror", (error) => errors.push(error.message));
+    const badges = name === "Rhea" ? [] : name === "Otto" ? REGION_BADGES.slice(0, 1)
+      : name === "Mira" ? REGION_BADGES.slice(0, 2) : REGION_BADGES;
+    await seedRegion(page, map, x, y, "up", badges);
+    if (map === "pipeGym") {
+      await solvePipeline(page);
+      await regionWalk(page, "ArrowLeft", 2);
+      await regionWalk(page, "ArrowUp", 10);
+    } else {
+      await press(page, "z", { delay: 35 });
+    }
+    const game = page.locator("#game");
+    for (let tick = 0; tick < 80 && await game.getAttribute("data-scene") !== "battle"; tick++) {
+      await press(page, "z", { delay: 35 });
+      await page.waitForTimeout(50);
+    }
+    await expect(game).toHaveAttribute("data-scene", "battle");
+    await expect(game.locator("canvas")).toHaveAttribute("aria-label", /Battle/);
+    if (name !== "Champion") {
+      await finishRegionBattle(page);
+      await clearRegionDialogue(page);
+      await press(page, "Enter", { delay: 35 });
+      for (let index = 0; index < 4; index++) {
+        await press(page, "ArrowDown", { delay: 35 });
+      }
+      await press(page, "z", { delay: 35 });
+      await loadGameModules(page);
+      const flags = await page.evaluate(() => globalThis.__codelings.loadSave()!.flags);
+      expect(flags).toContain(`badge:${name === "Rhea" ? "merge" : name === "Otto" ? "pipeline" : "release"}`);
+      expect(flags).not.toContain("champion");
+    }
+    expect(errors).toEqual([]);
+  });
+}
+
+async function finishRegionBattle(page: Page): Promise<void> {
+  const game = page.locator("#game");
+  const canvas = game.locator("canvas");
+  for (let tick = 0; tick < 600 && await game.getAttribute("data-scene") === "battle"; tick++) {
+    const label = await canvas.getAttribute("aria-label") ?? "";
+    if (/Battle (main|moves) menu:|Battle dialogue:/.test(label)) {
+      await press(page, "z", { delay: 35 });
+    } else if (label.includes("Battle team menu:")) {
+      await press(page, "x", { delay: 35 });
+    } else {
+      await page.waitForTimeout(60);
+    }
+  }
+  await expect(game).not.toHaveAttribute("data-scene", "battle");
+  await page.waitForTimeout(100);
+}
+
+test("region: a Champion win reaches ending, KEEP PLAYING uses the Tower exit", async ({ page }) => {
+  test.setTimeout(120_000);
+  const errors: string[] = [];
+  page.on("pageerror", (error) => errors.push(error.message));
+  page.on("console", (message) => {
+    if (message.type() === "error") {
+      errors.push(message.text());
+    }
+  });
+  await seedRegion(page, "tower", 5, 3);
+  const game = page.locator("#game");
+  const canvas = game.locator("canvas");
+  await press(page, "z", { delay: 35 });
+  for (let tick = 0; tick < 900 && await game.getAttribute("data-scene") !== "ending"; tick++) {
+    const label = await canvas.getAttribute("aria-label") ?? "";
+    if (/Battle (main|moves) menu:|Battle dialogue:|Dialogue:/.test(label)) {
+      await press(page, "z", { delay: 35 });
+    } else if (label.includes("Battle team menu:")) {
+      await press(page, "x", { delay: 35 });
+    } else {
+      await page.waitForTimeout(60);
+    }
+  }
+  await expect(game).toHaveAttribute("data-scene", "ending");
+  await press(page, "z", { delay: 35 });
+  await expect(canvas).toHaveAttribute("aria-label", /KEEP PLAYING/);
+  for (let index = 0; index < 3; index++) {
+    await press(page, "ArrowDown", { delay: 35 });
+  }
+  await press(page, "z", { delay: 35 });
+  await expect(game).toHaveAttribute("data-scene", "overworld");
+  await expect(game).toHaveAttribute("data-map", "ridge");
+  await expect(game).toHaveAttribute("data-pos", "11,2,down");
+  await page.waitForTimeout(450);
+  await press(page, "Enter", { delay: 35 });
+  for (let index = 0; index < 3; index++) {
+    await press(page, "ArrowDown", { delay: 35 });
+  }
+  await press(page, "z", { delay: 35 });
+  await expect(canvas).toHaveAttribute("aria-label", /TRAINER CARD: DEV \/ CHAMPION/);
+  expect(errors).toEqual([]);
+});
+
+test("region: Warden visibly steps aside and the ladder reaches Branch Trail", async ({ page }) => {
+  await seedRegion(page, "cave", 9, 5, "up", []);
+  await page.keyboard.down("ArrowUp");
+  await page.waitForTimeout(250);
+  await page.keyboard.up("ArrowUp");
+  await expect(page.locator("#game")).toHaveAttribute("data-pos", "9,5,up");
+  await seedRegion(page, "cave", 9, 5, "up", ["badge:merge"]);
+  await press(page, "z", { delay: 35 });
+  await expect(page.locator("#game canvas")).toHaveAttribute("aria-label", /Dialogue:/);
+  await clearRegionDialogue(page);
+  await page.waitForTimeout(700);
+  await regionWalk(page, "ArrowUp", 1);
+  await expect(page.locator("#game")).toHaveAttribute("data-pos", "9,4,up");
+  if (await page.locator("#game").getAttribute("data-scene") === "battle") {
+    await finishRegionBattle(page);
+  }
+  await regionWalk(page, "ArrowUp", 1);
+  await expect(page.locator("#game")).toHaveAttribute("data-map", "route3");
+  await expect(page.locator("#game")).toHaveAttribute("data-pos", "11,28,up");
+});
+
+test("region: all 108 character frames and nine portraits meet the art rules", async ({ page }) => {
+  await page.goto("/projects");
+  await expect(page.locator("#game")).toHaveAttribute("data-ready", "");
+  await loadGameModules(page);
+  await page.evaluate(() => {
+    const { Screen, initFont, initSprites, REGION_SPRITES, drawSprite, trainerPortrait }
+      = globalThis.__codelings;
+    initFont();
+    initSprites();
+    const canvas = document.createElement("canvas");
+    canvas.width = 192;
+    canvas.height = 240;
+    const screen = new Screen(canvas);
+    screen.canvas.width = 192;
+    screen.canvas.height = 240;
+    screen.context.imageSmoothingEnabled = false;
+    const designs = new Set<string>();
+    for (const id of REGION_SPRITES) {
+      for (const dir of ["up", "down", "left", "right"] as const) {
+        const poses = new Set<string>();
+        for (let frame = 0; frame < 3; frame++) {
+          screen.context.clearRect(0, 0, 192, 240);
+          drawSprite(screen, id, dir, frame, 0, 0);
+          const data = screen.context.getImageData(0, 0, 16, 16).data;
+          const colours = new Set<string>();
+          for (let offset = 0; offset < data.length; offset += 4) {
+            if (data[offset + 3]) {
+              colours.add(`${data[offset]},${data[offset + 1]},${data[offset + 2]}`);
+            }
+          }
+          if (!colours.size || colours.size > 4 || !data[(15 * 16 + 5) * 4 + 3]) {
+            throw new Error(`${id}:${dir}:${frame} violates the sprite palette or shadow`);
+          }
+          const signature = [...data].join(",");
+          poses.add(signature);
+          if (dir === "down" && frame === 0) {
+            designs.add(signature);
+          }
+        }
+        if (poses.size !== 3) {
+          throw new Error(`${id}:${dir} needs three distinct walk frames`);
+        }
+      }
+      const portrait = trainerPortrait(id)!;
+      if (portrait.width !== 32 || portrait.height !== 40) {
+        throw new Error(`${id} portrait has the wrong dimensions`);
+      }
+    }
+    if (designs.size !== REGION_SPRITES.length) {
+      throw new Error("Region character designs must be distinct");
+    }
+  });
+});
+
+
+
+test("region: deploy maze takes five tagged pads and an untagged pad returns to the entrance", async ({ page }) => {
+  test.setTimeout(60_000);
+  await seedRegion(page, "releaseGym", 2, 14);
+  const game = page.locator("#game");
+  await regionWalk(page, "ArrowLeft", 1);
+  await regionWalk(page, "ArrowUp", 2);
+  await expect(game).toHaveAttribute("data-pos", "2,14,up");
+  await regionWalk(page, "ArrowUp", 1);
+  await regionWalk(page, "ArrowRight", 1);
+  await regionWalk(page, "ArrowUp", 1);
+  await expect(game).toHaveAttribute("data-pos", "8,13,up");
+  for (const destination of ["2,9,up", "8,9,up", "2,5,up", "8,5,up"]) {
+    await regionWalk(page, "ArrowRight", 1);
+    await regionWalk(page, "ArrowUp", 1);
+    await expect(game).toHaveAttribute("data-pos", destination);
+  }
+  await regionWalk(page, "ArrowRight", 1);
+  await regionWalk(page, "ArrowUp", 2);
+  await regionWalk(page, "ArrowLeft", 1);
+  await press(page, "ArrowUp", { delay: 35 });
+  await press(page, "z", { delay: 35 });
+  for (let tick = 0; tick < 80 && await game.getAttribute("data-scene") !== "battle"; tick++) {
+    await press(page, "z", { delay: 35 });
+    await page.waitForTimeout(50);
+  }
+  await expect(game).toHaveAttribute("data-scene", "battle");
 });

@@ -5,10 +5,11 @@ import { mulberry32 } from "./rng.js";
 import { Sequencer, type Note } from "./sequencer.js";
 
 export type Sfx = "cursor" | "confirm" | "cancel" | "bump" | "save"
-  | "door" | "ledge" | "grass" | "heal" | "item" | "badge"
+  | "door" | "ledge" | "grass" | "heal" | "item" | "badge" | "switch" | "buzz" | "teleport"
   | "hit" | "super" | "weak" | "faint" | "throw" | "shake" | "catch" | "run";
 
 const EFFECTS: Readonly<Record<Sfx, readonly number[]>> = {
+  switch: [67, 74, 79], buzz: [43, 42, 43, 38], teleport: [60, 72, 84, 79, 91],
   hit: [44, 39], super: [55, 43, 36], weak: [40], faint: [55, 48, 40, 32],
   throw: [60, 67, 76], shake: [52, 57], catch: [72, 79, 86, 84], run: [64, 60, 55],
   door: [48, 55], ledge: [60, 67, 72], grass: [42, 46],

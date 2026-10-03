@@ -48,7 +48,8 @@ export const DEFAULT_OPTIONS: Readonly<Options> = {
 };
 
 const maps: readonly MapId[] = ["bedroom", "house", "sterling", "lab", "route1", "commit", "center", "mart",
-  "gym", "route2", "cave"];
+  "gym", "route2", "cave", "route3", "bay", "bayCenter", "bayMart", "bayHouse", "pipeGym",
+  "route4", "ridge", "ridgeCenter", "ridgeMart", "releaseGym", "tower"];
 
 const items: readonly ItemId[] = ["forkBall", "greatFork", "patch", "hotfix", "fullRebuild", "rollback", "linter"];
 
@@ -124,12 +125,46 @@ function write(key: string, value: unknown): boolean {
   }
 }
 
+export const CENTERS = ["center", "bayCenter", "ridgeCenter"] as const;
+export type CenterId = typeof CENTERS[number];
+
+export function lastCenter(flags: readonly string[]): CenterId | "bedroom" {
+  for (const flag of [...flags].reverse()) {
+    const id = CENTERS.find((center) => flag === `lastCenter:${center}`);
+    if (id) {
+      return id;
+    }
+  }
+  return flags.includes("lastCenter") ? "center" : "bedroom";
+}
+
+export function visitCenter(save: SaveV1, id: MapId): void {
+  if (!CENTERS.some((center) => center === id)) {
+    return;
+  }
+  save.flags = save.flags.filter((flag) => flag !== "lastCenter" && !flag.startsWith("lastCenter:"));
+  save.flags.push(`lastCenter:${id}`);
+}
+
+export function reconcileFlags(flags: readonly string[]): string[] {
+  const result = flags.filter((flag) => flag !== "badge" && flag !== "lastCenter"
+    && !flag.startsWith("lastCenter:"));
+  if ((flags.includes("badge") || flags.includes("defeated:rhea")) && !result.includes("badge:merge")) {
+    result.push("badge:merge");
+  }
+  const latest = [...flags].reverse().find((flag) => CENTERS.some((id) => flag === `lastCenter:${id}`));
+  if (latest || flags.includes("lastCenter")) {
+    result.push(latest ?? "lastCenter:center");
+  }
+  return [...new Set(result)];
+}
+
 export function loadSave(): SaveV1 | null {
   const value = read(SAVE_KEY);
   if (!validSave(value)) {
     return null;
   }
-  return { ...value,
+  return { ...value, flags: reconcileFlags(value.flags),
     party: value.party.map((mon) => ({ ...mon, stage: mon.stage ?? 1 })),
     box: value.box.map((mon) => ({ ...mon, stage: mon.stage ?? 1 })),
     options: { ...value.options, haptics: value.options.haptics ?? true } };
@@ -140,7 +175,7 @@ export function reconcileSpecies(save: SaveV1, ids: ReadonlySet<number>): SaveV1
     ...save, party: save.party.filter((mon) => ids.has(mon.species)),
     box: save.box.filter((mon) => ids.has(mon.species)),
     seen: save.seen.filter((id) => ids.has(id)), caught: save.caught.filter((id) => ids.has(id)),
-    flags: [...save.flags],
+    flags: reconcileFlags(save.flags),
   };
   if (!result.party.length && !result.box.length) {
     result.flags = result.flags.filter((flag) => flag !== "hasStarter" && flag !== "hasCodex"
@@ -148,9 +183,15 @@ export function reconcileSpecies(save: SaveV1, ids: ReadonlySet<number>): SaveV1
     // Part 2 granted placeholder starter and battle flags without creating a team.
     // A real team lost through payload changes keeps its legitimately earned badge.
     if (!save.party.length && !save.box.length && save.flags.includes("hasStarter")) {
-      result.flags = result.flags.filter((flag) => flag !== "badge" && flag !== "diploma"
+      result.flags = result.flags.filter((flag) => flag !== "badge:merge" && flag !== "diploma"
         && !flag.startsWith("defeated:"));
     }
+  }
+  // The old ladder was a dead end where a player could save without a badge.
+  // The new Warden would trap that position, so resume just below his checkpoint.
+  if (result.map === "cave" && result.x === 9 && result.y === 3 && !result.flags.includes("badge:merge")) {
+    result.y = 5;
+    result.dir = "up";
   }
   return result;
 }

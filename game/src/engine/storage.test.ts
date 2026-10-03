@@ -20,6 +20,26 @@ const fixture = (): SaveV1 => ({
   }],
 });
 describe("versioned local storage", () => {
+  it("accepts every expanded region map and migrates legacy flags on load", () => {
+    for (const map of ["route3", "bay", "bayCenter", "bayMart", "bayHouse", "pipeGym", "route4",
+      "ridge", "ridgeCenter", "ridgeMart", "releaseGym", "tower"] as const) {
+      const save = { ...fixture(), map, flags: ["badge", "lastCenter", "defeated:rhea"] };
+      expect(writeSave(save)).toBe(true);
+      const loaded = loadSave()!;
+      expect(loaded.map).toBe(map);
+      expect(loaded.party).toEqual(save.party);
+      expect(loaded.flags).toEqual(["defeated:rhea", "badge:merge", "lastCenter:center"]);
+    }
+  });
+  it("resumes an unbadged legacy ladder save below the new Warden", () => {
+    const save = { ...fixture(), map: "cave" as const, x: 9, y: 3, flags: [] };
+    const result = reconcileSpecies(save, new Set([42]));
+    expect(result.map).toBe("cave");
+    expect(result.x).toBe(9);
+    expect(result.y).toBe(5);
+    expect(save.y).toBe(3);
+    expect(reconcileSpecies({ ...save, flags: ["badge"] }, new Set([42])).y).toBe(3);
+  });
   it("recovers a part-2 placeholder starter save without losing other progress", () => {
     const save = { ...fixture(), party: [], flags: ["hasStarter", "hasCodex", "badge", "defeated:rhea", "granGift"] };
     const result = reconcileSpecies(save, new Set([42]));
@@ -34,11 +54,13 @@ describe("versioned local storage", () => {
     expect(result.party).toEqual([]);
     expect(result.seen).toEqual([]);
     expect(result.caught).toEqual([]);
-    expect(result.flags).toEqual(["badge", "defeated:rhea"]);
+    expect(result.flags).toEqual(["defeated:rhea", "badge:merge"]);
   });
   it("retains a real party and starter flags when its species still exists", () => {
     const save = { ...fixture(), flags: ["hasStarter", "hasCodex", "starter:42", "badge"] };
-    expect(reconcileSpecies(save, new Set([42]))).toEqual(save);
+    expect(reconcileSpecies(save, new Set([42]))).toEqual({
+      ...save, flags: ["hasStarter", "hasCodex", "starter:42", "badge:merge"],
+    });
   });
   let values: Map<string, string>;
   beforeEach(() => {

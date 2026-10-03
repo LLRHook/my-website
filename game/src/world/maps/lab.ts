@@ -1,4 +1,4 @@
-import { WORLD_TEXT as T } from "../../data/text.js";
+import { REGION_TEXT as R, WORLD_TEXT as T } from "../../data/text.js";
 import type { GameMap } from "../map.js";
 export const lab: GameMap = {
   id: "lab",
@@ -68,7 +68,7 @@ export const lab: GameMap = {
       movement: "look",
       script: [
         {
-          say: T.aide1
+          if: "badge:release", then: [{ say: R.profAway }], else: [{ say: T.aide1 }]
         }
       ]
     },
