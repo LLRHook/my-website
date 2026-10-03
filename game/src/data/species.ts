@@ -1,3 +1,4 @@
+import { POSTGAME_TEXT } from "./text.js";
 import type { GameRepo, MapId } from "./ids.js";
 import type { Stats } from "../engine/storage.js";
 import { hashString, mulberry32 } from "../engine/rng.js";
@@ -13,7 +14,7 @@ export interface Form {
   catchRate: number;
 }
 export interface Species {
-  stages: 2 | 3;
+  stages: 1 | 2 | 3;
   evolveAt: number[];
   forms: Form[];
   id: number;
@@ -192,7 +193,7 @@ export function starterCandidates(species: readonly Species[]): Species[] {
 export function formOf(species: Species, stage: 1 | 2 | 3): Form {
   return species.forms[stage - 1];
 }
-export function stageCount(species: Species): 2 | 3 {
+export function stageCount(species: Species): 1 | 2 | 3 {
   return species.stages;
 }
 export function evolutionLevels(species: Species): readonly number[] {
@@ -200,4 +201,29 @@ export function evolutionLevels(species: Species): readonly number[] {
 }
 export function stageAt(species: Species, level: number): 1 | 2 | 3 {
   return (1 + species.evolveAt.filter((threshold) => level >= threshold).length) as 1 | 2 | 3;
+}
+
+// Zero is reserved for ORIGIN; repository and fallback identities are positive.
+export const ORIGIN_ID = 0;
+export const ORIGIN_SEED = 0x0a11ce;
+
+export function originSpecies(): Species {
+  const base = { hp: 130, atk: 120, def: 120, spd: 100, spc: 130 };
+  const repo: GameRepo = {
+    id: ORIGIN_ID, name: "ORIGIN", title: "ORIGIN", language: null, stars: 0,
+    pushedAt: "", url: FALLBACK_REPOS[0].url, homepage: null,
+    description: POSTGAME_TEXT.originFlavour,
+  };
+  return {
+    id: ORIGIN_ID, dex: 0, name: "ORIGIN", repo, type: "normal", base, catchRate: 3, expYield: 300,
+    stages: 1, evolveAt: [], forms: [{ stage: 1, name: "ORIGIN", base, catchRate: 3, expYield: 300 }],
+    learnset: Object.values(MOVES).filter((move) => move.type === "normal" && move.power > 0)
+      .sort((a, b) => b.power - a.power).slice(0, 4)
+      .map((move) => ({ level: 1, move: move.id })),
+    habitat: [], rarity: 0, sprite: { seed: ORIGIN_SEED, body: bodyMask("normal") },
+  };
+}
+
+export function speciesById(species: readonly Species[], id: number): Species | undefined {
+  return id === ORIGIN_ID ? originSpecies() : species.find((entry) => entry.id === id);
 }

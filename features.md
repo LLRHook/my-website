@@ -73,7 +73,7 @@ Priority guide: crit / high / med / low.
 - **Status:** shipped-pending-migration
 
 ### [FEAT-1790991964] Codelings post-game: rematches, a legendary and side quests
-- [ ] **Priority:** med
+- [x] **Priority:** med
 - **Area:** game
 - **File(s):** game/src/world/*, game/src/data/*, game/src/ui/*, docs/game-design.md
 - **Why:** Owner asked to build out the rest of the game; after the ending there is nothing new to do.
@@ -83,7 +83,8 @@ Priority guide: crit / high / med / low.
 - **Test plan:** Unit: post-game gating, rematch parties, quest state transitions. E2E: post-game seeded save reaches the legendary battle.
 - **Out of scope:** Online features, daily events beyond the rematch cooldown.
 - **Bump:** minor
-- **Status:** open
+- **Implementation:** Per docs/game-design.md §6.2, all gated on `champion` in pure `world/postgame.ts`: Rhea, Otto, Mira and Prof. Ivanov (back in the lab) offer one rematch per local day (`rematch:<id>:<date>`, latest kept) with six-member `rematchParty` teams at 40-63 and doubled rewards; a sealed door on Stack Cave's west wall opens into the `vault`, where ORIGIN (species id 0, `originSpecies()`, level 50, catch rate 3, single form, gold crowned sprite, own cry, strongest normal moves) stands on a pedestal, returns after a faint or run and is gone once caught (`origin`); Codex entry `000` (LEGENDARY) opens the GitHub profile and does not count toward the diploma. Side quests in `quest:<id>:<state>` flags: Old Dev's lost keyboard (Route 3 hidden spot), the Ridge Collector (stage 2+ in party) and the lab aide's 25/50/100% Codex milestones. Species lookups go through `speciesById`; save validation accepts id 0. One art review pass (ORIGIN too small and weak, sealed door read as a panel). Verified: lint, tsc, 249 Vitest, build, 118 Playwright passed with 12 expected skips, captures inspected.
+- **Status:** shipped-pending-migration
 
 ## Shipped`, append a one-liner to `CHANGELOG.md / Unreleased / Added` (or `Changed`).
 

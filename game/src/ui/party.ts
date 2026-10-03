@@ -1,4 +1,4 @@
-import { formOf, type Species } from "../data/species.js";
+import { speciesById, formOf, type Species } from "../data/species.js";
 import type { SaveV1 } from "../engine/storage.js";
 import type { Input } from "../engine/input.js";
 import type { Audio } from "../engine/audio.js";
@@ -45,7 +45,7 @@ export class PartyScene implements Scene {
         this.menu = undefined;
         const mon = this.state.party[this.selected];
         if (index === 0) {
-          const species = this.species.find((s) => s.id === mon.species)!;
+          const species = speciesById(this.species, mon.species)!;
           this.stack.push(new SummaryScene(this.input, this.stack, mon, species));
         } else if (index === 1) {
           this.reorder = this.selected;
@@ -57,12 +57,12 @@ export class PartyScene implements Scene {
   }
   draw(screen: Screen): void {
     screen.describe(`Party: ${this.state.party.map((mon) =>
-      formOf(this.species.find((entry) => entry.id === mon.species)!, mon.stage).name).join(" / ")}`);
+      formOf(speciesById(this.species, mon.species)!, mon.stage).name).join(" / ")}`);
     screen.fill(14);
     windowFrame(screen, 4, 4, 152, 136);
     drawSmallText(screen, this.reorder === undefined ? "CODELINGS" : "CHOOSE NEW POSITION", 12, 12, 1);
     this.state.party.forEach((mon, index) => {
-      const species = this.species.find((s) => s.id === mon.species)!;
+      const species = speciesById(this.species, mon.species)!;
       const y = 25 + index * 17;
       if (this.selected === index) {
         screen.fill(7, 9, y, 142, 17);

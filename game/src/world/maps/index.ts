@@ -1,3 +1,4 @@
+import { vault } from "./vault.js";
 import { route3 } from "./route3.js";
 import { bay, bayCenter, bayMart, bayHouse } from "./bay.js";
 import { pipeGym } from "./pipeGym.js";
@@ -20,6 +21,6 @@ import type { MapId } from "../../data/ids.js";
 import type { GameMap } from "../map.js";
 
 export const MAPS: Readonly<Record<MapId, GameMap>> = {
-  bedroom, house, sterling, lab, route1, commit, center, mart, gym, route2, cave,
+  vault, bedroom, house, sterling, lab, route1, commit, center, mart, gym, route2, cave,
   route3, bay, bayCenter, bayMart, bayHouse, pipeGym, route4, ridge, ridgeCenter, ridgeMart, releaseGym, tower,
 };

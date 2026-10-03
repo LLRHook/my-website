@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { buildSpecies, evolutionLevels, FALLBACK_REPOS, formOf, stageAt, stageCount } from "./species.js";
+import { buildSpecies, originSpecies, evolutionLevels, FALLBACK_REPOS,
+  formOf, stageAt, stageCount } from "./species.js";
 import { hashString } from "../engine/rng.js";
 import { createCodeling, stats } from "../battle/stats.js";
 
@@ -76,4 +77,13 @@ it("skips suffixes that introduce blocked substrings at the join", () => {
     .find((candidate) => hashString(candidate) % 6 === 5)!;
   const existing = buildSpecies([{ ...FALLBACK_REPOS[0], id: 1001, name: inherited }])[0];
   expect(existing.forms[1].name).toBe(existing.name + "UM");
+});
+
+it("gives ORIGIN the four strongest normal damaging moves at level one", () => {
+  expect(originSpecies().learnset).toEqual([
+    { level: 1, move: "hard-reset" },
+    { level: 1, move: "repo-pulse" },
+    { level: 1, move: "byte-bash" },
+    { level: 1, move: "last-resort" },
+  ]);
 });

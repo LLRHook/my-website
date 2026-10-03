@@ -115,6 +115,12 @@ Completing the Codex earns a diploma. Branch Trail and Release Road include ever
 species, and a black out returns you to your last visited Center. Older saves
 keep their Merge badge and Commit City Center checkpoint.
 Codelings evolve after levelling up in battle; press B during the animation to cancel.
+After becoming Champion, challenge Rhea, Otto, Mira and Prof. Ivanov once per
+local calendar day for six-member rematches and double rewards. The sealed door
+on Stack Cave's west wall opens into ORIGIN's vault. This level-50 legendary has
+Codex entry 000 and opens the GitHub profile; it does not count toward the diploma.
+Old Dev in Branch Bay, the Collector in Release Ridge and the lab aide have side
+quests for a lost keyboard, an evolved party member and Codex collection milestones.
 Caught Codex entries open the repository after a YES/NO confirmation; HTTP(S)
 homepages also offer a demo link. Saves stay in this browser's local storage.
 

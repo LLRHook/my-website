@@ -93,3 +93,6 @@ export const MUSIC: Readonly<Record<TrackId, readonly Track[]>> = {
   ending: score(96, "e4 a8 g8 f+4 e4 d8 f+8 a4 b4 e4 g8 b8 a4 g4 f+8 e8 d4 r4 a2",
     "a2 d2 e2 g2 c2 d2 e2 a2", "a2 d2 e2 g2 c2 d2 e2 a2", "[r4 c4 r4 c4 r4 c4 c4 r4]2"),
 };
+
+// ORIGIN's descending bell cry, answered by a low fifth (0.4 seconds total).
+export const ORIGIN_CRY = [84, 79, 76, 67, 55] as const;

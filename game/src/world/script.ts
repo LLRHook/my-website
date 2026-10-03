@@ -1,5 +1,6 @@
 import type { Dir, ItemId, TrackId } from "../data/ids.js";
 import type { SaveV1 } from "../engine/storage.js";
+import { setQuestState, type QuestId } from "./postgame.js";
 
 export type Script = readonly Command[];
 export type Command =
@@ -17,7 +18,9 @@ export type Command =
   | { mart: true }
   | { pc: true }
   | { music: TrackId }
-  | { wait: number };
+  | { wait: number }
+  | { coins: number }
+  | { quest: QuestId; state: string };
 
 export interface ScriptHost {
   state: SaveV1;
@@ -48,7 +51,11 @@ export function interpolate(text: string, player: string, mon: string): string {
 export async function runScript(script: Script, host: ScriptHost): Promise<void> {
   const text = (value: string) => interpolate(value, host.state.name, host.mon);
   for (const command of script) {
-    if ("say" in command) {
+    if ("coins" in command) {
+      host.state.coins += command.coins;
+    } else if ("quest" in command) {
+      setQuestState(host.state.flags, command.quest, command.state);
+    } else if ("say" in command) {
       await host.say(text(command.say));
     } else if ("ask" in command) {
       await runScript(await host.ask(text(command.ask)) ? command.yes : command.no, host);

@@ -1,3 +1,4 @@
+import { ORIGIN_ID } from "../data/species.js";
 import { MOVES } from "../battle/moves.js";
 import type { Dir, ItemId, MapId, MoveId, Options, Status } from "../data/ids.js";
 
@@ -49,7 +50,7 @@ export const DEFAULT_OPTIONS: Readonly<Options> = {
 
 const maps: readonly MapId[] = ["bedroom", "house", "sterling", "lab", "route1", "commit", "center", "mart",
   "gym", "route2", "cave", "route3", "bay", "bayCenter", "bayMart", "bayHouse", "pipeGym",
-  "route4", "ridge", "ridgeCenter", "ridgeMart", "releaseGym", "tower"];
+  "route4", "ridge", "ridgeCenter", "ridgeMart", "releaseGym", "tower", "vault"];
 
 const items: readonly ItemId[] = ["forkBall", "greatFork", "patch", "hotfix", "fullRebuild", "rollback", "linter"];
 
@@ -83,7 +84,7 @@ type StoredSave = Omit<SaveV1, "party" | "box" | "options"> & {
 function validCodeling(value: unknown): value is StoredCodeling {
   return record(value) && typeof value.uid === "string" && value.uid.length > 0
     && (value.stage === undefined || integer(value.stage, 1, 3))
-    && integer(value.species, 1) && integer(value.level, 1, 100) && integer(value.exp) && integer(value.hp)
+    && integer(value.species, 0) && integer(value.level, 1, 100) && integer(value.exp) && integer(value.hp)
     && record(value.ivs) && ["hp", "atk", "def", "spd", "spc"].every((stat) =>
       integer((value.ivs as Record<string, unknown>)[stat], 0, 31))
     && arrayOf(value.moves, (move) => record(move) && typeof move.id === "string" &&
@@ -102,7 +103,7 @@ export function validSave(value: unknown): value is StoredSave {
     && record(value.bag) && Object.entries(value.bag).every(([key, quantity]) => member(key, items) &&
       integer(quantity))
     && integer(value.coins) && arrayOf(value.flags, (flag) => typeof flag === "string")
-    && arrayOf(value.seen, (id) => integer(id, 1)) && arrayOf(value.caught, (id) => integer(id, 1))
+    && arrayOf(value.seen, (id) => integer(id, 0)) && arrayOf(value.caught, (id) => integer(id, 0))
     && typeof value.playTimeSec === "number" && Number.isFinite(value.playTimeSec) &&
       value.playTimeSec >= 0 && validOptions(value.options);
 }
@@ -171,10 +172,12 @@ export function loadSave(): SaveV1 | null {
 }
 
 export function reconcileSpecies(save: SaveV1, ids: ReadonlySet<number>): SaveV1 {
+  const known = (id: number): boolean => id === ORIGIN_ID || ids.has(id);
   const result: SaveV1 = {
-    ...save, party: save.party.filter((mon) => ids.has(mon.species)),
-    box: save.box.filter((mon) => ids.has(mon.species)),
-    seen: save.seen.filter((id) => ids.has(id)), caught: save.caught.filter((id) => ids.has(id)),
+    ...save, party: save.party.filter((mon) => known(mon.species)),
+    box: save.box.filter((mon) => known(mon.species)),
+    seen: save.seen.filter(known),
+    caught: save.caught.filter(known),
     flags: reconcileFlags(save.flags),
   };
   if (!result.party.length && !result.box.length) {

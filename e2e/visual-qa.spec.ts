@@ -34,12 +34,13 @@ async function regionWalk(page: Page, key: string, count: number): Promise<void>
 }
 
 async function seedRegion(page: Page, map: MapId, x: number, y: number, dir: Dir = "up",
-  extraFlags: readonly string[] = REGION_BADGES, hour = 12): Promise<void> {
+  extraFlags: readonly string[] = REGION_BADGES, hour = 12,
+  progress?: "origin" | "milestone"): Promise<void> {
   await page.goto(`/projects?seed=1&hour=${hour}`);
   const game = page.locator("#game");
   await expect(game).toHaveAttribute("data-ready", "");
   await loadGameModules(page);
-  await page.evaluate(({ map, x, y, dir, extraFlags }) => {
+  await page.evaluate(({ map, x, y, dir, extraFlags, progress }) => {
     const { buildSpecies, createCodeling, newGame, DEFAULT_OPTIONS, writeSave, MAPS } = globalThis.__codelings;
     const species = buildSpecies(JSON.parse(document.querySelector<HTMLElement>("#game")!.dataset.repos!));
     const state = newGame("DEV", { ...DEFAULT_OPTIONS, textSpeed: "fast", music: 0, sfx: 0, anims: false });
@@ -54,10 +55,15 @@ async function seedRegion(page: Page, map: MapId, x: number, y: number, dir: Dir
       .filter((npc) => npc.trainer && !leaders.has(npc.id)).map((npc) => `defeated:${npc.id}`));
     Object.assign(state, { map, x, y, dir, party, seen: [species[0].id], caught: [species[0].id],
       flags: ["hasStarter", "hasCodex", ...defeated, ...extraFlags] });
+    if (progress === "origin") {
+      state.seen.push(0);
+    } else if (progress === "milestone") {
+      state.caught = species.slice(0, Math.ceil(species.length / 4)).map((entry) => entry.id);
+    }
     if (!writeSave(state)) {
       throw new Error("Region fixture did not save");
     }
-  }, { map, x, y, dir, extraFlags: [...extraFlags] });
+  }, { map, x, y, dir, extraFlags: [...extraFlags], progress });
   await page.reload();
   await expect(game).toHaveAttribute("data-ready", "");
   await game.scrollIntoViewIfNeeded();
@@ -82,7 +88,7 @@ async function captureRegion(page: Page, name: string): Promise<void> {
   if (!directory) {
     return;
   }
-  await page.waitForTimeout(100);
+  await page.waitForTimeout(750);
   await mkdir(directory, { recursive: true });
   const url = await page.locator("#game canvas").evaluate((element) => {
     const canvas = element as HTMLCanvasElement;
@@ -270,3 +276,126 @@ test("region: original character contact sheet", async ({ page }) => {
 });
 
 
+
+
+test("post-game: authored captures", async ({ page }) => {
+  test.setTimeout(180_000);
+  const flags = [...REGION_BADGES, "champion"];
+  await seedRegion(page, "cave", 1, 6, "left", []);
+  await press(page, "z", { delay: 35 });
+  await captureRegion(page, "sealed-door-before");
+  await seedRegion(page, "cave", 1, 6, "left", flags);
+  await page.waitForTimeout(1800);
+  await captureRegion(page, "sealed-door-after");
+  await seedRegion(page, "vault", 4, 5, "up", flags);
+  await page.waitForTimeout(1800);
+  await captureRegion(page, "vault");
+  await regionWalk(page, "ArrowUp", 1);
+  await press(page, "z", { delay: 35 });
+  await clearRegionDialogue(page);
+  await expect(page.locator("#game")).toHaveAttribute("data-scene", "battle");
+  await press(page, "z", { delay: 35 });
+  await captureRegion(page, "origin-battle-start");
+  // Saved fixtures keep screenshots on actual menu and dialogue paths.
+  await seedRegion(page, "lab", 4, 7, "up", flags, 12, "origin");
+  await press(page, "Enter", { delay: 35 });
+  await press(page, "z", { delay: 35 });
+  await captureRegion(page, "origin-codex-list");
+  await press(page, "z", { delay: 35 });
+  await expect(page.locator("#game canvas")).toHaveAttribute("aria-label", /Codex entry: ORIGIN/);
+  await captureRegion(page, "origin-codex-entry");
+  await press(page, "z", { delay: 35 });
+  await expect(page.locator("#game canvas")).toHaveAttribute("aria-label", /Open on GitHub.*YES \/ NO/);
+  await captureRegion(page, "origin-codex-confirmation");
+  await seedRegion(page, "gym", 4, 3, "up", [...flags, "defeated:rhea"]);
+  await press(page, "z", { delay: 35 });
+  await captureDialogue(page, "rhea-rematch-offer", "Rematch?");
+  await clearRegionDialogue(page);
+  await expect(page.locator("#game canvas")).toHaveAttribute("aria-label", /YES \/ NO/);
+  await captureRegion(page, "rhea-rematch-yes-no");
+  const today = await page.evaluate(() => {
+    const now = new Date();
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${
+      String(now.getDate()).padStart(2, "0")}`;
+  });
+  await seedRegion(page, "gym", 4, 3, "up", [...flags, `rematch:rhea:${today}`]);
+  await press(page, "z", { delay: 35 });
+  await captureDialogue(page, "rhea-cooldown", "tomorrow");
+  await seedRegion(page, "bayHouse", 3, 4, "right", flags);
+  await press(page, "z", { delay: 35 });
+  await captureDialogue(page, "old-dev-quest-start", "keyboard");
+  await seedRegion(page, "route3", 15, 27, "down", [...flags, "quest:keyboard:started"]);
+  await press(page, "z", { delay: 35 });
+  await captureDialogue(page, "keyboard-found", "OLD");
+  await seedRegion(page, "ridge", 15, 12, "right", flags);
+  await press(page, "z", { delay: 35 });
+  await captureDialogue(page, "collector-reward", "Received");
+  await seedRegion(page, "lab", 7, 4, "up", flags, 12, "milestone");
+  await press(page, "z", { delay: 35 });
+  await captureDialogue(page, "aide-milestone", "Received");
+});
+
+async function captureDialogue(page: Page, name: string, target: string): Promise<void> {
+  await loadGameModules(page);
+  const label = await page.locator("#game canvas").getAttribute("aria-label");
+  const text = label!.split("Dialogue: ")[1].split(" Projects are also")[0];
+  const lines = await page.evaluate((text) => globalThis.__codelings.wrapText(text, 18), text);
+  const line = lines.findIndex((line) => line.includes(target));
+  expect(line, `Missing capture phrase ${target}`).toBeGreaterThanOrEqual(0);
+  const count = Math.floor(line / 2);
+  await page.waitForTimeout(750);
+  for (let index = 0; index < count; index++) {
+    await press(page, "z", { delay: 35 });
+    await page.waitForTimeout(750);
+  }
+  await captureRegion(page, name);
+}
+
+
+test("post-game: ORIGIN front, back and icon art", async ({ page }) => {
+  await page.goto("/projects");
+  await expect(page.locator("#game")).toHaveAttribute("data-ready", "");
+  await loadGameModules(page);
+  const { url, areas, largest } = await page.evaluate(() => {
+    const { Screen, initFont, drawSmallText, drawCreature, creatureIcon, originSpecies } = globalThis.__codelings;
+    initFont();
+    const canvas = document.createElement("canvas");
+    canvas.width = 160;
+    canvas.height = 144;
+    const screen = new Screen(canvas);
+    screen.fill(29);
+    drawSmallText(screen, "ORIGIN", 61, 10, 6);
+    const origin = originSpecies();
+    const area = (sprite: HTMLCanvasElement): number => {
+      const rgba = sprite.getContext("2d")!.getImageData(0, 0, 32, 32).data;
+      return rgba.filter((value, index) => index % 4 === 3 && value !== 0).length;
+    };
+    const repositorySpecies = globalThis.__codelings.buildSpecies(
+      JSON.parse(document.querySelector<HTMLElement>("#game")!.dataset.repos!));
+    const largest = Math.max(...repositorySpecies.filter((entry) => entry.stages === 3).flatMap((entry) =>
+      (["front", "back"] as const).map((facing) => area(drawCreature(
+        entry.sprite.seed, entry.sprite.body, entry.type, facing, 3)))));
+    const areas: number[] = [];
+    for (const [facing, x] of [["front", 24], ["back", 100]] as const) {
+      const sprite = drawCreature(origin.sprite.seed, origin.sprite.body, origin.type, facing);
+      areas.push(area(sprite));
+      screen.blit(sprite, 0, 0, 32, 32, x, 38);
+      drawSmallText(screen, facing.toUpperCase(), x, 80, 6);
+    }
+    screen.blit(creatureIcon(origin), 0, 0, 16, 16, 72, 105);
+    const scaled = document.createElement("canvas");
+    scaled.width = 640;
+    scaled.height = 576;
+    const context = scaled.getContext("2d")!;
+    context.imageSmoothingEnabled = false;
+    context.drawImage(screen.canvas, 0, 0, 640, 576);
+    return { url: scaled.toDataURL("image/png"), areas, largest };
+  });
+  for (const area of areas) {
+    expect(area).toBeGreaterThanOrEqual(largest);
+  }
+  console.log(`ORIGIN front/back opaque areas: ${areas.join("/")}; largest stage-3: ${largest}`);
+  await mkdir(process.env.CODELINGS_CAPTURE_DIR!, { recursive: true });
+  await writeFile(join(process.env.CODELINGS_CAPTURE_DIR!, "origin-sprites.png"),
+    Buffer.from(url.split(",")[1], "base64"));
+});

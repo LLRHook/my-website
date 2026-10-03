@@ -1,7 +1,7 @@
 import { createHash } from "node:crypto";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { bodyMask, drawCreature } from "./creatures.js";
-import { buildSpecies, FALLBACK_REPOS } from "../data/species.js";
+import { buildSpecies, FALLBACK_REPOS, originSpecies } from "../data/species.js";
 import { mulberry32 } from "../engine/rng.js";
 import { TYPES, type TypeId } from "../battle/types.js";
 
@@ -281,3 +281,25 @@ function hasFeature(pixels: Uint8ClampedArray, trait: string, stage: 1 | 2 | 3):
   }
   return false;
 }
+
+it("renders ORIGIN's distinct gold front and back with three opaque colours", () => {
+  const origin = originSpecies();
+  const images = ["front", "back"].map((facing) => pixelsOf(drawCreature(origin.sprite.seed,
+    origin.sprite.body, origin.type, facing as "front" | "back")));
+  for (const pixels of images) {
+    const colours = new Set<string>();
+    let opaque = 0;
+    for (let index = 0; index < pixels.length; index += 4) {
+      if (pixels[index + 3]) {
+        colours.add(Array.from(pixels.slice(index, index + 3)).join(","));
+        opaque++;
+      }
+    }
+    expect(colours).toEqual(new Set(["96,72,48", "248,184,72", "240,208,160"]));
+    const largest = Math.max(...fixture.filter((entry) => entry.stages === 3).flatMap((entry) =>
+      (["front", "back"] as const).map((facing) => areaOf(pixelsOf(drawCreature(
+        entry.sprite.seed, entry.sprite.body, entry.type, facing, 3))))));
+    expect(opaque).toBeGreaterThanOrEqual(largest);
+  }
+  expect(images[0]).not.toEqual(images[1]);
+});

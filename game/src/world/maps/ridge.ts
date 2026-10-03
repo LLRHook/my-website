@@ -43,7 +43,7 @@ export const ridge: GameMap = {
     gate("guard", 11, 3, ["badge:merge", "badge:pipeline", "badge:release"], R.guard, R.guardOpen),
     { id: "sweeper", x: 8, y: 10, sprite: "townsfolk", dir: "down", movement: "look",
       script: [{ say: R.ridgeTrivia1 }] },
-    { id: "reader", x: 16, y: 12, sprite: "aide", dir: "left", movement: "look",
+    { id: "collector", x: 16, y: 12, sprite: "aide", dir: "left", movement: "look",
       script: [{ say: R.ridgeTrivia2 }] },
     { id: "watcher", x: 9, y: 4, sprite: "townsfolk", dir: "up", movement: "look",
       script: [{ say: R.ridgeTrivia3 }] },

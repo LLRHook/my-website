@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { clearSave, DEFAULT_OPTIONS, loadOptions, loadSave, OPTIONS_KEY, reconcileSpecies,
-  SAVE_KEY, writeOptions, writeSave,
+  SAVE_KEY, validSave, writeOptions, writeSave,
   type SaveV1 } from "./storage.js";
 
 const fixture = (): SaveV1 => ({
@@ -22,7 +22,7 @@ const fixture = (): SaveV1 => ({
 describe("versioned local storage", () => {
   it("accepts every expanded region map and migrates legacy flags on load", () => {
     for (const map of ["route3", "bay", "bayCenter", "bayMart", "bayHouse", "pipeGym", "route4",
-      "ridge", "ridgeCenter", "ridgeMart", "releaseGym", "tower"] as const) {
+      "ridge", "ridgeCenter", "ridgeMart", "releaseGym", "tower", "vault"] as const) {
       const save = { ...fixture(), map, flags: ["badge", "lastCenter", "defeated:rhea"] };
       expect(writeSave(save)).toBe(true);
       const loaded = loadSave()!;
@@ -202,4 +202,21 @@ describe("versioned local storage", () => {
     })).toBe(false);
     expect(() => clearSave()).not.toThrow();
   });
+
+  it("validates zero species identity in party, seen and caught, but rejects negative ids", () => {
+    const save = fixture();
+    save.party[0].species = 0;
+    save.seen = [0];
+    save.caught = [0];
+    expect(validSave(save)).toBe(true);
+    expect(writeSave(save)).toBe(true);
+    expect(loadSave()).toEqual(save);
+    for (const invalid of [
+      { ...save, party: [{ ...save.party[0], species: -1 }] },
+      { ...save, seen: [-1] }, { ...save, caught: [-1] },
+    ]) {
+      expect(validSave(invalid)).toBe(false);
+    }
+  });
+
 });
