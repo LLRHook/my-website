@@ -30,7 +30,60 @@ Priority guide: crit / high / med / low.
 1. **File:** new entries under `## Open` with the full template.
 2. **Implement:** flip status to `in-progress`, write code + tests.
 3. **Verify:** set `shipped-pending-migration`, tick checkbox, add `**Implementation:**` line.
-4. **Migrate:** move to `## Shipped`, append a one-liner to `CHANGELOG.md / Unreleased / Added` (or `Changed`).
+4. **Migrate:** move to `### [FEAT-1790991961] Fast loading on slow or metered connections
+- [x] **Priority:** high
+- **Area:** performance, projects, game
+- **File(s):** package.json, game/build.mjs, app/lib/pages.ts, app/lib/html.ts, next.config.js, public/*.webp|jpg, e2e/
+- **Why:** Owner wants the site, including the game, to load easily on low signal. The game ships as 65 unbundled ES modules (280 KB, a deep import waterfall: one round trip per import level), the Off the Clock photo is a 2400x1800 650 KB WebP shown at 320 px, the portrait is 343 px shown at 120 px, below-the-fold images load eagerly, and static assets get no long-lived cache.
+- **Approach:** Bundle and minify the game with esbuild into one content-hashed file (`/game/main.<hash>.js`) whose name the page reads from a build manifest; serve `/game/*` as `public, max-age=31536000, immutable`; resize images to 2x their display size (WebP) with explicit dimensions, `loading="lazy"` and `decoding="async"` below the fold; give images and icons a day-long cache with stale-while-revalidate. The HTML table stays usable before and without the game. No service worker (owner decision).
+- **Library / dependency notes:** esbuild (latest stable, confirmed on npm before install) as a devDependency.
+- **Acceptance criteria:** /projects loads the game in one script request; total transfer for each page on a cold load is measured before and after and drops; the game boots and every existing test passes; images look identical at display size; no page regresses Lighthouse.
+- **Test plan:** Existing E2E (script count, CSP, boot); new check that /projects requests exactly one game script and that `/game/` responses carry the immutable cache header; byte budgets recorded in VERIFICATION.md.
+- **Out of scope:** Service worker / offline cache, PWA manifest, CDN changes.
+- **Bump:** minor
+- **Implementation:** `game/build.mjs` bundles and minifies the game with esbuild 0.28.2 (es2022/safari15) into one `public/game/main.js` (143 KB raw), after a strict `tsc --noEmit`; `dev:game` watches with esbuild. Instead of hashed filenames, next.config.js hashes `retro.css` and `main.js` at build and exposes `?v=<hash>` URLs through `env` (`STYLE_HREF`, `GAME_SCRIPT`); production serves both `immutable` for a year and images/icons/PDF for a day with a week of stale-while-revalidate. Peru photo 2400 px/649 KB to 640 px/53 KB, portrait 343 px/117 KB to 240 px/11 KB; below-the-fold photos lazy-load. Cold loads: /projects 66 requests/169 KB to 3/82 KB, / 128 KB to 22 KB, /off-the-clock 659 KB to 62 KB; Resume and Contact grow 31 bytes (the `?v=` query) but repeat visits skip the stylesheet. Slow link (400ms, 50 KB/s): /projects ready in 2.6s instead of 7.3s. E2E game tests that imported individual modules now bundle a test-only entry with esbuild and evaluate it over CDP. Verified: lint, tsc, 157 Vitest, build, 66 Playwright passed with 12 expected skips, production curl of headers and CSP.
+- **Status:** shipped-pending-migration
+
+### [FEAT-1790991962] Codelings evolve
+- [ ] **Priority:** high
+- **Area:** game
+- **File(s):** game/src/data/species.ts, game/src/gfx/creatures.ts, game/src/battle/*, game/src/ui/*, game/src/engine/storage.ts, docs/game-design.md
+- **Why:** Owner asked to build out the rest of the game; evolution is the classic progression beat the current game lacks.
+- **Approach:** Per docs/game-design.md (evolution section, written before code): each repository species gets evolved stages derived deterministically from it (name, sprite, stats, moves); evolution triggers after battle at set levels with a cancellable cutscene; the Codex keeps one entry per repository and shows the highest stage seen; saves gain a per-Codeling stage that defaults to the base stage.
+- **Library / dependency notes:** none.
+- **Acceptance criteria:** A Codeling reaching its evolution level evolves after battle with the cutscene (B cancels and it retries next level); evolved forms differ visibly and in stats; old saves load; Codex stays one entry per repository; all gates green.
+- **Test plan:** Unit: stage derivation determinism and constraints, stat growth, evolution trigger and cancel, save migration. E2E: seeded save at the threshold evolves after a battle.
+- **Out of scope:** Trade or item evolution, branching evolutions.
+- **Bump:** minor
+- **Status:** open
+
+### [FEAT-1790991963] Codelings region expansion: two towns, two routes, two gyms and the Champion
+- [ ] **Priority:** high
+- **Area:** game
+- **File(s):** game/src/world/maps/*, game/src/data/trainers.ts, game/src/data/ids.ts, game/src/world/*, game/src/ui/*, docs/game-design.md
+- **Why:** Owner asked to build out the rest of the game; today the journey ends after one gym and three outdoor areas.
+- **Approach:** Per docs/game-design.md (region section, written before code): Stack Cave opens onto new routes, two new towns with their own Center and Mart, two new gyms with distinct puzzles and leaders (three badges total), and a Champion battle that becomes the ending trigger; habitats and levels re-spread across all wild areas.
+- **Library / dependency notes:** none.
+- **Acceptance criteria:** A player can travel from Sterling Town to the Champion, earn three badges in order, and see the ending after the Champion; every species stays catchable; old saves continue (Rhea already beaten keeps the badge); all gates green.
+- **Test plan:** Unit: map connectivity and warp targets, gating flags, habitat coverage, trainer party constraints. E2E: seeded saves enter each new town and start each new gym battle.
+- **Out of scope:** Surf/fly-style field moves, more than three gyms.
+- **Bump:** minor
+- **Status:** open
+
+### [FEAT-1790991964] Codelings post-game: rematches, a legendary and side quests
+- [ ] **Priority:** med
+- **Area:** game
+- **File(s):** game/src/world/*, game/src/data/*, game/src/ui/*, docs/game-design.md
+- **Why:** Owner asked to build out the rest of the game; after the ending there is nothing new to do.
+- **Approach:** Per docs/game-design.md (post-game section, written before code): gym leader and Champion rematches at higher levels after the ending, one legendary Codeling in a sealed room that opens after the ending, and three NPC side quests with rewards.
+- **Library / dependency notes:** none.
+- **Acceptance criteria:** After the ending rematches, the legendary encounter and the three side quests are available and completable; nothing post-game is reachable before the ending; old saves load; all gates green.
+- **Test plan:** Unit: post-game gating, rematch parties, quest state transitions. E2E: post-game seeded save reaches the legendary battle.
+- **Out of scope:** Online features, daily events beyond the rematch cooldown.
+- **Bump:** minor
+- **Status:** open
+
+## Shipped`, append a one-liner to `CHANGELOG.md / Unreleased / Added` (or `Changed`).
 
 IDs are UNIX-epoch timestamps (`FEAT-$(date +%s)`), never sequential — appended at
 the end of their section, sorted by id on read.

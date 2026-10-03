@@ -37,9 +37,9 @@ Set production variables in Vercel; never commit secrets.
 ## Scripts and checks
 
 - `npm run dev`: development server.
-- `npm run build:game`: compile `game/src` into generated `public/game/` browser modules.
-- `npm run dev:game`: watch and recompile the game alongside `npm run dev`.
-- `npm run build`: compile the game, then create the Next.js production build.
+- `npm run build:game`: strictly type-check `game/src`, then bundle and minify it with esbuild into `public/game/main.js`, removing stale output first.
+- `npm run dev:game`: watch and rebundle the game with esbuild alongside `npm run dev`; log each rebuild's size.
+- `npm run build`: type-check and bundle the game, then create the Next.js production build.
 - `npm run start`: serve the production build.
 - `npm run lint`: ESLint.
 - `npm test`: Vitest unit tests; `npm run test:watch` watches changes.
@@ -55,8 +55,8 @@ without starting a local server.
 
 Next.js App Router route handlers return complete HTML documents as
 `Response` objects. There are no React page components, layouts, or web fonts.
-Only `/projects` loads a module script, compiled with the existing TypeScript
-compiler; its Content Security Policy uses `script-src 'self'`. All other pages
+Only `/projects` loads a module script, bundled and minified with esbuild after
+strict TypeScript checking; its Content Security Policy uses `script-src 'self'`. All other pages
 use `script-src 'none'`. The policy limits
 styles and images to the same origin. CSS provides the marquee and blinking
 NEW label, disables both for reduced motion, and supplies print styles.
@@ -67,8 +67,9 @@ NEW label, disables both for reduced motion, and supplies print styles.
 - `app/lib/projectPresentation.ts`: display names and descriptions for selected repos.
 - `game/`: Codelings engine, procedural creatures, battles, collection menus, and unit tests; see [the game design](docs/game-design.md).
 - `game/src/world/`: overworld movement, typed map data, NPCs, and story scripts.
-- `public/game/`: generated browser modules, excluded from Git.
-- `public/retro.css`: the site's only stylesheet, including the CSS handheld.
+- `public/game/main.js`: one generated, minified browser bundle, excluded from Git.
+- `public/retro.css`: the site's only stylesheet, including the CSS handheld. Both it and the game script use a content-derived `?v=` query and a one-year immutable cache in production.
+- Public images, icons and the resume PDF use a one-day cache with one week of stale-while-revalidate in production. The portrait and Peru photo are resized for their display sizes; below-the-fold photos load lazily.
 - `scripts/render-assets.mjs`: regenerates the committed favicon set and 1200x630 share card (`npm run assets`).
 - `app/route.ts` and the route folders: Home, About, Projects, Resume, Off the Clock, Contact, and the catch-all 404.
 - `app/sitemap.ts` and `app/robots.ts`: crawler metadata.

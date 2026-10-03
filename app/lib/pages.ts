@@ -6,7 +6,7 @@ import type { RepoSummary } from "./types";
 const external = 'target="_blank" rel="noopener noreferrer"';
 const profile = 'target="_blank" rel="me noopener noreferrer"';
 const paragraph = (text: string) => `<p>${esc(text)}</p>`;
-const portrait = '<img class="portrait" src="/victor-profile.jpg" width="120" height="120" alt="Victor\'s illustrated GitHub profile portrait">';
+const portrait = '<img class="portrait" decoding="async" fetchpriority="high" src="/victor-profile.jpg" width="120" height="120" alt="Victor\'s illustrated GitHub profile portrait">';
 
 export function homeBody(): string {
   const lines = ["who I am and what I work on", "everything public on my GitHub, updated hourly", "experience, projects and education (PDF too)", "climbing, cards, books and travel", "email, GitHub and LinkedIn"];
@@ -22,7 +22,7 @@ ${paragraph("I work on certification software at Paradigm Testing. That means AP
 ${paragraph("Most days, I work with Java, Spring Boot, React, and PostgreSQL. Outside of that, I build tools in Go and TypeScript and spend a lot of time exploring agentic development workflows.")}
 ${paragraph("I studied computer science at UMBC and I'm pursuing an M.S. in Computer Science at Georgia Tech, expected December 2027. Away from the desk, you'll usually find me climbing or thinking about the next project.")}
 <blockquote>Build fast. Always test.<br><small>A good test suite is part of the work.</small></blockquote><h2>Tools I use</h2><ul class="columns">${[...SKILLS, "Go"].map((skill) => `<li>${esc(skill)}</li>`).join("")}</ul>
-<figure><img src="/conference-photo.jpg" alt="A moment at the conference podium" width="320" height="320"><figcaption>At the podium.</figcaption></figure><p><a href="/projects">See what I'm building &raquo;</a></p>
+<figure><img loading="lazy" decoding="async" src="/conference-photo.jpg" alt="A moment at the conference podium" width="320" height="320"><figcaption>At the podium.</figcaption></figure><p><a href="/projects">See what I'm building &raquo;</a></p>
 <div itemscope itemtype="https://schema.org/ProfilePage">${personMicrodata('itemprop="mainEntity"')}</div>`;
 }
 
@@ -74,7 +74,7 @@ export function offTheClockBody(): string {
     ["Side projects", "Agentic workflows, deployment automation, and small developer tools."],
     ["Reading", "Pierce Brown’s Red Rising trilogy."],
   ];
-  return `<h1>Off the clock</h1>${paragraph("What I do when I'm not working.")}<dl class="interests">${interests.map(([heading, text], index) => `<dt>${esc(heading)}</dt><dd>${esc(text)}${index === 3 ? '<p><img src="/peru-travel.webp" alt="Mountains and a river in Peru" width="320" height="240"></p>' : ""}</dd>`).join("")}</dl>`;
+  return `<h1>Off the clock</h1>${paragraph("What I do when I'm not working.")}<dl class="interests">${interests.map(([heading, text], index) => `<dt>${esc(heading)}</dt><dd>${esc(text)}${index === 3 ? '<p><img loading="lazy" decoding="async" src="/peru-travel.webp" alt="Mountains and a river in Peru" width="320" height="240"></p>' : ""}</dd>`).join("")}</dl>`;
 }
 
 export function contactBody(): string {

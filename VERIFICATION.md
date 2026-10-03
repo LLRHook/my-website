@@ -22,11 +22,11 @@ Dated evidence sections below describe earlier versions.
 5. For a deployment, set `PLAYWRIGHT_BASE_URL` to its HTTPS URL and run the same
    E2E command. This skips local startup.
 
-Current baseline: 157 Vitest cases across 13 files and 72 Playwright cases across
-2 files: Chromium and WebKit run both suites (14 site and 11 game each, 4 game
+Current baseline: 157 Vitest cases across 13 files and 78 Playwright cases across
+2 files: Chromium and WebKit run both suites (15 site and 12 game each, 4 game
 cases skipped as touch-only), and the iPhone 15 (WebKit) and Pixel 7 (Chromium)
-touch projects run only the game suite (11 each, 1 desktop-only case skipped),
-so 62 run and 10 skip. Vitest covers repository listing, filtering, mapping
+touch projects run only the game suite (12 each, 2 desktop-only cases skipped),
+so 66 run and 12 skip. Vitest covers repository listing, filtering, mapping
 and fallback; HTML escaping, metadata, microdata and navigation; pure body
 renderers; and the game's pure modules (RNG, storage validation, text wrapping,
 MML parser and music data, maps, scripts, NPC sight lines, species, formulas,
@@ -37,7 +37,7 @@ authoritative counts. Historical counts below refer to their recorded builds.
 
 - All six PAGES paths return 200 and text/html with one visible h1. Every page
   except /projects has no script tags and a CSP with `script-src 'none'`;
-  /projects has exactly one script (`/game/main.js`, type module) and a CSP with
+  /projects has exactly one script (`/game/main.js` with an optional `?v=` query, type module) and a CSP with
   `script-src 'self'`. Navigation marks only the current page with `aria-current`.
 - The game boots to `data-ready` and `data-scene="title"` with zero console and
   page errors; keyboard and on-screen START reach the intro; a new game reaches
@@ -53,6 +53,13 @@ authoritative counts. Historical counts below refer to their recorded builds.
   screen scale 2 or more; EXIT restores scrolling. On desktop the power LED stays
   inside the bezel in fullscreen. Audio unlock, vibration and notch insets need a
   physical-device check; emulation cannot prove them.
+- Low-bandwidth delivery (FEAT-1790991961): the game is one minified esbuild
+  bundle, so a cold /projects load makes one `/game/` request (3 requests in
+  total). In production `/retro.css` and `/game/main.js` (always linked with a
+  content `?v=` hash) are `immutable` for a year; images, icons and the PDF are
+  cached a day with a week of stale-while-revalidate. Recorded cold transfer on
+  2026-10-02: / 22 KB, /about 52 KB, /projects 82 KB, /off-the-clock 62 KB; with
+  400ms latency and 50 KB/s, /projects reached `data-ready` in 2.6s (7.3s before).
 - Projects use hourly GitHub listing and show a table or a usable empty notice
   without `GITHUB_TOKEN`. Descriptions are escaped, profile and undescribed repos
   are filtered, rows sort newest first, and demo links use HTTP(S).
@@ -71,8 +78,8 @@ authoritative counts. Historical counts below refer to their recorded builds.
 ## Runtime and deployment checks
 
 - GET /, /about, /projects, /resume, /off-the-clock, /contact, /robots.txt,
-  /sitemap.xml, /retro.css, /favicon.svg, /favicon.ico, /apple-touch-icon.png,
-  /og-image.png, /game/main.js, the resume PDF and public photos return 200.
+  /sitemap.xml, /retro.css (allow `?v=`), /favicon.svg, /favicon.ico, /apple-touch-icon.png,
+  /og-image.png, /game/main.js (allow `?v=`), the resume PDF and public photos return 200.
 - Only /projects contains a `<script>` element and carries `script-src 'self'`;
   every other response carries `script-src 'none'`. /interests redirects (308)
   to /off-the-clock; unknown paths return the HTML 404 page.
