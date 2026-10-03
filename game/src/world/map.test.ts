@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { Dir, MapId } from "../data/ids.js";
 import { TILE_DEFS, lightAt, remap } from "../gfx/tiles.js";
+import { createNpcs } from "./npc.js";
 import { MAPS } from "./maps/index.js";
 import { VECTORS, canMove, connectionDestination, inBounds, walkable } from "./map.js";
 
@@ -28,6 +29,10 @@ describe("authored maps", () => {
       for (const warp of map.warps) {
         const target = MAPS[warp.to];
         expect(walkable(target, warp.tx, warp.ty)).toBe(true);
+        if (warp.to === map.id) {
+          expect(map.tiles[warp.y][warp.x]).toBe("@");
+          continue;
+        }
         expect(target.warps.some((back) => back.x === warp.tx && back.y === warp.ty && back.to === map.id
           && back.tx === warp.x && back.ty === warp.y)).toBe(true);
       }
@@ -45,12 +50,16 @@ describe("authored maps", () => {
       }
       visited.add(key);
       maps.add(point.map);
-      const map = MAPS[point.map];
+      const original = MAPS[point.map];
+      const map = original.id === "pipeGym" ? { ...original,
+        tiles: original.tiles.map((row) => row.replaceAll("|", "/")),
+      } : original;
+      const npcs = createNpcs(map, ["gate:warden", "gate:ranger", "gate:guard"]);
       for (const dir of directions) {
         const [dx, dy] = VECTORS[dir];
         const x = point.x + dx;
         const y = point.y + dy;
-        if (canMove(map, point.x, point.y, dir, map.npcs)) {
+        if (canMove(map, point.x, point.y, dir, npcs)) {
           const hop = map.tiles[y][x] === "v" ? 1 : 0;
           if (walkable(map, x + dx * hop, y + dy * hop)) {
             queue.push({ map: point.map, x: x + dx * hop, y: y + dy * hop });
@@ -68,6 +77,8 @@ describe("authored maps", () => {
     expect(maps).toEqual(new Set(Object.keys(MAPS)));
     expect(visited.has("lab:4:7")).toBe(true);
     expect(visited.has("gym:4:3")).toBe(true);
+    expect(visited.has("tower:5:3")).toBe(true);
+    expect(visited.has("releaseGym:8:3")).toBe(true);
   });
 });
 describe("movement and palette", () => {

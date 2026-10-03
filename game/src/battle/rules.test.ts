@@ -40,7 +40,8 @@ describe("Codeling species", () => {
       expect(Object.values(entry.base).every((value) => value >= 45 && value <= 110)).toBe(true);
       expect(entry.catchRate).toBeGreaterThanOrEqual(45);
       expect(entry.catchRate).toBeLessThanOrEqual(255);
-      expect(entry.habitat).toHaveLength(1);
+      expect(entry.habitat).toHaveLength(3);
+      expect(entry.habitat.slice(1)).toEqual(["route3", "route4"]);
       expect(entry.learnset.map((learn) => learn.level)).toEqual(
         entry.learnset.map((learn) => learn.level).sort((a, b) => a - b));
       expect(entry.learnset.every((learn) => MOVES[learn.move])).toBe(true);

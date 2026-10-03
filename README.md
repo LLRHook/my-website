@@ -45,6 +45,7 @@ Set production variables in Vercel; never commit secrets.
 - `npm test`: Vitest unit tests; `npm run test:watch` watches changes.
 - `npx tsc --noEmit`: standalone TypeScript check.
 - `npm run test:e2e`: Playwright in Chromium and WebKit.
+- PowerShell visual QA: `$env:CODELINGS_CAPTURE_DIR="C:/Users/Victor/AppData/Local/Temp/game/shots8b"; npx playwright test e2e/visual-qa.spec.ts --project=chromium; Remove-Item Env:CODELINGS_CAPTURE_DIR` captures the game at 4× resolution.
 
 Install browser engines with `npx playwright install chromium webkit` before
 running E2E tests. Playwright reuses a local production server or builds and
@@ -101,11 +102,18 @@ normal revert and the same deployment path.
 
 ### Codelings battles and collection
 
-Choose a level-5 starter in Prof. Ivanov's lab, then explore Route 1, Route 2 and
-Stack Cave. Each public repository has a deterministic Codeling, with older
-repositories deeper in the cave. Fight, catch and train a party of six, store
+Choose a level-5 starter in Prof. Ivanov's lab, then explore five wild areas,
+from Route 1 through Stack Cave to Branch Trail and Release Road. Each public
+repository has a deterministic Codeling, with older repositories deeper in the
+cave. Fight, catch and train a party of six, store
 extras in the Center PC, buy or sell supplies at the Mart, and challenge Reviewer
-Rhea for the green-check badge and credits. Completing the Codex earns a diploma.
+Rhea for the green-check badge. Continue to Branch Bay and Release Ridge: solve
+the Pipeline switches, follow the Release Gym deploy pads, and earn all three
+badges to challenge Prof. Ivanov, the Champion, in Main Branch Tower. The credits
+follow that final battle; KEEP PLAYING returns you to the Tower entrance.
+Completing the Codex earns a diploma. Branch Trail and Release Road include every
+species, and a black out returns you to your last visited Center. Older saves
+keep their Merge badge and Commit City Center checkpoint.
 Codelings evolve after levelling up in battle; press B during the animation to cancel.
 Caught Codex entries open the repository after a YES/NO confirmation; HTTP(S)
 homepages also offer a demo link. Saves stay in this browser's local storage.

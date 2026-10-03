@@ -116,7 +116,7 @@ export function buildSpecies(repos: GameRepo[]): Species[] {
       level += 5 + Math.floor(rng() * 4);
     }
     const third = Math.min(2, Math.floor(index * 3 / sorted.length));
-    const habitat: MapId[] = [["cave", "route2", "route1"][third] as MapId];
+    const habitat: MapId[] = [["cave", "route2", "route1"][third] as MapId, "route3", "route4"];
     const stages = threeStages.has(repo.id) ? 3 : 2;
     const base = { hp: values[0], atk: values[1], def: values[2], spd: values[3], spc: values[4] };
     const catchRate = Math.max(45, 255 - Math.floor(Math.log2(repo.stars + 1) * 30));

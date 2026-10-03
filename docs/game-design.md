@@ -373,10 +373,126 @@ a straight line (`!` balloon, walk up, dialogue, battle); signs and objects use 
 Story: wake in the bedroom, go downstairs, try to leave town north, Prof.
 Ivanov stops you, lab: pick one of three starters (the three highest-star
 species of distinct types; ties by recency), receive the Codex and 5 Fork Balls.
-Goal: register every Codeling (every project) and earn the Merge Gym badge.
-Beating Rhea plays the ending: Prof. Ivanov thanks the player, credits roll
+Goal: register every Codeling (every project), earn three badges and beat the
+Champion (§6.1). Beating the Champion plays the ending: Prof. Ivanov thanks the player, credits roll
 (game by Victor Ivanov; links offered: Resume, Contact, GitHub). Completing the
 Codex gives a diploma screen. Play continues after the ending.
+
+### 6.1 Region expansion (FEAT-1790991963)
+
+The journey continues north from Stack Cave through two towns and two gyms to the
+Champion. Three badges in order; the Champion replaces Rhea as the ending trigger.
+
+New `MapId`s: `route3`, `bay`, `bayCenter`, `bayMart`, `bayHouse`, `pipeGym`,
+`route4`, `ridge`, `ridgeCenter`, `ridgeMart`, `releaseGym`, `tower`.
+Existing `center`/`mart` stay Commit City's. Center and Mart interiors are built
+by one factory in `world/maps/interiors.ts` (`makeCenter(id, town, door)`,
+`makeMart(id, town, door)`; every Mart sells the §8 stock) so each town has its own interior ids with
+correct return warps; the Commit interiors use the same factory with their
+current layout and coordinates unchanged.
+
+1. `cave`: the ladder at (9,3) becomes a warp to `route3` (south end). A "Cave
+   Warden" NPC stands on (9,4) until the player holds `badge:merge` ("The upper
+   shelf is for badge holders."), then steps aside (moves to (10,4)).
+2. `route3` (24x30, outdoor, track `route`): forest ascent with irregular grass,
+   two ledges, a stream with a bridge, 3 trainers (levels 14-18), item balls
+   (Great Fork x2, Hotfix), a hidden item, signs; encounters 0.14, levels 14-19.
+   North connection to `bay`.
+3. `bay` Branch Bay (26x22, outdoor, new track `bay`): harbour town on the
+   east shore with docks, a lighthouse (decor), boats (decor), sand and water
+   edges, Center, Mart, Pipeline Gym, `bayHouse` (enterable), 4 NPCs with
+   project-themed trivia, signs. North connection to `route4`.
+4. `pipeGym` Pipeline Gym (12x16, track `gym`): puzzle "pipeline stages": three
+   floor switches labelled LINT, TEST, BUILD (new switch metatiles: up/down
+   states) and three barrier rows (new barrier metatile, solid while closed).
+   Pressing the switches in order LINT > TEST > BUILD opens the barriers one
+   by one; a wrong switch closes all and resets (buzz SFX). Two trainers
+   (levels 20-22). Leader "Ops Otto" (party 4: levels 22, 23, 24, 25, picks
+   `star:5`, `star:6`, `mixed`, `star:2`), reward 1500, badge `badge:pipeline`
+   (art: green pipeline). Switch state is per visit (not saved).
+5. `route4` Release Road (20x40, outdoor, new track `mountain`): mountain
+   switchbacks with ledges, a river crossing on a long bridge, rock clusters,
+   a short tunnel segment (cave tiles, no encounters), 4 trainers (levels
+   24-28), item balls (Full Rebuild, Rollback, Great Fork x3); encounters
+   0.15, levels 22-28. A ranger NPC blocks the south entrance from `bay` until
+   `badge:pipeline`. North connection to `ridge`.
+6. `ridge` Release Ridge (24x22, outdoor, new track `ridge`): snowy mountain
+   town (new snow ground/tree variants, same palette rules), Center, Mart,
+   Release Gym, the Main Branch Tower entrance at the north edge, 4 NPCs.
+7. `releaseGym` Release Gym (12x16, track `gym`): puzzle "deploy pads":
+   teleport pads (new pad metatile) are warps within the same map; a maze of
+   pads where some lead back to the start; a sign hints "Tag, then ship.". Two
+   trainers (levels 28-30). Leader "Maintainer Mira" (party 5: levels 30, 31,
+   32, 33, 34; picks `star:4`, `mixed`, `star:3`, `mixed`, `star:1`), reward
+   2500, badge `badge:release` (art: tag).
+8. `tower` Main Branch Tower (12x18, track new `tower`): a guard at the door
+   requires all three badges; inside, two ace trainers (levels 34-36) in a
+   hall, then the Champion: Prof. Ivanov ("You have met every one of my
+   projects. Show me what they can do.") with 6 Codelings, levels 36, 37, 38,
+   39, 40, 42, picks `star:1`..`star:6` (wrapping when fewer species), stages
+   by `stageAt`. Battle track new `champion`. Winning sets `champion`, plays
+   the existing ending (credits text adds the three badges), then returns the
+   player to the tower entrance in `ridge`.
+9. `lab`: after `badge:release` the aide says the Prof. went to Main Branch
+   Tower; the Prof. NPC is hidden from the lab after that until `champion`.
+
+Rules:
+
+- Trainer `pick` grammar adds `star:<n>` (n-th species by stars, desc, ties by
+  newer push, wrapping). Rhea's special case stays.
+- Wild species: route1/route2/cave keep today's thirds. `route3` and `route4`
+  draw from every species (rarity-weighted), so the Codex can be completed late.
+  Stage by `stageAt(level)`.
+- Badges: flags `badge:merge`, `badge:pipeline`, `badge:release`; storage
+  reconciliation maps the old `badge` flag to `badge:merge`. Rhea now grants the
+  badge with the badge jingle and a hint ("The next gym is past Stack Cave.")
+  instead of the ending.
+- Black out returns to the last visited Center: flag `lastCenter:<mapId>`
+  (one kept, replaced on each visit); old `lastCenter` maps to `center`.
+- Trainer card: three badge slots (check, pipeline, tag; empty slot outline when
+  missing) and a CHAMPION star after `champion`.
+- New tracks (original, MML): `bay`, `mountain`, `ridge`, `tower`, `champion`.
+  New SFX: `switch`, `buzz`, `teleport`.
+- Save: `validSave` accepts the new map ids.
+- Tests (Vitest): every new map rectangular, warps/connections land on walkable
+  tiles in bounds and are reciprocal where expected, the full graph from
+  `bedroom` reaches `tower`, gates (warden, ranger, guard) block without flags
+  and open with them, `star:<n>` picks, Pipeline switch logic (order, reset),
+  blackout center selection, old-flag migration. E2E (seeded saves injected with
+  `loadGameModules`): enter `bay` and `ridge` from their routes, start the Otto,
+  Mira and Champion battles (`data-scene="battle"`), and a Champion win (forced
+  via a test save at high level with `?seed=1`) reaches the ending.
+
+### 6.2 Post-game (FEAT-1790991964)
+
+Nothing here is reachable before `champion`.
+
+- Rematches: Rhea, Otto, Mira and Prof. Ivanov (now back in the lab) offer a
+  rematch once per local calendar day (flag `rematch:<id>:<YYYY-MM-DD>`, only
+  the latest kept per id). Parties are 6 Codelings: Rhea 40-45, Otto 45-50,
+  Mira 50-55, Prof. 58-63, picks spread by `star:<n>` and `mixed`, stages by
+  `stageAt`. Rewards x2.
+- Legendary: a sealed door in Stack Cave (new door metatile at the cave's west
+  wall) opens after `champion` into `vault` (10x10, cave track, no random
+  encounters). ORIGIN, a unique Codeling not from a repository: id `1` (no
+  GitHub repository payload uses it; documented as reserved), type `normal`,
+  base total 600, catch rate 3, level 50, 3-stage-style sprite with a gold ramp
+  (seeded, distinct), stands visible on a pedestal; A starts the battle with the
+  `champion` track. If it faints or the player runs, it returns when the vault
+  is re-entered; once caught it is gone (flag `origin`). Codex: entry `000`
+  after seen, opens the GitHub profile; it does not count toward the diploma.
+- Side quests (state in flags `quest:<id>:<state>`):
+  1. "Lost keyboard": Old Dev in `bayHouse` lost his keyboard on Route 3; a
+     hidden spot there (post-game only) gives "OLD KEYBOARD"; returning it pays
+     1000 coins and 3 Hotfix.
+  2. "Evolved, please": a Collector in `ridge` asks to see an evolved (stage 2+)
+     Codeling in the party; pays 5 Great Fork.
+  3. "Codex milestones": the lab aide rewards 25%, 50% and 100% caught (repo
+     species only): 5 Great Fork; 3 Full Rebuild; 3000 coins and 3 Rollback.
+- Tests (Vitest): post-game gating for every element, rematch daily cooldown and
+  parties, ORIGIN species constraints and Codex exclusion from the diploma,
+  quest state transitions and rewards. E2E: a post-game seeded save enters
+  `vault` and starts the ORIGIN battle.
 
 ## 7. Scripts and dialogue
 

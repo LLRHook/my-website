@@ -59,7 +59,7 @@ Priority guide: crit / high / med / low.
 - **Status:** shipped-pending-migration
 
 ### [FEAT-1790991963] Codelings region expansion: two towns, two routes, two gyms and the Champion
-- [ ] **Priority:** high
+- [x] **Priority:** high
 - **Area:** game
 - **File(s):** game/src/world/maps/*, game/src/data/trainers.ts, game/src/data/ids.ts, game/src/world/*, game/src/ui/*, docs/game-design.md
 - **Why:** Owner asked to build out the rest of the game; today the journey ends after one gym and three outdoor areas.
@@ -69,7 +69,8 @@ Priority guide: crit / high / med / low.
 - **Test plan:** Unit: map connectivity and warp targets, gating flags, habitat coverage, trainer party constraints. E2E: seeded saves enter each new town and start each new gym battle.
 - **Out of scope:** Surf/fly-style field moves, more than three gyms.
 - **Bump:** minor
-- **Status:** open
+- **Implementation:** Per docs/game-design.md §6.1: the Stack Cave ladder (behind a Cave Warden until `badge:merge`) leads to Route 3, Branch Bay (harbour town with its own Center, Mart and Old Dev's house), the Pipeline Gym (LINT > TEST > BUILD switch puzzle in pure `world/pipeline.ts`; Ops Otto), Route 4 (mountain road behind a ranger until `badge:pipeline`, cliffs, bridge, tunnel), Release Ridge (snow town, lookout, frozen pond), the Release Gym (deploy-pad warp maze; Maintainer Mira) and Main Branch Tower (guard needs three badges; Champion Prof. Ivanov, 6 Codelings, `champion` flag, ending, return to Ridge). Center/Mart interiors come from `interiors.ts` factories (Commit layouts unchanged); `star:<n>` trainer picks; late routes draw every species; badges are `badge:merge/pipeline/release` (old `badge` migrates), blackout returns to the last visited Center (`lastCenter:<map>`); trainer card shows three badges and a CHAMPION star. Nine new character sprites with battle portraits, new harbour/snow/mountain/gym tiles, five tracks and three SFX. Screenshot captures moved to opt-in `e2e/visual-qa.spec.ts`. Two art review passes (shared trainer sprite, warden not moving, bare Ridge/Route 4/gym interiors). Verified: lint, tsc, 217 Vitest, build, 110 Playwright passed with 12 expected skips, 29 captures inspected.
+- **Status:** shipped-pending-migration
 
 ### [FEAT-1790991964] Codelings post-game: rematches, a legendary and side quests
 - [ ] **Priority:** med

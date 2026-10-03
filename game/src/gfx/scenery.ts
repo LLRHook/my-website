@@ -20,6 +20,14 @@ const BUILDINGS: Partial<Record<MapId, readonly Building[]>> = {
     { x: 3, y: 7, width: 5, style: "house" }, { x: 12, y: 6, width: 5, style: "lab" },
     { x: 2, y: 2, width: 4, style: "house" }, { x: 13, y: 13, width: 4, style: "house" },
   ],
+  bay: [
+    { x: 3, y: 5, width: 5, style: "center" }, { x: 13, y: 5, width: 5, style: "mart" },
+    { x: 3, y: 12, width: 5, style: "gym" }, { x: 9, y: 16, width: 4, style: "house" },
+  ],
+  ridge: [
+    { x: 3, y: 6, width: 5, style: "center" }, { x: 15, y: 6, width: 5, style: "mart" },
+    { x: 3, y: 14, width: 5, style: "gym" }, { x: 8, y: 0, width: 8, style: "lab" },
+  ],
   commit: [
     { x: 3, y: 5, width: 5, style: "center" }, { x: 15, y: 5, width: 5, style: "mart" },
     { x: 9, y: 12, width: 5, style: "gym" }, { x: 3, y: 15, width: 4, style: "house" },
@@ -94,6 +102,7 @@ function terrainArt(): void {
       }
     }
     register(`grass:${variant}`, rows, [7, 8, 9]);
+    register(`gravel:${variant}`, rows, [27, 28, 19]);
   }
   for (let edges = 0; edges < 16; edges++) {
     const rows = grid();
@@ -106,6 +115,8 @@ function terrainArt(): void {
       }
     }
     register(`path:${edges}`, rows, [18, 19, 7, 8]);
+    register(`snow-path:${edges}`, rows, [18, 19, 5, 12]);
+    register(`mountain-path:${edges}`, rows, [18, 19, 27, 28]);
     for (let frame = 0; frame < 2; frame++) {
       const water = grid();
       for (let y = 0; y < 16; y++) {
@@ -167,6 +178,40 @@ function terrainArt(): void {
   rect(tree, 14, 25, 2, 4, "0");
   rect(tree, 8, 30, 18, 1, "2");
   register("tree", tree, [9, 8, 10]);
+  const pine = grid(32, 32, ".");
+  for (const [top, height, width] of [[1, 10, 8], [8, 12, 12], [15, 11, 15]]) {
+    for (let y = top; y < top + height; y++) {
+      const half = Math.max(1, Math.floor((y - top + 1) * width / height));
+      for (let x = 16 - half; x <= 16 + half && x < 32; x++) {
+        pine[y][x] = x === 16 - half || x === 16 + half || y === top + height - 1
+          ? "3" : y > top + height - 4 ? "1" : "0";
+      }
+    }
+  }
+  rect(pine, 14, 25, 4, 5, "2");
+  rect(pine, 8, 30, 18, 1, "3");
+  register("pine", pine, [9, 8, 10, 28]);
+  register("snow-pine", pine, [5, 12, 10, 27]);
+  const lookout = grid(32, 32, ".");
+  for (let y = 2; y < 10; y++) {
+    const half = 1 + (y - 2) * 2;
+    rect(lookout, 16 - half, y, half * 2, 1, y === 9 ? "1" : "0");
+    lookout[y][16 - half] = "1";
+    lookout[y][15 + half] = "1";
+  }
+  rect(lookout, 5, 10, 3, 22, "1");
+  rect(lookout, 24, 10, 3, 22, "1");
+  rect(lookout, 8, 11, 16, 9, "3");
+  for (let y = 13; y < 20; y++) {
+    rect(lookout, 12 - (y - 13), y, (y - 13) * 2 + 1, 1, "0");
+  }
+  rect(lookout, 2, 20, 28, 2, "2");
+  for (const x of [3, 10, 19, 27]) {
+    rect(lookout, x, 18, 2, 7, "1");
+  }
+  rect(lookout, 2, 25, 28, 2, "1");
+  rect(lookout, 3, 25, 26, 1, "2");
+  register("lookout", lookout, [5, 21, 19, 12]);
   for (const arrow of ["a", ">", "<"]) {
     const panel = grid();
     rect(panel, 0, 0, 16, 1, "2");
@@ -198,7 +243,7 @@ function terrainArt(): void {
 }
 function buildingArt(): void {
   for (const [style, colours] of Object.entries(ROOF_PALETTES)) {
-    for (const width of [4, 5]) {
+    for (const width of [4, 5, 8]) {
       const roof = grid(width * 16 + 8, 40, ".");
       for (let y = 0; y < 40; y++) {
         const inset = Math.max(0, 8 - Math.floor(y / 3));
@@ -278,19 +323,59 @@ function edgeMask(map: GameMap, x: number, y: number, same: (tile: string) => bo
 }
 export function drawMapTile(screen: Screen, map: GameMap, tile: string, wx: number, wy: number,
   x: number, y: number, frame: number, light: Light): void {
+  if (tile === "^") {
+    drawTile(screen, "*", x, y, frame, light);
+    return;
+  }
+  if (map.id === "ridge" && tile === "?") {
+    drawTile(screen, "*", x, y, frame, light);
+    return;
+  }
+  if (map.id === "ridge" && tile === "F") {
+    screen.fill(remap(5, light), x, y, 16, 16);
+    for (const post of [2, 12]) {
+      screen.fill(remap(21, light), x + post, y + 3, 2, 13);
+      screen.fill(remap(19, light), x + post, y + 4, 1, 11);
+      screen.fill(remap(12, light), x + post - 1, y + 2, 4, 2);
+    }
+    for (const rail of [6, 11]) {
+      screen.fill(remap(21, light), x, y + rail, 16, 2);
+      screen.fill(remap(19, light), x, y + rail, 16, 1);
+    }
+    return;
+  }
+  if (tile === "9") {
+    screen.fill(remap(12, light), x, y, 16, 16);
+    for (let offset = 1; offset < 15; offset++) {
+      const crackY = 3 + Math.floor(offset / 2) + hash(wx, wy) % 3;
+      screen.fill(remap(5, light), x + offset, y + crackY, 1, 1);
+    }
+    for (const [dx, dy] of [[0, -1], [1, 0], [0, 1], [-1, 0]]) {
+      if (map.tiles[wy + dy]?.[wx + dx] !== "9") {
+        screen.fill(remap(5, light), x + (dx > 0 ? 13 : 0), y + (dy > 0 ? 13 : 0),
+          dx ? 3 : 16, dy ? 3 : 16);
+      }
+    }
+    return;
+  }
   if (tile === "_") {
-    const kind = map.id === "lab" ? "lab" : ["bedroom", "house"].includes(map.id) ? "wood" : map.id;
+    const kind = map.id === "lab" ? "lab" : ["bedroom", "house", "bayHouse"].includes(map.id) ? "wood"
+      : ["center", "bayCenter", "ridgeCenter"].includes(map.id) ? "center"
+        : ["mart", "bayMart", "ridgeMart"].includes(map.id) ? "mart" : "gym";
     blit(screen, `floor:${kind}:${hash(wx, wy) % 8}`, x, y, light);
     return;
   }
   if (tile === "." || tile === "T") {
-    blit(screen, `grass:${hash(wx, wy) % 3}`, x, y, light);
+    blit(screen, `${map.id === "route4" ? "gravel" : "grass"}:${hash(wx, wy) % 3}`, x, y, light);
     return;
   }
   if (tile === ":") {
-    const edges = edgeMask(map, wx, wy, (value) => ![".", "g", "f", "T", "Z"].includes(value));
+    const ground = map.id === "ridge" ? ["*", "7", "8", "^"] : [".", "g", "f", "T", "Z"];
+    const edges = edgeMask(map, wx, wy, (value) => !ground.includes(value));
     const plaza = map.id === "commit" && wx >= 14 && wx <= 21 && wy >= 10 && wy <= 15;
-    blit(screen, `${plaza ? "plaza" : "path"}:${edges}`, x, y, light);
+    const kind = map.id === "ridge" ? "snow-path" : map.id === "route4" ? "mountain-path"
+      : plaza ? "plaza" : "path";
+    blit(screen, `${kind}:${edges}`, x, y, light);
     return;
   }
   if (tile === "~") {
@@ -300,6 +385,15 @@ export function drawMapTile(screen: Screen, map: GameMap, tile: string, wx: numb
   }
   if (["a", ">", "<"].includes(tile)) {
     blit(screen, `panel:${tile}`, x, y, light);
+    return;
+  }
+  if (tile === "v" && map.id === "pipeGym") {
+    blit(screen, `floor:gym:${hash(wx, wy) % 8}`, x, y, light);
+    screen.fill(28, x, y + 2, 16, 2);
+    screen.fill(3, x, y + 2, 16, 1);
+    for (let row = 0; row < 3; row++) {
+      screen.fill(28, x + 5 + row, y + 7 + row, 6 - row * 2, 1);
+    }
     return;
   }
   if (tile === "z") {
@@ -335,6 +429,28 @@ export function drawMapTile(screen: Screen, map: GameMap, tile: string, wx: numb
     screen.fill(21, x, y + (wy === 8 ? 0 : 14), 16, 2);
     screen.fill(18, x, y + (wy === 8 ? 0 : 14), 16, 1);
     screen.fill(21, x + 1, y + (wy === 8 ? 0 : 10), 2, 6);
+  }
+  if (tile === "=" && ["route3", "route4"].includes(map.id)) {
+    const dark = remap(21, light);
+    const highlight = remap(18, light);
+    for (const [dx, dy] of [[0, -1], [1, 0], [0, 1], [-1, 0]]) {
+      if (map.tiles[wy + dy]?.[wx + dx] !== "~") {
+        continue;
+      }
+      if (dx) {
+        const railX = x + (dx < 0 ? 0 : 14);
+        screen.fill(dark, railX, y, 2, 16);
+        screen.fill(highlight, railX, y, 1, 16);
+        screen.fill(dark, railX - (dx > 0 ? 1 : 0), y + 2, 3, 3);
+        screen.fill(dark, railX - (dx > 0 ? 1 : 0), y + 11, 3, 3);
+      } else {
+        const railY = y + (dy < 0 ? 0 : 14);
+        screen.fill(dark, x, railY, 16, 2);
+        screen.fill(highlight, x, railY, 16, 1);
+        screen.fill(dark, x + 2, railY - (dy > 0 ? 1 : 0), 3, 3);
+        screen.fill(dark, x + 11, railY - (dy > 0 ? 1 : 0), 3, 3);
+      }
+    }
   }
 }
 export function drawScenery(screen: Screen, map: GameMap, ox: number, oy: number,
@@ -373,10 +489,24 @@ export function drawScenery(screen: Screen, map: GameMap, ox: number, oy: number
       }
     }
   }
-  const tree = atlas.get(`tree:${light}`)!;
+  const tree = atlas.get(`${map.id === "route4" ? "pine" : "tree"}:${light}`)!;
   for (const [x, y] of trees) {
     const sy = overhead ? 0 : 24;
     screen.blit(tree, 0, sy, 32, overhead ? 24 : 8, x + ox, y + oy + sy);
+  }
+  if (map.id === "ridge") {
+    const snowTree = atlas.get(`snow-pine:${light}`)!;
+    for (let y = 0; y < map.height; y++) {
+      for (let x = 0; x < map.width; x++) {
+        if (map.tiles[y][x] === "^") {
+          const sy = overhead ? 0 : 24;
+          screen.blit(snowTree, 0, sy, 32, overhead ? 24 : 8, ox + x * 16 - 8, oy + y * 16 - 16 + sy);
+        }
+      }
+    }
+    if (overhead) {
+      blit(screen, "lookout", ox + 18 * 16 - 8, oy + 13 * 16 - 16, light);
+    }
   }
   for (const building of BUILDINGS[map.id] ?? []) {
     const x = ox + building.x * 16;
@@ -386,6 +516,9 @@ export function drawScenery(screen: Screen, map: GameMap, ox: number, oy: number
       continue;
     }
     blit(screen, `roof:${building.style}:${building.width}`, x - 4, y - 4, light);
+    if (map.id === "ridge") {
+      screen.fill(remap(5, light), x + 5, y + 1, building.width * 16 - 10, 3);
+    }
     if (building.style === "house") {
       blit(screen, "chimney", x + 14, y - 12, light);
     } else if (building.style === "lab") {
