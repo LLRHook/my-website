@@ -1,6 +1,6 @@
 import type { ItemId } from "../data/ids.js";
 import { ITEMS, applyItem } from "../data/items.js";
-import { formOf, type Species } from "../data/species.js";
+import { speciesById, formOf, type Species } from "../data/species.js";
 import type { SaveV1 } from "../engine/storage.js";
 import type { Input } from "../engine/input.js";
 import type { Audio } from "../engine/audio.js";
@@ -42,7 +42,7 @@ export class BagScene implements Scene {
         this.apply(id, this.target);
       } else {
         this.targetMenu = new Menu([...this.state.party.map((mon) =>
-          formOf(this.species.find((entry) => entry.id === mon.species)!, mon.stage).name), "BACK"], (target) => {
+          formOf(speciesById(this.species, mon.species)!, mon.stage).name), "BACK"], (target) => {
           this.targetMenu = undefined;
           if (target < this.state.party.length) {
             this.apply(id, target);
@@ -58,7 +58,7 @@ export class BagScene implements Scene {
       return;
     }
     const mon = this.state.party[target];
-    const species = this.species.find((entry) => entry.id === mon.species)!;
+    const species = speciesById(this.species, mon.species)!;
     if (applyItem(id, mon, stats(formOf(species, mon.stage).base, mon.ivs, mon.level).hp)) {
       this.state.bag[id]!--;
       this.audio.sfx("item");

@@ -22,11 +22,11 @@ Dated evidence sections below describe earlier versions.
 5. For a deployment, set `PLAYWRIGHT_BASE_URL` to its HTTPS URL and run the same
    E2E command. This skips local startup.
 
-Current baseline: 217 Vitest cases across 19 files and 122 Playwright cases across
-2 files: Chromium and WebKit run both suites (15 site and 23 game each, 4 game
+Current baseline: 249 Vitest cases across 20 files and 130 Playwright cases across
+2 files: Chromium and WebKit run both suites (15 site and 25 game each, 4 game
 cases skipped as touch-only), and the iPhone 15 (WebKit) and Pixel 7 (Chromium)
-touch projects run only the game suite (23 each, 2 desktop-only cases skipped),
-so 110 run and 12 skip. `e2e/visual-qa.spec.ts` (screenshot captures) runs only
+touch projects run only the game suite (25 each, 2 desktop-only cases skipped),
+so 118 run and 12 skip. `e2e/visual-qa.spec.ts` (screenshot captures) runs only
 when `CODELINGS_CAPTURE_DIR` is set and is not part of the baseline. Vitest covers repository listing, filtering, mapping
 and fallback; HTML escaping, metadata, microdata and navigation; pure body
 renderers; and the game's pure modules (RNG, storage validation, text wrapping,
@@ -64,6 +64,12 @@ authoritative counts. Historical counts below refer to their recorded builds.
   block without their badges; seeded saves enter Branch Bay and Release Ridge and
   start the Rhea, Otto, Mira and Champion battles on all four projects; a Champion
   win plays the ending and returns the player to the tower entrance in Ridge.
+- Post-game (FEAT-1790991964): before `champion` the Stack Cave door says it is
+  sealed and blocks; a seeded post-game save enters the vault and starts the
+  ORIGIN battle on all four projects. Unit tests gate every post-game element on
+  `champion`, pin the once-per-local-day rematch cooldown and six-member parties,
+  ORIGIN's constraints (id 0, level 50, catch rate 3, one form, excluded from the
+  diploma), quest transitions and rewards, and that saves with species id 0 load.
 - Low-bandwidth delivery (FEAT-1790991961): the game is one minified esbuild
   bundle, so a cold /projects load makes one `/game/` request (3 requests in
   total). In production `/retro.css` and `/game/main.js` (always linked with a

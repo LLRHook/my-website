@@ -2,7 +2,7 @@ export type Dir = "up" | "down" | "left" | "right";
 
 export type MapId = "bedroom" | "house" | "sterling" | "lab" | "route1" | "commit" | "center" | "mart" |
   "gym" | "route2" | "cave" | "route3" | "bay" | "bayCenter" | "bayMart" | "bayHouse" | "pipeGym"
-  | "route4" | "ridge" | "ridgeCenter" | "ridgeMart" | "releaseGym" | "tower";
+  | "route4" | "ridge" | "ridgeCenter" | "ridgeMart" | "releaseGym" | "tower" | "vault";
 
 export type ItemId = "forkBall" | "greatFork" | "patch" | "hotfix" | "fullRebuild" | "rollback" | "linter";
 

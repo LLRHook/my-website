@@ -1,5 +1,5 @@
 import type { Dir, GameRepo, MapId, Options, TrackId } from "../data/ids.js";
-import { QUEST_TEXT as Q, REGION_TEXT as R, WORLD_TEXT as T } from "../data/text.js";
+import { QUEST_TEXT as Q, REGION_TEXT as R, WORLD_TEXT as T, POSTGAME_TEXT as P } from "../data/text.js";
 import type { Audio } from "../engine/audio.js";
 import type { Input } from "../engine/input.js";
 import type { Scene, SceneStack } from "../engine/scenes.js";
@@ -10,8 +10,9 @@ import { drawMapTile, drawScenery } from "../gfx/scenery.js";
 import { drawSprite } from "../gfx/sprites.js";
 import { drawTile, lightAt, type Light } from "../gfx/tiles.js";
 import { windowFrame } from "../gfx/ui.js";
-import { buildSpecies, formOf, starterCandidates, type Species } from "../data/species.js";
-import { trainerParty } from "../data/trainers.js";
+import { speciesById, buildSpecies, formOf, starterCandidates, originSpecies, ORIGIN_ID,
+  type Species } from "../data/species.js";
+import { rematchParty, trainerParty } from "../data/trainers.js";
 import { createCodeling, stats } from "../battle/stats.js";
 import { MOVES } from "../battle/moves.js";
 import { Battle, type BattleResult } from "../battle/battle.js";
@@ -31,6 +32,9 @@ import { MAPS } from "./maps/index.js";
 import {
   OPPOSITE, VECTORS, canMove, connectionDestination, inBounds, walkable, type GameMap, type NpcDef,
 } from "./map.js";
+import { drawCreature } from "../gfx/creatures.js";
+import { postGame, localDate, rematchId, rematchScript, rematchAvailable, markRematch,
+  questScript, keyboardSpot, diplomaComplete } from "./postgame.js";
 import { createNpcs, faceToward, trainerSees, wander, type NpcState } from "./npc.js";
 import { interpolate, runScript, setFlag, type Script, type ScriptHost } from "./script.js";
 
@@ -90,11 +94,15 @@ export class OverworldScene implements Scene, ScriptHost, OverworldHooks {
   readonly species: Species[];
   private readonly fallback: boolean;
   private closed = false;
+  private originCanvas?: HTMLCanvasElement;
 
   constructor(private readonly input: Input, private readonly audio: Audio,
     private readonly stack: SceneStack, private readonly root: HTMLElement, readonly state: SaveV1,
     repos: readonly GameRepo[], private readonly hour?: number,
     private readonly rng: () => number = Math.random, private forceEncounter = false) {
+    if (state.map === "vault" && !postGame(state.flags)) {
+      Object.assign(state, { map: "cave", x: 1, y: 6, dir: "right" });
+    }
     this.map = MAPS[state.map];
     if (!walkable(this.map, state.x, state.y)) {
       state.map = "bedroom";
@@ -322,6 +330,9 @@ export class OverworldScene implements Scene, ScriptHost, OverworldHooks {
     visitCenter(this.state, id);
   }
   private get movementMap(): GameMap {
+    if (this.map.id === "cave" && !postGame(this.state.flags)) {
+      return { ...this.map, tiles: this.map.tiles.map((row, y) => y === 6 ? "A" + row.slice(1) : row) };
+    }
     return this.map.id === "pipeGym" ? { ...this.map,
       tiles: this.map.tiles.map((row, y) => [...row].map((tile) => this.pipelineTile(tile, y)).join("")),
     } : this.map;
@@ -370,8 +381,15 @@ export class OverworldScene implements Scene, ScriptHost, OverworldHooks {
     if (npc) {
       npc.dir = faceToward(npc, this.state.x, this.state.y);
       this.activeNpc = npc;
-      this.launch(this.state.flags.includes(`defeated:${npc.id}`) && npc.trainer
-        ? [{ say: npc.trainer.lose }] : npc.script);
+      const rematch = rematchId(npc.id);
+      const quest = npc.id === "oldDev" ? "keyboard" : npc.id === "collector" ? "evolved"
+        : npc.id === "oren" ? "milestones" : null;
+      const script = postGame(this.state.flags) && rematch
+        ? rematchScript(this.state.flags, rematch, localDate(new Date()))
+        : postGame(this.state.flags) && quest ? questScript(this.state, quest, this.species)
+        : this.state.flags.includes(`defeated:${npc.id}`) && npc.trainer ? [{ say: npc.trainer.lose }] : npc.script;
+      this.launch(script);
+
       return;
     }
     const sign = this.map.signs.find((entry) => entry.x === x && entry.y === y)
@@ -379,7 +397,10 @@ export class OverworldScene implements Scene, ScriptHost, OverworldHooks {
     if (!sign) {
       return;
     }
-    if (sign.text === T.starter) {
+    const keyboard = keyboardSpot(this.state.flags);
+    if (this.map.id === "route3" && sign.x === 15 && sign.y === 28 && keyboard.length) {
+      this.launch(keyboard);
+    } else if (sign.text === T.starter) {
       if (this.state.flags.includes("hasStarter")) {
         this.launch([{ say: Q.remainingStarters }]);
       } else {
@@ -392,6 +413,9 @@ export class OverworldScene implements Scene, ScriptHost, OverworldHooks {
         this.launch([{ say: T.item }, { give: "forkBall", qty: 3 }, { flag: "route1Gift", set: true }]);
       }
     } else {
+      if (this.map.id === "cave" && sign.text === P.sealed && postGame(this.state.flags)) {
+        return;
+      }
       this.launch([{ say: sign.text }]);
     }
   }
@@ -429,7 +453,7 @@ export class OverworldScene implements Scene, ScriptHost, OverworldHooks {
     this.root.dataset.caught = String(this.state.caught.length);
   }
   private async diploma(): Promise<void> {
-    if (this.species.every((species) => this.state.caught.includes(species.id))
+    if (diplomaComplete(this.species, this.state.caught)
       && !this.state.flags.includes("diploma")) {
       setFlag(this.state, "diploma");
       await this.showScene(new DiplomaScene(this.input, this.stack, this.state.name, this.species.length));
@@ -474,7 +498,7 @@ export class OverworldScene implements Scene, ScriptHost, OverworldHooks {
       this.busy = false;
     });
   }
-  private playBattle(foes: SaveV1["party"], npc?: NpcDef): Promise<BattleResult> {
+  private playBattle(foes: SaveV1["party"], npc?: NpcDef, track?: TrackId): Promise<BattleResult> {
     for (const foe of foes) {
       if (!this.state.seen.includes(foe.species)) {
         this.state.seen.push(foe.species);
@@ -493,23 +517,38 @@ export class OverworldScene implements Scene, ScriptHost, OverworldHooks {
           }
           for (const pending of pendingEvolutions(this.state.party, this.species, levelledUp, result)) {
             const mon = this.state.party.find((candidate) => candidate.uid === pending.uid)!;
-            const species = this.species.find((candidate) => candidate.id === mon.species)!;
+            const species = speciesById(this.species, mon.species)!;
             await this.showScene(new EvolutionScene(this.input, this.audio, this.stack,
               this.state, mon, species, pending.to));
           }
           this.audio.play(this.map.music);
           resolve(result);
-        }, npc?.id === "champion" ? "champion"
-          : ["rhea", "otto", "mira"].includes(npc?.id ?? "") ? "leader" : undefined, npc?.sprite));
+        }, track ?? (npc?.id === "champion" || npc?.id === "prof" ? "champion"
+          : ["rhea", "otto", "mira"].includes(npc?.id ?? "") ? "leader" : undefined), npc?.sprite));
     });
   }
   async startTrainerBattle(npc: NpcDef): Promise<void> {
-    if (!npc.trainer || this.state.flags.includes(`defeated:${npc.id}`) || !this.state.party.length) {
+    const id = rematchId(npc.id);
+    const today = localDate(new Date());
+    const rematch = postGame(this.state.flags) && id !== null;
+    if (npc.id === "prof" && !postGame(this.state.flags)) {
       return;
     }
-    const result = await this.playBattle(trainerParty(npc, this.species), npc);
+    if (!npc.trainer || !this.state.party.some((mon) => mon.hp > 0)
+      || (rematch ? !rematchAvailable(this.state.flags, id, today)
+        : this.state.flags.includes(`defeated:${npc.id}`))) {
+      return;
+    }
+    const result = await this.playBattle(rematch ? rematchParty(id, this.species, this.rng)
+      : trainerParty(npc, this.species), npc);
     if (result !== "win") {
       await this.say(Q.blackout);
+      return;
+    }
+    if (rematch) {
+      markRematch(this.state.flags, id, today);
+      this.state.coins += npc.trainer.reward * 2;
+      await this.say(`${npc.trainer.lose} Received ${npc.trainer.reward * 2} coins.`);
       return;
     }
     setFlag(this.state, `defeated:${npc.id}`);
@@ -580,6 +619,27 @@ export class OverworldScene implements Scene, ScriptHost, OverworldHooks {
     }
   }
   async battle(id: string): Promise<void> {
+    if (id === "origin") {
+      if (!postGame(this.state.flags) || this.state.flags.includes("origin")
+        || !this.state.party.some((mon) => mon.hp > 0)) {
+        return;
+      }
+      const foe = createCodeling(originSpecies(), 50, this.rng);
+      const result = await this.playBattle([foe], undefined, "champion");
+      this.npcs = this.npcs.filter((npc) => npc.id !== "origin");
+      if (result === "caught") {
+        (this.state.party.length < 6 ? this.state.party : this.state.box).push(foe);
+        setFlag(this.state, "origin");
+        if (!this.state.caught.includes(ORIGIN_ID)) {
+          this.state.caught.push(ORIGIN_ID);
+        }
+        this.syncCaught();
+        if (await this.ask(Q.openRepository)) {
+          this.open(originSpecies().repo.url);
+        }
+      }
+      return;
+    }
     const npc = this.npcs.find((entry) => entry.id === id);
     if (npc) {
       await this.startTrainerBattle(npc);
@@ -616,7 +676,7 @@ export class OverworldScene implements Scene, ScriptHost, OverworldHooks {
   }
   private restoreParty(): void {
     for (const mon of this.state.party) {
-      const species = this.species.find((entry) => entry.id === mon.species)!;
+      const species = speciesById(this.species, mon.species)!;
       mon.hp = stats(formOf(species, mon.stage).base, mon.ivs, mon.level).hp;
       mon.status = null;
       for (const move of mon.moves) {
@@ -653,7 +713,8 @@ export class OverworldScene implements Scene, ScriptHost, OverworldHooks {
     const frame = Math.floor(this.frames / 30) % 2;
     for (let y = Math.max(0, Math.floor(cy / 16)); y < Math.min(this.map.height, Math.ceil((cy + 144) / 16)); y++) {
       for (let x = Math.max(0, Math.floor(cx / 16)); x < Math.min(this.map.width, Math.ceil((cx + 160) / 16)); x++) {
-        const tile = this.pipelineTile(this.map.tiles[y][x], y);
+        const baseTile = this.pipelineTile(this.map.tiles[y][x], y);
+        const tile = baseTile === "0" && postGame(this.state.flags) ? "`" : baseTile;
         const usedItem = tile === "i" && this.state.flags.includes("route1Gift");
         drawMapTile(screen, this.map, usedItem ? "g" : tile, x, y,
           x * 16 - cx + ox, y * 16 - cy + oy, frame, light);
@@ -672,10 +733,11 @@ export class OverworldScene implements Scene, ScriptHost, OverworldHooks {
     }
     drawScenery(screen, this.map, ox - cx, oy - cy, light, false);
     const actors = this.npcs.filter((npc) => !npc.id.startsWith("hidden-")).map((npc) => ({
-      sprite: npc.sprite, dir: npc.dir, frame: npc.frame, x: npc.px, y: npc.py, player: false,
+      id: npc.id, sprite: npc.sprite, dir: npc.dir, frame: npc.frame, x: npc.px, y: npc.py, player: false,
       item: npc.id.startsWith("item-"),
     }));
-    actors.push({ sprite: "player", dir: this.state.dir, frame: this.step ? Math.floor(this.frames / 6) % 3 : 0,
+    actors.push({ id: "player", sprite: "player", dir: this.state.dir,
+      frame: this.step ? Math.floor(this.frames / 6) % 3 : 0,
       x: this.px, y: this.py, player: true, item: false });
     actors.sort((a, b) => a.y - b.y);
     for (const actor of actors) {
@@ -688,6 +750,12 @@ export class OverworldScene implements Scene, ScriptHost, OverworldHooks {
       }
       if (actor.item) {
         drawTile(screen, "i", x, y, 0, light);
+      } else if (actor.id === "origin") {
+        if (!this.originCanvas) {
+          const origin = originSpecies();
+          this.originCanvas = drawCreature(origin.sprite.seed, origin.sprite.body, origin.type, "front");
+        }
+        screen.blit(this.originCanvas, 0, 0, 32, 32, x, y - 16);
       } else {
         drawSprite(screen, actor.sprite, actor.dir, actor.frame, x, y - hop, light);
       }

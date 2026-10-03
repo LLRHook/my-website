@@ -1,4 +1,4 @@
-import { formOf, type Species } from "../data/species.js";
+import { speciesById, formOf, type Species } from "../data/species.js";
 import type { SaveV1 } from "../engine/storage.js";
 import type { Input } from "../engine/input.js";
 import type { Audio } from "../engine/audio.js";
@@ -18,7 +18,7 @@ export class PcBoxScene implements Scene {
   private makeMenu(): Menu {
     const list = this.box ? this.state.box : this.state.party;
     const entries = list.map((mon) => {
-      const species = this.species.find((entry) => entry.id === mon.species)!;
+      const species = speciesById(this.species, mon.species)!;
       return `${formOf(species, mon.stage).name} L${mon.level}`;
     });
     return new Menu([...entries,

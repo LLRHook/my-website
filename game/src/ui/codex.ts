@@ -1,4 +1,5 @@
-import { formOf, type Species } from "../data/species.js";
+import { postGame } from "../world/postgame.js";
+import { ORIGIN_ID, speciesById, formOf, type Species } from "../data/species.js";
 import type { SaveV1 } from "../engine/storage.js";
 import type { Input } from "../engine/input.js";
 import type { Audio } from "../engine/audio.js";
@@ -13,17 +14,22 @@ import { codexFlavour } from "../data/text.js";
 export class CodexScene implements Scene {
   readonly id = "codex";
   private readonly menu: Menu;
+  private readonly species: readonly Species[];
+  private readonly repositoryTotal: number;
   private entry?: Species;
   private page = 0;
   private yesno?: YesNo;
   private link?: string;
   constructor(private readonly input: Input, private readonly audio: Audio, private readonly stack: SceneStack,
-    private readonly state: SaveV1, private readonly species: readonly Species[], private readonly fallback = false) {
-    this.menu = new Menu(species.map((entry) => `${String(entry.dex).padStart(3, "0")}   ${
+    private readonly state: SaveV1, species: readonly Species[], private readonly fallback = false) {
+    this.repositoryTotal = species.length;
+    this.species = postGame(state.flags) && state.seen.includes(ORIGIN_ID)
+      ? [speciesById(species, ORIGIN_ID)!, ...species] : species;
+    this.menu = new Menu(this.species.map((entry) => `${String(entry.dex).padStart(3, "0")}   ${
       state.seen.includes(entry.id) ? formOf(entry, this.highestStage(entry)).name : "?????"}`),
     (index) => {
-      if (state.seen.includes(species[index].id)) {
-        this.entry = species[index];
+      if (state.seen.includes(this.species[index].id)) {
+        this.entry = this.species[index];
         this.page = 0;
         this.audio.cry(this.entry.sprite.seed);
       }
@@ -47,9 +53,10 @@ export class CodexScene implements Scene {
       const count = this.pages(this.entry).length + 1;
       this.page = (this.page + direction + count) % count;
     }
-    if (this.input.pressed("a") && this.state.caught.includes(this.entry.id)) {
+    const canOpen = this.entry.id === ORIGIN_ID || this.state.caught.includes(this.entry.id);
+    if (this.input.pressed("a") && canOpen) {
       this.confirm(this.entry.repo.url);
-    } else if (this.input.pressed("select") && this.state.caught.includes(this.entry.id)
+    } else if (this.input.pressed("select") && canOpen
       && /^https?:\/\//i.test(this.entry.repo.homepage ?? "")) {
       this.confirm(this.entry.repo.homepage!);
     }
@@ -74,7 +81,8 @@ export class CodexScene implements Scene {
     return entry.forms.map((form) => this.owned(entry, form.stage) ? form.name : "?????").join(" > ");
   }
   private pages(entry: Species): string[][] {
-    const text = `${entry.repo.description} ${codexFlavour(entry.type, entry.sprite.seed)}`;
+    const text = entry.id === ORIGIN_ID ? entry.repo.description
+      : `${entry.repo.description} ${codexFlavour(entry.type, entry.sprite.seed)}`;
     const lines: string[] = [];
     let line = "";
     for (const word of text.split(/\s+/)) {
@@ -99,7 +107,8 @@ export class CodexScene implements Scene {
         ${this.entry.evolveAt.map((level) => `LV ${level}`).join(" / ")}. A: Open on GitHub. SELECT: Open demo.`
       : "Codex list. A: Entry. B: Back.");
     screen.fill(14);
-    drawSmallText(screen, `CODEX ${this.state.caught.length}/${this.species.length}`, 12, 7, 6);
+    const caught = this.state.caught.filter((id) => id !== ORIGIN_ID).length;
+    drawSmallText(screen, `CODEX ${caught}/${this.repositoryTotal}`, 12, 7, 6);
     if (!this.entry) {
       this.menu.draw(screen, 4, 20, 152);
       for (let row = 0; row < 7; row++) {
@@ -138,7 +147,7 @@ export class CodexScene implements Scene {
       ctx.restore();
       drawSmallText(screen, formOf(entry, this.highestStage(entry)).name, 52, 27, 1);
       drawSmallText(screen, entry.type.toUpperCase(), 52, 38, 1);
-      drawSmallText(screen, `STARS ${entry.repo.stars}`, 52, 49, 1);
+      drawSmallText(screen, entry.id === ORIGIN_ID ? "LEGENDARY" : `STARS ${entry.repo.stars}`, 52, 49, 1);
       drawSmallText(screen, entry.repo.pushedAt.slice(0, 10), 52, 60, 1);
       pages[this.page].forEach((line, index) => drawSmallText(screen, line, 12, 77 + index * 10, 1));
     }

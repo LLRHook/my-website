@@ -1,4 +1,4 @@
-import type { BodyPlan, Species } from "../data/species.js";
+import { ORIGIN_SEED, type BodyPlan, type Species } from "../data/species.js";
 import { mulberry32 } from "../engine/rng.js";
 import type { TypeId } from "../battle/types.js";
 import { PALETTE } from "./palette.js";
@@ -60,6 +60,11 @@ export function drawCreature(seed: number, body: BodyPlan, type: TypeId,
   const cached = cache.get(key);
   if (cached) {
     return cached;
+  }
+  if (seed === ORIGIN_SEED && type === "normal") {
+    const canvas = originCreature(seed, facing);
+    cache.set(key, canvas);
+    return canvas;
   }
   if (stage !== 1) {
     const canvas = evolvedCreature(seed, body, type, facing, stage);
@@ -587,5 +592,78 @@ export function creatureIcon(species: Species, stage: 1 | 2 | 3 = 1): HTMLCanvas
   const ctx = canvas.getContext("2d")!;
   ctx.imageSmoothingEnabled = false;
   ctx.drawImage(drawCreature(species.sprite.seed, species.sprite.body, species.type, "front", stage), 0, 0, 16, 16);
+  return canvas;
+}
+
+// Full-frame winged sovereign: dark contours, gold armour and pale engraved feathers.
+function originCreature(seed: number, facing: "front" | "back"): HTMLCanvasElement {
+  const rows = [
+    "111.......1....11....1.......111",
+    "13211....121..1221..121....11231",
+    "1222111..12211222211221..1112221",
+    "12213321122222222222222112331221",
+    "12133222112222222222221122233121",
+    "11332221312222222222221312223311",
+    "13322213312222222222221331222331",
+    "13222133212222222222221233122231",
+    ".122133221222222222222122331221.",
+    "12213322212222222222221222331221",
+    ".113322211222222222222112223311.",
+    "..1322213122222222222213122231..",
+    "11322213312222222222221331222311",
+    "..1221332122222222222212331221..",
+    "...11332212222222222221223311...",
+    ".111332221222222222222122233111.",
+    "...13222112233222233221122231...",
+    "....122131223322223322131221....",
+    "..1122133122332222332213312211..",
+    "....113321223322223322123311....",
+    ".....1322222332222332222231.....",
+    "...11322222233222233222222311...",
+    ".....1221222332222332221221.....",
+    "......11322233222233222311......",
+    ".......132223322223322231.......",
+    "........1222332112332221........",
+    ".......12222221..12222221.......",
+    ".......12222221..12222221.......",
+    "......121222221..122222121......",
+    ".....1213222221..1222223121.....",
+    "....12133222221..12222233121....",
+    "...111111111111..111111111111...",
+  ];
+  const canvas = document.createElement("canvas");
+  canvas.width = 32;
+  canvas.height = 32;
+  const ctx = canvas.getContext("2d")!;
+  const palette = [29, 21, 22, 18];
+  for (let y = 0; y < 32; y++) {
+    for (let x = 0; x < 32; x++) {
+      const cell = rows[y][x];
+      if (cell !== ".") {
+        ctx.fillStyle = PALETTE[palette[Number(cell)]];
+        ctx.fillRect(x, y, 1, 1);
+      }
+    }
+  }
+  ctx.fillStyle = PALETTE[21];
+  if (facing === "front") {
+    ctx.fillRect(10, 8, 4, 1);
+    ctx.fillRect(11, 10, 4, 2);
+    ctx.fillRect(18, 8, 4, 1);
+    ctx.fillRect(17, 10, 4, 2);
+    ctx.fillRect(14, 14, 4, 1);
+    ctx.fillRect(15, 18, 2, 5);
+    ctx.fillStyle = PALETTE[18];
+    ctx.fillRect(13, 10, 1, 1);
+    ctx.fillRect(18, 10, 1, 1);
+  } else {
+    ctx.fillRect(11, 8, 10, 1);
+    ctx.fillRect(15, 9, 2, 17);
+    for (let y = 11; y < 25; y += 3) {
+      ctx.fillRect(12, y, 8, 1);
+    }
+  }
+  ctx.fillStyle = PALETTE[18];
+  ctx.fillRect(15 + seed % 2, 3, 1, 3);
   return canvas;
 }

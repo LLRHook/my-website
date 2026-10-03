@@ -222,3 +222,40 @@ export const EVOLUTION_TEXT = {
 export function evolutionText(text: string, mon: string, next: string): string {
   return text.replaceAll("{MON}", mon).replaceAll("{NEW}", next);
 }
+
+export const POSTGAME_TEXT = {
+  vault: "ORIGIN VAULT",
+  sealed: "The door is sealed.",
+  vaultInscription: "FIRST COMMIT. A sleeping server still holds its oldest secret.",
+  origin: "The golden guardian stirs. ORIGIN's crown rings through the chamber!",
+  originFlavour: "Before the first commit, it kept watch over a sleeping machine. "
+    + "Its golden crown hums when a new idea wakes.",
+  decline: "Take your time. I'll keep the team warmed up.",
+  rematch: {
+    rhea: "Champion! I've reviewed my team. Six approvals, zero mercy. Rematch?",
+    otto: "My new pipeline has six stages. Let's see if your team passes. Rematch?",
+    mira: "A fresh release is ready. Shall we test it in production? Rematch?",
+    prof: "Back in the lab, with six old friends and a few new tricks. Rematch?",
+  },
+  cooldown: {
+    rhea: "That was a thorough review. Come back tomorrow for another rematch.",
+    otto: "Today's build is finished. Come back tomorrow; I'll rerun the pipeline.",
+    mira: "One release a day keeps the pager quiet. Come back tomorrow.",
+    prof: "Even Champions need a tea break. Come back tomorrow for another battle.",
+  },
+  keyboardStart: "Champion, I lost my keyboard on Route 3. Could you find it? Try the southern trail marker. The space bar squeaks.",
+  keyboardHint: "Try the trail marker on southern Route 3. Listen for a squeaky space bar.",
+  keyboardFound: "Found OLD KEYBOARD! The space bar still squeaks.",
+  keyboardReward: "My keyboard! Now I can finish that comment. Received 1000 coins and 3 Hotfix!",
+  keyboardDone: "Click, clack. Ah, that's the sound of a good afternoon.",
+  evolvedStart: "I'm the Collector. Bring an evolved Codeling in your party. I'd like to see how a project grows.",
+  evolvedReward: "Look at that evolved form! All those little changes added up. Received 5 Great Fork!",
+  evolvedDone: "Thanks for the visit. That evolved Codeling gave me plenty to sketch.",
+  milestonesStart: "I have Codex rewards at 25%, 50% and 100% caught. Repository Codelings count. Come show me your progress.",
+  milestones: [
+    "Received 5 Great Fork! You've caught a quarter of the Codex. Talk again for the next milestone.",
+    "Half the Codex caught! Received 3 Full Rebuild. Your collection is growing nicely.",
+    "Every repository Codeling caught! Received 3000 coins and 3 Rollback. That deserves a diploma!",
+  ],
+  milestonesDone: "All three Codex rewards claimed. Thank you for getting to know every project.",
+} as const;

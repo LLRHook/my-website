@@ -614,8 +614,8 @@ async function regionWalk(page: Page, key: string, count: number): Promise<void>
 }
 
 async function seedRegion(page: Page, map: MapId, x: number, y: number, dir: Dir = "up",
-  extraFlags: readonly string[] = REGION_BADGES, hour = 12): Promise<void> {
-  await page.goto(`/projects?seed=1&hour=${hour}`);
+  extraFlags: readonly string[] = REGION_BADGES, hour = 12, seed = 1): Promise<void> {
+  await page.goto(`/projects?seed=${seed}&hour=${hour}`);
   const game = page.locator("#game");
   await expect(game).toHaveAttribute("data-ready", "");
   await loadGameModules(page);
@@ -882,4 +882,36 @@ test("region: deploy maze takes five tagged pads and an untagged pad returns to 
     await page.waitForTimeout(50);
   }
   await expect(game).toHaveAttribute("data-scene", "battle");
+});
+
+
+test("post-game: sealed cave door blocks before Champion", async ({ page }) => {
+  await seedRegion(page, "cave", 1, 6, "left", []);
+  const game = page.locator("#game");
+  await page.keyboard.down("ArrowLeft");
+  await page.waitForTimeout(300);
+  await page.keyboard.up("ArrowLeft");
+  await expect(game).toHaveAttribute("data-map", "cave");
+  await expect(game).toHaveAttribute("data-pos", "1,6,left");
+  await press(page, "z", { delay: 35 });
+  await expect(game.locator("canvas")).toHaveAttribute("aria-label", /The door is sealed/);
+});
+
+test("post-game: enter vault through cave door and start ORIGIN battle", async ({ page }) => {
+  test.setTimeout(90_000);
+  const errors: string[] = [];
+  page.on("pageerror", (error) => errors.push(error.message));
+  await seedRegion(page, "cave", 1, 6, "left", [...REGION_BADGES, "champion"], 12, 2);
+  // Step off the resume position before approaching a warp, as in the existing world flow.
+  await regionWalk(page, "ArrowRight", 1);
+  await regionWalk(page, "ArrowLeft", 2);
+  const game = page.locator("#game");
+  await expect(game).toHaveAttribute("data-map", "vault");
+  await regionWalk(page, "ArrowLeft", 4);
+  await regionWalk(page, "ArrowUp", 3);
+  await press(page, "z", { delay: 35 });
+  await clearRegionDialogue(page);
+  await expect(game).toHaveAttribute("data-scene", "battle");
+  await expect(game.locator("canvas")).toHaveAttribute("aria-label", /ORIGIN/);
+  expect(errors).toEqual([]);
 });

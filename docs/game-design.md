@@ -474,8 +474,9 @@ Nothing here is reachable before `champion`.
   `stageAt`. Rewards x2.
 - Legendary: a sealed door in Stack Cave (new door metatile at the cave's west
   wall) opens after `champion` into `vault` (10x10, cave track, no random
-  encounters). ORIGIN, a unique Codeling not from a repository: id `1` (no
-  GitHub repository payload uses it; documented as reserved), type `normal`,
+  encounters). ORIGIN, a unique Codeling not from a repository: id `0` (repository
+  and fallback ids are positive; save validation accepts `0` for species, seen
+  and caught ids), type `normal`,
   base total 600, catch rate 3, level 50, 3-stage-style sprite with a gold ramp
   (seeded, distinct), stands visible on a pedestal; A starts the battle with the
   `champion` track. If it faints or the player runs, it returns when the vault

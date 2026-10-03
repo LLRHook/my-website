@@ -1,4 +1,5 @@
-import { MUSIC } from "../data/music.js";
+import { ORIGIN_SEED } from "../data/species.js";
+import { MUSIC, ORIGIN_CRY } from "../data/music.js";
 import type { TrackId } from "../data/ids.js";
 import type { Options } from "../data/ids.js";
 import { mulberry32 } from "./rng.js";
@@ -152,6 +153,11 @@ export class Audio {
 
   cry(seed: number): void {
     this.resume();
+    if (seed === ORIGIN_SEED) {
+      ORIGIN_CRY.forEach((midi, index) => this.voice(index < 3 ? 0 : 2,
+        { time: 0, duration: 0.08, midi, volume: 10, duty: 0 }, this.time + index * 0.08, this.effects));
+      return;
+    }
     const rng = mulberry32(seed);
     const base = 44 + Math.floor(rng() * 32);
     for (let i = 0; i < 5; i++) {

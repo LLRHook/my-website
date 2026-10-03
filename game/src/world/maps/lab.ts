@@ -34,6 +34,7 @@ export const lab: GameMap = {
   npcs: [
     {
       id: "prof",
+      trainer: { name: "Prof. Ivanov", party: [], sight: 0, reward: 4000, lose: R.championLose },
       x: 4,
       y: 6,
       sprite: "prof",

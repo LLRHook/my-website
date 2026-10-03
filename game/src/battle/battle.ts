@@ -1,6 +1,6 @@
 import { BATTLE_TEXT as T } from "../data/text.js";
 import type { ItemId, Status } from "../data/ids.js";
-import { formOf, type Species } from "../data/species.js";
+import { speciesById, formOf, type Species } from "../data/species.js";
 import { applyItem } from "../data/items.js";
 import type { Codeling, Stats } from "../engine/storage.js";
 import { chooseMove } from "./ai.js";
@@ -67,7 +67,7 @@ export class Battle {
     return (side === 0 ? this.config.party : this.config.foes)[this.active[side]];
   }
   species(mon: Codeling): Species {
-    const species = this.config.species.find((entry) => entry.id === mon.species);
+    const species = speciesById(this.config.species, mon.species);
     if (!species) {
       throw new Error("Battle species missing");
     }
