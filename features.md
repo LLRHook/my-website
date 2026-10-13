@@ -402,7 +402,7 @@ the end of their section, sorted by id on read.
 - **Status:** shipped-pending-migration
 
 ### [FEAT-1791849859] Inline the stylesheet to remove the render-blocking CSS request
-- [ ] **Priority:** med
+- [x] **Priority:** med
 - **Area:** performance, frontend
 - **File(s):** next.config.js, app/lib/html.ts, app/lib/html.test.ts, e2e/site.spec.ts
 - **Why:** First paint on every cold load waits for a separate `retro.css` request (one extra round trip; FCP ~550 ms on a throttled mobile profile with 40 ms TTFB).
@@ -412,7 +412,8 @@ the end of their section, sorted by id on read.
 - **Test plan:** Unit test for the inlined style and hash; E2E asserts no CSS request and no CSP violation; visual screenshot comparison before/after.
 - **Out of scope:** Splitting game styles into a separate file, minifying hand-written CSS beyond whitespace.
 - **Bump:** minor
-- **Status:** open
+- **Implementation:** next.config.js reads `public/retro.css` at config load (CRLF normalized, trimmed, rejected if it contains `</`), exposes it as `STYLE_CSS` and sets CSP `style-src 'sha256-<hash>'` (replacing `'self'`); `page()` emits it in one `<style>` element and throws if it is missing. The `?v=` stylesheet URL and its immutable cache rule are gone; `/retro.css` stays as a public file. Vitest gets a test `STYLE_CSS`. Screenshots of all six pages and the 404 at 1280x900 and 390x844: 0 differing pixels. Median FCP (4x CPU, 150 ms latency, 1.6 Mbps, local production build): 544 ms to 356 ms. Production adds about 3.4 KB brotli per page. Per-page E2E asserts no stylesheet request, one `<style>`, a matching CSP hash and applied styles. While adding the CSP console check, found and fixed BUG-1791851972 (WebKit speculation rules fetch). Verified: lint, tsc, 251 Vitest, build, 122 Playwright passed with 12 expected skips.
+- **Status:** shipped-pending-migration
 
 ### [FEAT-1791849860] CI performance budget for page weight, requests, game bundle and long tasks
 - [ ] **Priority:** med

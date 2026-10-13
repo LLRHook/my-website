@@ -4,14 +4,24 @@ import { SITE_URL } from "../app/lib/constants";
 
 for (const item of PAGES) {
   test(`${item.label}: HTML, navigation, CSP and narrow layout`, async ({ page }) => {
+    const stylesheets: string[] = [];
+    page.on("request", (request) => { if (request.resourceType() === "stylesheet") stylesheets.push(request.url()); });
     const response = await page.goto(item.path);
     expect(response?.status()).toBe(200);
     expect(response?.headers()["content-type"]).toContain("text/html");
-    expect(response?.headers()["content-security-policy"]).toMatch(item.path === "/projects" ? /script-src 'self';/ : /script-src https?:\/\/[^/; ]+\/speculation-rules;/);
+    const policy = response?.headers()["content-security-policy"];
+    expect(policy).toMatch(item.path === "/projects" ? /script-src 'self';/ : /script-src https?:\/\/[^/; ]+\/speculation-rules;/);
     await expect(page.locator("h1")).toHaveCount(1);
     await expect(page.locator("h1")).toBeVisible();
     await expect(page.locator("script")).toHaveCount(item.path === "/projects" ? 1 : 0);
-    await expect(page.locator('link[rel="stylesheet"]')).toHaveAttribute("href", /^\/retro\.css(\?v=[0-9a-f]{10})?$/);
+    // The stylesheet is inlined and allowed by its CSP hash: no CSS request, styles applied.
+    await expect(page.locator('link[rel="stylesheet"]')).toHaveCount(0);
+    await expect(page.locator("head style")).toHaveCount(1);
+    const hash = await page.locator("head style").evaluate(async (element) => btoa(String.fromCharCode(
+      ...new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(element.textContent!))))));
+    expect(policy).toContain(`style-src 'sha256-${hash}'`);
+    expect(await page.locator('nav[aria-label="Site"]').evaluate((element) => getComputedStyle(element).textAlign)).toBe("center");
+    expect(stylesheets).toEqual([]);
     await expect(page.locator('nav [aria-current="page"]')).toHaveText(item.label);
     await page.setViewportSize({ width: 320, height: 700 });
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
@@ -21,15 +31,11 @@ for (const item of PAGES) {
 
 test("production assets have long-lived cache headers", async ({ page, request }) => {
   await page.goto("/projects");
-  const stylesheet = await page.locator('link[rel="stylesheet"]').getAttribute("href");
   const script = await page.locator('script[type="module"]').getAttribute("src");
-  expect(stylesheet).not.toBeNull();
   expect(script).not.toBeNull();
-  for (const url of [stylesheet!, script!]) {
-    const response = await request.get(url);
-    expect(response.status()).toBe(200);
-    expect(response.headers()["cache-control"]).toContain("immutable");
-  }
+  const response = await request.get(script!);
+  expect(response.status()).toBe(200);
+  expect(response.headers()["cache-control"]).toContain("immutable");
   const photo = await request.get("/peru-travel.webp");
   expect(photo.status()).toBe(200);
   expect(photo.headers()["cache-control"]).toContain("max-age=86400");
