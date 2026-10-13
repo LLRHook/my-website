@@ -89,6 +89,22 @@ authoritative counts. Historical counts below refer to their recorded builds.
   refuses to activate prerenders while DevTools is attached).
 - Game boot (FEAT-1791849857): at 4x CPU no main-thread task on /projects
   exceeds the 300 ms CI cap (measured under 200 ms; ~780 ms before).
+- Performance budget (FEAT-1791849860): `e2e/performance.spec.ts` fails CI
+  when a cold load exceeds its budget against the local production server
+  (`next start`: HTML uncompressed, static files gzip; headers included):
+
+  | Page | Requests (max) | Bytes (max) | Measured 2026-10-12 |
+  |---|---|---|---|
+  | / | 3 | 40,000 | 3 / 32,394 |
+  | /about | 4 | 75,000 | 4 / 61,888 |
+  | /projects | 3 | 140,000 | 3 / 111,198 |
+  | /resume | 2 | 32,000 | 2 / 24,469 |
+  | /off-the-clock | 3 | 85,000 | 3 / 72,423 |
+  | /contact | 2 | 26,000 | 2 / 18,913 |
+
+  The raw game bundle is capped at 240,000 bytes (204,249 measured), and no task
+  on /projects may exceed 300 ms at 4x CPU. Raise a budget only deliberately,
+  in the same change that explains why.
 - Projects use hourly GitHub listing and show a table or a usable empty notice
   without `GITHUB_TOKEN`. Descriptions are escaped, profile and undescribed repos
   are filtered, rows sort newest first, and demo links use HTTP(S).
