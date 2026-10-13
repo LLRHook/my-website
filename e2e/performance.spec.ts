@@ -23,3 +23,30 @@ test("Codelings boots on /projects without a long main-thread task", async ({ pa
   const durations = await page.evaluate(() => (window as unknown as { __longTasks: number[] }).__longTasks);
   expect(Math.max(0, ...durations)).toBeLessThan(LONG_TASK_CAP_MS);
 });
+
+test("hovered links are speculatively loaded: pages prerendered, /projects only prefetched", async ({ page, request }) => {
+  const rules = await request.get("/speculation-rules");
+  expect(rules.headers()["content-type"]).toBe("application/speculationrules+json");
+  const session = await page.context().newCDPSession(page);
+  const speculations: { action: string; path: string }[] = [];
+  const record = (event: { key: { action: string; url: string } }) =>
+    speculations.push({ action: event.key.action, path: new URL(event.key.url).pathname });
+  session.on("Preload.prerenderStatusUpdated", record);
+  session.on("Preload.prefetchStatusUpdated", record);
+  await session.send("Preload.enable");
+  const response = await page.goto("/about");
+  expect(response?.headers()["speculation-rules"]).toBe('"/speculation-rules"');
+  for (const path of ["/projects", "/resume"]) {
+    await page.hover(`nav a[href="${path}"]`);
+    await expect.poll(() => speculations.some((item) => item.path === path)).toBe(true);
+  }
+  expect(speculations).toContainEqual({ action: "Prerender", path: "/resume" });
+  expect(speculations).toContainEqual({ action: "Prefetch", path: "/projects" });
+  expect(speculations).not.toContainEqual({ action: "Prerender", path: "/projects" });
+  // Chromium never activates a prerender while DevTools is attached
+  // (PrerenderingDisabledByDevTools), so assert the prefetched response is what loads.
+  await page.click('nav a[href="/resume"]');
+  await expect(page).toHaveURL(/\/resume$/);
+  expect(await page.evaluate(() => (performance.getEntriesByType("navigation")[0] as PerformanceNavigationTiming & { deliveryType: string })
+    .deliveryType)).toBe("navigational-prefetch");
+});

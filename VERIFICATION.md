@@ -77,6 +77,14 @@ authoritative counts. Historical counts below refer to their recorded builds.
   cached a day with a week of stale-while-revalidate. Recorded cold transfer on
   2026-10-02: / 22 KB, /about 52 KB, /projects 82 KB, /off-the-clock 62 KB; with
   400ms latency and 50 KB/s, /projects reached `data-ready` in 2.6s (7.3s before).
+- Instant navigation (FEAT-1791849858): every page carries `Speculation-Rules:
+  "/speculation-rules"`, served as `application/speculationrules+json`. In Chromium,
+  hovering a nav link prerenders that page, except /projects, which is only
+  prefetched; the following click loads the speculated response
+  (`deliveryType` `navigational-prefetch` under automation, because Chromium
+  refuses to activate prerenders while DevTools is attached).
+- Game boot (FEAT-1791849857): at 4x CPU no main-thread task on /projects
+  exceeds the 300 ms CI cap (measured under 200 ms; ~780 ms before).
 - Projects use hourly GitHub listing and show a table or a usable empty notice
   without `GITHUB_TOKEN`. Descriptions are escaped, profile and undescribed repos
   are filtered, rows sort newest first, and demo links use HTTP(S).
