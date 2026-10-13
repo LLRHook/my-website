@@ -299,32 +299,29 @@ function portraitRows(id: RegionSpriteId): string[] {
   return rows.map((row) => row.join(""));
 }
 
+// Portraits and walk frames are rasterized on first use; building all of them up front blocked boot.
 export function trainerPortrait(id: SpriteId): HTMLCanvasElement | undefined {
-  return portraits.get(id);
-}
-
-export function initSprites(): void {
-  for (const id of REGION_SPRITES) {
-    const [o, h, s] = STYLES[id];
-    portraits.set(id, pixels(portraitRows(id), { o, h, s }));
+  let portrait = portraits.get(id);
+  const region = REGION_SPRITES.find((sprite) => sprite === id);
+  if (!portrait && region) {
+    const [o, h, s] = STYLES[region];
+    portrait = pixels(portraitRows(region), { o, h, s });
+    portraits.set(region, portrait);
   }
-  for (const id of Object.keys(STYLES) as SpriteId[]) {
-    const [outline, clothing, skin] = STYLES[id];
-    for (const light of ["day", "dusk", "night"] as const) {
-      for (const dir of ["up", "down", "left", "right"] as const) {
-        for (let frame = 0; frame < 3; frame++) {
-          atlas.set(`${id}:${dir}:${frame}:${light}`, pixels(characterRows(id, dir, frame), {
-            o: remap(outline, light), h: remap(clothing, light), s: remap(skin, light),
-          }));
-        }
-      }
-    }
-  }
+  return portrait;
 }
 
 export function drawSprite(screen: Screen, id: SpriteId, dir: Dir, frame: number,
   x: number, y: number, light: Light = "day"): void {
-  const sprite = atlas.get(`${id}:${dir}:${frame}:${light}`);
+  const key = `${id}:${dir}:${frame}:${light}`;
+  let sprite = atlas.get(key);
+  if (!sprite && Object.hasOwn(STYLES, id) && (frame === 0 || frame === 1 || frame === 2)) {
+    const [outline, clothing, skin] = STYLES[id];
+    sprite = pixels(characterRows(id, dir, frame), {
+      o: remap(outline, light), h: remap(clothing, light), s: remap(skin, light),
+    });
+    atlas.set(key, sprite);
+  }
   if (sprite) {
     screen.blit(sprite, 0, 0, 16, 16, x, y);
   }

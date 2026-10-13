@@ -805,10 +805,9 @@ test("region: all 108 character frames and nine portraits meet the art rules", a
   await expect(page.locator("#game")).toHaveAttribute("data-ready", "");
   await loadGameModules(page);
   await page.evaluate(() => {
-    const { Screen, initFont, initSprites, REGION_SPRITES, drawSprite, trainerPortrait }
+    const { Screen, initFont, REGION_SPRITES, drawSprite, trainerPortrait }
       = globalThis.__codelings;
     initFont();
-    initSprites();
     const canvas = document.createElement("canvas");
     canvas.width = 192;
     canvas.height = 240;
