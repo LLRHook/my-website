@@ -7,7 +7,7 @@ for (const item of PAGES) {
     const response = await page.goto(item.path);
     expect(response?.status()).toBe(200);
     expect(response?.headers()["content-type"]).toContain("text/html");
-    expect(response?.headers()["content-security-policy"]).toContain(item.path === "/projects" ? "script-src 'self'" : "script-src 'none'");
+    expect(response?.headers()["content-security-policy"]).toMatch(item.path === "/projects" ? /script-src 'self';/ : /script-src https?:\/\/[^/; ]+\/speculation-rules;/);
     await expect(page.locator("h1")).toHaveCount(1);
     await expect(page.locator("h1")).toBeVisible();
     await expect(page.locator("script")).toHaveCount(item.path === "/projects" ? 1 : 0);
@@ -90,4 +90,13 @@ test("share card is served at 1200x630 and subpages show breadcrumbs", async ({ 
   await page.goto("/contact");
   await expect(page.locator("nav.crumbs")).toBeVisible();
   await expect(page.locator("nav.crumbs li")).toHaveText(["Home", "Contact"]);
+});
+test("no page reports a Content Security Policy violation", async ({ page }) => {
+  const errors: string[] = [];
+  page.on("console", (message) => { if (message.type() === "error") errors.push(message.text()); });
+  for (const item of PAGES) {
+    await page.goto(item.path);
+    await page.waitForLoadState("networkidle");
+  }
+  expect(errors.filter((text) => /Content Security Policy/i.test(text))).toEqual([]);
 });

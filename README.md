@@ -58,7 +58,8 @@ Next.js App Router route handlers return complete HTML documents as
 `Response` objects. There are no React page components, layouts, or web fonts.
 Only `/projects` loads a module script, bundled and minified with esbuild after
 strict TypeScript checking; its Content Security Policy uses `script-src 'self'`. All other pages
-use `script-src 'none'`. The policy limits
+use `script-src <origin>/speculation-rules`: no script can run, and WebKit may still fetch the
+speculation rules JSON (`SITE_ORIGIN` sets the origin; production by default). The policy limits
 styles and images to the same origin. CSS provides the marquee and blinking
 NEW label, disables both for reduced motion, and supplies print styles.
 
