@@ -77,7 +77,7 @@ NEW label, disables both for reduced motion, and supplies print styles.
 - `app/route.ts` and the route folders: Home, About, Projects, Resume, Off the Clock, Contact, and the catch-all 404.
 - `app/sitemap.ts` and `app/robots.ts`: crawler metadata.
 - `e2e/site.spec.ts`: HTML, navigation, headers, routing, narrow layouts, and reduced motion.
-- `e2e/performance.spec.ts` (Chromium): no long main-thread task while Codelings boots at 4x CPU, and speculative loading of hovered links.
+- `e2e/performance.spec.ts` (Chromium, runs in CI): per-page cold-load request and byte budgets, a game bundle size cap, no long main-thread task while Codelings boots at 4x CPU, and speculative loading of hovered links. Budgets are recorded in VERIFICATION.md.
 
 ## GitHub data
 

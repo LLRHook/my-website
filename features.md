@@ -416,7 +416,7 @@ the end of their section, sorted by id on read.
 - **Status:** shipped-pending-migration
 
 ### [FEAT-1791849860] CI performance budget for page weight, requests, game bundle and long tasks
-- [ ] **Priority:** med
+- [x] **Priority:** med
 - **Area:** performance, tests
 - **File(s):** e2e/performance.spec.ts, playwright.config.ts, VERIFICATION.md
 - **Why:** Keep the site fast after FEAT-1791849857/58/59: nothing automated stops page weight, request count or game boot time from regressing (the bundle already grew from 143 KB to 204 KB unnoticed).
@@ -426,7 +426,8 @@ the end of their section, sorted by id on read.
 - **Test plan:** Run the spec green; temporarily lower one budget to confirm it fails.
 - **Out of scope:** Lighthouse CI, real-user monitoring.
 - **Bump:** minor
-- **Status:** open
+- **Implementation:** `e2e/performance.spec.ts` (Chromium project, so it runs in CI's existing `npm run test:e2e`) adds per-page cold-load budgets for request count and bytes (headers plus body from Playwright request sizes, against `next start`), and a 240,000-byte cap on the raw game bundle, next to the FEAT-1791849857 long-task cap and the FEAT-1791849858 speculation check. Budgets sit 15-30% above the 2026-10-12 measurements, which are recorded in VERIFICATION.md. No playwright.config change was needed. Lowering the / budget to 10,000 bytes failed the spec (received 32,394), and restoring it passed. Verified: lint, tsc, 251 Vitest, build, 129 Playwright passed with 12 expected skips.
+- **Status:** shipped-pending-migration
 
 ## Shipped
 - **Implementation:** Window toggles day/evening, lamp toggles its independent desk glow, and the cat responds directly with its wake gesture. Replaced the mountain print with a UMBC B.S. Computer Science May 2024 frame; removed both journal and pencil. Added control regressions and verified 320px/390px/desktop layouts and focus return.

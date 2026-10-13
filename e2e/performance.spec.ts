@@ -1,7 +1,42 @@
 import { test, expect } from "@playwright/test";
 
-// Chromium only: CPU throttling and the Long Tasks API need CDP and Blink.
+// Chromium only: CPU throttling, the Long Tasks API, Preload events and request sizes need CDP and Blink.
 test.skip(({ browserName }) => browserName !== "chromium", "Chromium only");
+
+// Cold-load budgets against the local production server (`next start` sends HTML
+// uncompressed and static files gzipped; production brotli is smaller). Measured
+// 2026-10-12 and recorded in VERIFICATION.md; raise a budget only on purpose.
+const PAGE_BUDGETS: Record<string, { requests: number; bytes: number }> = {
+  "/": { requests: 3, bytes: 40_000 },
+  "/about": { requests: 4, bytes: 75_000 },
+  "/projects": { requests: 3, bytes: 140_000 },
+  "/resume": { requests: 2, bytes: 32_000 },
+  "/off-the-clock": { requests: 3, bytes: 85_000 },
+  "/contact": { requests: 2, bytes: 26_000 },
+};
+const GAME_BUNDLE_MAX_BYTES = 240_000;
+
+for (const [path, budget] of Object.entries(PAGE_BUDGETS)) {
+  test(`${path} stays within its cold-load budget`, async ({ page }) => {
+    const transfers: { url: string; bytes: Promise<number> }[] = [];
+    page.on("requestfinished", (request) => transfers.push({
+      url: new URL(request.url()).pathname,
+      bytes: request.sizes().then((sizes) => sizes.responseHeadersSize + sizes.responseBodySize),
+    }));
+    await page.goto(path, { waitUntil: "networkidle" });
+    const rows = await Promise.all(transfers.map(async ({ url, bytes }) => ({ url, bytes: await bytes })));
+    const total = rows.reduce((sum, row) => sum + row.bytes, 0);
+    expect(rows.length, JSON.stringify(rows)).toBeLessThanOrEqual(budget.requests);
+    expect(total, JSON.stringify(rows)).toBeLessThanOrEqual(budget.bytes);
+  });
+}
+
+test("the game bundle stays under its size cap", async ({ page, request }) => {
+  await page.goto("/projects");
+  const script = await page.locator('script[type="module"]').getAttribute("src");
+  const body = await (await request.get(script!)).body();
+  expect(body.length).toBeLessThanOrEqual(GAME_BUNDLE_MAX_BYTES);
+});
 
 // 4x CPU approximates a mid-range phone. Measured 2026-10-12: the slowest task while
 // Codelings boots fell from ~780 ms to under 200 ms; the cap leaves room for slower CI hosts.
