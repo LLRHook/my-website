@@ -60,7 +60,7 @@ Only `/projects` loads a module script, bundled and minified with esbuild after
 strict TypeScript checking; its Content Security Policy uses `script-src 'self'`. All other pages
 use `script-src <origin>/speculation-rules`: no script can run, and WebKit may still fetch the
 speculation rules JSON (`SITE_ORIGIN` sets the origin; production by default). The policy limits
-styles and images to the same origin. CSS provides the marquee and blinking
+images to the same origin and styles to the inlined stylesheet's hash. CSS provides the marquee and blinking
 NEW label, disables both for reduced motion, and supplies print styles.
 
 - `app/lib/html.ts`: escaping, page metadata, schema.org Person microdata, navigation, document shell, responses.
@@ -70,7 +70,7 @@ NEW label, disables both for reduced motion, and supplies print styles.
 - `game/`: Codelings engine, procedural creatures, battles, collection menus, and unit tests; see [the game design](docs/game-design.md).
 - `game/src/world/`: overworld movement, typed map data, NPCs, and story scripts.
 - `public/game/main.js`: one generated, minified browser bundle, excluded from Git.
-- `public/retro.css`: the site's only stylesheet, including the CSS handheld. Both it and the game script use a content-derived `?v=` query and a one-year immutable cache in production.
+- `public/retro.css`: the site's only stylesheet, including the CSS handheld. `next.config.js` inlines it in a `<style>` element on every page, so first paint never waits on a CSS request, and the CSP `style-src` allows exactly that text by its SHA-256 hash. The game script uses a content-derived `?v=` query and a one-year immutable cache in production.
 - Public images, icons and the resume PDF use a one-day cache with one week of stale-while-revalidate in production. The portrait and Peru photo are resized for their display sizes; below-the-fold photos load lazily.
 - `app/speculation-rules/route.ts`: speculation rules sent through a `Speculation-Rules` response header on every page (no `<script>`). Chromium prerenders a same-origin page when its link is hovered or pressed and only prefetches /projects, so Codelings never boots in the background; other browsers ignore the header.
 - `scripts/render-assets.mjs`: regenerates the committed favicon set and 1200x630 share card (`npm run assets`).

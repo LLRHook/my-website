@@ -73,11 +73,14 @@ authoritative counts. Historical counts below refer to their recorded builds.
   diploma), quest transitions and rewards, and that saves with species id 0 load.
 - Low-bandwidth delivery (FEAT-1790991961): the game is one minified esbuild
   bundle, so a cold /projects load makes one `/game/` request (3 requests in
-  total). In production `/retro.css` and `/game/main.js` (always linked with a
-  content `?v=` hash) are `immutable` for a year; images, icons and the PDF are
+  total). In production `/game/main.js` (always linked with a content `?v=`
+  hash) is `immutable` for a year; images, icons and the PDF are
   cached a day with a week of stale-while-revalidate. Recorded cold transfer on
   2026-10-02: / 22 KB, /about 52 KB, /projects 82 KB, /off-the-clock 62 KB; with
   400ms latency and 50 KB/s, /projects reached `data-ready` in 2.6s (7.3s before).
+- Inline stylesheet (FEAT-1791849859): every page inlines `public/retro.css` in
+  one `<style>` element, requests no stylesheet, and its CSP `style-src` is the
+  SHA-256 hash of that text, with no CSP console errors.
 - Instant navigation (FEAT-1791849858): every page carries `Speculation-Rules:
   "/speculation-rules"`, served as `application/speculationrules+json`. In Chromium,
   hovering a nav link prerenders that page, except /projects, which is only
@@ -104,7 +107,7 @@ authoritative counts. Historical counts below refer to their recorded builds.
 ## Runtime and deployment checks
 
 - GET /, /about, /projects, /resume, /off-the-clock, /contact, /robots.txt,
-  /sitemap.xml, /retro.css (allow `?v=`), /favicon.svg, /favicon.ico, /apple-touch-icon.png,
+  /sitemap.xml, /retro.css, /favicon.svg, /favicon.ico, /apple-touch-icon.png,
   /og-image.png, /game/main.js (allow `?v=`), the resume PDF and public photos return 200.
 - Only /projects contains a `<script>` element and carries `script-src 'self'`;
   every other response allows only `script-src https://victorivanov.engineer/speculation-rules`. /interests redirects (308)
