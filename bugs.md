@@ -240,6 +240,17 @@ the end of their section, sorted by id on read.
 - **Fix:** The D-pad buttons carry no glyph text (their aria-labels name them); each draws a CSS `clip-path` triangle in `currentColor` sized 36% of the button, so all four arrows match and scale in fullscreen, and the pressed arrow brightens. The up arm's shadow no longer draws a seam across the centre. Verified by screenshots (desktop Chromium, iPhone 15 WebKit, page and fullscreen) and game E2E on Chromium and iPhone.
 - **Status:** fixed-pending-migration
 
+### [BUG-1791851972] WebKit blocks the speculation rules fetch under script-src 'none'
+- [x] **Severity:** med
+- **Area:** frontend, tests
+- **File(s):** next.config.js, playwright.config.ts, .github/workflows/ci.yml, e2e/site.spec.ts, README.md, VERIFICATION.md, docs/game-design.md
+- **Observation:** After FEAT-1791849858, every page except /projects logs "Refused to load http://localhost:3000/speculation-rules because it does not appear in the script-src directive of the Content Security Policy." in WebKit. WebKit checks the header-delivered rules fetch against `script-src`; Chromium does not, so the Chromium-only E2E missed it. Found by the FEAT-1791849859 CSP console check.
+- **Expected:** No page reports a CSP violation in any supported browser (FEAT-1791849858 acceptance: "no CSP violations").
+- **Repro / Notes:** `npx playwright test e2e/site.spec.ts --project=webkit-mobile` with a console-error filter for "Content Security Policy".
+- **Bump:** patch
+- **Fix:** Pages without scripts now allow exactly `script-src <origin>/speculation-rules` instead of `'none'`; the file is JSON served with `nosniff`, so nothing can execute. `SITE_ORIGIN` (default `https://victorivanov.engineer`) sets the origin; Playwright's web server and the CI build set it to `http://localhost:3000`. New E2E "no page reports a Content Security Policy violation" runs on Chromium and WebKit; the per-page test matches the new directive. Docs updated. Verified: lint, tsc, 251 Vitest, build, full Playwright suite.
+- **Status:** fixed-pending-migration
+
 ## Migrated to changelog
 
 Entries below have been ticked off and copied as a one-liner into `CHANGELOG.md`.
