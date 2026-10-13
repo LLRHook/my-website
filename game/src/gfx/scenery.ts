@@ -298,19 +298,23 @@ function buildingArt(): void {
   rect(chimney, 4, 8, 8, 1, "2");
   register("chimney", chimney, [20, 19, 21]);
 }
-export function initScenery(): void {
-  floorArt();
-  terrainArt();
-  buildingArt();
-  for (const [key, value] of art) {
-    for (const light of ["day", "dusk", "night"] as const) {
-      const colours = Object.fromEntries(value.colours.map((index, digit) => [String(digit), remap(index, light)]));
-      atlas.set(`${key}:${light}`, pixels(value.rows, colours));
-    }
+// Art is registered and rasterized on first draw; building every piece and light up front blocked boot.
+function imageFor(key: string, light: Light): HTMLCanvasElement | undefined {
+  if (!art.size) {
+    floorArt();
+    terrainArt();
+    buildingArt();
   }
+  const id = `${key}:${light}`;
+  const value = art.get(key);
+  if (!atlas.has(id) && value) {
+    const colours = Object.fromEntries(value.colours.map((index, digit) => [String(digit), remap(index, light)]));
+    atlas.set(id, pixels(value.rows, colours));
+  }
+  return atlas.get(id);
 }
 function blit(screen: Screen, key: string, x: number, y: number, light: Light): void {
-  const image = atlas.get(`${key}:${light}`);
+  const image = imageFor(key, light);
   if (image) {
     screen.blit(image, 0, 0, image.width, image.height, x, y);
   }
@@ -489,13 +493,13 @@ export function drawScenery(screen: Screen, map: GameMap, ox: number, oy: number
       }
     }
   }
-  const tree = atlas.get(`${map.id === "route4" ? "pine" : "tree"}:${light}`)!;
+  const tree = imageFor(map.id === "route4" ? "pine" : "tree", light)!;
   for (const [x, y] of trees) {
     const sy = overhead ? 0 : 24;
     screen.blit(tree, 0, sy, 32, overhead ? 24 : 8, x + ox, y + oy + sy);
   }
   if (map.id === "ridge") {
-    const snowTree = atlas.get(`snow-pine:${light}`)!;
+    const snowTree = imageFor("snow-pine", light)!;
     for (let y = 0; y < map.height; y++) {
       for (let x = 0; x < map.width; x++) {
         if (map.tiles[y][x] === "^") {

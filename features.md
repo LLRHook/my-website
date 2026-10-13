@@ -374,7 +374,7 @@ the end of their section, sorted by id on read.
 - **Status:** shipped-pending-migration
 
 ### [FEAT-1791849857] Codelings boot without a long main-thread task
-- [ ] **Priority:** high
+- [x] **Priority:** high
 - **Area:** performance, projects, game
 - **File(s):** game/src/gfx/pixels.ts, game/src/gfx/tiles.ts, game/src/gfx/scenery.ts, game/src/gfx/sprites.ts, game/src/main.ts, e2e/game.spec.ts
 - **Why:** Owner wants every page load and click to feel instant. On a throttled mobile profile (4x CPU), /projects runs a 730-800 ms long task while Codelings boots, then a ~280 ms first-frame task, so taps on the page and the table stall. A CPU profile attributes ~715 ms to `initTiles`/`initScenery`/`initSprites`, almost all in `pixels()`, which paints every sprite pixel with its own `fillStyle` + `fillRect`.
@@ -384,7 +384,8 @@ the end of their section, sorted by id on read.
 - **Test plan:** Unit test that `pixels()` matches the reference per-pixel rendering; E2E long-task check on /projects under CPU throttling (Chromium); existing game E2E.
 - **Out of scope:** Code-splitting the bundle, redesigning art, changing game behaviour.
 - **Bump:** minor
-- **Status:** open
+- **Implementation:** A CPU profile at 4x throttling put ~715 ms of boot in `pixels()`, which painted every sprite pixel with its own `fillStyle`/`fillRect`, eagerly for 1,845 tile, scenery and sprite canvases. `pixels()` now fills one `ImageData` from a pre-parsed RGB palette and calls `putImageData` once; a Chromium comparison of all 1,845 canvases against the old renderer found 0 differing pixels, and a unit test pins it to the per-pixel reference. Tiles, scenery and walk/portrait sprites are rasterized on first draw (`initTiles`/`initScenery`/`initSprites` removed; only the font atlas stays eager). /projects at 4x CPU: boot task ~780 ms to ~75 ms, slowest task ~180 ms (was 780 + 280 ms). New `e2e/performance.spec.ts` fails if any task exceeds 300 ms at 4x CPU (headroom for CI hosts). Verified: lint, tsc, 251 Vitest, build, 119 Playwright passed with 12 expected skips.
+- **Status:** shipped-pending-migration
 
 ### [FEAT-1791849858] Instant page-to-page navigation with header-delivered speculation rules
 - [ ] **Priority:** high
