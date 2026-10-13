@@ -12,8 +12,15 @@ function assetUrl(path) {
   return `/${path}?v=${hash}`;
 }
 
+// WebKit checks the header-delivered speculation rules fetch against script-src (Chromium
+// does not), so pages without scripts allow exactly that URL. It is JSON served with
+// nosniff, so it can never run as a script. SITE_ORIGIN overrides the production
+// origin for local and CI builds.
+const SITE_ORIGIN = process.env.SITE_ORIGIN ?? "https://victorivanov.engineer";
+const SCRIPT_SRC = `script-src ${SITE_ORIGIN}/speculation-rules`;
+
 const securityHeaders = [
-  { key: "Content-Security-Policy", value: "default-src 'self'; script-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'; img-src 'self'; style-src 'self'" },
+  { key: "Content-Security-Policy", value: `default-src 'self'; ${SCRIPT_SRC}; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'; img-src 'self'; style-src 'self'` },
   { key: "X-Content-Type-Options", value: "nosniff" },
   { key: "X-Frame-Options", value: "DENY" },
   { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
@@ -53,7 +60,7 @@ const nextConfig = {
       {
         source: "/projects",
         headers: securityHeaders.map((header) => header.key === "Content-Security-Policy"
-          ? { ...header, value: header.value.replace("script-src 'none'", "script-src 'self'") }
+          ? { ...header, value: header.value.replace(SCRIPT_SRC, "script-src 'self'") }
           : header),
       },
       ...(process.env.NODE_ENV === "production" ? [

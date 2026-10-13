@@ -29,8 +29,8 @@ maps, music or text from any Nintendo / Game Freak / The Pokémon Company produc
 - Only `/projects` loads JavaScript: `<script type="module" src="/game/main.js?v=<hash>">`
   at the end of `<body>`. `next.config.js` adds a header rule for `/projects`,
   after the catch-all, overriding the CSP with `script-src 'self'` (everything
-  else identical). Every other route keeps `script-src 'none'` and zero
-  `<script>` tags.
+  else identical). Every other route allows only the speculation rules JSON
+  (`script-src <origin>/speculation-rules`) and has zero `<script>` tags.
 - `page()` in `app/lib/html.ts` gains an optional `scripts?: string[]` (module
   script URLs, rendered just before `</body>`). Only the Projects route passes it.
 - Repository data reaches the game through one attribute, escaped with `esc()`:
@@ -584,6 +584,6 @@ the options; muted while the tab is hidden.
   bounds and reachable starter/lab/gym, text wrapping within 18 columns.
 - Playwright (`e2e/game.spec.ts`, Chromium + WebKit): `/projects` has the game
   and the table; CSP there allows `'self'` scripts; every other page still has
-  `script-src 'none'` and 0 scripts; boot reaches `data-scene="title"` with no
+  no executable script source and 0 scripts; boot reaches `data-scene="title"` with no
   console errors; START leads through the intro; on-screen buttons work on a
   touch viewport; no horizontal overflow at 320px.

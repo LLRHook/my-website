@@ -38,6 +38,8 @@ jobs:
         run: npm run build
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # E2E serves this build on localhost; the CSP names the speculation rules URL there.
+          SITE_ORIGIN: http://localhost:3000
 
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium webkit

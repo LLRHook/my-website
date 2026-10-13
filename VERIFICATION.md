@@ -37,7 +37,8 @@ authoritative counts. Historical counts below refer to their recorded builds.
 ## Acceptance coverage
 
 - All six PAGES paths return 200 and text/html with one visible h1. Every page
-  except /projects has no script tags and a CSP with `script-src 'none'`;
+  except /projects has no script tags and a CSP whose only script source is
+  `<origin>/speculation-rules` (the JSON rules file, never executable);
   /projects has exactly one script (`/game/main.js` with an optional `?v=` query, type module) and a CSP with
   `script-src 'self'`. Navigation marks only the current page with `aria-current`.
 - The game boots to `data-ready` and `data-scene="title"` with zero console and
@@ -106,7 +107,7 @@ authoritative counts. Historical counts below refer to their recorded builds.
   /sitemap.xml, /retro.css (allow `?v=`), /favicon.svg, /favicon.ico, /apple-touch-icon.png,
   /og-image.png, /game/main.js (allow `?v=`), the resume PDF and public photos return 200.
 - Only /projects contains a `<script>` element and carries `script-src 'self'`;
-  every other response carries `script-src 'none'`. /interests redirects (308)
+  every other response allows only `script-src https://victorivanov.engineer/speculation-rules`. /interests redirects (308)
   to /off-the-clock; unknown paths return the HTML 404 page.
 - The 404 page links back to the home page.
 - Run mobile Lighthouse against the production artifact/domain. Existing targets
