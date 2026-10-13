@@ -373,6 +373,58 @@ the end of their section, sorted by id on read.
 - **Implementation:** PLAY FULLSCREEN pins the handheld as a fixed overlay (Fullscreen API where available, safe-area padding, `html.game-locked` scroll lock with scroll position restored) and picks the largest integer screen scale whose bezel and controls fit, with portrait and landscape layouts; narrow portrait collapses the shell padding, moves EXIT beside the bezel and hides the wordmark, so 320x568 plays at 2x. One `.dpad` touch zone resolves direction through `resolveDpad` (18% dead zone, sliding thumb, `data-pressed` visuals); other buttons keep per-pointer capture for multi-touch. Touch hygiene on the device, audio resume on pointerup/touchend, 8ms vibration behind a new HAPTICS option (old saves default it to true), pause and mute when under 25% visible, touch hint on coarse pointers, `data-pos` hook. Playwright gains iPhone 15 and Pixel 7 projects for the game suite. Verified: lint, tsc, 157 Vitest, build, 62 Playwright passed with 10 expected skips; six device screenshots inspected. Physical-device audio unlock, vibration and notch insets not verified (emulation only).
 - **Status:** shipped-pending-migration
 
+### [FEAT-1791849857] Codelings boot without a long main-thread task
+- [ ] **Priority:** high
+- **Area:** performance, projects, game
+- **File(s):** game/src/gfx/pixels.ts, game/src/gfx/tiles.ts, game/src/gfx/scenery.ts, game/src/gfx/sprites.ts, game/src/main.ts, e2e/game.spec.ts
+- **Why:** Owner wants every page load and click to feel instant. On a throttled mobile profile (4x CPU), /projects runs a 730-800 ms long task while Codelings boots, then a ~280 ms first-frame task, so taps on the page and the table stall. A CPU profile attributes ~715 ms to `initTiles`/`initScenery`/`initSprites`, almost all in `pixels()`, which paints every sprite pixel with its own `fillStyle` + `fillRect`.
+- **Approach:** Rasterize sprite rows through one `ImageData` buffer and a single `putImageData` per canvas (palette pre-parsed to RGBA once), keeping output pixel-identical. If boot is still over budget, build atlases lazily on first use instead of eagerly for every light and frame. Measure with the same throttled CPU profile before and after.
+- **Library / dependency notes:** none.
+- **Acceptance criteria:** at 4x CPU, no task over 200 ms on /projects during load; title screen ready no later than today; sprite output pixel-identical; lint, tsc, unit, build and E2E green.
+- **Test plan:** Unit test that `pixels()` matches the reference per-pixel rendering; E2E long-task check on /projects under CPU throttling (Chromium); existing game E2E.
+- **Out of scope:** Code-splitting the bundle, redesigning art, changing game behaviour.
+- **Bump:** minor
+- **Status:** open
+
+### [FEAT-1791849858] Instant page-to-page navigation with header-delivered speculation rules
+- [ ] **Priority:** high
+- **Area:** performance, frontend
+- **File(s):** next.config.js, app/speculation-rules/route.ts, e2e/site.spec.ts
+- **Why:** Owner wants every click to feel instant. Each navigation is a full cold document load today; nothing prefetches or prerenders.
+- **Approach:** Send a `Speculation-Rules` response header on HTML pages that points to a same-origin JSON route (`application/speculationrules+json`): prerender same-origin page links with `moderate` eagerness (hover/pointerdown), and prefetch only for `/projects` so the game does not boot in the background. No `<script>` is added, so the JavaScript-free rule for non-game routes holds. Confirm the CSP allows header-delivered rules.
+- **Library / dependency notes:** none (browser feature; Chromium only, other browsers ignore the header).
+- **Acceptance criteria:** in Chromium, hovering then clicking a nav link activates a prerendered page (`activationStart > 0`); `/projects` is prefetched, not prerendered; no CSP violations; Safari and Firefox behave as before.
+- **Test plan:** Chromium E2E hover-then-click checks `activationStart`; header and rules-route content-type checks; existing CSP tests.
+- **Out of scope:** Client-side routing, service workers, any JavaScript on non-game routes.
+- **Bump:** minor
+- **Status:** open
+
+### [FEAT-1791849859] Inline the stylesheet to remove the render-blocking CSS request
+- [ ] **Priority:** med
+- **Area:** performance, frontend
+- **File(s):** next.config.js, app/lib/html.ts, app/lib/html.test.ts, e2e/site.spec.ts
+- **Why:** First paint on every cold load waits for a separate `retro.css` request (one extra round trip; FCP ~550 ms on a throttled mobile profile with 40 ms TTFB).
+- **Approach:** Read `public/retro.css` at build, inline it in a `<style>` element and allow exactly that content in CSP `style-src` through its `sha256` hash, computed in next.config.js. About 3.4 KB brotli per page; owner accepted the trade.
+- **Library / dependency notes:** none.
+- **Acceptance criteria:** no stylesheet request on any page; CSP carries the hash and reports no violations; pages render identically; FCP on the throttled profile drops below the ~550 ms baseline.
+- **Test plan:** Unit test for the inlined style and hash; E2E asserts no CSS request and no CSP violation; visual screenshot comparison before/after.
+- **Out of scope:** Splitting game styles into a separate file, minifying hand-written CSS beyond whitespace.
+- **Bump:** minor
+- **Status:** open
+
+### [FEAT-1791849860] CI performance budget for page weight, requests, game bundle and long tasks
+- [ ] **Priority:** med
+- **Area:** performance, tests
+- **File(s):** e2e/performance.spec.ts, playwright.config.ts, VERIFICATION.md
+- **Why:** Keep the site fast after FEAT-1791849857/58/59: nothing automated stops page weight, request count or game boot time from regressing (the bundle already grew from 143 KB to 204 KB unnoticed).
+- **Approach:** A Chromium Playwright spec run in CI against the production build: per-page transfer and request-count budgets, a raw-byte cap on the game bundle, a long-task cap at 4x CPU on /projects, and the prerender-activation check. Budgets recorded in VERIFICATION.md.
+- **Library / dependency notes:** none (Playwright already present).
+- **Acceptance criteria:** spec passes on the current build and fails when a budget is exceeded; budgets documented.
+- **Test plan:** Run the spec green; temporarily lower one budget to confirm it fails.
+- **Out of scope:** Lighthouse CI, real-user monitoring.
+- **Bump:** minor
+- **Status:** open
+
 ## Shipped
 - **Implementation:** Window toggles day/evening, lamp toggles its independent desk glow, and the cat responds directly with its wake gesture. Replaced the mountain print with a UMBC B.S. Computer Science May 2024 frame; removed both journal and pencil. Added control regressions and verified 320px/390px/desktop layouts and focus return.
 
