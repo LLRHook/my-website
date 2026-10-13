@@ -22,8 +22,8 @@ maps, music or text from any Nintendo / Game Freak / The Pokémon Company produc
   `build:game` then `next build`, `dev:game` uses esbuild context watch mode and
   logs each rebuild's size.
 - `next.config.js` adds a content-derived, 10-hex-character SHA-256 `?v=` query
-  to the game script and stylesheet URLs at config load. Missing files use the
-  plain URL. Production serves both assets with
+  to the game script URL at config load (a missing file uses the plain URL) and
+  inlines the stylesheet in every page. Production serves the script with
   `public, max-age=31536000, immutable`; images, icons and the resume PDF use
   `public, max-age=86400, stale-while-revalidate=604800`.
 - Only `/projects` loads JavaScript: `<script type="module" src="/game/main.js?v=<hash>">`
