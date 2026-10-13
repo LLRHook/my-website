@@ -388,7 +388,7 @@ the end of their section, sorted by id on read.
 - **Status:** shipped-pending-migration
 
 ### [FEAT-1791849858] Instant page-to-page navigation with header-delivered speculation rules
-- [ ] **Priority:** high
+- [x] **Priority:** high
 - **Area:** performance, frontend
 - **File(s):** next.config.js, app/speculation-rules/route.ts, e2e/site.spec.ts
 - **Why:** Owner wants every click to feel instant. Each navigation is a full cold document load today; nothing prefetches or prerenders.
@@ -398,7 +398,8 @@ the end of their section, sorted by id on read.
 - **Test plan:** Chromium E2E hover-then-click checks `activationStart`; header and rules-route content-type checks; existing CSP tests.
 - **Out of scope:** Client-side routing, service workers, any JavaScript on non-game routes.
 - **Bump:** minor
-- **Status:** open
+- **Implementation:** `app/speculation-rules/route.ts` serves static document rules as `application/speculationrules+json`; next.config.js adds `Speculation-Rules: "/speculation-rules"` to the six page routes, so no `<script>` is added and non-game pages stay JavaScript-free. Rules: prerender same-origin, extensionless links without `download`/`target` at `moderate` eagerness (hover or pointerdown), and only prefetch /projects. No CSP change was needed; Chromium loads the header rules under the existing `default-src 'self'` policy with no violations. Chromium refuses to activate a prerender while DevTools is attached (`PrerenderingDisabledByDevTools`, confirmed with Playwright and with a raw CDP client), so automation cannot show `activationStart > 0`. The new E2E instead asserts the Prerender attempt for /resume, Prefetch-only for /projects and that the click loads the speculated response (`deliveryType` `navigational-prefetch`). README and VERIFICATION document the rules and the FEAT-1791849857 boot budget. Verified: lint, tsc, 251 Vitest, build, 120 Playwright passed with 12 expected skips.
+- **Status:** shipped-pending-migration
 
 ### [FEAT-1791849859] Inline the stylesheet to remove the render-blocking CSS request
 - [ ] **Priority:** med
