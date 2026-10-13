@@ -6,9 +6,6 @@ import { startLoop } from "./engine/loop.js";
 import { SceneStack } from "./engine/scenes.js";
 import { Screen } from "./engine/screen.js";
 import { loadOptions } from "./engine/storage.js";
-import { initScenery } from "./gfx/scenery.js";
-import { initSprites } from "./gfx/sprites.js";
-import { initTiles } from "./gfx/tiles.js";
 import { initFont } from "./gfx/font.js";
 import { TitleScene } from "./ui/title.js";
 
@@ -58,9 +55,6 @@ if (root) {
     const options = loadOptions();
     const screen = new Screen(canvas);
     initFont();
-    initTiles();
-    initScenery();
-    initSprites();
     const audio = new Audio(options);
     const input = new Input(root, () => audio.resume(), () => {
       if (options.haptics) {
