@@ -19,8 +19,16 @@ function assetUrl(path) {
 const SITE_ORIGIN = process.env.SITE_ORIGIN ?? "https://victorivanov.engineer";
 const SCRIPT_SRC = `script-src ${SITE_ORIGIN}/speculation-rules`;
 
+// The stylesheet is inlined in every page, so first paint never waits on a CSS request.
+// CSP allows exactly this text through its hash.
+const STYLE_CSS = readFileSync(join(__dirname, "public", "retro.css"), "utf8").replace(/\r\n/g, "\n").trim();
+if (STYLE_CSS.includes("</")) {
+  throw new Error("public/retro.css must not contain \"</\": it is inlined in a <style> element");
+}
+const STYLE_HASH = createHash("sha256").update(STYLE_CSS).digest("base64");
+
 const securityHeaders = [
-  { key: "Content-Security-Policy", value: `default-src 'self'; ${SCRIPT_SRC}; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'; img-src 'self'; style-src 'self'` },
+  { key: "Content-Security-Policy", value: `default-src 'self'; ${SCRIPT_SRC}; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'; img-src 'self'; style-src 'sha256-${STYLE_HASH}'` },
   { key: "X-Content-Type-Options", value: "nosniff" },
   { key: "X-Frame-Options", value: "DENY" },
   { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
@@ -40,7 +48,7 @@ const nextConfig = {
   compress: true,
   poweredByHeader: false,
   env: {
-    STYLE_HREF: assetUrl("retro.css"),
+    STYLE_CSS,
     GAME_SCRIPT: assetUrl("game/main.js"),
   },
   async redirects() {
@@ -64,7 +72,7 @@ const nextConfig = {
           : header),
       },
       ...(process.env.NODE_ENV === "production" ? [
-        ...["/retro.css", "/game/main.js"].map((source) => ({
+        ...["/game/main.js"].map((source) => ({
           source,
           headers: [...securityHeaders, {
             key: "Cache-Control",
