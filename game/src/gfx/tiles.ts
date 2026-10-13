@@ -1272,37 +1272,39 @@ const METATILE_ROWS: Readonly<Record<string, readonly string[]>> = {
   ]
 };
 const atlas = new Map<string, HTMLCanvasElement>();
-export function initTiles(): void {
-  for (const [id, def] of Object.entries(TILE_DEFS)) {
-    for (const light of ["day", "dusk", "night"] as const) {
-      for (let frame = 0; frame < 2; frame++) {
-        const colours = Object.fromEntries(def.colours.map((index, char) => [String(char), remap(index, light)]));
-        const source = METATILE_ROWS[id] ?? def.rows;
-        const rows = def.animated && frame ? source.map((row, y) => {
-          if (id === "h") {
-            return row.replaceAll("1", "2");
-          }
-          if (id === "f" && y % 8 > 4) {
-            return row;
-          }
-          return row.slice(1) + row[0];
-        }) : source;
-        const tile = pixels(rows, colours);
-        const canvas = document.createElement("canvas");
-        canvas.width = 16;
-        canvas.height = 16;
-        const ctx = canvas.getContext("2d")!;
-        const positions = source.length === 16 ? [[0, 0]] : [[0, 0], [8, 0], [0, 8], [8, 8]];
-        for (const [x, y] of positions) {
-          ctx.drawImage(tile, x, y);
-        }
-        atlas.set(`${id}:${light}:${frame}`, canvas);
-      }
-    }
+// Rasterized on first draw: building every tile, light and frame up front blocked the page at boot.
+function tileCanvas(id: string, light: Light, frame: number): HTMLCanvasElement | undefined {
+  const key = `${id}:${light}:${frame}`;
+  const cached = atlas.get(key);
+  if (cached || !Object.hasOwn(TILE_DEFS, id) || (frame !== 0 && frame !== 1)) {
+    return cached;
   }
+  const def = TILE_DEFS[id];
+  const colours = Object.fromEntries(def.colours.map((index, char) => [String(char), remap(index, light)]));
+  const source = METATILE_ROWS[id] ?? def.rows;
+  const rows = def.animated && frame ? source.map((row, y) => {
+    if (id === "h") {
+      return row.replaceAll("1", "2");
+    }
+    if (id === "f" && y % 8 > 4) {
+      return row;
+    }
+    return row.slice(1) + row[0];
+  }) : source;
+  const tile = pixels(rows, colours);
+  const canvas = document.createElement("canvas");
+  canvas.width = 16;
+  canvas.height = 16;
+  const ctx = canvas.getContext("2d")!;
+  const positions = source.length === 16 ? [[0, 0]] : [[0, 0], [8, 0], [0, 8], [8, 8]];
+  for (const [x, y] of positions) {
+    ctx.drawImage(tile, x, y);
+  }
+  atlas.set(key, canvas);
+  return canvas;
 }
 export function drawTile(screen: Screen, id: string, x: number, y: number, frame: number, light: Light): void {
-  const tile = atlas.get(`${id}:${light}:${frame}`);
+  const tile = tileCanvas(id, light, frame);
   if (tile) {
     screen.blit(tile, 0, 0, 16, 16, x, y);
   }

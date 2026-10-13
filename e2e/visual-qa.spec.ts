@@ -242,10 +242,9 @@ test("region: original character contact sheet", async ({ page }) => {
   await expect(page.locator("#game")).toHaveAttribute("data-ready", "");
   await loadGameModules(page);
   const url = await page.evaluate(() => {
-    const { Screen, initFont, initSprites, REGION_SPRITES, drawSprite, trainerPortrait, drawSmallText }
+    const { Screen, initFont, REGION_SPRITES, drawSprite, trainerPortrait, drawSmallText }
       = globalThis.__codelings;
     initFont();
-    initSprites();
     const canvas = document.createElement("canvas");
     canvas.width = 192;
     canvas.height = 240;
