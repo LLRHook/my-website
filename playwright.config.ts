@@ -35,6 +35,8 @@ export default defineConfig({
     command: process.env.CI ? "npm run start" : "npm run build && npm run start",
     url: localBaseURL,
     reuseExistingServer: !process.env.CI,
+    // CSP allows the speculation rules URL on this origin (next.config.js).
+    env: { SITE_ORIGIN: localBaseURL },
     timeout: 120_000,
   },
 });
