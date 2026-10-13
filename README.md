@@ -71,10 +71,12 @@ NEW label, disables both for reduced motion, and supplies print styles.
 - `public/game/main.js`: one generated, minified browser bundle, excluded from Git.
 - `public/retro.css`: the site's only stylesheet, including the CSS handheld. Both it and the game script use a content-derived `?v=` query and a one-year immutable cache in production.
 - Public images, icons and the resume PDF use a one-day cache with one week of stale-while-revalidate in production. The portrait and Peru photo are resized for their display sizes; below-the-fold photos load lazily.
+- `app/speculation-rules/route.ts`: speculation rules sent through a `Speculation-Rules` response header on every page (no `<script>`). Chromium prerenders a same-origin page when its link is hovered or pressed and only prefetches /projects, so Codelings never boots in the background; other browsers ignore the header.
 - `scripts/render-assets.mjs`: regenerates the committed favicon set and 1200x630 share card (`npm run assets`).
 - `app/route.ts` and the route folders: Home, About, Projects, Resume, Off the Clock, Contact, and the catch-all 404.
 - `app/sitemap.ts` and `app/robots.ts`: crawler metadata.
 - `e2e/site.spec.ts`: HTML, navigation, headers, routing, narrow layouts, and reduced motion.
+- `e2e/performance.spec.ts` (Chromium): no long main-thread task while Codelings boots at 4x CPU, and speculative loading of hovered links.
 
 ## GitHub data
 

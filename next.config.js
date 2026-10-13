@@ -45,6 +45,11 @@ const nextConfig = {
         source: "/:path*",
         headers: securityHeaders,
       },
+      // Instant navigation: Chromium prerenders hovered links (see app/speculation-rules).
+      ...["/", "/about", "/projects", "/resume", "/off-the-clock", "/contact"].map((source) => ({
+        source,
+        headers: [{ key: "Speculation-Rules", value: '"/speculation-rules"' }],
+      })),
       {
         source: "/projects",
         headers: securityHeaders.map((header) => header.key === "Content-Security-Policy"
