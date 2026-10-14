@@ -38,6 +38,7 @@ Set production variables in Vercel; never commit secrets.
 - `npm run dev`: development server.
 - `npm run build`: Next.js production build.
 - `npm run start`: serve the production build.
+- `npm run token-stats`: rebuild `data/token-stats.json` from this machine's Claude Code (`~/.claude/projects`) and Codex (`~/.codex/sessions`) logs; see [Token stats](#token-stats).
 - `npm run lint`: ESLint.
 - `npm test`: Vitest unit tests; `npm run test:watch` watches changes.
 - `npx tsc --noEmit`: standalone TypeScript check.
@@ -79,6 +80,19 @@ Rows sort by the most recent push and include language, stars, update date, and
 HTTP(S) demo links. Listing requests use the existing authenticated-to-public
 fallback. An unavailable list shows a direct GitHub link. No language, commit,
 or README requests are made per repository.
+
+## Token stats
+
+`scripts/token-stats.mjs` (Node built-ins only) ports the owner's usage-widget
+parsing: Claude Code assistant messages are counted once per message id, and
+Codex token counts are summed as per-event deltas of each rollout's cumulative
+totals. Malformed lines are skipped. It writes `data/token-stats.json`: lifetime
+and 30-day totals, a Claude Code / Codex split, the top six models, and 90 local
+days, each split into input, output, cache-write and cache-read tokens with an
+API-equivalent cost from the dated list-price table in the script (models without
+a published price count tokens but no cost). The file holds no paths, project
+names, session ids, prompts or tool names, and is rewritten only when it changes.
+`app/lib/tokenStats.ts` defines its type and validator.
 
 ## Content and resume
 
