@@ -37,6 +37,42 @@ the end of their section, sorted by id on read.
 ---
 
 ## Open
+### [BUG-1791951243] npm audit reports seven high-severity advisories
+- [ ] **Severity:** med
+- **Area:** deps, security
+- **File(s):** package.json, package-lock.json
+- **Observation:** `npm ci` at 6ec878b reports 7 high-severity advisories. Two are in the production tree under `next@16.3.8`: `sharp@0.35.4` (librsvg, CVE-2026-96889, GHSA-wq5f-xc86-pv6w) and `source-map-js@1.2.1` via `postcss` (GHSA-68fv-2mgg-jv7q, event-loop DoS from crafted source maps). Five are dev-only, through `eslint-config-next` (`@next/eslint-plugin-next`, `fast-glob`, `micromatch`, `braces`). Exposure is low: no code imports `next/image` or `sharp`, and `postcss` source maps are only read at build time from repository files. Found by the `/protocol-v-and-v` Stage 0 install.
+- **Expected:** `npm audit` reports no high-severity advisories, or each remaining one is documented as unreachable.
+- **Repro / Notes:** `npm ci && npm audit`. `npm audit fix` resolves `sharp` and `source-map-js` without a semver-major change. Its suggested fix for the `eslint-config-next` chain is a downgrade to 14.2.35, which is wrong for Next 16; check `docs/dependency-update.md` and the current `eslint-config-next` release instead. CI runs no audit gate.
+- **Bump:** patch
+- **Status:** open
+
+## Migrated to changelog
+
+Entries below have been ticked off and copied as a one-liner into `CHANGELOG.md`.
+They are kept here so each `BUG-NNN` stays resolvable.
+
+### [BUG-1781501120] Projects never render in production ("No projects to display")
+- [x] **Severity:** high
+- **Area:** github-api, frontend, deploy
+- **File(s):** app/lib/github.ts, app/page.tsx, app/api/repos/route.ts
+- **Observation:** The production site (victorivanov.engineer) "Work" timeline always showed the empty state "No projects to display." `fetchAllRepos()` was returning `[]` because the GitHub repos-list request came back non-OK (the Vercel `GITHUB_TOKEN` was stale/invalid → 401, with unauthenticated fallback rate-limited at 60-req/hr on Vercel's shared serverless IPs). A prior commit (`25784ea`) misdiagnosed this as a timeout problem and additionally left the timeout `AbortError` uncaught in `fetchPaginatedRepos`, which could crash the render instead of degrading gracefully.
+- **Expected:** The Work timeline renders the public GitHub repositories (36 non-fork public repos).
+- **Repro / Notes:** Confirmed fixed end-to-end: `/` no longer contains "No projects to display"; `/api/repos` returns 36 repos across 2026/2025/2023; `/api/readme/...` returns real content.
+- **Fix:** Replaced the stale Vercel `GITHUB_TOKEN` (Production) with a valid PAT and redeployed (root cause). Hardened `app/lib/github.ts` (commit `59ce141`): wrapped the paginated repos fetch in try/catch so a timeout/abort degrades to the empty state instead of throwing; fall back to the public repos endpoint when the authenticated request yields nothing; added a timeout + graceful fallback to `fetchReadme`.
+- **Bump:** patch
+- **Status:** fixed-pending-migration
+
+### [BUG-1781501121] Orphaned StatementSection breaks 4 E2E "statement" tests
+- [x] **Severity:** med
+- **Area:** tests, ui
+- **File(s):** app/components/StatementSection.tsx, app/components/ClientPage.tsx, e2e/centering.spec.ts
+- **Observation:** `e2e/centering.spec.ts` asserts a `[data-testid="statement"] > div` is centered across all 4 viewports, but `ClientPage.tsx` never imports or renders `StatementSection`. The component is orphaned (nothing references it). The 4 `statement` centering tests therefore time out / fail.
+- **Expected:** Either the statement section is part of the page, or it has been intentionally retired and both the component and its E2E coverage should be removed. The E2E suite must be green.
+- **Repro / Notes:** `npm run test:e2e` — the 4 `statement inner div is centered` cases fail.
+- **Fix:** Deleted the orphaned `app/components/StatementSection.tsx` and removed the 4 `statement` centering assertions from `e2e/centering.spec.ts`. E2E suite is now green (16/16, was 4 red).
+- **Bump:** patch
+- **Status:** fixed-pending-migration
 
 ### [BUG-1781504214] Outdated dependency tree includes high-severity advisories
 - [x] **Severity:** high
@@ -115,8 +151,6 @@ the end of their section, sorted by id on read.
 - **Bump:** patch
 - **Status:** fixed-pending-migration
 - **Fix:** Updated current behavior and acceptance descriptions, recorded the confirmed 104-unit-test baseline across 11 files, and restored the two fix notes to their owning entries. Final browser/deployment evidence is recorded separately after its checks complete.
-
----
 
 ### [BUG-1788663454] Combined desktop features fail current lint and browser checks
 - [x] **Severity:** med
@@ -271,31 +305,4 @@ the end of their section, sorted by id on read.
 - **Repro / Notes:** `grep -n "§" VERIFICATION.md` returns nothing.
 - **Bump:** patch
 - **Fix:** CLAUDE.md now points at the `/protocol-v-and-v` Verified entry shape and the VERIFICATION.md Stage 2 baseline table.
-- **Status:** fixed-pending-migration
-
-## Migrated to changelog
-
-Entries below have been ticked off and copied as a one-liner into `CHANGELOG.md`.
-They are kept here so each `BUG-NNN` stays resolvable.
-
-### [BUG-1781501120] Projects never render in production ("No projects to display")
-- [x] **Severity:** high
-- **Area:** github-api, frontend, deploy
-- **File(s):** app/lib/github.ts, app/page.tsx, app/api/repos/route.ts
-- **Observation:** The production site (victorivanov.engineer) "Work" timeline always showed the empty state "No projects to display." `fetchAllRepos()` was returning `[]` because the GitHub repos-list request came back non-OK (the Vercel `GITHUB_TOKEN` was stale/invalid → 401, with unauthenticated fallback rate-limited at 60-req/hr on Vercel's shared serverless IPs). A prior commit (`25784ea`) misdiagnosed this as a timeout problem and additionally left the timeout `AbortError` uncaught in `fetchPaginatedRepos`, which could crash the render instead of degrading gracefully.
-- **Expected:** The Work timeline renders the public GitHub repositories (36 non-fork public repos).
-- **Repro / Notes:** Confirmed fixed end-to-end: `/` no longer contains "No projects to display"; `/api/repos` returns 36 repos across 2026/2025/2023; `/api/readme/...` returns real content.
-- **Fix:** Replaced the stale Vercel `GITHUB_TOKEN` (Production) with a valid PAT and redeployed (root cause). Hardened `app/lib/github.ts` (commit `59ce141`): wrapped the paginated repos fetch in try/catch so a timeout/abort degrades to the empty state instead of throwing; fall back to the public repos endpoint when the authenticated request yields nothing; added a timeout + graceful fallback to `fetchReadme`.
-- **Bump:** patch
-- **Status:** fixed-pending-migration
-
-### [BUG-1781501121] Orphaned StatementSection breaks 4 E2E "statement" tests
-- [x] **Severity:** med
-- **Area:** tests, ui
-- **File(s):** app/components/StatementSection.tsx, app/components/ClientPage.tsx, e2e/centering.spec.ts
-- **Observation:** `e2e/centering.spec.ts` asserts a `[data-testid="statement"] > div` is centered across all 4 viewports, but `ClientPage.tsx` never imports or renders `StatementSection`. The component is orphaned (nothing references it). The 4 `statement` centering tests therefore time out / fail.
-- **Expected:** Either the statement section is part of the page, or it has been intentionally retired and both the component and its E2E coverage should be removed. The E2E suite must be green.
-- **Repro / Notes:** `npm run test:e2e` — the 4 `statement inner div is centered` cases fail.
-- **Fix:** Deleted the orphaned `app/components/StatementSection.tsx` and removed the 4 `statement` centering assertions from `e2e/centering.spec.ts`. E2E suite is now green (16/16, was 4 red).
-- **Bump:** patch
 - **Status:** fixed-pending-migration

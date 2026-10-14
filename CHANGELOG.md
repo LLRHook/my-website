@@ -14,11 +14,58 @@ under each release/date heading.
 
 ### Verified
 
+- 2026-10-14 V&V pass on a local production build (`npm ci`, `SITE_ORIGIN=http://localhost:3000 npm run build`, `next start`), SHA 6ec878b: lint zero warnings, tsc zero errors, 251 Vitest (21 files), Playwright 141 listed (129 passed, 12 skipped; new and affected specs rerun without retries, no flips); batch FEAT-1788629556, FEAT-1788611335, FEAT-1788650818, FEAT-1788652720, FEAT-1788653835, FEAT-1788655296, FEAT-1788655651, FEAT-1790801371, FEAT-1790806476, FEAT-1790821648, FEAT-1790963490, FEAT-1790966739, FEAT-1790966740, FEAT-1790968447, FEAT-1790968448, FEAT-1790968449, FEAT-1790969283, FEAT-1790978717, FEAT-1791849857, FEAT-1791849858, FEAT-1791849859, FEAT-1791849860, BUG-1781504214, BUG-1788662454, BUG-1788653836, BUG-1788655093, BUG-1788655652, BUG-1788656593, BUG-1788663409, BUG-1788663454, BUG-1790801366, BUG-1790801367, BUG-1790801368, BUG-1790801370, BUG-1790822531, BUG-1790964596, BUG-1790966738, BUG-1790972091, BUG-1790979920, BUG-1790991960, BUG-1791851972, BUG-1791949998, BUG-1791949999; stack fresh, data none (stateless); gui pass. Since v0.4.0 the React room site was replaced by the HTML/CSS site and Codelings, so the room tests were retired and the suites grew from 8 unit and 20 E2E.
+
 ### Added
+
+- [FEAT-1788629556] Uncrowded phone room with subtle discovery and softer ambience. [minor]
+- [FEAT-1788611335] Room close-ups, poker details, and optional ambient sound. [minor]
+- [FEAT-1788650818] Professional profile copy and curated work inside the room. [minor]
+- [FEAT-1788652720] Replace poker desk detail with a playful roulette toy. [minor]
+- [FEAT-1788653835] Simplify room close-ups and give the cat a varied idle rhythm. [minor]
+- [FEAT-1788655296] Red Rising reading shelf and default quiet room ambience. [minor]
+- [FEAT-1788655651] Direct room interactions and education frame. [minor]
+- [FEAT-1790801371] Addressable desktop apps and public resume PDF. [minor]
+- [FEAT-1790806476] Photoreal room renders and web asset export. [minor]
+- [FEAT-1790821648] Photoreal room on the site (phase 2). [minor]
+- [FEAT-1790963490] Rebuild the site as a 1990s HTML/CSS home page. [major]
+- [FEAT-1790966739] 1990s pixel-art favicon set. [minor]
+- [FEAT-1790966740] SEO pass: share card, name-focused metadata, breadcrumbs. [minor]
+- [FEAT-1790968447] Codelings game, part 1: engine, embed and title screen. [minor]
+- [FEAT-1790968448] Codelings game, part 2: overworld, maps and story. [minor]
+- [FEAT-1790968449] Codelings game, part 3: Codelings, battles, Codex and ending. [minor]
+- [FEAT-1790969283] Plain Off the Clock copy. [minor]
+- [FEAT-1790978717] Codelings on phones: fullscreen play, sliding D-pad, haptics. [minor]
+- [FEAT-1791849857] Codelings boot without a long main-thread task. [minor]
+- [FEAT-1791849858] Instant page-to-page navigation with header-delivered speculation rules. [minor]
+- [FEAT-1791849859] Inline the stylesheet to remove the render-blocking CSS request. [minor]
+- [FEAT-1791849860] CI performance budget for page weight, requests, game bundle and long tasks. [minor]
 
 ### Changed
 
 ### Fixed
+
+- [BUG-1781504214] Outdated dependency tree includes high-severity advisories. [patch]
+- [BUG-1788662454] WebKit compatibility mouse events cancel the touch-motion reset. [patch]
+- [BUG-1788653836] Dialog focus trap includes inputs disabled by a fieldset. [patch]
+- [BUG-1788655093] Standalone typecheck rejects injected browser test helper assertion. [patch]
+- [BUG-1788655652] Evening caption loses contrast and room computer is off center. [patch]
+- [BUG-1788656593] Interrupted ambient audio cannot resume with an existing scheduler. [patch]
+- [BUG-1788663409] Room documentation describes retired interactions and audio defaults. [patch]
+- [BUG-1788663454] Combined desktop features fail current lint and browser checks. [patch]
+- [BUG-1790801366] Resume and featured projects lag the September resume. [patch]
+- [BUG-1790801367] Project shelf and README links expose junk content. [patch]
+- [BUG-1790801368] Skip link does not skip the header. [patch]
+- [BUG-1790801370] App text fails WCAG AA contrast. [patch]
+- [BUG-1790822531] DesktopWindow local-link test times out on cold README import. [patch]
+- [BUG-1790964596] next 16.3.4 is vulnerable to remote code execution (GHSA-vcvr-r3jv-pc5j). [patch]
+- [BUG-1790966738] Structured data dropped and 404 page canonicalizes to home. [patch]
+- [BUG-1790972091] Marquee wraps onto two static lines under reduced motion. [patch]
+- [BUG-1790979920] VERIFICATION.md still describes a script-free site and the old test baseline. [patch]
+- [BUG-1790991960] Handheld D-pad left and right arrows render as emoji on phones. [patch]
+- [BUG-1791851972] WebKit blocks the speculation rules fetch under script-src 'none'. [patch]
+- [BUG-1791949998] VERIFICATION.md build and E2E commands diverge from CI. [patch]
+- [BUG-1791949999] CLAUDE.md cites VERIFICATION.md sections that do not exist. [patch]
 
 ### Removed
 

@@ -8,7 +8,7 @@ GitHub projects table stays below the game, and the public route contracts hold.
 Run history lives in `CHANGELOG.md` (Verified entries); older evidence is in
 `docs/verification-history.md`.
 
-Last verified: none under this checklist yet.
+Last verified: 2026-10-14, SHA 6ec878b (see `CHANGELOG.md` Verified).
 
 ## Build and automated checks
 
@@ -30,8 +30,9 @@ Last verified: none under this checklist yet.
 
 ### Stage 2 baseline
 
-Counts come from the runners' own enumerators (`npx vitest list`,
-`npx playwright test --list`) and are overwritten in place after each green run.
+Counts come from the runners themselves: Vitest's run summary (`npx vitest list`
+counts each `it.each` table once) and `npx playwright test --list`. They are
+overwritten in place after each green run.
 
 | Layer | Runner | Count | Command (matches `.github/workflows/ci.yml`) |
 |---|---|---|---|
