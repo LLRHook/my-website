@@ -17,7 +17,7 @@ export function homeBody(): string {
 
 export function aboutBody(): string {
   return `<h1>About Me</h1>${portrait}${paragraph("Hi, I'm Victor. A Senior Full-Stack Engineer with a habit of building useful things.")}
-${paragraph("Based in Sterling, Virginia · DoD Secret eligibility (DCSA 2026)")}
+${paragraph("Based in Sterling, Virginia · Active DoD Secret clearance")}
 ${paragraph("I work on certification software at Paradigm Testing. That means APIs, multi-tenant systems, real-time exam workflows, and getting the details right before they reach production.")}
 ${paragraph("Most days, I work with Java, Spring Boot, React, and PostgreSQL. Outside of that, I build tools in Go and TypeScript and spend a lot of time exploring agentic development workflows.")}
 ${paragraph("I studied computer science at UMBC and I'm pursuing an M.S. in Computer Science at Georgia Tech, expected December 2027. Away from the desk, you'll usually find me climbing or thinking about the next project.")}
@@ -88,10 +88,10 @@ export function notFoundBody(): string {
 export function resumeBody(): string {
   return `<h1>Resume</h1><p><a href="/Victor_Ivanov_Resume.pdf" download>Download resume (PDF)</a></p>      <h2>${esc("Victor Ivanov")}</h2>
       <p>${esc("Senior Full-Stack Engineer")}</p>
-      <p>${esc("\n        Sterling, Virginia · DoD Secret eligibility (DCSA 2026) · ")}<a href="${esc(EMAIL_HREF)}">${esc("victor.n.ivanov@gmail.com")}</a><br />
+      <p>${esc("\n        Sterling, Virginia · U.S. Citizen · Active DoD Secret clearance · ")}<a href="${esc(EMAIL_HREF)}">${esc("victor.n.ivanov@gmail.com")}</a><br />
         <a href="https://victorivanov.engineer" target="_blank" rel="noopener noreferrer">${esc("victorivanov.engineer")}</a>${esc(" · ")}<a href="${esc(GITHUB_HREF)}" rel="me">${esc("github.com/LLRHook")}</a>${esc(" · ")}<a href="${esc(SOCIAL_BY_ICON.linkedin.href)}" rel="me">${esc("LinkedIn")}</a>
       </p>
-      <p>${esc("Secret-eligible, backend-leaning full-stack engineer with 4+ years shipping high-stakes certification SaaS. Owned a React/Spring Boot scheduling workflow end to end, carried a billing hotfix through live production validation, and built Next.js analytics and quiz experiences with explicit async, accessibility, and security controls. Open to on-site and hybrid roles and customer travel.")}</p>
+      <p>${esc("Secret-cleared, backend-leaning full-stack engineer with 4+ years shipping high-stakes certification SaaS. Owned a React/Spring Boot scheduling workflow end to end, carried a billing hotfix through live production validation, and built Next.js analytics and quiz experiences with explicit async, accessibility, and security controls. Open to on-site and hybrid roles and customer travel.")}</p>
       <h2>${esc("Experience")}</h2>
       <article>
         <h3>${esc("Senior Backend Engineer")}</h3><p class="when">${esc("May 2024 – present")}<br>${esc("Paradigm Testing · Remote")}</p>
@@ -142,6 +142,6 @@ export function resumeBody(): string {
       <p><strong>${esc("Backend:")}</strong>${esc(" Java 21, Spring Boot 3, Spring Security, JPA/Hibernate, Python, FastAPI, Go, REST, WebSockets/STOMP")}</p>
       <p><strong>${esc("Data & cloud:")}</strong>${esc(" PostgreSQL, MariaDB, Redis/Valkey, AWS (EC2, S3, RDS), Docker, Kubernetes/Helm")}</p>
       <p><strong>${esc("Delivery & security:")}</strong>${esc(" Bitbucket Pipelines, GitHub Actions, CI/CD, OAuth2/JWT, JUnit/Mockito, Testcontainers, Pytest")}</p>
-      <p>${esc("Updated September 2026.")}</p>
+      <p>${esc("Updated October 2026.")}</p>
 `;
 }

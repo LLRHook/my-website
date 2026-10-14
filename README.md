@@ -90,8 +90,9 @@ or README requests are made per repository.
 
 ## Content and resume
 
-The HTML resume retains the September 2026 copy and links to
-`public/Victor_Ivanov_Resume.pdf`. The portrait comes from the public GitHub
+The HTML resume carries the October 2026 copy and links to
+`public/Victor_Ivanov_Resume.pdf`, a PDF export of the owner's resume with the
+phone number removed and the same public wording as the HTML. The portrait comes from the public GitHub
 profile. The conference photo and September 2026 Peru photograph were supplied
 by the owner and authorized for publication. Public copies have no EXIF or XMP
 metadata. The original source resume files remain unchanged.
