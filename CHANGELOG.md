@@ -14,6 +14,20 @@ under each release/date heading.
 
 ### Verified
 
+### Added
+
+### Changed
+
+### Fixed
+
+### Removed
+
+### Security
+
+## [v1.0.0] - 2026-10-14
+
+### Verified
+
 - 2026-10-14 V&V pass on a local production build (`npm ci`, `SITE_ORIGIN=http://localhost:3000 npm run build`, `next start`), SHA 6ec878b: lint zero warnings, tsc zero errors, 251 Vitest (21 files), Playwright 141 listed (129 passed, 12 skipped; new and affected specs rerun without retries, no flips); batch FEAT-1788629556, FEAT-1788611335, FEAT-1788650818, FEAT-1788652720, FEAT-1788653835, FEAT-1788655296, FEAT-1788655651, FEAT-1790801371, FEAT-1790806476, FEAT-1790821648, FEAT-1790963490, FEAT-1790966739, FEAT-1790966740, FEAT-1790968447, FEAT-1790968448, FEAT-1790968449, FEAT-1790969283, FEAT-1790978717, FEAT-1791849857, FEAT-1791849858, FEAT-1791849859, FEAT-1791849860, BUG-1781504214, BUG-1788662454, BUG-1788653836, BUG-1788655093, BUG-1788655652, BUG-1788656593, BUG-1788663409, BUG-1788663454, BUG-1790801366, BUG-1790801367, BUG-1790801368, BUG-1790801370, BUG-1790822531, BUG-1790964596, BUG-1790966738, BUG-1790972091, BUG-1790979920, BUG-1790991960, BUG-1791851972, BUG-1791949998, BUG-1791949999; stack fresh, data none (stateless); gui pass. Since v0.4.0 the React room site was replaced by the HTML/CSS site and Codelings, so the room tests were retired and the suites grew from 8 unit and 20 E2E.
 - 2026-10-14 V&V pass on a local production build (`npm ci`, `SITE_ORIGIN=http://localhost:3000 npm run build`, `next start`) in a clean worktree, SHA 1344f04: lint zero warnings, tsc zero errors, 64 Vitest (4 files), Playwright 41 listed (41 passed, 0 skipped; site and performance specs rerun without retries, no flips); batch FEAT-1790991961, FEAT-1790991962, FEAT-1790991963, FEAT-1790991964, FEAT-1791988181, FEAT-1791988182, FEAT-1791988183, BUG-1791980560, BUG-1791991388; stack fresh, data none (stateless); gui pass. The Codelings game and its tests were removed (FEAT-1791988181), so the suites shrank from 251 unit and 141 E2E, and webkit-mobile now runs only the site spec, leaving no skips.
 
@@ -48,8 +62,6 @@ under each release/date heading.
 - [FEAT-1791988182] Token-usage snapshot export (`npm run token-stats` writes `data/token-stats.json`). [minor]
 - [FEAT-1791988183] Token burner panel on /projects. [minor]
 
-### Changed
-
 ### Fixed
 
 - [BUG-1781504214] Outdated dependency tree includes high-severity advisories. [patch]
@@ -79,8 +91,6 @@ under each release/date heading.
 ### Removed
 
 - [FEAT-1791988181] Remove the Codelings game from /projects; every page is JavaScript free. [major]
-
-### Security
 
 ## [v0.4.0] - 2026-06-18
 
