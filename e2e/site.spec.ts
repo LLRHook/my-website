@@ -10,10 +10,10 @@ for (const item of PAGES) {
     expect(response?.status()).toBe(200);
     expect(response?.headers()["content-type"]).toContain("text/html");
     const policy = response?.headers()["content-security-policy"];
-    expect(policy).toMatch(item.path === "/projects" ? /script-src 'self';/ : /script-src https?:\/\/[^/; ]+\/speculation-rules;/);
+    expect(policy).toMatch(/script-src https?:\/\/[^/; ]+\/speculation-rules;/);
     await expect(page.locator("h1")).toHaveCount(1);
     await expect(page.locator("h1")).toBeVisible();
-    await expect(page.locator("script")).toHaveCount(item.path === "/projects" ? 1 : 0);
+    await expect(page.locator("script")).toHaveCount(0);
     // The stylesheet is inlined and allowed by its CSP hash: no CSS request, styles applied.
     await expect(page.locator('link[rel="stylesheet"]')).toHaveCount(0);
     await expect(page.locator("head style")).toHaveCount(1);
@@ -25,17 +25,12 @@ for (const item of PAGES) {
     await expect(page.locator('nav [aria-current="page"]')).toHaveText(item.label);
     await page.setViewportSize({ width: 320, height: 700 });
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
-    if (item.path === "/projects") await expect(page.locator("table.projects, .notice")).toBeVisible();
+    if (item.path === "/projects") await expect(page.getByRole("table", { name: "Public repositories" }).or(page.locator(".notice"))).toBeVisible();
   });
 }
 
-test("production assets have long-lived cache headers", async ({ page, request }) => {
-  await page.goto("/projects");
-  const script = await page.locator('script[type="module"]').getAttribute("src");
-  expect(script).not.toBeNull();
-  const response = await request.get(script!);
-  expect(response.status()).toBe(200);
-  expect(response.headers()["cache-control"]).toContain("immutable");
+test("public photos are cached and the retired game bundle is gone", async ({ request }) => {
+  expect((await request.get("/game/main.js")).status()).toBe(404);
   const photo = await request.get("/peru-travel.webp");
   expect(photo.status()).toBe(200);
   expect(photo.headers()["cache-control"]).toContain("max-age=86400");
@@ -105,4 +100,21 @@ test("no page reports a Content Security Policy violation", async ({ page }) => 
     await page.waitForLoadState("networkidle");
   }
   expect(errors.filter((text) => /Content Security Policy/i.test(text))).toEqual([]);
+});
+test("projects shows the token burner panel without inline styles", async ({ page }) => {
+  await page.goto("/projects");
+  const panel = page.locator("section.burner");
+  await expect(panel.getByRole("heading", { name: "Token burner" })).toBeVisible();
+  await expect(panel.locator(".burner-stats > div")).toHaveCount(4);
+  await expect(panel.locator(".burner-tools li")).toHaveCount(2);
+  expect(await panel.locator(".burner-models li").count()).toBeGreaterThan(0);
+  await expect(panel.locator(".burner-chart svg[role=img]")).toHaveAttribute("aria-label", /^Daily tokens from /);
+  await expect(page.locator("[style]")).toHaveCount(0);
+  // Bars take their colour from the stylesheet, so the hashed style-src applied.
+  expect(await panel.locator(".burner-chart rect").first().evaluate((element) => getComputedStyle(element).fill)).toBe("rgb(0, 255, 0)");
+  await panel.getByText("Daily numbers as a table").click();
+  await expect(panel.locator("details tbody tr")).toHaveCount(90);
+  await page.setViewportSize({ width: 320, height: 700 });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
+  expect(await panel.locator(".burner-chart svg").evaluate((element) => element.getBoundingClientRect().width)).toBeLessThanOrEqual(320);
 });

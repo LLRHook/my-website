@@ -126,7 +126,7 @@ the end of their section, sorted by id on read.
 - **Status:** open
 
 ### [FEAT-1791988181] Remove the Codelings game from /projects
-- [ ] **Priority:** high
+- [x] **Priority:** high
 - **Area:** projects, performance, tests, docs
 - **File(s):** game/**, package.json, package-lock.json, app/lib/pages.ts, app/lib/pages.test.ts, app/lib/html.ts, app/lib/html.test.ts, app/projects/route.ts, app/speculation-rules/route.ts, app/lib/projectPresentation.ts, next.config.js, public/retro.css, eslint.config.mjs, tsconfig.json, vitest.config.ts, playwright.config.ts, .gitignore, e2e/game.spec.ts, e2e/visual-qa.spec.ts, e2e/support/*, e2e/performance.spec.ts, e2e/site.spec.ts, docs/game-design.md, README.md, CLAUDE.md, VERIFICATION.md
 - **Why:** Owner decision (2026-10-14): the game is not needed. It is the only JavaScript on the site (69 KB brotli on /projects), the reason /projects is excluded from prerendering, and the reason for the per-route `script-src 'self'` exception. Removing it makes /projects as light and instant as the other pages, especially on slow connections.
@@ -142,10 +142,12 @@ the end of their section, sorted by id on read.
 - **Test plan:** Update `e2e/site.spec.ts` (no scripts on any page, uniform CSP) and `e2e/performance.spec.ts` (prerender attempt for /projects, new budget); update `app/lib/pages.test.ts` / `html.test.ts` for the embed and badge; full local gate.
 - **Out of scope:** The token burner panel (FEAT-1791988183). Editing the GitHub repository description of `my-website`.
 - **Bump:** major (removes a public feature; the owner decides when to cut a major)
-- **Status:** open
+- **Implementation:** Deleted `game/`, `e2e/game.spec.ts`, `e2e/visual-qa.spec.ts`, `e2e/support/` and `docs/game-design.md`; removed esbuild and the `build:game`/`dev:game` scripts (`build` is `next build`). `/projects` renders only the repository table, `page()`/`render()` no longer take scripts, and every footer reads "100% JavaScript free". `next.config.js` drops `GAME_SCRIPT`, the /projects `script-src 'self'` override and the `/game/main.js` immutable entry; the speculation rules prerender every page, /projects included. The handheld CSS left `public/retro.css` (12,766 to 4,167 bytes inlined on every page). Playwright drops the iphone/pixel projects; `site.spec` asserts zero scripts, a uniform CSP and a 404 for `/game/main.js`; `performance.spec` drops the bundle and long-task tests, asserts a /projects Prerender and lowers its budget to 2 requests / 24,000 bytes (measured 2 / 19,919, from 3 / 111,198). Vitest 38 tests in 3 files; Playwright 39 passed.
+- **Docs:** README, CLAUDE.md (stack note), VERIFICATION.md (scope, build step, projects, acceptance, budget row), `app/lib/projectPresentation.ts`, `/projects` meta description; `docs/game-design.md` deleted.
+- **Status:** shipped-pending-migration
 
 ### [FEAT-1791988182] Token-usage snapshot export
-- [ ] **Priority:** high
+- [x] **Priority:** high
 - **Area:** scripts, data
 - **File(s):** scripts/token-stats.mjs, scripts/token-stats.test.ts, scripts/fixtures/token-stats/*, data/token-stats.json, app/lib/tokenStats.ts, package.json, vitest.config.ts, README.md
 - **Why:** Owner wants a "token burner" panel on /projects showing AI coding-agent usage. The data lives only in local logs, so a script must turn it into a small, public-safe snapshot.
@@ -160,10 +162,12 @@ the end of their section, sorted by id on read.
 - **Test plan:** Vitest over fixture JSONL: Claude dedup, Codex delta handling, model pricing, 30- and 90-day windows, a privacy check that no fixture path or project string appears in the output, malformed-line tolerance, and validator rejection of a bad snapshot.
 - **Out of scope:** Rendering (FEAT-1791988183); scheduling and publishing (FEAT-1791988184); usage-limit percentages.
 - **Bump:** minor
-- **Status:** open
+- **Implementation:** `scripts/token-stats.mjs` (`npm run token-stats`, Node built-ins only) scans `~/.claude/projects/**/*.jsonl` and `~/.codex/sessions/**/rollout-*.jsonl`, searching each file's raw buffer for `"usage"` / `"token_count"` / `"turn_context"` lines so only those are decoded and parsed (about 3.7 GB in under 10 s). Claude messages are deduplicated by id, keeping the largest usage logged for the id (Claude Code logs partial usage while a message streams; usage-widget keeps the first line and undercounts about 14.4M tokens here), and their cache writes priced by TTL (5 minutes or 1 hour); Codex rollouts contribute per-event deltas of their cumulative counters, with cached and cache-write tokens split out of input. Prices are a dated table (2026-10-14) from the official Anthropic and OpenAI pricing pages, including Haiku 5.5's over-100K and GPT-6's over-272K rates; unpriced models count tokens, print a warning and are labelled Other, so no custom model id is published. The snapshot adds `since` (first usage day) and `pricesAsOf` to the planned shape; `byModel` keeps the top six plus Other with display names. `app/lib/tokenStats.ts` holds the type and `parseTokenStats`, which checks every count, sum, real calendar date, model-name shape and the 90 consecutive days. Against usage-widget the Codex totals match exactly; Claude totals match every day except where usage-widget silently skips 16 log files whose paths exceed Windows' 260-character limit (+125,073,897 tokens here). 21 Vitest cases over fixture logs cover dedup (including a partial streaming line), deltas and resets, pricing, windows, ranking, privacy, malformed lines, determinism and validator rejections.
+- **Docs:** README (scripts list, Token stats section).
+- **Status:** shipped-pending-migration
 
 ### [FEAT-1791988183] Token burner panel on /projects
-- [ ] **Priority:** high
+- [x] **Priority:** high
 - **Area:** projects, frontend, accessibility
 - **File(s):** app/lib/pages.ts, app/lib/pages.test.ts, app/lib/tokenStats.ts, public/retro.css, e2e/site.spec.ts, e2e/performance.spec.ts, README.md
 - **Why:** Owner request: replace the game on /projects with stats on how many tokens AI coding agents have burned. It shows how the projects get built.
@@ -182,7 +186,9 @@ the end of their section, sorted by id on read.
 - **Test plan:** Unit tests for formatting, SVG generation, escaping and missing-data omission in `pages.test.ts`; E2E in `site.spec.ts` for presence, no inline styles, no CSP violations (Chromium and WebKit); budget in `performance.spec.ts`.
 - **Out of scope:** Live or client-side updating; per-project breakdowns.
 - **Bump:** minor
-- **Status:** open
+- **Implementation:** `app/projects/route.ts` imports `data/token-stats.json` at build and passes `parseTokenStats(snapshot)` to `projectsBody`, which renders `tokenBurner()` (in `app/lib/pages.ts`) between the intro and a new "Repositories" heading. The panel has four tiles (lifetime with first-use date, last 30 days, API-equivalent cost, as-of date), a stacked Claude Code / Codex bar with a text list, per-model bars and a 90-day chart. All of them are SVG sized by `viewBox`/`width`/`height`/`x`/`y` attributes, coloured from `public/retro.css` classes, and each bar has a `<title>`. The chart has an `aria-label` summary repeated as visible text and a `<details>` table of all 90 days. `formatTokens` (three significant digits, K/M/B), `formatUsd` and `formatDay` format numbers on the server. A null snapshot omits the panel. Deviation: because the JSON is a static import, a missing file fails the build rather than silently dropping the panel. The /projects budget is raised deliberately to 2 requests / 44,000 bytes (measured 2 / 38,536 uncompressed with `next start`; the panel adds about 18 KB raw). Unit tests cover formatting, SVG output, escaping and omission (Vitest 61 tests in 4 files). E2E covers the panel, zero `style` attributes, stylesheet bar colours, the 90-row table and 320 px layout in Chromium and WebKit (Playwright 41 passed).
+- **Docs:** README (pages list, Token stats section), VERIFICATION.md (token burner acceptance, budget row), `/projects` meta description.
+- **Status:** shipped-pending-migration
 
 ### [FEAT-1791988184] Daily auto-publish of token stats
 - [ ] **Priority:** med
