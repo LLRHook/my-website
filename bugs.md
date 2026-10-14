@@ -251,6 +251,28 @@ the end of their section, sorted by id on read.
 - **Fix:** Pages without scripts now allow exactly `script-src <origin>/speculation-rules` instead of `'none'`; the file is JSON served with `nosniff`, so nothing can execute. `SITE_ORIGIN` (default `https://victorivanov.engineer`) sets the origin; Playwright's web server and the CI build set it to `http://localhost:3000`. New E2E "no page reports a Content Security Policy violation" runs on Chromium and WebKit; the per-page test matches the new directive. Docs updated. Verified: lint, tsc, 251 Vitest, build, full Playwright suite.
 - **Status:** fixed-pending-migration
 
+### [BUG-1791949998] VERIFICATION.md build and E2E commands diverge from CI
+- [x] **Severity:** med
+- **Area:** docs, ci
+- **File(s):** VERIFICATION.md
+- **Observation:** Steps 3-4 build with a plain `npm run build` and run Playwright against `npm run start -- -p 3100` via `PLAYWRIGHT_BASE_URL`. Since BUG-1791851972 the page CSP names `<SITE_ORIGIN>/speculation-rules`; a build without `SITE_ORIGIN` names production, so the WebKit CSP console check fails against localhost. CI builds with `SITE_ORIGIN=http://localhost:3000` and runs `npm run test:e2e`. Found by the `/protocol-v-and-v` command-fidelity audit.
+- **Expected:** Every VERIFICATION.md command matches the CI command for its layer.
+- **Repro / Notes:** Follow VERIFICATION.md steps 3-4 verbatim; `e2e/site.spec.ts` "no page reports a Content Security Policy violation" fails on `webkit-mobile`.
+- **Bump:** patch
+- **Fix:** Steps 3-5 now use `SITE_ORIGIN=http://localhost:3000 npm run build` and `CI=1 npm run test:e2e` (port 3000, as in `.github/workflows/ci.yml`); a Stage 2 baseline table lists each layer's runner, count and CI command. Applied in the approved VERIFICATION.md compaction.
+- **Status:** fixed-pending-migration
+
+### [BUG-1791949999] CLAUDE.md cites VERIFICATION.md sections that do not exist
+- [x] **Severity:** low
+- **Area:** docs
+- **File(s):** CLAUDE.md
+- **Observation:** The cycle-file rules say to append the Verified entry "per `VERIFICATION.md § 6.5`" and bump counts in "`VERIFICATION.md § 2`". VERIFICATION.md has no numbered sections; the Verified entry shape is owned by `/protocol-v-and-v`.
+- **Expected:** Instruction-file references resolve.
+- **Repro / Notes:** `grep -n "§" VERIFICATION.md` returns nothing.
+- **Bump:** patch
+- **Fix:** CLAUDE.md now points at the `/protocol-v-and-v` Verified entry shape and the VERIFICATION.md Stage 2 baseline table.
+- **Status:** fixed-pending-migration
+
 ## Migrated to changelog
 
 Entries below have been ticked off and copied as a one-liner into `CHANGELOG.md`.
