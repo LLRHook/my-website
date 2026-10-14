@@ -54,7 +54,8 @@ the end of their section, sorted by id on read.
 - **Test plan:** Unit lifecycle tests, Playwright desktop/mobile/keyboard/reduced-motion flows, repeated window cycles and browser heap check, production smoke.
 - **Out of scope:** Rewriting the original resume or adding unsupported professional claims.
 - **Bump:** minor
-- **Status:** shipped-pending-migration
+- **Retired:** 2026-10-14. Superseded by FEAT-1790963490: the room shipped in September 2026 and was replaced by the 1990s HTML/CSS site before it was verified, so it gets no changelog line.
+- **Status:** retired
 
 ### [FEAT-1781505473] Refine source-peek key-file heuristic
 - [ ] **Priority:** low
