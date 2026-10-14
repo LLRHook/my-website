@@ -7,7 +7,7 @@ route contracts hold.
 Run history lives in `CHANGELOG.md` (Verified entries); older evidence is in
 `docs/verification-history.md`.
 
-Last verified: 2026-10-14, SHA 1344f04 (see `CHANGELOG.md` Verified).
+Last verified: 2026-10-14, SHA ff1ce0f (see `CHANGELOG.md` Verified).
 
 ## Build and automated checks
 
