@@ -47,6 +47,17 @@ the end of their section, sorted by id on read.
 - **Bump:** patch
 - **Status:** open
 
+### [BUG-1791980560] Resume and About page describe a Secret clearance as pending eligibility
+- [x] **Severity:** med
+- **Area:** content, resume
+- **File(s):** app/lib/pages.ts, app/lib/html.ts, public/Victor_Ivanov_Resume.pdf, README.md
+- **Observation:** The About page, the HTML resume and the downloadable PDF say "DoD Secret eligibility (DCSA 2026)", and both resume summaries open with "Secret-eligible". Victor holds an active Secret clearance (DoD CAS eligibility granted 2026-09-02). The PDF also kept internal names the HTML resume had already replaced ("Vantage", "Rosalyn's vendor team", "Inf/Sec", "ktest validation"), and the HTML resume omitted "U.S. Citizen" from the PDF header. Reported by the owner.
+- **Expected:** Site and PDF state an active DoD Secret clearance and make the same claims in the same public wording.
+- **Repro / Notes:** `curl -s https://victorivanov.engineer/resume | grep -o "Secret[^<]*"`; `pdftotext public/Victor_Ivanov_Resume.pdf - | grep -i secret`.
+- **Bump:** patch
+- **Fix:** The About page and HTML resume say "Active DoD Secret clearance", the resume header adds "U.S. Citizen", and the summary opens with "Secret-cleared". The resume page and its description are dated October 2026. The PDF was regenerated from a copy of the owner's September 21 `VI_Resume.docx` with the same clearance wording, the phone number left out as before, and the public wording for the billing and proctoring bullets; the source files are unchanged. README updated.
+- **Status:** fixed-pending-migration
+
 ## Migrated to changelog
 
 Entries below have been ticked off and copied as a one-liner into `CHANGELOG.md`.

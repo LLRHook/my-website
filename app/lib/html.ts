@@ -9,7 +9,7 @@ export const PAGES: readonly SitePage[] = [
   { path: "/", label: "Home", title: SITE_TITLE, description: SITE_DESCRIPTION },
   { path: "/about", label: "About Me", title: "About | Victor Ivanov", description: "Meet Victor Ivanov, a senior full-stack engineer in Sterling, Virginia building certification software and developer tools." },
   { path: "/projects", label: "Projects", title: "Projects | Victor Ivanov", description: "Victor Ivanov's projects: play Codelings, an original handheld game, and explore web products, developer tools, and open-source repositories." },
-  { path: "/resume", label: "Resume", title: "Resume | Victor Ivanov", description: "Victor Ivanov's September 2026 resume: engineering experience, selected projects, education, technical skills, and a downloadable PDF." },
+  { path: "/resume", label: "Resume", title: "Resume | Victor Ivanov", description: "Victor Ivanov's October 2026 resume: engineering experience, selected projects, education, technical skills, and a downloadable PDF." },
   { path: "/off-the-clock", label: "Off the Clock", title: "Off the clock | Victor Ivanov", description: "Victor Ivanov away from the desk: rock climbing, Pokémon and Magic cards, books, travel, and side projects." },
   { path: "/contact", label: "Contact", title: "Contact | Victor Ivanov", description: "Contact Victor Ivanov by email or connect on GitHub and LinkedIn. Based in Virginia, on Eastern time." },
 ];
