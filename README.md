@@ -84,13 +84,15 @@ or README requests are made per repository.
 ## Token stats
 
 `scripts/token-stats.mjs` (Node built-ins only) ports the owner's usage-widget
-parsing: Claude Code assistant messages are counted once per message id, and
-Codex token counts are summed as per-event deltas of each rollout's cumulative
+parsing: Claude Code assistant messages are counted once per message id, at the
+largest usage logged for that id (Claude Code logs partial usage while a message
+streams), and Codex token counts are summed as per-event deltas of each rollout's cumulative
 totals. Malformed lines are skipped. It writes `data/token-stats.json`: lifetime
 and 30-day totals, a Claude Code / Codex split, the top six models, and 90 local
 days, each split into input, output, cache-write and cache-read tokens with an
-API-equivalent cost from the dated list-price table in the script (models without
-a published price count tokens but no cost). The file holds no paths, project
+API-equivalent cost from the dated list-price table in the script. Only priced
+models are named; others count tokens, no cost, and appear as Other. It covers
+every Claude Code and Codex session on the machine. The file holds no paths, project
 names, session ids, prompts or tool names, and is rewritten only when it changes.
 `app/lib/tokenStats.ts` defines its type and validator.
 

@@ -4,34 +4,34 @@
   "pricesAsOf": "2026-10-14",
   "lifetime": {
     "tokens": {
-      "input": 37493057,
-      "output": 17053762,
-      "cacheWrite": 168287765,
-      "cacheRead": 6733404721,
-      "total": 6956239305
+      "input": 37493269,
+      "output": 31593073,
+      "cacheWrite": 168707349,
+      "cacheRead": 6745523540,
+      "total": 6983317231
     },
-    "costUsd": 4088.04
+    "costUsd": 4433.96
   },
   "last30": {
     "tokens": {
-      "input": 36608876,
-      "output": 11523574,
-      "cacheWrite": 75515563,
-      "cacheRead": 5207433782,
-      "total": 5331081795
+      "input": 36609088,
+      "output": 17741489,
+      "cacheWrite": 75935147,
+      "cacheRead": 5219552601,
+      "total": 5349838325
     },
-    "costUsd": 2387.53
+    "costUsd": 2519.17
   },
   "byTool": {
     "claudeCode": {
       "tokens": {
-        "input": 976282,
-        "output": 14225995,
-        "cacheWrite": 168287765,
-        "cacheRead": 4757251249,
-        "total": 4940741291
+        "input": 976494,
+        "output": 28765306,
+        "cacheWrite": 168707349,
+        "cacheRead": 4769370068,
+        "total": 4967819217
       },
-      "costUsd": 3291.8
+      "costUsd": 3637.72
     },
     "codex": {
       "tokens": {
@@ -47,37 +47,37 @@
   "byModel": [
     {
       "model": "Claude Opus 5.5",
-      "tokens": 2707370579,
-      "share": 0.3892
+      "tokens": 2724647807,
+      "share": 0.3902
     },
     {
       "model": "GPT-6.1 Sol",
       "tokens": 1576853956,
-      "share": 0.2267
+      "share": 0.2258
     },
     {
       "model": "Claude Opus 5",
-      "tokens": 1308988967,
-      "share": 0.1882
+      "tokens": 1317281874,
+      "share": 0.1886
     },
     {
       "model": "Claude Fable 5.1",
-      "tokens": 577506400,
-      "share": 0.083
+      "tokens": 577863131,
+      "share": 0.0827
     },
     {
       "model": "GPT-6 Astra",
       "tokens": 438644058,
-      "share": 0.0631
+      "share": 0.0628
     },
     {
       "model": "Claude Opus 4.8",
-      "tokens": 221266281,
-      "share": 0.0318
+      "tokens": 221388394,
+      "share": 0.0317
     },
     {
       "model": "Other",
-      "tokens": 125609064,
+      "tokens": 126638011,
       "share": 0.0181
     }
   ],
@@ -219,13 +219,13 @@
     },
     {
       "date": "2026-08-13",
-      "tokens": 323416647,
-      "costUsd": 269.36
+      "tokens": 325699310,
+      "costUsd": 326.43
     },
     {
       "date": "2026-08-14",
-      "tokens": 512731906,
-      "costUsd": 557.42
+      "tokens": 517285840,
+      "costUsd": 671.27
     },
     {
       "date": "2026-08-15",
@@ -244,13 +244,13 @@
     },
     {
       "date": "2026-08-18",
-      "tokens": 80734053,
-      "costUsd": 71.8
+      "tokens": 81571422,
+      "costUsd": 92.73
     },
     {
       "date": "2026-08-19",
-      "tokens": 74646012,
-      "costUsd": 56.78
+      "tokens": 74817163,
+      "costUsd": 61.06
     },
     {
       "date": "2026-08-20",
@@ -274,8 +274,8 @@
     },
     {
       "date": "2026-08-24",
-      "tokens": 117735767,
-      "costUsd": 143.49
+      "tokens": 117855541,
+      "costUsd": 146.49
     },
     {
       "date": "2026-08-25",
@@ -349,13 +349,13 @@
     },
     {
       "date": "2026-09-08",
-      "tokens": 158939146,
-      "costUsd": 259.01
+      "tokens": 159195854,
+      "costUsd": 271.84
     },
     {
       "date": "2026-09-09",
-      "tokens": 70027516,
-      "costUsd": 84.24
+      "tokens": 70028769,
+      "costUsd": 84.25
     },
     {
       "date": "2026-09-10",
@@ -364,33 +364,33 @@
     },
     {
       "date": "2026-09-11",
-      "tokens": 67516688,
-      "costUsd": 57.47
+      "tokens": 67535955,
+      "costUsd": 57.8
     },
     {
       "date": "2026-09-12",
-      "tokens": 66893927,
-      "costUsd": 55.4
+      "tokens": 66907163,
+      "costUsd": 55.73
     },
     {
       "date": "2026-09-13",
-      "tokens": 55657980,
-      "costUsd": 51.23
+      "tokens": 55686326,
+      "costUsd": 51.94
     },
     {
       "date": "2026-09-14",
-      "tokens": 28174985,
-      "costUsd": 25.61
+      "tokens": 28212680,
+      "costUsd": 26.56
     },
     {
       "date": "2026-09-15",
-      "tokens": 8732363,
-      "costUsd": 12.61
+      "tokens": 8763289,
+      "costUsd": 13.39
     },
     {
       "date": "2026-09-16",
-      "tokens": 20659908,
-      "costUsd": 17.38
+      "tokens": 20772663,
+      "costUsd": 20.2
     },
     {
       "date": "2026-09-17",
@@ -404,8 +404,8 @@
     },
     {
       "date": "2026-09-19",
-      "tokens": 184595146,
-      "costUsd": 136.88
+      "tokens": 184601934,
+      "costUsd": 137.05
     },
     {
       "date": "2026-09-20",
@@ -414,8 +414,8 @@
     },
     {
       "date": "2026-09-21",
-      "tokens": 165815292,
-      "costUsd": 149.23
+      "tokens": 166123788,
+      "costUsd": 159.44
     },
     {
       "date": "2026-09-22",
@@ -424,18 +424,18 @@
     },
     {
       "date": "2026-09-23",
-      "tokens": 521559780,
-      "costUsd": 203.1
+      "tokens": 523176457,
+      "costUsd": 234.64
     },
     {
       "date": "2026-09-24",
-      "tokens": 595038554,
-      "costUsd": 210.71
+      "tokens": 597742443,
+      "costUsd": 264.7
     },
     {
       "date": "2026-09-25",
-      "tokens": 80931380,
-      "costUsd": 41.77
+      "tokens": 81024827,
+      "costUsd": 43.64
     },
     {
       "date": "2026-09-26",
@@ -444,23 +444,23 @@
     },
     {
       "date": "2026-09-27",
-      "tokens": 101820076,
-      "costUsd": 98.04
+      "tokens": 101820675,
+      "costUsd": 98.05
     },
     {
       "date": "2026-09-28",
-      "tokens": 140732575,
-      "costUsd": 127.03
+      "tokens": 140734658,
+      "costUsd": 127.07
     },
     {
       "date": "2026-09-29",
-      "tokens": 85031116,
-      "costUsd": 79.18
+      "tokens": 85033821,
+      "costUsd": 79.23
     },
     {
       "date": "2026-09-30",
-      "tokens": 388965023,
-      "costUsd": 214.65
+      "tokens": 388966705,
+      "costUsd": 214.68
     },
     {
       "date": "2026-10-01",
@@ -469,8 +469,8 @@
     },
     {
       "date": "2026-10-02",
-      "tokens": 987043537,
-      "costUsd": 371.76
+      "tokens": 988145521,
+      "costUsd": 393.79
     },
     {
       "date": "2026-10-03",
@@ -504,8 +504,8 @@
     },
     {
       "date": "2026-10-09",
-      "tokens": 189232136,
-      "costUsd": 99.14
+      "tokens": 189250857,
+      "costUsd": 99.33
     },
     {
       "date": "2026-10-10",
@@ -524,13 +524,13 @@
     },
     {
       "date": "2026-10-13",
-      "tokens": 162360836,
-      "costUsd": 50.04
+      "tokens": 162372329,
+      "costUsd": 50.27
     },
     {
       "date": "2026-10-14",
-      "tokens": 134915808,
-      "costUsd": 59.59
+      "tokens": 147660093,
+      "costUsd": 67.26
     }
   ]
 }

@@ -8,7 +8,7 @@ const fixtures = join(__dirname, "fixtures", "token-stats");
 const run = () => collect({ claudeDir: join(fixtures, "claude"), codexDir: join(fixtures, "codex"), today: "2026-10-14" });
 
 describe("token-stats export", () => {
-  it("counts each Claude message once, skips malformed and zero lines, and prices by model", () => {
+  it("counts each Claude message once at its final usage, skips malformed and zero lines, and prices by model", () => {
     const { snapshot, unpriced } = run();
     expect(snapshot.byTool.claudeCode.tokens).toEqual({ input: 51117, output: 2100, cacheWrite: 1000, cacheRead: 70000, total: 124217 });
     // 0.01024 (Opus 5.5 with 1h writes) + 0.006 (Haiku 4.5) + 0.0004 + 0.0305 (Haiku 5.5 over 100K)
@@ -67,10 +67,16 @@ describe("token-stats export", () => {
     expect(modelLabel("gpt-6.1-sol")).toBe("GPT-6.1 Sol");
     expect(modelLabel("<synthetic>")).toBeNull();
     expect(modelLabel("opus")).toBeNull();
+    // Unpriced or prototype ids are never published by name.
+    expect(modelLabel("claude-internal-9")).toBeNull();
+    expect(modelLabel("gpt-7-secretproject")).toBeNull();
+    expect(modelLabel("constructor")).toBeNull();
   });
 
   it("returns a null cost for unpriced models and clamps cache counts", () => {
     expect(claudeUsage("unknown", { input_tokens: 5 }).costUsd).toBeNull();
+    expect(claudeUsage("constructor", { input_tokens: 5 }).costUsd).toBeNull();
+    expect(codexUsage("__proto__", { input_tokens: 5 }).costUsd).toBeNull();
     expect(codexUsage("gpt-6.1-sol", { input_tokens: 10, cached_input_tokens: 50, output_tokens: 1 }).tokens)
       .toEqual({ input: 0, output: 1, cacheWrite: 0, cacheRead: 10, total: 11 });
   });
@@ -81,10 +87,13 @@ describe("token stats validator", () => {
   it.each<[string, (value: ReturnType<typeof good>) => unknown]>([
     ["a non-object", () => "nope"],
     ["a bad date", (value) => ({ ...value, asOf: "2026-13-45" })],
+    ["an impossible date", (value) => ({ ...value, since: "2026-02-31" })],
     ["a negative count", (value) => { value.lifetime.tokens.input = -1; return value; }],
     ["a total that does not add up", (value) => { value.lifetime.tokens.total += 1; return value; }],
     ["tools that do not sum to lifetime", (value) => { value.byTool.codex.tokens.input += 1; value.byTool.codex.tokens.total += 1; return value; }],
     ["markup in a model name", (value) => { value.byModel[0].model = "<b>x</b>"; return value; }],
+    ["a path in a model name", (value) => { value.byModel[0].model = "C Users Victor work-repo"; return value; }],
+    ["a gap in the days", (value) => { value.daily[0].date = "2026-07-15"; return value; }],
     ["a short daily series", (value) => ({ ...value, daily: value.daily.slice(1) })],
     ["unsorted days", (value) => { [value.daily[0], value.daily[1]] = [value.daily[1], value.daily[0]]; return value; }],
     ["a non-finite cost", (value) => { value.last30.costUsd = Number.NaN; return value; }],

@@ -54,8 +54,15 @@ export function normalizeModel(model) {
   return String(model ?? "").toLowerCase().replace(/\[[^\]]*\]$/, "").replace(/-\d{8}$/, "");
 }
 
-/** "claude-opus-5-5" -> "Claude Opus 5.5", "gpt-6.1-sol" -> "GPT-6.1 Sol"; anything else -> null. */
+// Own keys only, so an id such as "constructor" is not read off the prototype.
+const priceOf = (prices, model) => (Object.hasOwn(prices, model) ? prices[model] : null);
+
+/**
+ * "claude-opus-5-5" -> "Claude Opus 5.5", "gpt-6.1-sol" -> "GPT-6.1 Sol". Only priced
+ * models are named; any other id (a custom or proxy model) -> null, shown as Other.
+ */
 export function modelLabel(model) {
+  if (!priceOf(CLAUDE_PRICES, model) && !priceOf(OPENAI_PRICES, model)) return null;
   const title = (word) => word[0].toUpperCase() + word.slice(1);
   const claude = /^claude-([a-z]+)-(\d+)(?:-(\d))?$/.exec(model);
   if (claude) return `Claude ${title(claude[1])} ${claude[2]}${claude[3] ? `.${claude[3]}` : ""}`;
@@ -73,7 +80,7 @@ export function claudeUsage(model, usage) {
   // Claude Code splits cache writes by TTL; older logs have only the total (5-minute).
   const write1h = Math.min(count(usage.cache_creation?.ephemeral_1h_input_tokens), cacheWrite);
   const tokens = { input, output, cacheWrite, cacheRead, total: input + output + cacheWrite + cacheRead };
-  const base = CLAUDE_PRICES[model];
+  const base = priceOf(CLAUDE_PRICES, model);
   if (!base) return { tokens, costUsd: null };
   const price = base.long && input + cacheWrite + cacheRead > base.long.over ? base.long : base;
   const costUsd = (input * price.input + (cacheWrite - write1h) * price.write5m + write1h * price.write1h
@@ -89,7 +96,7 @@ export function codexUsage(model, usage) {
   const input = allInput - cacheRead - cacheWrite;
   const output = count(usage.output_tokens);
   const tokens = { input, output, cacheWrite, cacheRead, total: allInput + output };
-  const base = OPENAI_PRICES[model];
+  const base = priceOf(OPENAI_PRICES, model);
   if (!base) return { tokens, costUsd: null };
   const price = allInput > base.long.over ? base.long : base;
   return { tokens, costUsd: (input * price.input + cacheRead * price.read + cacheWrite * price.write + output * price.output) / MILLION };
@@ -105,13 +112,16 @@ function jsonlFiles(dir, match) {
 function* markedRecords(file, markers) {
   const buffer = readFileSync(file);
   const needles = markers.map((marker) => Buffer.from(marker));
+  // Next match of each needle, searched again only once passed, so a rare marker
+  // does not rescan the rest of the file on every line.
+  const next = needles.map(() => -2);
   let start = 0;
   while (start < buffer.length) {
     let hit = -1;
-    for (const needle of needles) {
-      const at = buffer.indexOf(needle, start);
-      if (at !== -1 && (hit === -1 || at < hit)) hit = at;
-    }
+    needles.forEach((needle, index) => {
+      if (next[index] !== -1 && next[index] < start) next[index] = buffer.indexOf(needle, start);
+      if (next[index] !== -1 && (hit === -1 || next[index] < hit)) hit = next[index];
+    });
     if (hit === -1) return;
     const lineStart = buffer.lastIndexOf(10, hit) + 1;
     let lineEnd = buffer.indexOf(10, hit);
@@ -135,23 +145,25 @@ function timestampDay(value) {
  * (day, tool, model, { tokens, costUsd }).
  */
 export function scanClaude(dir, add) {
-  const seen = new Set();
+  // Claude Code writes one line per content block of a message, each with the usage so
+  // far, so a message id counts once, at its largest total.
+  const byId = new Map();
   for (const file of jsonlFiles(dir, /\.jsonl$/)) {
     for (const record of markedRecords(file, ['"usage"'])) {
       const message = record?.message;
       const usage = message?.usage;
       if (!usage || typeof usage !== "object") continue;
-      if (message.id) {
-        if (seen.has(message.id)) continue;
-        seen.add(message.id);
-      }
       const day = timestampDay(record.timestamp);
       if (!day) continue;
       const model = normalizeModel(message.model);
       const result = claudeUsage(model, usage);
-      if (result.tokens.total) add(day, "claudeCode", model, result);
+      if (!result.tokens.total) continue;
+      const id = typeof message.id === "string" && message.id ? message.id : null;
+      if (!id) add(day, "claudeCode", model, result);
+      else if ((byId.get(id)?.result.tokens.total ?? -1) < result.tokens.total) byId.set(id, { day, model, result });
     }
   }
+  for (const { day, model, result } of byId.values()) add(day, "claudeCode", model, result);
 }
 
 export function scanCodex(dir, add) {
