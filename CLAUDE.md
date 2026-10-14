@@ -24,8 +24,8 @@ shipped or fixed entries are *migrated* into `CHANGELOG.md` as a permanent recor
 - When a feature ships: tick, add `**Implementation:**` line, move to `## Shipped`,
   copy a one-liner into `CHANGELOG.md / Unreleased / Added` (or `Changed`).
 - When a `VERIFICATION.md` run goes green: append a `Verified` entry to
-  `CHANGELOG.md / Unreleased` per `VERIFICATION.md § 6.5`, bump test counts in
-  `VERIFICATION.md § 2` if the suite size changed.
+  `CHANGELOG.md / Unreleased` in the shape `/protocol-v-and-v` defines, and
+  overwrite the `VERIFICATION.md` Stage 2 baseline table if the suite size changed.
 - When `README.md` drifts from reality: treat the drift as a `BUG` (area `docs`).
   Do not silently update it.
 - Empty `## Open` sections are the desired steady state.
