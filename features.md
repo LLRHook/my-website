@@ -30,63 +30,7 @@ Priority guide: crit / high / med / low.
 1. **File:** new entries under `## Open` with the full template.
 2. **Implement:** flip status to `in-progress`, write code + tests.
 3. **Verify:** set `shipped-pending-migration`, tick checkbox, add `**Implementation:**` line.
-4. **Migrate:** move to `### [FEAT-1790991961] Fast loading on slow or metered connections
-- [x] **Priority:** high
-- **Area:** performance, projects, game
-- **File(s):** package.json, game/build.mjs, app/lib/pages.ts, app/lib/html.ts, next.config.js, public/*.webp|jpg, e2e/
-- **Why:** Owner wants the site, including the game, to load easily on low signal. The game ships as 65 unbundled ES modules (280 KB, a deep import waterfall: one round trip per import level), the Off the Clock photo is a 2400x1800 650 KB WebP shown at 320 px, the portrait is 343 px shown at 120 px, below-the-fold images load eagerly, and static assets get no long-lived cache.
-- **Approach:** Bundle and minify the game with esbuild into one content-hashed file (`/game/main.<hash>.js`) whose name the page reads from a build manifest; serve `/game/*` as `public, max-age=31536000, immutable`; resize images to 2x their display size (WebP) with explicit dimensions, `loading="lazy"` and `decoding="async"` below the fold; give images and icons a day-long cache with stale-while-revalidate. The HTML table stays usable before and without the game. No service worker (owner decision).
-- **Library / dependency notes:** esbuild (latest stable, confirmed on npm before install) as a devDependency.
-- **Acceptance criteria:** /projects loads the game in one script request; total transfer for each page on a cold load is measured before and after and drops; the game boots and every existing test passes; images look identical at display size; no page regresses Lighthouse.
-- **Test plan:** Existing E2E (script count, CSP, boot); new check that /projects requests exactly one game script and that `/game/` responses carry the immutable cache header; byte budgets recorded in VERIFICATION.md.
-- **Out of scope:** Service worker / offline cache, PWA manifest, CDN changes.
-- **Bump:** minor
-- **Implementation:** `game/build.mjs` bundles and minifies the game with esbuild 0.28.2 (es2022/safari15) into one `public/game/main.js` (143 KB raw), after a strict `tsc --noEmit`; `dev:game` watches with esbuild. Instead of hashed filenames, next.config.js hashes `retro.css` and `main.js` at build and exposes `?v=<hash>` URLs through `env` (`STYLE_HREF`, `GAME_SCRIPT`); production serves both `immutable` for a year and images/icons/PDF for a day with a week of stale-while-revalidate. Peru photo 2400 px/649 KB to 640 px/53 KB, portrait 343 px/117 KB to 240 px/11 KB; below-the-fold photos lazy-load. Cold loads: /projects 66 requests/169 KB to 3/82 KB, / 128 KB to 22 KB, /off-the-clock 659 KB to 62 KB; Resume and Contact grow 31 bytes (the `?v=` query) but repeat visits skip the stylesheet. Slow link (400ms, 50 KB/s): /projects ready in 2.6s instead of 7.3s. E2E game tests that imported individual modules now bundle a test-only entry with esbuild and evaluate it over CDP. Verified: lint, tsc, 157 Vitest, build, 66 Playwright passed with 12 expected skips, production curl of headers and CSP.
-- **Status:** shipped-pending-migration
-
-### [FEAT-1790991962] Codelings evolve
-- [x] **Priority:** high
-- **Area:** game
-- **File(s):** game/src/data/species.ts, game/src/gfx/creatures.ts, game/src/battle/*, game/src/ui/*, game/src/engine/storage.ts, docs/game-design.md
-- **Why:** Owner asked to build out the rest of the game; evolution is the classic progression beat the current game lacks.
-- **Approach:** Per docs/game-design.md (evolution section, written before code): each repository species gets evolved stages derived deterministically from it (name, sprite, stats, moves); evolution triggers after battle at set levels with a cancellable cutscene; the Codex keeps one entry per repository and shows the highest stage seen; saves gain a per-Codeling stage that defaults to the base stage.
-- **Library / dependency notes:** none.
-- **Acceptance criteria:** A Codeling reaching its evolution level evolves after battle with the cutscene (B cancels and it retries next level); evolved forms differ visibly and in stats; old saves load; Codex stays one entry per repository; all gates green.
-- **Test plan:** Unit: stage derivation determinism and constraints, stat growth, evolution trigger and cancel, save migration. E2E: seeded save at the threshold evolves after a battle.
-- **Out of scope:** Trade or item evolution, branching evolutions.
-- **Bump:** minor
-- **Implementation:** Per docs/game-design.md §5.6: buildSpecies gives each species `stages` (top third by stars get 3), `evolveAt` levels and stored `forms` (unique names with a blocked-substring guard, scaled stats, EXP yield, catch rate); `stageAt` sets wild/trainer stages; Codelings carry `stage` (old saves default to 1). `pendingEvolutions` (battle/evolution.ts) queues members that levelled up in a won or caught battle; `EvolutionScene` plays the accelerating silhouette flash with one-shot `evolve`/`evolveSuccess` cues (sequencer gained an optional `loop` flag), B cancels and retries next level-up, reduced motion fades, HP damage carries over and the type's strong move goes through the extracted `ui/learnMove.ts`. Stage 1 sprites are pixel-identical to before; stage 2 switches to the next type sub-silhouette with the same ramp, face, markings and features plus one more feature; stage 3 doubles features and adds symmetric plating. Party, summary, PC, bag, battle and a Codex LINE page use forms. Four art review passes (recolouring, slabs, lost faces, too-subtle and shrinking stages) before acceptance. Verified: lint, tsc, 185 Vitest, build, 70 Playwright passed with 12 expected skips, forms sheet of all 66 live forms and eight scene captures inspected.
-- **Status:** shipped-pending-migration
-
-### [FEAT-1790991963] Codelings region expansion: two towns, two routes, two gyms and the Champion
-- [x] **Priority:** high
-- **Area:** game
-- **File(s):** game/src/world/maps/*, game/src/data/trainers.ts, game/src/data/ids.ts, game/src/world/*, game/src/ui/*, docs/game-design.md
-- **Why:** Owner asked to build out the rest of the game; today the journey ends after one gym and three outdoor areas.
-- **Approach:** Per docs/game-design.md (region section, written before code): Stack Cave opens onto new routes, two new towns with their own Center and Mart, two new gyms with distinct puzzles and leaders (three badges total), and a Champion battle that becomes the ending trigger; habitats and levels re-spread across all wild areas.
-- **Library / dependency notes:** none.
-- **Acceptance criteria:** A player can travel from Sterling Town to the Champion, earn three badges in order, and see the ending after the Champion; every species stays catchable; old saves continue (Rhea already beaten keeps the badge); all gates green.
-- **Test plan:** Unit: map connectivity and warp targets, gating flags, habitat coverage, trainer party constraints. E2E: seeded saves enter each new town and start each new gym battle.
-- **Out of scope:** Surf/fly-style field moves, more than three gyms.
-- **Bump:** minor
-- **Implementation:** Per docs/game-design.md §6.1: the Stack Cave ladder (behind a Cave Warden until `badge:merge`) leads to Route 3, Branch Bay (harbour town with its own Center, Mart and Old Dev's house), the Pipeline Gym (LINT > TEST > BUILD switch puzzle in pure `world/pipeline.ts`; Ops Otto), Route 4 (mountain road behind a ranger until `badge:pipeline`, cliffs, bridge, tunnel), Release Ridge (snow town, lookout, frozen pond), the Release Gym (deploy-pad warp maze; Maintainer Mira) and Main Branch Tower (guard needs three badges; Champion Prof. Ivanov, 6 Codelings, `champion` flag, ending, return to Ridge). Center/Mart interiors come from `interiors.ts` factories (Commit layouts unchanged); `star:<n>` trainer picks; late routes draw every species; badges are `badge:merge/pipeline/release` (old `badge` migrates), blackout returns to the last visited Center (`lastCenter:<map>`); trainer card shows three badges and a CHAMPION star. Nine new character sprites with battle portraits, new harbour/snow/mountain/gym tiles, five tracks and three SFX. Screenshot captures moved to opt-in `e2e/visual-qa.spec.ts`. Two art review passes (shared trainer sprite, warden not moving, bare Ridge/Route 4/gym interiors). Verified: lint, tsc, 217 Vitest, build, 110 Playwright passed with 12 expected skips, 29 captures inspected.
-- **Status:** shipped-pending-migration
-
-### [FEAT-1790991964] Codelings post-game: rematches, a legendary and side quests
-- [x] **Priority:** med
-- **Area:** game
-- **File(s):** game/src/world/*, game/src/data/*, game/src/ui/*, docs/game-design.md
-- **Why:** Owner asked to build out the rest of the game; after the ending there is nothing new to do.
-- **Approach:** Per docs/game-design.md (post-game section, written before code): gym leader and Champion rematches at higher levels after the ending, one legendary Codeling in a sealed room that opens after the ending, and three NPC side quests with rewards.
-- **Library / dependency notes:** none.
-- **Acceptance criteria:** After the ending rematches, the legendary encounter and the three side quests are available and completable; nothing post-game is reachable before the ending; old saves load; all gates green.
-- **Test plan:** Unit: post-game gating, rematch parties, quest state transitions. E2E: post-game seeded save reaches the legendary battle.
-- **Out of scope:** Online features, daily events beyond the rematch cooldown.
-- **Bump:** minor
-- **Implementation:** Per docs/game-design.md §6.2, all gated on `champion` in pure `world/postgame.ts`: Rhea, Otto, Mira and Prof. Ivanov (back in the lab) offer one rematch per local day (`rematch:<id>:<date>`, latest kept) with six-member `rematchParty` teams at 40-63 and doubled rewards; a sealed door on Stack Cave's west wall opens into the `vault`, where ORIGIN (species id 0, `originSpecies()`, level 50, catch rate 3, single form, gold crowned sprite, own cry, strongest normal moves) stands on a pedestal, returns after a faint or run and is gone once caught (`origin`); Codex entry `000` (LEGENDARY) opens the GitHub profile and does not count toward the diploma. Side quests in `quest:<id>:<state>` flags: Old Dev's lost keyboard (Route 3 hidden spot), the Ridge Collector (stage 2+ in party) and the lab aide's 25/50/100% Codex milestones. Species lookups go through `speciesById`; save validation accepts id 0. One art review pass (ORIGIN too small and weak, sealed door read as a panel). Verified: lint, tsc, 249 Vitest, build, 118 Playwright passed with 12 expected skips, captures inspected.
-- **Status:** shipped-pending-migration
-
-## Shipped`, append a one-liner to `CHANGELOG.md / Unreleased / Added` (or `Changed`).
+4. **Migrate:** move to `## Shipped`, append a one-liner to `CHANGELOG.md / Unreleased / Added` (or `Changed`).
 
 IDs are UNIX-epoch timestamps (`FEAT-$(date +%s)`), never sequential — appended at
 the end of their section, sorted by id on read.
@@ -125,70 +69,8 @@ the end of their section, sorted by id on read.
 - **Bump:** patch
 - **Status:** open
 
-### [FEAT-1791988181] Remove the Codelings game from /projects
-- [x] **Priority:** high
-- **Area:** projects, performance, tests, docs
-- **File(s):** game/**, package.json, package-lock.json, app/lib/pages.ts, app/lib/pages.test.ts, app/lib/html.ts, app/lib/html.test.ts, app/projects/route.ts, app/speculation-rules/route.ts, app/lib/projectPresentation.ts, next.config.js, public/retro.css, eslint.config.mjs, tsconfig.json, vitest.config.ts, playwright.config.ts, .gitignore, e2e/game.spec.ts, e2e/visual-qa.spec.ts, e2e/support/*, e2e/performance.spec.ts, e2e/site.spec.ts, docs/game-design.md, README.md, CLAUDE.md, VERIFICATION.md
-- **Why:** Owner decision (2026-10-14): the game is not needed. It is the only JavaScript on the site (69 KB brotli on /projects), the reason /projects is excluded from prerendering, and the reason for the per-route `script-src 'self'` exception. Removing it makes /projects as light and instant as the other pages, especially on slow connections.
-- **Approach:** Delete `game/`, the `build:game` / `dev:game` scripts (so `build` is `next build`), the esbuild dev dependency, the handheld embed and its `GAME_SCRIPT` env in `app/lib/pages.ts` / `next.config.js`, and the handheld CSS in `public/retro.css` (which also shrinks the CSS inlined in every page). `/projects` gets the same CSP as every other page: drop its `script-src 'self'` override and the production immutable-cache entry for `/game/main.js`. In `app/speculation-rules/route.ts` remove the /projects exclusions and the prefetch-only rule so /projects is prerendered like the others. The footer badge on /projects becomes "100% JavaScript free". Remove `e2e/game.spec.ts`, `e2e/visual-qa.spec.ts`, `e2e/support/*`, the `iphone` and `pixel` Playwright projects, the `game/**` Vitest include, the game-bundle and long-task tests, and the /projects-only prefetch assertion in `e2e/performance.spec.ts`; re-measure and lower the /projects page budget. Update `app/lib/projectPresentation.ts` ("plus a TypeScript game"), `CLAUDE.md` (stack note on JS), README, `VERIFICATION.md` (baseline, projects note), and delete `docs/game-design.md`. Historical entries in `CHANGELOG.md`, the trackers and `docs/verification-history.md` stay.
-- **Library / dependency notes:** Removes `esbuild` from devDependencies. No new dependencies.
-- **Acceptance criteria:**
-  - No page contains a `<script>` element and no request goes to `/game/*` (`/game/main.js` returns 404).
-  - Every page carries the same CSP, with `script-src <origin>/speculation-rules` only; no CSP violations in Chromium or WebKit.
-  - Hovering /projects in Chromium triggers a Prerender attempt.
-  - /projects page-weight budget lowered to the new measurement plus headroom.
-  - No living doc or instruction file describes the game as current.
-  - lint, tsc, Vitest, build and the remaining Playwright projects pass.
-- **Test plan:** Update `e2e/site.spec.ts` (no scripts on any page, uniform CSP) and `e2e/performance.spec.ts` (prerender attempt for /projects, new budget); update `app/lib/pages.test.ts` / `html.test.ts` for the embed and badge; full local gate.
-- **Out of scope:** The token burner panel (FEAT-1791988183). Editing the GitHub repository description of `my-website`.
-- **Bump:** major (removes a public feature; the owner decides when to cut a major)
-- **Implementation:** Deleted `game/`, `e2e/game.spec.ts`, `e2e/visual-qa.spec.ts`, `e2e/support/` and `docs/game-design.md`; removed esbuild and the `build:game`/`dev:game` scripts (`build` is `next build`). `/projects` renders only the repository table, `page()`/`render()` no longer take scripts, and every footer reads "100% JavaScript free". `next.config.js` drops `GAME_SCRIPT`, the /projects `script-src 'self'` override and the `/game/main.js` immutable entry; the speculation rules prerender every page, /projects included. The handheld CSS left `public/retro.css` (12,766 to 4,167 bytes inlined on every page). Playwright drops the iphone/pixel projects; `site.spec` asserts zero scripts, a uniform CSP and a 404 for `/game/main.js`; `performance.spec` drops the bundle and long-task tests, asserts a /projects Prerender and lowers its budget to 2 requests / 24,000 bytes (measured 2 / 19,919, from 3 / 111,198). Vitest 38 tests in 3 files; Playwright 39 passed.
-- **Docs:** README, CLAUDE.md (stack note), VERIFICATION.md (scope, build step, projects, acceptance, budget row), `app/lib/projectPresentation.ts`, `/projects` meta description; `docs/game-design.md` deleted.
-- **Status:** shipped-pending-migration
 
-### [FEAT-1791988182] Token-usage snapshot export
-- [x] **Priority:** high
-- **Area:** scripts, data
-- **File(s):** scripts/token-stats.mjs, scripts/token-stats.test.ts, scripts/fixtures/token-stats/*, data/token-stats.json, app/lib/tokenStats.ts, package.json, vitest.config.ts, README.md
-- **Why:** Owner wants a "token burner" panel on /projects showing AI coding-agent usage. The data lives only in local logs, so a script must turn it into a small, public-safe snapshot.
-- **Approach:** A dependency-free Node script (`npm run token-stats`) ports the parsing in the owner's `usage-widget` (`widget.py` `scan_claude` / `scan_codex`). It reads `~/.claude/projects/**/*.jsonl` (assistant `usage` blocks: input, output, cache-creation and cache-read tokens; deduplicate repeated message ids) and `~/.codex/sessions/**/rollout-*.jsonl` (per-session token-usage deltas, not cumulative totals). It prices each model family from a dated list-price table in the script and writes `data/token-stats.json`. The shape is `{ asOf, lifetime, last30, byTool: { claudeCode, codex }, byModel: [{ model, tokens, share }], daily: [{ date, tokens, costUsd }] }`, the last 90 days, with `tokens` split into input / output / cacheWrite / cacheRead / total and `costUsd`. `app/lib/tokenStats.ts` holds the TypeScript type and a validator. The output carries no project names, paths, session ids, prompts or tool names. Dates are local ISO days.
-- **Library / dependency notes:** None; Node built-ins only (fs, path, readline, os).
-- **Acceptance criteria:**
-  - Running the script on this machine writes a valid snapshot in under a minute (logs are about 3.7 GB).
-  - Totals agree with `usage-widget` for the same day within rounding.
-  - The output contains no file path, project name or session id.
-  - A malformed log line is skipped, not fatal.
-  - Re-running without new usage produces an identical file, apart from `asOf` only when data changed.
-- **Test plan:** Vitest over fixture JSONL: Claude dedup, Codex delta handling, model pricing, 30- and 90-day windows, a privacy check that no fixture path or project string appears in the output, malformed-line tolerance, and validator rejection of a bad snapshot.
-- **Out of scope:** Rendering (FEAT-1791988183); scheduling and publishing (FEAT-1791988184); usage-limit percentages.
-- **Bump:** minor
-- **Implementation:** `scripts/token-stats.mjs` (`npm run token-stats`, Node built-ins only) scans `~/.claude/projects/**/*.jsonl` and `~/.codex/sessions/**/rollout-*.jsonl`, searching each file's raw buffer for `"usage"` / `"token_count"` / `"turn_context"` lines so only those are decoded and parsed (about 3.7 GB in under 10 s). Claude messages are deduplicated by id, keeping the largest usage logged for the id (Claude Code logs partial usage while a message streams; usage-widget keeps the first line and undercounts about 14.4M tokens here), and their cache writes priced by TTL (5 minutes or 1 hour); Codex rollouts contribute per-event deltas of their cumulative counters, with cached and cache-write tokens split out of input. Prices are a dated table (2026-10-14) from the official Anthropic and OpenAI pricing pages, including Haiku 5.5's over-100K and GPT-6's over-272K rates; unpriced models count tokens, print a warning and are labelled Other, so no custom model id is published. The snapshot adds `since` (first usage day) and `pricesAsOf` to the planned shape; `byModel` keeps the top six plus Other with display names. `app/lib/tokenStats.ts` holds the type and `parseTokenStats`, which checks every count, sum, real calendar date, model-name shape and the 90 consecutive days. Against usage-widget the Codex totals match exactly; Claude totals match every day except where usage-widget silently skips 16 log files whose paths exceed Windows' 260-character limit (+125,073,897 tokens here). 21 Vitest cases over fixture logs cover dedup (including a partial streaming line), deltas and resets, pricing, windows, ranking, privacy, malformed lines, determinism and validator rejections.
-- **Docs:** README (scripts list, Token stats section).
-- **Status:** shipped-pending-migration
 
-### [FEAT-1791988183] Token burner panel on /projects
-- [x] **Priority:** high
-- **Area:** projects, frontend, accessibility
-- **File(s):** app/lib/pages.ts, app/lib/pages.test.ts, app/lib/tokenStats.ts, public/retro.css, e2e/site.spec.ts, e2e/performance.spec.ts, README.md
-- **Why:** Owner request: replace the game on /projects with stats on how many tokens AI coding agents have burned. It shows how the projects get built.
-- **Approach:** Render a "Token burner" section at the top of /projects from `data/token-stats.json` (imported at build; /projects already revalidates hourly, and each data commit redeploys). It has:
-  - stat tiles: lifetime tokens, last 30 days, API-equivalent cost, as-of date;
-  - a Claude Code vs Codex split;
-  - per-model horizontal bars;
-  - a 90-day daily activity chart.
-  Bars and the chart are inline SVG with `width`/`height`/`x`/`y` attributes. CSP `style-src` allows only the stylesheet hash, so inline `style=""` attributes would be blocked. Each bar has a `<title>`, and a `<details>` table gives the same numbers as text. Numbers are formatted server-side (e.g. "1.2B tokens", "$4,310"). If the snapshot is missing or invalid, the section is omitted and the projects table still renders. The retro look matches the site.
-- **Library / dependency notes:** None.
-- **Acceptance criteria:**
-  - Section renders with all four stat groups and a readable 320 px layout.
-  - No `<script>` and no inline `style` attributes; no CSP violations.
-  - The chart has a text and table equivalent; the page passes the existing a11y checks.
-  - /projects stays within its page-weight budget.
-- **Test plan:** Unit tests for formatting, SVG generation, escaping and missing-data omission in `pages.test.ts`; E2E in `site.spec.ts` for presence, no inline styles, no CSP violations (Chromium and WebKit); budget in `performance.spec.ts`.
-- **Out of scope:** Live or client-side updating; per-project breakdowns.
-- **Bump:** minor
-- **Implementation:** `app/projects/route.ts` imports `data/token-stats.json` at build and passes `parseTokenStats(snapshot)` to `projectsBody`, which renders `tokenBurner()` (in `app/lib/pages.ts`) between the intro and a new "Repositories" heading. The panel has four tiles (lifetime with first-use date, last 30 days, API-equivalent cost, as-of date), a stacked Claude Code / Codex bar with a text list, per-model bars and a 90-day chart. All of them are SVG sized by `viewBox`/`width`/`height`/`x`/`y` attributes, coloured from `public/retro.css` classes, and each bar has a `<title>`. The chart has an `aria-label` summary repeated as visible text and a `<details>` table of all 90 days. `formatTokens` (three significant digits, K/M/B), `formatUsd` and `formatDay` format numbers on the server. A null snapshot omits the panel. Deviation: because the JSON is a static import, a missing file fails the build rather than silently dropping the panel. The /projects budget is raised deliberately to 2 requests / 44,000 bytes (measured 2 / 38,536 uncompressed with `next start`; the panel adds about 18 KB raw). Unit tests cover formatting, SVG output, escaping and omission (Vitest 61 tests in 4 files). E2E covers the panel, zero `style` attributes, stylesheet bar colours, the 90-row table and 320 px layout in Chromium and WebKit (Playwright 41 passed).
-- **Docs:** README (pages list, Token stats section), VERIFICATION.md (token burner acceptance, budget row), `/projects` meta description.
-- **Status:** shipped-pending-migration
 
 ### [FEAT-1791988184] Daily auto-publish of token stats
 - [ ] **Priority:** med
@@ -259,6 +141,19 @@ the end of their section, sorted by id on read.
 - **Test plan:** The test itself, run twice for stability; a temporary low budget confirms it fails.
 - **Out of scope:** WebKit network emulation; real-device testing.
 - **Bump:** minor
+- **Status:** open
+
+### [FEAT-1791991424] Regression test for the clearance wording on the About page and resume
+- [ ] **Priority:** low
+- **Area:** tests
+- **File(s):** app/lib/pages.test.ts, e2e/site.spec.ts
+- **Why:** BUG-1791980560 fixed the clearance wording ("Active DoD Secret clearance", "Secret-cleared", "U.S. Citizen") with no test, so the outdated "Secret eligibility" wording could return unnoticed. Found by the `/protocol-v-and-v` coverage audit at 1344f04.
+- **Approach:** Unit-test the About and resume bodies for the current wording and the absence of "eligib"; optionally extract the PDF text in E2E and check the same phrases.
+- **Library / dependency notes:** None.
+- **Acceptance criteria:** A test fails if the About page or resume says "Secret eligibility" or drops "Active DoD Secret clearance" or "U.S. Citizen".
+- **Test plan:** The test itself; temporarily restoring the old wording makes it fail.
+- **Out of scope:** Other resume content.
+- **Bump:** patch
 - **Status:** open
 
 ## Shipped
@@ -752,4 +647,125 @@ the end of their section, sorted by id on read.
 - **Out of scope:** Lighthouse CI, real-user monitoring.
 - **Bump:** minor
 - **Implementation:** `e2e/performance.spec.ts` (Chromium project, so it runs in CI's existing `npm run test:e2e`) adds per-page cold-load budgets for request count and bytes (headers plus body from Playwright request sizes, against `next start`), and a 240,000-byte cap on the raw game bundle, next to the FEAT-1791849857 long-task cap and the FEAT-1791849858 speculation check. Budgets sit 15-30% above the 2026-10-12 measurements, which are recorded in VERIFICATION.md. No playwright.config change was needed. Lowering the / budget to 10,000 bytes failed the spec (received 32,394), and restoring it passed. Verified: lint, tsc, 251 Vitest, build, 129 Playwright passed with 12 expected skips.
+- **Status:** shipped-pending-migration
+
+### [FEAT-1790991961] Fast loading on slow or metered connections
+- [x] **Priority:** high
+- **Area:** performance, projects, game
+- **File(s):** package.json, game/build.mjs, app/lib/pages.ts, app/lib/html.ts, next.config.js, public/*.webp|jpg, e2e/
+- **Why:** Owner wants the site, including the game, to load easily on low signal. The game ships as 65 unbundled ES modules (280 KB, a deep import waterfall: one round trip per import level), the Off the Clock photo is a 2400x1800 650 KB WebP shown at 320 px, the portrait is 343 px shown at 120 px, below-the-fold images load eagerly, and static assets get no long-lived cache.
+- **Approach:** Bundle and minify the game with esbuild into one content-hashed file (`/game/main.<hash>.js`) whose name the page reads from a build manifest; serve `/game/*` as `public, max-age=31536000, immutable`; resize images to 2x their display size (WebP) with explicit dimensions, `loading="lazy"` and `decoding="async"` below the fold; give images and icons a day-long cache with stale-while-revalidate. The HTML table stays usable before and without the game. No service worker (owner decision).
+- **Library / dependency notes:** esbuild (latest stable, confirmed on npm before install) as a devDependency.
+- **Acceptance criteria:** /projects loads the game in one script request; total transfer for each page on a cold load is measured before and after and drops; the game boots and every existing test passes; images look identical at display size; no page regresses Lighthouse.
+- **Test plan:** Existing E2E (script count, CSP, boot); new check that /projects requests exactly one game script and that `/game/` responses carry the immutable cache header; byte budgets recorded in VERIFICATION.md.
+- **Out of scope:** Service worker / offline cache, PWA manifest, CDN changes.
+- **Bump:** minor
+- **Implementation:** `game/build.mjs` bundles and minifies the game with esbuild 0.28.2 (es2022/safari15) into one `public/game/main.js` (143 KB raw), after a strict `tsc --noEmit`; `dev:game` watches with esbuild. Instead of hashed filenames, next.config.js hashes `retro.css` and `main.js` at build and exposes `?v=<hash>` URLs through `env` (`STYLE_HREF`, `GAME_SCRIPT`); production serves both `immutable` for a year and images/icons/PDF for a day with a week of stale-while-revalidate. Peru photo 2400 px/649 KB to 640 px/53 KB, portrait 343 px/117 KB to 240 px/11 KB; below-the-fold photos lazy-load. Cold loads: /projects 66 requests/169 KB to 3/82 KB, / 128 KB to 22 KB, /off-the-clock 659 KB to 62 KB; Resume and Contact grow 31 bytes (the `?v=` query) but repeat visits skip the stylesheet. Slow link (400ms, 50 KB/s): /projects ready in 2.6s instead of 7.3s. E2E game tests that imported individual modules now bundle a test-only entry with esbuild and evaluate it over CDP. Verified: lint, tsc, 157 Vitest, build, 66 Playwright passed with 12 expected skips, production curl of headers and CSP.
+- **Status:** shipped-pending-migration
+
+### [FEAT-1790991962] Codelings evolve
+- [x] **Priority:** high
+- **Area:** game
+- **File(s):** game/src/data/species.ts, game/src/gfx/creatures.ts, game/src/battle/*, game/src/ui/*, game/src/engine/storage.ts, docs/game-design.md
+- **Why:** Owner asked to build out the rest of the game; evolution is the classic progression beat the current game lacks.
+- **Approach:** Per docs/game-design.md (evolution section, written before code): each repository species gets evolved stages derived deterministically from it (name, sprite, stats, moves); evolution triggers after battle at set levels with a cancellable cutscene; the Codex keeps one entry per repository and shows the highest stage seen; saves gain a per-Codeling stage that defaults to the base stage.
+- **Library / dependency notes:** none.
+- **Acceptance criteria:** A Codeling reaching its evolution level evolves after battle with the cutscene (B cancels and it retries next level); evolved forms differ visibly and in stats; old saves load; Codex stays one entry per repository; all gates green.
+- **Test plan:** Unit: stage derivation determinism and constraints, stat growth, evolution trigger and cancel, save migration. E2E: seeded save at the threshold evolves after a battle.
+- **Out of scope:** Trade or item evolution, branching evolutions.
+- **Bump:** minor
+- **Implementation:** Per docs/game-design.md §5.6: buildSpecies gives each species `stages` (top third by stars get 3), `evolveAt` levels and stored `forms` (unique names with a blocked-substring guard, scaled stats, EXP yield, catch rate); `stageAt` sets wild/trainer stages; Codelings carry `stage` (old saves default to 1). `pendingEvolutions` (battle/evolution.ts) queues members that levelled up in a won or caught battle; `EvolutionScene` plays the accelerating silhouette flash with one-shot `evolve`/`evolveSuccess` cues (sequencer gained an optional `loop` flag), B cancels and retries next level-up, reduced motion fades, HP damage carries over and the type's strong move goes through the extracted `ui/learnMove.ts`. Stage 1 sprites are pixel-identical to before; stage 2 switches to the next type sub-silhouette with the same ramp, face, markings and features plus one more feature; stage 3 doubles features and adds symmetric plating. Party, summary, PC, bag, battle and a Codex LINE page use forms. Four art review passes (recolouring, slabs, lost faces, too-subtle and shrinking stages) before acceptance. Verified: lint, tsc, 185 Vitest, build, 70 Playwright passed with 12 expected skips, forms sheet of all 66 live forms and eight scene captures inspected.
+- **Status:** shipped-pending-migration
+
+### [FEAT-1790991963] Codelings region expansion: two towns, two routes, two gyms and the Champion
+- [x] **Priority:** high
+- **Area:** game
+- **File(s):** game/src/world/maps/*, game/src/data/trainers.ts, game/src/data/ids.ts, game/src/world/*, game/src/ui/*, docs/game-design.md
+- **Why:** Owner asked to build out the rest of the game; today the journey ends after one gym and three outdoor areas.
+- **Approach:** Per docs/game-design.md (region section, written before code): Stack Cave opens onto new routes, two new towns with their own Center and Mart, two new gyms with distinct puzzles and leaders (three badges total), and a Champion battle that becomes the ending trigger; habitats and levels re-spread across all wild areas.
+- **Library / dependency notes:** none.
+- **Acceptance criteria:** A player can travel from Sterling Town to the Champion, earn three badges in order, and see the ending after the Champion; every species stays catchable; old saves continue (Rhea already beaten keeps the badge); all gates green.
+- **Test plan:** Unit: map connectivity and warp targets, gating flags, habitat coverage, trainer party constraints. E2E: seeded saves enter each new town and start each new gym battle.
+- **Out of scope:** Surf/fly-style field moves, more than three gyms.
+- **Bump:** minor
+- **Implementation:** Per docs/game-design.md §6.1: the Stack Cave ladder (behind a Cave Warden until `badge:merge`) leads to Route 3, Branch Bay (harbour town with its own Center, Mart and Old Dev's house), the Pipeline Gym (LINT > TEST > BUILD switch puzzle in pure `world/pipeline.ts`; Ops Otto), Route 4 (mountain road behind a ranger until `badge:pipeline`, cliffs, bridge, tunnel), Release Ridge (snow town, lookout, frozen pond), the Release Gym (deploy-pad warp maze; Maintainer Mira) and Main Branch Tower (guard needs three badges; Champion Prof. Ivanov, 6 Codelings, `champion` flag, ending, return to Ridge). Center/Mart interiors come from `interiors.ts` factories (Commit layouts unchanged); `star:<n>` trainer picks; late routes draw every species; badges are `badge:merge/pipeline/release` (old `badge` migrates), blackout returns to the last visited Center (`lastCenter:<map>`); trainer card shows three badges and a CHAMPION star. Nine new character sprites with battle portraits, new harbour/snow/mountain/gym tiles, five tracks and three SFX. Screenshot captures moved to opt-in `e2e/visual-qa.spec.ts`. Two art review passes (shared trainer sprite, warden not moving, bare Ridge/Route 4/gym interiors). Verified: lint, tsc, 217 Vitest, build, 110 Playwright passed with 12 expected skips, 29 captures inspected.
+- **Status:** shipped-pending-migration
+
+### [FEAT-1790991964] Codelings post-game: rematches, a legendary and side quests
+- [x] **Priority:** med
+- **Area:** game
+- **File(s):** game/src/world/*, game/src/data/*, game/src/ui/*, docs/game-design.md
+- **Why:** Owner asked to build out the rest of the game; after the ending there is nothing new to do.
+- **Approach:** Per docs/game-design.md (post-game section, written before code): gym leader and Champion rematches at higher levels after the ending, one legendary Codeling in a sealed room that opens after the ending, and three NPC side quests with rewards.
+- **Library / dependency notes:** none.
+- **Acceptance criteria:** After the ending rematches, the legendary encounter and the three side quests are available and completable; nothing post-game is reachable before the ending; old saves load; all gates green.
+- **Test plan:** Unit: post-game gating, rematch parties, quest state transitions. E2E: post-game seeded save reaches the legendary battle.
+- **Out of scope:** Online features, daily events beyond the rematch cooldown.
+- **Bump:** minor
+- **Implementation:** Per docs/game-design.md §6.2, all gated on `champion` in pure `world/postgame.ts`: Rhea, Otto, Mira and Prof. Ivanov (back in the lab) offer one rematch per local day (`rematch:<id>:<date>`, latest kept) with six-member `rematchParty` teams at 40-63 and doubled rewards; a sealed door on Stack Cave's west wall opens into the `vault`, where ORIGIN (species id 0, `originSpecies()`, level 50, catch rate 3, single form, gold crowned sprite, own cry, strongest normal moves) stands on a pedestal, returns after a faint or run and is gone once caught (`origin`); Codex entry `000` (LEGENDARY) opens the GitHub profile and does not count toward the diploma. Side quests in `quest:<id>:<state>` flags: Old Dev's lost keyboard (Route 3 hidden spot), the Ridge Collector (stage 2+ in party) and the lab aide's 25/50/100% Codex milestones. Species lookups go through `speciesById`; save validation accepts id 0. One art review pass (ORIGIN too small and weak, sealed door read as a panel). Verified: lint, tsc, 249 Vitest, build, 118 Playwright passed with 12 expected skips, captures inspected.
+- **Status:** shipped-pending-migration
+
+### [FEAT-1791988181] Remove the Codelings game from /projects
+- [x] **Priority:** high
+- **Area:** projects, performance, tests, docs
+- **File(s):** game/**, package.json, package-lock.json, app/lib/pages.ts, app/lib/pages.test.ts, app/lib/html.ts, app/lib/html.test.ts, app/projects/route.ts, app/speculation-rules/route.ts, app/lib/projectPresentation.ts, next.config.js, public/retro.css, eslint.config.mjs, tsconfig.json, vitest.config.ts, playwright.config.ts, .gitignore, e2e/game.spec.ts, e2e/visual-qa.spec.ts, e2e/support/*, e2e/performance.spec.ts, e2e/site.spec.ts, docs/game-design.md, README.md, CLAUDE.md, VERIFICATION.md
+- **Why:** Owner decision (2026-10-14): the game is not needed. It is the only JavaScript on the site (69 KB brotli on /projects), the reason /projects is excluded from prerendering, and the reason for the per-route `script-src 'self'` exception. Removing it makes /projects as light and instant as the other pages, especially on slow connections.
+- **Approach:** Delete `game/`, the `build:game` / `dev:game` scripts (so `build` is `next build`), the esbuild dev dependency, the handheld embed and its `GAME_SCRIPT` env in `app/lib/pages.ts` / `next.config.js`, and the handheld CSS in `public/retro.css` (which also shrinks the CSS inlined in every page). `/projects` gets the same CSP as every other page: drop its `script-src 'self'` override and the production immutable-cache entry for `/game/main.js`. In `app/speculation-rules/route.ts` remove the /projects exclusions and the prefetch-only rule so /projects is prerendered like the others. The footer badge on /projects becomes "100% JavaScript free". Remove `e2e/game.spec.ts`, `e2e/visual-qa.spec.ts`, `e2e/support/*`, the `iphone` and `pixel` Playwright projects, the `game/**` Vitest include, the game-bundle and long-task tests, and the /projects-only prefetch assertion in `e2e/performance.spec.ts`; re-measure and lower the /projects page budget. Update `app/lib/projectPresentation.ts` ("plus a TypeScript game"), `CLAUDE.md` (stack note on JS), README, `VERIFICATION.md` (baseline, projects note), and delete `docs/game-design.md`. Historical entries in `CHANGELOG.md`, the trackers and `docs/verification-history.md` stay.
+- **Library / dependency notes:** Removes `esbuild` from devDependencies. No new dependencies.
+- **Acceptance criteria:**
+  - No page contains a `<script>` element and no request goes to `/game/*` (`/game/main.js` returns 404).
+  - Every page carries the same CSP, with `script-src <origin>/speculation-rules` only; no CSP violations in Chromium or WebKit.
+  - Hovering /projects in Chromium triggers a Prerender attempt.
+  - /projects page-weight budget lowered to the new measurement plus headroom.
+  - No living doc or instruction file describes the game as current.
+  - lint, tsc, Vitest, build and the remaining Playwright projects pass.
+- **Test plan:** Update `e2e/site.spec.ts` (no scripts on any page, uniform CSP) and `e2e/performance.spec.ts` (prerender attempt for /projects, new budget); update `app/lib/pages.test.ts` / `html.test.ts` for the embed and badge; full local gate.
+- **Out of scope:** The token burner panel (FEAT-1791988183). Editing the GitHub repository description of `my-website`.
+- **Bump:** major (removes a public feature; the owner decides when to cut a major)
+- **Implementation:** Deleted `game/`, `e2e/game.spec.ts`, `e2e/visual-qa.spec.ts`, `e2e/support/` and `docs/game-design.md`; removed esbuild and the `build:game`/`dev:game` scripts (`build` is `next build`). `/projects` renders only the repository table, `page()`/`render()` no longer take scripts, and every footer reads "100% JavaScript free". `next.config.js` drops `GAME_SCRIPT`, the /projects `script-src 'self'` override and the `/game/main.js` immutable entry; the speculation rules prerender every page, /projects included. The handheld CSS left `public/retro.css` (12,766 to 4,167 bytes inlined on every page). Playwright drops the iphone/pixel projects; `site.spec` asserts zero scripts, a uniform CSP and a 404 for `/game/main.js`; `performance.spec` drops the bundle and long-task tests, asserts a /projects Prerender and lowers its budget to 2 requests / 24,000 bytes (measured 2 / 19,919, from 3 / 111,198). Vitest 38 tests in 3 files; Playwright 39 passed.
+- **Docs:** README, CLAUDE.md (stack note), VERIFICATION.md (scope, build step, projects, acceptance, budget row), `app/lib/projectPresentation.ts`, `/projects` meta description; `docs/game-design.md` deleted.
+- **Status:** shipped-pending-migration
+
+### [FEAT-1791988182] Token-usage snapshot export
+- [x] **Priority:** high
+- **Area:** scripts, data
+- **File(s):** scripts/token-stats.mjs, scripts/token-stats.test.ts, scripts/fixtures/token-stats/*, data/token-stats.json, app/lib/tokenStats.ts, package.json, vitest.config.ts, README.md
+- **Why:** Owner wants a "token burner" panel on /projects showing AI coding-agent usage. The data lives only in local logs, so a script must turn it into a small, public-safe snapshot.
+- **Approach:** A dependency-free Node script (`npm run token-stats`) ports the parsing in the owner's `usage-widget` (`widget.py` `scan_claude` / `scan_codex`). It reads `~/.claude/projects/**/*.jsonl` (assistant `usage` blocks: input, output, cache-creation and cache-read tokens; deduplicate repeated message ids) and `~/.codex/sessions/**/rollout-*.jsonl` (per-session token-usage deltas, not cumulative totals). It prices each model family from a dated list-price table in the script and writes `data/token-stats.json`. The shape is `{ asOf, lifetime, last30, byTool: { claudeCode, codex }, byModel: [{ model, tokens, share }], daily: [{ date, tokens, costUsd }] }`, the last 90 days, with `tokens` split into input / output / cacheWrite / cacheRead / total and `costUsd`. `app/lib/tokenStats.ts` holds the TypeScript type and a validator. The output carries no project names, paths, session ids, prompts or tool names. Dates are local ISO days.
+- **Library / dependency notes:** None; Node built-ins only (fs, path, readline, os).
+- **Acceptance criteria:**
+  - Running the script on this machine writes a valid snapshot in under a minute (logs are about 3.7 GB).
+  - Totals agree with `usage-widget` for the same day within rounding.
+  - The output contains no file path, project name or session id.
+  - A malformed log line is skipped, not fatal.
+  - Re-running without new usage produces an identical file, apart from `asOf` only when data changed.
+- **Test plan:** Vitest over fixture JSONL: Claude dedup, Codex delta handling, model pricing, 30- and 90-day windows, a privacy check that no fixture path or project string appears in the output, malformed-line tolerance, and validator rejection of a bad snapshot.
+- **Out of scope:** Rendering (FEAT-1791988183); scheduling and publishing (FEAT-1791988184); usage-limit percentages.
+- **Bump:** minor
+- **Implementation:** `scripts/token-stats.mjs` (`npm run token-stats`, Node built-ins only) scans `~/.claude/projects/**/*.jsonl` and `~/.codex/sessions/**/rollout-*.jsonl`, searching each file's raw buffer for `"usage"` / `"token_count"` / `"turn_context"` lines so only those are decoded and parsed (about 3.7 GB in under 10 s). Claude messages are deduplicated by id, keeping the largest usage logged for the id (Claude Code logs partial usage while a message streams; usage-widget keeps the first line and undercounts about 14.4M tokens here), and their cache writes priced by TTL (5 minutes or 1 hour); Codex rollouts contribute per-event deltas of their cumulative counters, with cached and cache-write tokens split out of input. Prices are a dated table (2026-10-14) from the official Anthropic and OpenAI pricing pages, including Haiku 5.5's over-100K and GPT-6's over-272K rates; unpriced models count tokens, print a warning and are labelled Other, so no custom model id is published. The snapshot adds `since` (first usage day) and `pricesAsOf` to the planned shape; `byModel` keeps the top six plus Other with display names. `app/lib/tokenStats.ts` holds the type and `parseTokenStats`, which checks every count, sum, real calendar date, model-name shape and the 90 consecutive days. Against usage-widget the Codex totals match exactly; Claude totals match every day except where usage-widget silently skips 16 log files whose paths exceed Windows' 260-character limit (+125,073,897 tokens here). 21 Vitest cases over fixture logs cover dedup (including a partial streaming line), deltas and resets, pricing, windows, ranking, privacy, malformed lines, determinism and validator rejections.
+- **Docs:** README (scripts list, Token stats section).
+- **Status:** shipped-pending-migration
+
+### [FEAT-1791988183] Token burner panel on /projects
+- [x] **Priority:** high
+- **Area:** projects, frontend, accessibility
+- **File(s):** app/lib/pages.ts, app/lib/pages.test.ts, app/lib/tokenStats.ts, public/retro.css, e2e/site.spec.ts, e2e/performance.spec.ts, README.md
+- **Why:** Owner request: replace the game on /projects with stats on how many tokens AI coding agents have burned. It shows how the projects get built.
+- **Approach:** Render a "Token burner" section at the top of /projects from `data/token-stats.json` (imported at build; /projects already revalidates hourly, and each data commit redeploys). It has:
+  - stat tiles: lifetime tokens, last 30 days, API-equivalent cost, as-of date;
+  - a Claude Code vs Codex split;
+  - per-model horizontal bars;
+  - a 90-day daily activity chart.
+  Bars and the chart are inline SVG with `width`/`height`/`x`/`y` attributes. CSP `style-src` allows only the stylesheet hash, so inline `style=""` attributes would be blocked. Each bar has a `<title>`, and a `<details>` table gives the same numbers as text. Numbers are formatted server-side (e.g. "1.2B tokens", "$4,310"). If the snapshot is missing or invalid, the section is omitted and the projects table still renders. The retro look matches the site.
+- **Library / dependency notes:** None.
+- **Acceptance criteria:**
+  - Section renders with all four stat groups and a readable 320 px layout.
+  - No `<script>` and no inline `style` attributes; no CSP violations.
+  - The chart has a text and table equivalent; the page passes the existing a11y checks.
+  - /projects stays within its page-weight budget.
+- **Test plan:** Unit tests for formatting, SVG generation, escaping and missing-data omission in `pages.test.ts`; E2E in `site.spec.ts` for presence, no inline styles, no CSP violations (Chromium and WebKit); budget in `performance.spec.ts`.
+- **Out of scope:** Live or client-side updating; per-project breakdowns.
+- **Bump:** minor
+- **Implementation:** `app/projects/route.ts` imports `data/token-stats.json` at build and passes `parseTokenStats(snapshot)` to `projectsBody`, which renders `tokenBurner()` (in `app/lib/pages.ts`) between the intro and a new "Repositories" heading. The panel has four tiles (lifetime with first-use date, last 30 days, API-equivalent cost, as-of date), a stacked Claude Code / Codex bar with a text list, per-model bars and a 90-day chart. All of them are SVG sized by `viewBox`/`width`/`height`/`x`/`y` attributes, coloured from `public/retro.css` classes, and each bar has a `<title>`. The chart has an `aria-label` summary repeated as visible text and a `<details>` table of all 90 days. `formatTokens` (three significant digits, K/M/B), `formatUsd` and `formatDay` format numbers on the server. A null snapshot omits the panel. Deviation: because the JSON is a static import, a missing file fails the build rather than silently dropping the panel. The /projects budget is raised deliberately to 2 requests / 44,000 bytes (measured 2 / 38,536 uncompressed with `next start`; the panel adds about 18 KB raw). Unit tests cover formatting, SVG output, escaping and omission (Vitest 61 tests in 4 files). E2E covers the panel, zero `style` attributes, stylesheet bar colours, the 90-row table and 320 px layout in Chromium and WebKit (Playwright 41 passed).
+- **Docs:** README (pages list, Token stats section), VERIFICATION.md (token burner acceptance, budget row), `/projects` meta description.
 - **Status:** shipped-pending-migration
