@@ -25,7 +25,12 @@ type Data = Record<string, unknown>;
 const isObject = (value: unknown): value is Data => typeof value === "object" && value !== null && !Array.isArray(value);
 const isCount = (value: unknown): value is number => Number.isSafeInteger(value) && (value as number) >= 0;
 const isMoney = (value: unknown): value is number => typeof value === "number" && Number.isFinite(value) && value >= 0;
-const isDay = (value: unknown): value is string => typeof value === "string" && /^\d{4}-\d{2}-\d{2}$/.test(value) && !Number.isNaN(Date.parse(`${value}T00:00:00Z`));
+// A real calendar day: "2026-02-31" does not survive the round trip.
+const isDay = (value: unknown): value is string => typeof value === "string" && /^\d{4}-\d{2}-\d{2}$/.test(value)
+  && !Number.isNaN(Date.parse(`${value}T00:00:00Z`)) && new Date(`${value}T00:00:00Z`).toISOString().startsWith(value);
+const nextDay = (day: string) => new Date(Date.parse(`${day}T00:00:00Z`) + 86_400_000).toISOString().slice(0, 10);
+// The shapes scripts/token-stats.mjs modelLabel() produces, plus "Other".
+const MODEL_NAME = /^(?:Claude [A-Z][a-z]+ \d+(?:\.\d)?|GPT-\d+(?:\.\d+)?(?: [A-Z][a-z]+)*|Other)$/;
 
 function isCounts(value: unknown): value is TokenCounts {
   if (!isObject(value)) return false;
@@ -35,7 +40,7 @@ function isCounts(value: unknown): value is TokenCounts {
 }
 const isUsage = (value: unknown): value is TokenUsage => isObject(value) && isCounts(value.tokens) && isMoney(value.costUsd);
 const isModel = (value: unknown): value is ModelShare => isObject(value) && typeof value.model === "string"
-  && /^[\w .-]{1,40}$/.test(value.model) && isCount(value.tokens) && isMoney(value.share) && value.share <= 1;
+  && value.model.length <= 40 && MODEL_NAME.test(value.model) && isCount(value.tokens) && isMoney(value.share) && value.share <= 1;
 const isDaily = (value: unknown): value is DailyUsage => isObject(value) && isDay(value.date) && isCount(value.tokens) && isMoney(value.costUsd);
 
 // Returns the snapshot only if every field has the expected shape, else null, so a
@@ -49,6 +54,6 @@ export function parseTokenStats(value: unknown): TokenStats | null {
   if (byTool.claudeCode.tokens.total + byTool.codex.tokens.total !== lifetime.tokens.total) return null;
   if (!Array.isArray(byModel) || byModel.length > MAX_MODELS || !byModel.every(isModel)) return null;
   if (!Array.isArray(daily) || daily.length !== DAILY_DAYS || !daily.every(isDaily)) return null;
-  if (daily.some((day, index) => index > 0 && day.date <= daily[index - 1].date) || daily[DAILY_DAYS - 1].date !== asOf) return null;
+  if (daily.some((day, index) => index > 0 && day.date !== nextDay(daily[index - 1].date)) || daily[DAILY_DAYS - 1].date !== asOf) return null;
   return { asOf, since, pricesAsOf, lifetime, last30, byTool: { claudeCode: byTool.claudeCode, codex: byTool.codex }, byModel, daily };
 }
