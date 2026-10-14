@@ -14,6 +14,8 @@ under each release/date heading.
 
 ### Verified
 
+- 2026-10-14 V&V pass on a local production build (`npm ci`, `SITE_ORIGIN=http://localhost:3000 npm run build`, `next start`) in a clean worktree, SHA ff1ce0f: lint zero warnings, tsc zero errors, 64 Vitest (4 files), Playwright 41 listed (41 passed, 0 skipped; site and performance specs rerun without retries, no flips); batch none (v1.0.0 release commit: changelog, trackers and version only); stack fresh, data none (stateless); gui pass. Counts unchanged since 1344f04.
+
 ### Added
 
 ### Changed
