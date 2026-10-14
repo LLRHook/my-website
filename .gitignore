@@ -22,7 +22,5 @@ tsconfig.tsbuildinfo
 /render/*.log
 /render/.ruff_cache/
 
-/public/game/
-
 # V&V run logs and reports
 .vv/
