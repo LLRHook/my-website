@@ -1,19 +1,10 @@
 /* eslint-disable @typescript-eslint/no-require-imports -- Next config uses CommonJS. */
 const { createHash } = require("node:crypto");
-const { existsSync, readFileSync } = require("node:fs");
+const { readFileSync } = require("node:fs");
 const { join } = require("node:path");
 
-function assetUrl(path) {
-  const file = join(__dirname, "public", path);
-  if (!existsSync(file)) {
-    return `/${path}`;
-  }
-  const hash = createHash("sha256").update(readFileSync(file)).digest("hex").slice(0, 10);
-  return `/${path}?v=${hash}`;
-}
-
 // WebKit checks the header-delivered speculation rules fetch against script-src (Chromium
-// does not), so pages without scripts allow exactly that URL. It is JSON served with
+// does not), so pages allow exactly that URL. It is JSON served with
 // nosniff, so it can never run as a script. SITE_ORIGIN overrides the production
 // origin for local and CI builds.
 const SITE_ORIGIN = process.env.SITE_ORIGIN ?? "https://victorivanov.engineer";
@@ -49,7 +40,6 @@ const nextConfig = {
   poweredByHeader: false,
   env: {
     STYLE_CSS,
-    GAME_SCRIPT: assetUrl("game/main.js"),
   },
   async redirects() {
     return [{ source: "/interests", destination: "/off-the-clock", permanent: true }];
@@ -65,20 +55,7 @@ const nextConfig = {
         source,
         headers: [{ key: "Speculation-Rules", value: '"/speculation-rules"' }],
       })),
-      {
-        source: "/projects",
-        headers: securityHeaders.map((header) => header.key === "Content-Security-Policy"
-          ? { ...header, value: header.value.replace(SCRIPT_SRC, "script-src 'self'") }
-          : header),
-      },
       ...(process.env.NODE_ENV === "production" ? [
-        ...["/game/main.js"].map((source) => ({
-          source,
-          headers: [...securityHeaders, {
-            key: "Cache-Control",
-            value: "public, max-age=31536000, immutable",
-          }],
-        })),
         {
           source: "/:file*\\.(jpg|webp|png|svg|ico|pdf)",
           headers: [...securityHeaders, {

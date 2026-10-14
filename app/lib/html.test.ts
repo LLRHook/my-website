@@ -3,10 +3,10 @@ import { esc, page, PAGES, personMicrodata, render } from "./html";
 import { SITE_URL } from "./constants";
 
 describe("HTML documents", () => {
-  it("renders escaped module URLs at the end of the body only when supplied", () => {
-    const options = { path: "/projects", title: "Projects", description: "Projects", body: "" };
-    expect(page(options)).not.toContain("<script");
-    expect(page({ ...options, scripts: ['/game/main.js?x="&'] })).toContain('<script type="module" src="/game/main.js?x=&quot;&amp;"></script></body>');
+  it("renders /projects without scripts and with the JavaScript-free badge", () => {
+    const html = page({ path: "/projects", title: "Projects", description: "Projects", body: "" });
+    expect(html).not.toContain("<script");
+    expect(html).toContain('<span class="badge badge-nojs"><b>100%</b><br>JavaScript free</span>');
   });
   it("escapes all five special characters", () => {
     expect(esc('&<>"\'')).toBe("&amp;&lt;&gt;&quot;&#39;");

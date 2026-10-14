@@ -1,0 +1,2 @@
+{"timestamp": "2026-10-02T11:00:00Z", "type": "turn_context", "payload": {"model": "gpt-6-astra"}}
+{"timestamp": "2026-10-02T12:00:00Z", "type": "event_msg", "payload": {"type": "token_count", "info": {"total_token_usage": {"input_tokens": 300000, "cached_input_tokens": 0, "cache_write_input_tokens": 0, "output_tokens": 0, "reasoning_output_tokens": 0, "total_tokens": 300000}}, "rate_limits": {"plan_type": "pro"}}}

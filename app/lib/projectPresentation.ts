@@ -4,7 +4,7 @@ import type { RepoSummary } from "./types";
 const PRESENTATION: Record<string, { name: string; description: string }> = {
   "LLRHook/my-website": {
     name: "This home page",
-    description: "Hand-written HTML and CSS, served by Next.js, plus a TypeScript game on the Projects page.",
+    description: "Hand-written HTML and CSS served by Next.js, with no JavaScript in the browser.",
   },
   "LLRHook/checksinmyhead": {
     name: "Billington",
