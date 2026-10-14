@@ -10,7 +10,7 @@ no JavaScript in the browser.
 
 - Home (`/`): welcome and updates.
 - About Me (`/about`): biography, tools, and conference photo.
-- Projects (`/projects`): a table of public GitHub repositories.
+- Projects (`/projects`): the token burner (AI coding-agent token usage) and a table of public GitHub repositories.
 - Resume (`/resume`): experience, projects, education, skills, and a PDF download.
 - Off the Clock (`/off-the-clock`): climbing, cards, books, travel, and side projects.
 - Contact (`/contact`): email, GitHub, LinkedIn, and an email guestbook.
@@ -93,6 +93,13 @@ API-equivalent cost from the dated list-price table in the script (models withou
 a published price count tokens but no cost). The file holds no paths, project
 names, session ids, prompts or tool names, and is rewritten only when it changes.
 `app/lib/tokenStats.ts` defines its type and validator.
+
+`/projects` imports the committed snapshot at build time and renders it as the
+token burner panel above the repository table: four stat tiles, the Claude Code /
+Codex split, per-model bars and a 90-day chart. Bars and the chart are inline SVG
+sized by attributes (the CSP allows no inline styles), each bar has a `<title>`,
+and a `<details>` table lists every day as text. An invalid snapshot omits the
+panel. Run `npm run token-stats` and commit `data/token-stats.json` to refresh it.
 
 ## Content and resume
 

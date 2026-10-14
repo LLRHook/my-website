@@ -167,7 +167,7 @@ the end of their section, sorted by id on read.
 - **Status:** shipped-pending-migration
 
 ### [FEAT-1791988183] Token burner panel on /projects
-- [ ] **Priority:** high
+- [x] **Priority:** high
 - **Area:** projects, frontend, accessibility
 - **File(s):** app/lib/pages.ts, app/lib/pages.test.ts, app/lib/tokenStats.ts, public/retro.css, e2e/site.spec.ts, e2e/performance.spec.ts, README.md
 - **Why:** Owner request: replace the game on /projects with stats on how many tokens AI coding agents have burned. It shows how the projects get built.
@@ -186,7 +186,9 @@ the end of their section, sorted by id on read.
 - **Test plan:** Unit tests for formatting, SVG generation, escaping and missing-data omission in `pages.test.ts`; E2E in `site.spec.ts` for presence, no inline styles, no CSP violations (Chromium and WebKit); budget in `performance.spec.ts`.
 - **Out of scope:** Live or client-side updating; per-project breakdowns.
 - **Bump:** minor
-- **Status:** in-progress
+- **Implementation:** `app/projects/route.ts` imports `data/token-stats.json` at build and passes `parseTokenStats(snapshot)` to `projectsBody`, which renders `tokenBurner()` (in `app/lib/pages.ts`) between the intro and a new "Repositories" heading. The panel has four tiles (lifetime with first-use date, last 30 days, API-equivalent cost, as-of date), a stacked Claude Code / Codex bar with a text list, per-model bars and a 90-day chart. All of them are SVG sized by `viewBox`/`width`/`height`/`x`/`y` attributes, coloured from `public/retro.css` classes, and each bar has a `<title>`. The chart has an `aria-label` summary repeated as visible text and a `<details>` table of all 90 days. `formatTokens` (three significant digits, K/M/B), `formatUsd` and `formatDay` format numbers on the server. A null snapshot omits the panel. Deviation: because the JSON is a static import, a missing file fails the build rather than silently dropping the panel. The /projects budget is raised deliberately to 2 requests / 44,000 bytes (measured 2 / 38,536 uncompressed with `next start`; the panel adds about 18 KB raw). Unit tests cover formatting, SVG output, escaping and omission (Vitest 61 tests in 4 files). E2E covers the panel, zero `style` attributes, stylesheet bar colours, the 90-row table and 320 px layout in Chromium and WebKit (Playwright 41 passed).
+- **Docs:** README (pages list, Token stats section), VERIFICATION.md (token burner acceptance, budget row), `/projects` meta description.
+- **Status:** shipped-pending-migration
 
 ### [FEAT-1791988184] Daily auto-publish of token stats
 - [ ] **Priority:** med

@@ -247,7 +247,8 @@ function main() {
   });
   if (unpriced.length) console.warn(`No list price for ${unpriced.join(", ")}: tokens counted, cost excluded.`);
   const text = `${JSON.stringify(snapshot, null, 2)}\n`;
-  const unchanged = existsSync(out) && readFileSync(out, "utf8") === text;
+  // Compare without line endings: a Windows checkout may hold the committed file as CRLF.
+  const unchanged = existsSync(out) && readFileSync(out, "utf8").replace(/\r\n/g, "\n") === text;
   if (!unchanged) {
     mkdirSync(dirname(out), { recursive: true });
     writeFileSync(out, text);
