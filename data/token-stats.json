@@ -4,34 +4,34 @@
   "pricesAsOf": "2026-10-14",
   "lifetime": {
     "tokens": {
-      "input": 37493011,
-      "output": 17030785,
-      "cacheWrite": 168255813,
-      "cacheRead": 6727605296,
-      "total": 6950384905
+      "input": 37493057,
+      "output": 17053762,
+      "cacheWrite": 168287765,
+      "cacheRead": 6733404721,
+      "total": 6956239305
     },
-    "costUsd": 4086.16
+    "costUsd": 4088.04
   },
   "last30": {
     "tokens": {
-      "input": 36608830,
-      "output": 11500597,
-      "cacheWrite": 75483611,
-      "cacheRead": 5201634357,
-      "total": 5325227395
+      "input": 36608876,
+      "output": 11523574,
+      "cacheWrite": 75515563,
+      "cacheRead": 5207433782,
+      "total": 5331081795
     },
-    "costUsd": 2385.65
+    "costUsd": 2387.53
   },
   "byTool": {
     "claudeCode": {
       "tokens": {
-        "input": 976236,
-        "output": 14203018,
-        "cacheWrite": 168255813,
-        "cacheRead": 4751451824,
-        "total": 4934886891
+        "input": 976282,
+        "output": 14225995,
+        "cacheWrite": 168287765,
+        "cacheRead": 4757251249,
+        "total": 4940741291
       },
-      "costUsd": 3289.93
+      "costUsd": 3291.8
     },
     "codex": {
       "tokens": {
@@ -47,23 +47,23 @@
   "byModel": [
     {
       "model": "Claude Opus 5.5",
-      "tokens": 2701516179,
-      "share": 0.3887
+      "tokens": 2707370579,
+      "share": 0.3892
     },
     {
       "model": "GPT-6.1 Sol",
       "tokens": 1576853956,
-      "share": 0.2269
+      "share": 0.2267
     },
     {
       "model": "Claude Opus 5",
       "tokens": 1308988967,
-      "share": 0.1883
+      "share": 0.1882
     },
     {
       "model": "Claude Fable 5.1",
       "tokens": 577506400,
-      "share": 0.0831
+      "share": 0.083
     },
     {
       "model": "GPT-6 Astra",
@@ -529,8 +529,8 @@
     },
     {
       "date": "2026-10-14",
-      "tokens": 129061408,
-      "costUsd": 57.71
+      "tokens": 134915808,
+      "costUsd": 59.59
     }
   ]
 }

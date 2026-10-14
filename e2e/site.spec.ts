@@ -25,7 +25,7 @@ for (const item of PAGES) {
     await expect(page.locator('nav [aria-current="page"]')).toHaveText(item.label);
     await page.setViewportSize({ width: 320, height: 700 });
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
-    if (item.path === "/projects") await expect(page.locator("table.projects, .notice")).toBeVisible();
+    if (item.path === "/projects") await expect(page.getByRole("table", { name: "Public repositories" }).or(page.locator(".notice"))).toBeVisible();
   });
 }
 
@@ -100,4 +100,21 @@ test("no page reports a Content Security Policy violation", async ({ page }) => 
     await page.waitForLoadState("networkidle");
   }
   expect(errors.filter((text) => /Content Security Policy/i.test(text))).toEqual([]);
+});
+test("projects shows the token burner panel without inline styles", async ({ page }) => {
+  await page.goto("/projects");
+  const panel = page.locator("section.burner");
+  await expect(panel.getByRole("heading", { name: "Token burner" })).toBeVisible();
+  await expect(panel.locator(".burner-stats > div")).toHaveCount(4);
+  await expect(panel.locator(".burner-tools li")).toHaveCount(2);
+  expect(await panel.locator(".burner-models li").count()).toBeGreaterThan(0);
+  await expect(panel.locator(".burner-chart svg[role=img]")).toHaveAttribute("aria-label", /^Daily tokens from /);
+  await expect(page.locator("[style]")).toHaveCount(0);
+  // Bars take their colour from the stylesheet, so the hashed style-src applied.
+  expect(await panel.locator(".burner-chart rect").first().evaluate((element) => getComputedStyle(element).fill)).toBe("rgb(0, 255, 0)");
+  await panel.getByText("Daily numbers as a table").click();
+  await expect(panel.locator("details tbody tr")).toHaveCount(90);
+  await page.setViewportSize({ width: 320, height: 700 });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
+  expect(await panel.locator(".burner-chart svg").evaluate((element) => element.getBoundingClientRect().width)).toBeLessThanOrEqual(320);
 });

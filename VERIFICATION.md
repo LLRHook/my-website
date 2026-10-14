@@ -67,13 +67,19 @@ Skips are Chromium-only performance cases under WebKit.
   |---|---|---|---|
   | / | 3 | 40,000 | 3 / 32,394 |
   | /about | 4 | 75,000 | 4 / 61,888 |
-  | /projects | 2 | 24,000 | 2 / 19,919 (2026-10-14, game removed) |
+  | /projects | 2 | 44,000 | 2 / 38,536 (2026-10-14: game removed, token burner added) |
   | /resume | 2 | 32,000 | 2 / 24,469 |
   | /off-the-clock | 3 | 85,000 | 3 / 72,423 |
   | /contact | 2 | 26,000 | 2 / 18,913 |
 
   Raise a budget only deliberately,
   in the same change that explains why.
+- Token burner (FEAT-1791988183): /projects shows the panel above the repository
+  table with four stat tiles, two tool rows, model bars, a 90-day SVG chart with an
+  `aria-label` summary and a 90-row `<details>` table; no element has a `style`
+  attribute, bar colours come from the stylesheet, and the page has no horizontal
+  overflow at 320 px. `parseTokenStats` accepts the committed
+  `data/token-stats.json`, and an invalid snapshot omits the panel.
 - Projects use hourly GitHub listing and show a table or a usable empty notice
   without `GITHUB_TOKEN`. Descriptions are escaped, profile and undescribed repos
   are filtered, rows sort newest first, and demo links use HTTP(S).

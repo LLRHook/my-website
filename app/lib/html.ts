@@ -8,7 +8,7 @@ export interface SitePage { path: string; label: string; title: string; descript
 export const PAGES: readonly SitePage[] = [
   { path: "/", label: "Home", title: SITE_TITLE, description: SITE_DESCRIPTION },
   { path: "/about", label: "About Me", title: "About | Victor Ivanov", description: "Meet Victor Ivanov, a senior full-stack engineer in Sterling, Virginia building certification software and developer tools." },
-  { path: "/projects", label: "Projects", title: "Projects | Victor Ivanov", description: "Victor Ivanov's projects: web products, developer tools, and open-source repositories, all from GitHub." },
+  { path: "/projects", label: "Projects", title: "Projects | Victor Ivanov", description: "Victor Ivanov's projects: web products, developer tools, and open-source repositories, plus how many AI coding-agent tokens it took to build them." },
   { path: "/resume", label: "Resume", title: "Resume | Victor Ivanov", description: "Victor Ivanov's October 2026 resume: engineering experience, selected projects, education, technical skills, and a downloadable PDF." },
   { path: "/off-the-clock", label: "Off the Clock", title: "Off the clock | Victor Ivanov", description: "Victor Ivanov away from the desk: rock climbing, Pokémon and Magic cards, books, travel, and side projects." },
   { path: "/contact", label: "Contact", title: "Contact | Victor Ivanov", description: "Contact Victor Ivanov by email or connect on GitHub and LinkedIn. Based in Virginia, on Eastern time." },

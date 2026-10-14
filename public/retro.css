@@ -40,6 +40,19 @@ footer { text-align: center; font-size: 14px; }
 .badge b { font-size: 10px; } .badge-any { background: #000; color: #0f0; }
 .badge-nojs { background: #ffcc00; color: #000; } .badge-next { background: #fff; color: #000; }
 .updated { font-style: italic; color: #595959; }
+.burner-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px; margin: 12px 0; }
+.burner-stats div { background: #c0c0c0; border: 2px outset #dfdfdf; padding: 6px 8px; }
+.burner-stats dt { font: bold 12px/1.2 Verdana, Geneva, sans-serif; text-transform: uppercase; }
+.burner-stats dd { margin: 2px 0 0; font: bold 22px/1.2 "Courier New", Courier, monospace; color: #000080; overflow-wrap: anywhere; }
+.burner-stats dd.note { font: italic 13px/1.3 "Times New Roman", Times, serif; color: #000; }
+.burner-bar { display: block; width: 100%; height: 12px; background: #eee; border: 1px inset #c0c0c0; margin: 2px 0 8px; }
+.burner rect { fill: #000080; } .burner .codex { fill: #800000; }
+.burner-tools, .burner-models { list-style: none; padding: 0; margin: 4px 0; }
+.burner-tools .key { display: inline-block; width: 10px; height: 10px; margin-right: 6px; background: #000080; border: 1px solid #000; } .burner-tools .key.codex { background: #800000; }
+.burner-models .value { float: right; font-family: "Courier New", Courier, monospace; }
+.burner-chart { margin: 8px 0 0; } .burner-chart svg { display: block; width: 100%; height: 120px; background: #000; border: 2px inset #dfdfdf; }
+.burner-chart rect { fill: #0f0; } .burner-chart figcaption { display: flex; justify-content: space-between; font-style: normal; font-size: 13px; }
+.burner details { margin: 8px 0; } .burner summary { cursor: pointer; color: #0000ee; text-decoration: underline; }
 @media (max-width: 600px) { body { padding: 0; } .page { border-width: 0; padding: 10px 12px; } .site-name { font-size: 24px; } .portrait { width: 80px; height: 80px; } ul.columns { columns: 1; } }
 @media (prefers-reduced-motion: reduce) { .marquee span { display: block; animation: none; padding: 0 8px; overflow: hidden; text-overflow: ellipsis; text-align: center; } .new { animation: none; } }
 @media print { html { background: #fff; } .page { border: 0; } .marquee, nav, .buttons, .skip { display: none; } }

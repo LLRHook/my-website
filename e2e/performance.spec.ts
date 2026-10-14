@@ -5,11 +5,12 @@ test.skip(({ browserName }) => browserName !== "chromium", "Chromium only");
 
 // Cold-load budgets against the local production server (`next start` sends HTML
 // uncompressed and static files gzipped; production brotli is smaller). Measured
-// 2026-10-12 (/projects 2026-10-14) and recorded in VERIFICATION.md; raise a budget only on purpose.
+// 2026-10-12 (/projects 2026-10-14, with the token burner panel) and recorded in
+// VERIFICATION.md; raise a budget only on purpose.
 const PAGE_BUDGETS: Record<string, { requests: number; bytes: number }> = {
   "/": { requests: 3, bytes: 40_000 },
   "/about": { requests: 4, bytes: 75_000 },
-  "/projects": { requests: 2, bytes: 24_000 },
+  "/projects": { requests: 2, bytes: 44_000 },
   "/resume": { requests: 2, bytes: 32_000 },
   "/off-the-clock": { requests: 3, bytes: 85_000 },
   "/contact": { requests: 2, bytes: 26_000 },
