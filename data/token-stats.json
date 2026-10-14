@@ -1,0 +1,536 @@
+{
+  "asOf": "2026-10-14",
+  "since": "2026-08-10",
+  "pricesAsOf": "2026-10-14",
+  "lifetime": {
+    "tokens": {
+      "input": 37493011,
+      "output": 17030785,
+      "cacheWrite": 168255813,
+      "cacheRead": 6727605296,
+      "total": 6950384905
+    },
+    "costUsd": 4086.16
+  },
+  "last30": {
+    "tokens": {
+      "input": 36608830,
+      "output": 11500597,
+      "cacheWrite": 75483611,
+      "cacheRead": 5201634357,
+      "total": 5325227395
+    },
+    "costUsd": 2385.65
+  },
+  "byTool": {
+    "claudeCode": {
+      "tokens": {
+        "input": 976236,
+        "output": 14203018,
+        "cacheWrite": 168255813,
+        "cacheRead": 4751451824,
+        "total": 4934886891
+      },
+      "costUsd": 3289.93
+    },
+    "codex": {
+      "tokens": {
+        "input": 36516775,
+        "output": 2827767,
+        "cacheWrite": 0,
+        "cacheRead": 1976153472,
+        "total": 2015498014
+      },
+      "costUsd": 796.23
+    }
+  },
+  "byModel": [
+    {
+      "model": "Claude Opus 5.5",
+      "tokens": 2701516179,
+      "share": 0.3887
+    },
+    {
+      "model": "GPT-6.1 Sol",
+      "tokens": 1576853956,
+      "share": 0.2269
+    },
+    {
+      "model": "Claude Opus 5",
+      "tokens": 1308988967,
+      "share": 0.1883
+    },
+    {
+      "model": "Claude Fable 5.1",
+      "tokens": 577506400,
+      "share": 0.0831
+    },
+    {
+      "model": "GPT-6 Astra",
+      "tokens": 438644058,
+      "share": 0.0631
+    },
+    {
+      "model": "Claude Opus 4.8",
+      "tokens": 221266281,
+      "share": 0.0318
+    },
+    {
+      "model": "Other",
+      "tokens": 125609064,
+      "share": 0.0181
+    }
+  ],
+  "daily": [
+    {
+      "date": "2026-07-17",
+      "tokens": 0,
+      "costUsd": 0
+    },
+    {
+      "date": "2026-07-18",
+      "tokens": 0,
+      "costUsd": 0
+    },
+    {
+      "date": "2026-07-19",
+      "tokens": 0,
+      "costUsd": 0
+    },
+    {
+      "date": "2026-07-20",
+      "tokens": 0,
+      "costUsd": 0
+    },
+    {
+      "date": "2026-07-21",
+      "tokens": 0,
+      "costUsd": 0
+    },
+    {
+      "date": "2026-07-22",
+      "tokens": 0,
+      "costUsd": 0
+    },
+    {
+      "date": "2026-07-23",
+      "tokens": 0,
+      "costUsd": 0
+    },
+    {
+      "date": "2026-07-24",
+      "tokens": 0,
+      "costUsd": 0
+    },
+    {
+      "date": "2026-07-25",
+      "tokens": 0,
+      "costUsd": 0
+    },
+    {
+      "date": "2026-07-26",
+      "tokens": 0,
+      "costUsd": 0
+    },
+    {
+      "date": "2026-07-27",
+      "tokens": 0,
+      "costUsd": 0
+    },
+    {
+      "date": "2026-07-28",
+      "tokens": 0,
+      "costUsd": 0
+    },
+    {
+      "date": "2026-07-29",
+      "tokens": 0,
+      "costUsd": 0
+    },
+    {
+      "date": "2026-07-30",
+      "tokens": 0,
+      "costUsd": 0
+    },
+    {
+      "date": "2026-07-31",
+      "tokens": 0,
+      "costUsd": 0
+    },
+    {
+      "date": "2026-08-01",
+      "tokens": 0,
+      "costUsd": 0
+    },
+    {
+      "date": "2026-08-02",
+      "tokens": 0,
+      "costUsd": 0
+    },
+    {
+      "date": "2026-08-03",
+      "tokens": 0,
+      "costUsd": 0
+    },
+    {
+      "date": "2026-08-04",
+      "tokens": 0,
+      "costUsd": 0
+    },
+    {
+      "date": "2026-08-05",
+      "tokens": 0,
+      "costUsd": 0
+    },
+    {
+      "date": "2026-08-06",
+      "tokens": 0,
+      "costUsd": 0
+    },
+    {
+      "date": "2026-08-07",
+      "tokens": 0,
+      "costUsd": 0
+    },
+    {
+      "date": "2026-08-08",
+      "tokens": 0,
+      "costUsd": 0
+    },
+    {
+      "date": "2026-08-09",
+      "tokens": 0,
+      "costUsd": 0
+    },
+    {
+      "date": "2026-08-10",
+      "tokens": 4974644,
+      "costUsd": 7.12
+    },
+    {
+      "date": "2026-08-11",
+      "tokens": 6692214,
+      "costUsd": 8.91
+    },
+    {
+      "date": "2026-08-12",
+      "tokens": 17928812,
+      "costUsd": 14.3
+    },
+    {
+      "date": "2026-08-13",
+      "tokens": 323416647,
+      "costUsd": 269.36
+    },
+    {
+      "date": "2026-08-14",
+      "tokens": 512731906,
+      "costUsd": 557.42
+    },
+    {
+      "date": "2026-08-15",
+      "tokens": 0,
+      "costUsd": 0
+    },
+    {
+      "date": "2026-08-16",
+      "tokens": 0,
+      "costUsd": 0
+    },
+    {
+      "date": "2026-08-17",
+      "tokens": 0,
+      "costUsd": 0
+    },
+    {
+      "date": "2026-08-18",
+      "tokens": 80734053,
+      "costUsd": 71.8
+    },
+    {
+      "date": "2026-08-19",
+      "tokens": 74646012,
+      "costUsd": 56.78
+    },
+    {
+      "date": "2026-08-20",
+      "tokens": 39087213,
+      "costUsd": 38.38
+    },
+    {
+      "date": "2026-08-21",
+      "tokens": 0,
+      "costUsd": 0
+    },
+    {
+      "date": "2026-08-22",
+      "tokens": 0,
+      "costUsd": 0
+    },
+    {
+      "date": "2026-08-23",
+      "tokens": 0,
+      "costUsd": 0
+    },
+    {
+      "date": "2026-08-24",
+      "tokens": 117735767,
+      "costUsd": 143.49
+    },
+    {
+      "date": "2026-08-25",
+      "tokens": 0,
+      "costUsd": 0
+    },
+    {
+      "date": "2026-08-26",
+      "tokens": 0,
+      "costUsd": 0
+    },
+    {
+      "date": "2026-08-27",
+      "tokens": 0,
+      "costUsd": 0
+    },
+    {
+      "date": "2026-08-28",
+      "tokens": 0,
+      "costUsd": 0
+    },
+    {
+      "date": "2026-08-29",
+      "tokens": 0,
+      "costUsd": 0
+    },
+    {
+      "date": "2026-08-30",
+      "tokens": 0,
+      "costUsd": 0
+    },
+    {
+      "date": "2026-08-31",
+      "tokens": 0,
+      "costUsd": 0
+    },
+    {
+      "date": "2026-09-01",
+      "tokens": 0,
+      "costUsd": 0
+    },
+    {
+      "date": "2026-09-02",
+      "tokens": 0,
+      "costUsd": 0
+    },
+    {
+      "date": "2026-09-03",
+      "tokens": 0,
+      "costUsd": 0
+    },
+    {
+      "date": "2026-09-04",
+      "tokens": 0,
+      "costUsd": 0
+    },
+    {
+      "date": "2026-09-05",
+      "tokens": 0,
+      "costUsd": 0
+    },
+    {
+      "date": "2026-09-06",
+      "tokens": 0,
+      "costUsd": 0
+    },
+    {
+      "date": "2026-09-07",
+      "tokens": 0,
+      "costUsd": 0
+    },
+    {
+      "date": "2026-09-08",
+      "tokens": 158939146,
+      "costUsd": 259.01
+    },
+    {
+      "date": "2026-09-09",
+      "tokens": 70027516,
+      "costUsd": 84.24
+    },
+    {
+      "date": "2026-09-10",
+      "tokens": 0,
+      "costUsd": 0
+    },
+    {
+      "date": "2026-09-11",
+      "tokens": 67516688,
+      "costUsd": 57.47
+    },
+    {
+      "date": "2026-09-12",
+      "tokens": 66893927,
+      "costUsd": 55.4
+    },
+    {
+      "date": "2026-09-13",
+      "tokens": 55657980,
+      "costUsd": 51.23
+    },
+    {
+      "date": "2026-09-14",
+      "tokens": 28174985,
+      "costUsd": 25.61
+    },
+    {
+      "date": "2026-09-15",
+      "tokens": 8732363,
+      "costUsd": 12.61
+    },
+    {
+      "date": "2026-09-16",
+      "tokens": 20659908,
+      "costUsd": 17.38
+    },
+    {
+      "date": "2026-09-17",
+      "tokens": 0,
+      "costUsd": 0
+    },
+    {
+      "date": "2026-09-18",
+      "tokens": 16073226,
+      "costUsd": 13.64
+    },
+    {
+      "date": "2026-09-19",
+      "tokens": 184595146,
+      "costUsd": 136.88
+    },
+    {
+      "date": "2026-09-20",
+      "tokens": 9478386,
+      "costUsd": 15.67
+    },
+    {
+      "date": "2026-09-21",
+      "tokens": 165815292,
+      "costUsd": 149.23
+    },
+    {
+      "date": "2026-09-22",
+      "tokens": 155767493,
+      "costUsd": 139.3
+    },
+    {
+      "date": "2026-09-23",
+      "tokens": 521559780,
+      "costUsd": 203.1
+    },
+    {
+      "date": "2026-09-24",
+      "tokens": 595038554,
+      "costUsd": 210.71
+    },
+    {
+      "date": "2026-09-25",
+      "tokens": 80931380,
+      "costUsd": 41.77
+    },
+    {
+      "date": "2026-09-26",
+      "tokens": 77752433,
+      "costUsd": 77.42
+    },
+    {
+      "date": "2026-09-27",
+      "tokens": 101820076,
+      "costUsd": 98.04
+    },
+    {
+      "date": "2026-09-28",
+      "tokens": 140732575,
+      "costUsd": 127.03
+    },
+    {
+      "date": "2026-09-29",
+      "tokens": 85031116,
+      "costUsd": 79.18
+    },
+    {
+      "date": "2026-09-30",
+      "tokens": 388965023,
+      "costUsd": 214.65
+    },
+    {
+      "date": "2026-10-01",
+      "tokens": 17599932,
+      "costUsd": 5.76
+    },
+    {
+      "date": "2026-10-02",
+      "tokens": 987043537,
+      "costUsd": 371.76
+    },
+    {
+      "date": "2026-10-03",
+      "tokens": 84079536,
+      "costUsd": 16.05
+    },
+    {
+      "date": "2026-10-04",
+      "tokens": 13087333,
+      "costUsd": 2.14
+    },
+    {
+      "date": "2026-10-05",
+      "tokens": 261236169,
+      "costUsd": 37.71
+    },
+    {
+      "date": "2026-10-06",
+      "tokens": 255226247,
+      "costUsd": 43.71
+    },
+    {
+      "date": "2026-10-07",
+      "tokens": 237543178,
+      "costUsd": 60.66
+    },
+    {
+      "date": "2026-10-08",
+      "tokens": 155345114,
+      "costUsd": 26.35
+    },
+    {
+      "date": "2026-10-09",
+      "tokens": 189232136,
+      "costUsd": 99.14
+    },
+    {
+      "date": "2026-10-10",
+      "tokens": 77070853,
+      "costUsd": 13.99
+    },
+    {
+      "date": "2026-10-11",
+      "tokens": 3157638,
+      "costUsd": 1.34
+    },
+    {
+      "date": "2026-10-12",
+      "tokens": 200230727,
+      "costUsd": 62.7
+    },
+    {
+      "date": "2026-10-13",
+      "tokens": 162360836,
+      "costUsd": 50.04
+    },
+    {
+      "date": "2026-10-14",
+      "tokens": 129061408,
+      "costUsd": 57.71
+    }
+  ]
+}
