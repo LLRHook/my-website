@@ -125,6 +125,136 @@ the end of their section, sorted by id on read.
 - **Bump:** patch
 - **Status:** open
 
+### [FEAT-1791988181] Remove the Codelings game from /projects
+- [ ] **Priority:** high
+- **Area:** projects, performance, tests, docs
+- **File(s):** game/**, package.json, package-lock.json, app/lib/pages.ts, app/lib/pages.test.ts, app/lib/html.ts, app/lib/html.test.ts, app/projects/route.ts, app/speculation-rules/route.ts, app/lib/projectPresentation.ts, next.config.js, public/retro.css, eslint.config.mjs, tsconfig.json, vitest.config.ts, playwright.config.ts, .gitignore, e2e/game.spec.ts, e2e/visual-qa.spec.ts, e2e/support/*, e2e/performance.spec.ts, e2e/site.spec.ts, docs/game-design.md, README.md, CLAUDE.md, VERIFICATION.md
+- **Why:** Owner decision (2026-10-14): the game is not needed. It is the only JavaScript on the site (69 KB brotli on /projects), the reason /projects is excluded from prerendering, and the reason for the per-route `script-src 'self'` exception. Removing it makes /projects as light and instant as the other pages, especially on slow connections.
+- **Approach:** Delete `game/`, the `build:game` / `dev:game` scripts (so `build` is `next build`), the esbuild dev dependency, the handheld embed and its `GAME_SCRIPT` env in `app/lib/pages.ts` / `next.config.js`, and the handheld CSS in `public/retro.css` (which also shrinks the CSS inlined in every page). `/projects` gets the same CSP as every other page: drop its `script-src 'self'` override and the production immutable-cache entry for `/game/main.js`. In `app/speculation-rules/route.ts` remove the /projects exclusions and the prefetch-only rule so /projects is prerendered like the others. The footer badge on /projects becomes "100% JavaScript free". Remove `e2e/game.spec.ts`, `e2e/visual-qa.spec.ts`, `e2e/support/*`, the `iphone` and `pixel` Playwright projects, the `game/**` Vitest include, the game-bundle and long-task tests, and the /projects-only prefetch assertion in `e2e/performance.spec.ts`; re-measure and lower the /projects page budget. Update `app/lib/projectPresentation.ts` ("plus a TypeScript game"), `CLAUDE.md` (stack note on JS), README, `VERIFICATION.md` (baseline, projects note), and delete `docs/game-design.md`. Historical entries in `CHANGELOG.md`, the trackers and `docs/verification-history.md` stay.
+- **Library / dependency notes:** Removes `esbuild` from devDependencies. No new dependencies.
+- **Acceptance criteria:**
+  - No page contains a `<script>` element and no request goes to `/game/*` (`/game/main.js` returns 404).
+  - Every page carries the same CSP, with `script-src <origin>/speculation-rules` only; no CSP violations in Chromium or WebKit.
+  - Hovering /projects in Chromium triggers a Prerender attempt.
+  - /projects page-weight budget lowered to the new measurement plus headroom.
+  - No living doc or instruction file describes the game as current.
+  - lint, tsc, Vitest, build and the remaining Playwright projects pass.
+- **Test plan:** Update `e2e/site.spec.ts` (no scripts on any page, uniform CSP) and `e2e/performance.spec.ts` (prerender attempt for /projects, new budget); update `app/lib/pages.test.ts` / `html.test.ts` for the embed and badge; full local gate.
+- **Out of scope:** The token burner panel (FEAT-1791988183). Editing the GitHub repository description of `my-website`.
+- **Bump:** major (removes a public feature; the owner decides when to cut a major)
+- **Status:** open
+
+### [FEAT-1791988182] Token-usage snapshot export
+- [ ] **Priority:** high
+- **Area:** scripts, data
+- **File(s):** scripts/token-stats.mjs, scripts/token-stats.test.ts, scripts/fixtures/token-stats/*, data/token-stats.json, app/lib/tokenStats.ts, package.json, vitest.config.ts, README.md
+- **Why:** Owner wants a "token burner" panel on /projects showing AI coding-agent usage. The data lives only in local logs, so a script must turn it into a small, public-safe snapshot.
+- **Approach:** A dependency-free Node script (`npm run token-stats`) ports the parsing in the owner's `usage-widget` (`widget.py` `scan_claude` / `scan_codex`). It reads `~/.claude/projects/**/*.jsonl` (assistant `usage` blocks: input, output, cache-creation and cache-read tokens; deduplicate repeated message ids) and `~/.codex/sessions/**/rollout-*.jsonl` (per-session token-usage deltas, not cumulative totals). It prices each model family from a dated list-price table in the script and writes `data/token-stats.json`. The shape is `{ asOf, lifetime, last30, byTool: { claudeCode, codex }, byModel: [{ model, tokens, share }], daily: [{ date, tokens, costUsd }] }`, the last 90 days, with `tokens` split into input / output / cacheWrite / cacheRead / total and `costUsd`. `app/lib/tokenStats.ts` holds the TypeScript type and a validator. The output carries no project names, paths, session ids, prompts or tool names. Dates are local ISO days.
+- **Library / dependency notes:** None; Node built-ins only (fs, path, readline, os).
+- **Acceptance criteria:**
+  - Running the script on this machine writes a valid snapshot in under a minute (logs are about 3.7 GB).
+  - Totals agree with `usage-widget` for the same day within rounding.
+  - The output contains no file path, project name or session id.
+  - A malformed log line is skipped, not fatal.
+  - Re-running without new usage produces an identical file, apart from `asOf` only when data changed.
+- **Test plan:** Vitest over fixture JSONL: Claude dedup, Codex delta handling, model pricing, 30- and 90-day windows, a privacy check that no fixture path or project string appears in the output, malformed-line tolerance, and validator rejection of a bad snapshot.
+- **Out of scope:** Rendering (FEAT-1791988183); scheduling and publishing (FEAT-1791988184); usage-limit percentages.
+- **Bump:** minor
+- **Status:** open
+
+### [FEAT-1791988183] Token burner panel on /projects
+- [ ] **Priority:** high
+- **Area:** projects, frontend, accessibility
+- **File(s):** app/lib/pages.ts, app/lib/pages.test.ts, app/lib/tokenStats.ts, public/retro.css, e2e/site.spec.ts, e2e/performance.spec.ts, README.md
+- **Why:** Owner request: replace the game on /projects with stats on how many tokens AI coding agents have burned. It shows how the projects get built.
+- **Approach:** Render a "Token burner" section at the top of /projects from `data/token-stats.json` (imported at build; /projects already revalidates hourly, and each data commit redeploys). It has:
+  - stat tiles: lifetime tokens, last 30 days, API-equivalent cost, as-of date;
+  - a Claude Code vs Codex split;
+  - per-model horizontal bars;
+  - a 90-day daily activity chart.
+  Bars and the chart are inline SVG with `width`/`height`/`x`/`y` attributes. CSP `style-src` allows only the stylesheet hash, so inline `style=""` attributes would be blocked. Each bar has a `<title>`, and a `<details>` table gives the same numbers as text. Numbers are formatted server-side (e.g. "1.2B tokens", "$4,310"). If the snapshot is missing or invalid, the section is omitted and the projects table still renders. The retro look matches the site.
+- **Library / dependency notes:** None.
+- **Acceptance criteria:**
+  - Section renders with all four stat groups and a readable 320 px layout.
+  - No `<script>` and no inline `style` attributes; no CSP violations.
+  - The chart has a text and table equivalent; the page passes the existing a11y checks.
+  - /projects stays within its page-weight budget.
+- **Test plan:** Unit tests for formatting, SVG generation, escaping and missing-data omission in `pages.test.ts`; E2E in `site.spec.ts` for presence, no inline styles, no CSP violations (Chromium and WebKit); budget in `performance.spec.ts`.
+- **Out of scope:** Live or client-side updating; per-project breakdowns.
+- **Bump:** minor
+- **Status:** open
+
+### [FEAT-1791988184] Daily auto-publish of token stats
+- [ ] **Priority:** med
+- **Area:** scripts, ops
+- **File(s):** scripts/publish-token-stats.ps1, scripts/register-token-stats-task.ps1, README.md
+- **Why:** Owner chose daily auto-publish (2026-10-14) so the token burner stays current without manual runs.
+- **Approach:** `publish-token-stats.ps1 -RepoPath <dedicated clone>` works in a separate clone of this repo, never in the owner's working checkout. It:
+  - aborts if the clone is dirty or not on `main`;
+  - runs `git pull --ff-only` and `npm run token-stats`;
+  - if `data/token-stats.json` changed, stages that file only, commits `Update token stats <YYYY-MM-DD>`, and runs `git push`.
+  Git selects the identity from the owner's config; no `-c user.*`, `--author` or `--no-verify`, and hooks run. A `-WhatIf` switch prints the actions without committing. `register-token-stats-task.ps1` registers a daily Windows Task Scheduler job (current user, runs only when logged on, missed runs start when possible) and can unregister it. The clone path and time are parameters, not committed. Each push triggers CI and a Vercel deploy (one per day at most).
+- **Library / dependency notes:** None; Windows PowerShell and Task Scheduler.
+- **Acceptance criteria:**
+  - A `-WhatIf` run shows the steps.
+  - A real run commits and pushes only `data/token-stats.json`, and only when it changed.
+  - A dirty or diverged clone aborts with a clear message and no commit.
+  - The task appears in Task Scheduler and runs daily; a manual run from Task Scheduler succeeds.
+- **Test plan:** Manual verification on this machine: `-WhatIf`, a no-change run (no commit), a changed run (one commit pushed, deploy observed), and a dirty-clone abort. Record the results in the ticket's Implementation line.
+- **Out of scope:** Running on other machines or in the cloud; merging usage from several machines.
+- **Bump:** minor
+- **Status:** open
+
+### [FEAT-1791988185] Serve photos as AVIF and WebP at their display size
+- [ ] **Priority:** med
+- **Area:** frontend, performance
+- **File(s):** scripts/optimize-images.mjs, public/*.avif, public/*.webp, app/lib/pages.ts, app/lib/pages.test.ts, e2e/site.spec.ts, e2e/performance.spec.ts, package.json, README.md
+- **Why:** Photos are the largest remaining bytes on slow connections: profile 10.8 KB (stored at 240 px, shown at 120 px), conference photo 27.7 KB (400 px, shown at 320 px), Peru photo 52.6 KB WebP (640x480, shown at 320x240). About 50 KB of savings comes to about 1 s on a 50 KB/s link.
+- **Approach:** A script generates AVIF and WebP variants at 1x and 2x of each display size (capped at the source size) from the committed originals, and the outputs are committed. Each `<img>` becomes a `<picture>` with AVIF and WebP `<source srcset="... 1x, ... 2x">` and the existing JPEG/WebP as fallback. `width`/`height`, `alt`, `loading` and `fetchpriority` are kept. Originals stay for fallback and the share card.
+- **Library / dependency notes:** Use `sharp`, currently present only as a Next.js transitive dependency. Recommend adding it as a pinned devDependency for the script, after BUG-1791951243's `npm audit fix` updates its version. Review the current sharp release notes before adding.
+- **Acceptance criteria:**
+  - Chromium and WebKit fetch the AVIF variant at 1x and 2x DPR.
+  - Image bytes per page drop at least 40% against the 2026-10-14 production numbers.
+  - Screenshots at 1x and 2x show no visible regression.
+  - No layout shift (dimensions unchanged).
+  - Fallback renders when AVIF and WebP sources are removed.
+- **Test plan:** E2E in `site.spec.ts` asserts the fetched content-type is `image/avif` per page in Chromium and WebKit; lower page budgets in `performance.spec.ts`; unit test for the `<picture>` markup.
+- **Out of scope:** The share card and favicons; art direction or crops.
+- **Bump:** minor
+- **Status:** open
+
+### [FEAT-1791988186] Short browser cache with background refresh for pages
+- [ ] **Priority:** med
+- **Area:** performance, infra
+- **File(s):** next.config.js, e2e/site.spec.ts, README.md
+- **Why:** Pages send `Cache-Control: public, max-age=0, must-revalidate`, so every revisit waits on a network round trip, which costs about 0.4 s or more on a high-latency link.
+- **Approach:** For the six page routes, send a browser cache header such as `public, max-age=300, stale-while-revalidate=86400`, keeping Vercel's CDN caching separate (`CDN-Cache-Control` / `Vercel-CDN-Cache-Control` if needed). Verify on a Vercel preview deployment that the header survives for static and ISR routes before merging. The CSP and the inlined CSS travel in the same response, so a cached page is always self-consistent. Trade-off: after a deploy, a returning visitor can see the previous HTML for up to 5 minutes.
+- **Library / dependency notes:** None.
+- **Acceptance criteria:**
+  - Production `curl -I` shows the new browser header on all six pages, and Vercel still reports CDN HITs.
+  - In Chromium, a second navigation within 5 minutes is served from the HTTP cache with no network request.
+  - The redirect, 404, `/speculation-rules`, assets and the resume PDF keep their current caching.
+- **Test plan:** E2E asserts the header per page and a cache-served revisit in Chromium; a production `curl` check after deploy.
+- **Out of scope:** Service workers or offline support (they need JavaScript on every page, which the project forbids).
+- **Bump:** minor
+- **Status:** open
+
+### [FEAT-1791988187] Slow-network load budget test
+- [ ] **Priority:** med
+- **Area:** tests, performance
+- **File(s):** e2e/performance.spec.ts, VERIFICATION.md
+- **Why:** Owner wants the site to load quickly on poor connections; nothing tests that today, so it could regress silently.
+- **Approach:** In the Chromium performance spec, emulate a poor link with CDP `Network.emulateNetworkConditions` (400 ms latency, 50 KB/s down, 20 KB/s up) and cold-load each page. Assert that `main h1` is visible and that First Contentful Paint and the load event stay under per-page budgets. Set the budgets from measurements after FEAT-1791988181 and FEAT-1791988185, with headroom, and record them in VERIFICATION.md. The local server sends HTML uncompressed, so the budgets are conservative against production.
+- **Library / dependency notes:** None.
+- **Acceptance criteria:**
+  - The test passes on the current build and fails when a budget is lowered below the measurement.
+  - Runtime stays under 30 s.
+  - The budgets are documented.
+- **Test plan:** The test itself, run twice for stability; a temporary low budget confirms it fails.
+- **Out of scope:** WebKit network emulation; real-device testing.
+- **Bump:** minor
+- **Status:** open
+
 ## Shipped
 
 ### [FEAT-1781507205] Restore prominent interactive star/aurora background
