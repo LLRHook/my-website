@@ -47,16 +47,6 @@ the end of their section, sorted by id on read.
 - **Bump:** patch
 - **Status:** open
 
-### [BUG-1791980560] Resume and About page describe a Secret clearance as pending eligibility
-- [x] **Severity:** med
-- **Area:** content, resume
-- **File(s):** app/lib/pages.ts, app/lib/html.ts, public/Victor_Ivanov_Resume.pdf, README.md
-- **Observation:** The About page, the HTML resume and the downloadable PDF say "DoD Secret eligibility (DCSA 2026)", and both resume summaries open with "Secret-eligible". Victor holds an active Secret clearance (DoD CAS eligibility granted 2026-09-02). The PDF also kept internal names the HTML resume had already replaced ("Vantage", "Rosalyn's vendor team", "Inf/Sec", "ktest validation"), and the HTML resume omitted "U.S. Citizen" from the PDF header. Reported by the owner.
-- **Expected:** Site and PDF state an active DoD Secret clearance and make the same claims in the same public wording.
-- **Repro / Notes:** `curl -s https://victorivanov.engineer/resume | grep -o "Secret[^<]*"`; `pdftotext public/Victor_Ivanov_Resume.pdf - | grep -i secret`.
-- **Bump:** patch
-- **Fix:** The About page and HTML resume say "Active DoD Secret clearance", the resume header adds "U.S. Citizen", and the summary opens with "Secret-cleared". The resume page and its description are dated October 2026. The PDF was regenerated from a copy of the owner's September 21 `VI_Resume.docx` with the same clearance wording, the phone number left out as before, and the public wording for the billing and proctoring bullets; the source files are unchanged. README updated.
-- **Status:** fixed-pending-migration
 
 ## Migrated to changelog
 
@@ -316,4 +306,26 @@ They are kept here so each `BUG-NNN` stays resolvable.
 - **Repro / Notes:** `grep -n "§" VERIFICATION.md` returns nothing.
 - **Bump:** patch
 - **Fix:** CLAUDE.md now points at the `/protocol-v-and-v` Verified entry shape and the VERIFICATION.md Stage 2 baseline table.
+- **Status:** fixed-pending-migration
+
+### [BUG-1791980560] Resume and About page describe a Secret clearance as pending eligibility
+- [x] **Severity:** med
+- **Area:** content, resume
+- **File(s):** app/lib/pages.ts, app/lib/html.ts, public/Victor_Ivanov_Resume.pdf, README.md
+- **Observation:** The About page, the HTML resume and the downloadable PDF say "DoD Secret eligibility (DCSA 2026)", and both resume summaries open with "Secret-eligible". Victor holds an active Secret clearance (DoD CAS eligibility granted 2026-09-02). The PDF also kept internal names the HTML resume had already replaced ("Vantage", "Rosalyn's vendor team", "Inf/Sec", "ktest validation"), and the HTML resume omitted "U.S. Citizen" from the PDF header. Reported by the owner.
+- **Expected:** Site and PDF state an active DoD Secret clearance and make the same claims in the same public wording.
+- **Repro / Notes:** `curl -s https://victorivanov.engineer/resume | grep -o "Secret[^<]*"`; `pdftotext public/Victor_Ivanov_Resume.pdf - | grep -i secret`.
+- **Bump:** patch
+- **Fix:** The About page and HTML resume say "Active DoD Secret clearance", the resume header adds "U.S. Citizen", and the summary opens with "Secret-cleared". The resume page and its description are dated October 2026. The PDF was regenerated from a copy of the owner's September 21 `VI_Resume.docx` with the same clearance wording, the phone number left out as before, and the public wording for the billing and proctoring bullets; the source files are unchanged. README updated.
+- **Status:** fixed-pending-migration
+
+### [BUG-1791991388] Four shipped Codelings tickets sit inside the features.md lifecycle text
+- [x] **Severity:** low
+- **Area:** docs
+- **File(s):** features.md
+- **Observation:** Since 35aeea8 (2026-10-02), FEAT-1790991961 through FEAT-1790991964 sat inside step 4 of `features.md / ## Lifecycle`, splitting "move to `## Shipped`" in two. Being outside `## Open`, they were skipped by the 6ec878b migration and never reached `CHANGELOG.md`. Found by the `/protocol-v-and-v` run at 1344f04.
+- **Expected:** Lifecycle step 4 reads as one line, and shipped tickets are migrated like the others.
+- **Repro / Notes:** `grep -n "4. \*\*Migrate" features.md` shows a ticket heading on the same line.
+- **Bump:** patch
+- **Fix:** Lifecycle step 4 restored; the four tickets moved to `## Shipped` and copied to `CHANGELOG.md / Unreleased / Added` in the 1344f04 migration.
 - **Status:** fixed-pending-migration

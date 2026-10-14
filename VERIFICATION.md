@@ -7,7 +7,7 @@ route contracts hold.
 Run history lives in `CHANGELOG.md` (Verified entries); older evidence is in
 `docs/verification-history.md`.
 
-Last verified: 2026-10-14, SHA 6ec878b (see `CHANGELOG.md` Verified).
+Last verified: 2026-10-14, SHA 1344f04 (see `CHANGELOG.md` Verified).
 
 ## Build and automated checks
 
@@ -36,12 +36,12 @@ overwritten in place after each green run.
 |---|---|---|---|
 | Lint | ESLint 9 | zero warnings | `npm run lint` |
 | Types | TypeScript | zero errors | `npx tsc --noEmit` (local only; CI type-checks in `next build`) |
-| Unit | Vitest | 251 tests, 21 files | `npm test` |
+| Unit | Vitest | 64 tests, 4 files | `npm test` |
 | Build | Next.js | succeeds | `SITE_ORIGIN=http://localhost:3000 npm run build` |
-| E2E | Playwright | 141 listed: 129 run, 12 skip | `CI=1 npm run test:e2e` |
+| E2E | Playwright | 41 listed: 41 run, 0 skip | `CI=1 npm run test:e2e` |
 
 Playwright projects: `chromium` runs every spec; `webkit-mobile` runs the site spec.
-Skips are Chromium-only performance cases under WebKit.
+Nothing is skipped.
 
 ## Acceptance coverage
 
