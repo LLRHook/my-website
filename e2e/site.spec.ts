@@ -10,10 +10,10 @@ for (const item of PAGES) {
     expect(response?.status()).toBe(200);
     expect(response?.headers()["content-type"]).toContain("text/html");
     const policy = response?.headers()["content-security-policy"];
-    expect(policy).toMatch(item.path === "/projects" ? /script-src 'self';/ : /script-src https?:\/\/[^/; ]+\/speculation-rules;/);
+    expect(policy).toMatch(/script-src https?:\/\/[^/; ]+\/speculation-rules;/);
     await expect(page.locator("h1")).toHaveCount(1);
     await expect(page.locator("h1")).toBeVisible();
-    await expect(page.locator("script")).toHaveCount(item.path === "/projects" ? 1 : 0);
+    await expect(page.locator("script")).toHaveCount(0);
     // The stylesheet is inlined and allowed by its CSP hash: no CSS request, styles applied.
     await expect(page.locator('link[rel="stylesheet"]')).toHaveCount(0);
     await expect(page.locator("head style")).toHaveCount(1);
@@ -29,13 +29,8 @@ for (const item of PAGES) {
   });
 }
 
-test("production assets have long-lived cache headers", async ({ page, request }) => {
-  await page.goto("/projects");
-  const script = await page.locator('script[type="module"]').getAttribute("src");
-  expect(script).not.toBeNull();
-  const response = await request.get(script!);
-  expect(response.status()).toBe(200);
-  expect(response.headers()["cache-control"]).toContain("immutable");
+test("public photos are cached and the retired game bundle is gone", async ({ request }) => {
+  expect((await request.get("/game/main.js")).status()).toBe(404);
   const photo = await request.get("/peru-travel.webp");
   expect(photo.status()).toBe(200);
   expect(photo.headers()["cache-control"]).toContain("max-age=86400");

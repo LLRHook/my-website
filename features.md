@@ -126,7 +126,7 @@ the end of their section, sorted by id on read.
 - **Status:** open
 
 ### [FEAT-1791988181] Remove the Codelings game from /projects
-- [ ] **Priority:** high
+- [x] **Priority:** high
 - **Area:** projects, performance, tests, docs
 - **File(s):** game/**, package.json, package-lock.json, app/lib/pages.ts, app/lib/pages.test.ts, app/lib/html.ts, app/lib/html.test.ts, app/projects/route.ts, app/speculation-rules/route.ts, app/lib/projectPresentation.ts, next.config.js, public/retro.css, eslint.config.mjs, tsconfig.json, vitest.config.ts, playwright.config.ts, .gitignore, e2e/game.spec.ts, e2e/visual-qa.spec.ts, e2e/support/*, e2e/performance.spec.ts, e2e/site.spec.ts, docs/game-design.md, README.md, CLAUDE.md, VERIFICATION.md
 - **Why:** Owner decision (2026-10-14): the game is not needed. It is the only JavaScript on the site (69 KB brotli on /projects), the reason /projects is excluded from prerendering, and the reason for the per-route `script-src 'self'` exception. Removing it makes /projects as light and instant as the other pages, especially on slow connections.
@@ -142,7 +142,9 @@ the end of their section, sorted by id on read.
 - **Test plan:** Update `e2e/site.spec.ts` (no scripts on any page, uniform CSP) and `e2e/performance.spec.ts` (prerender attempt for /projects, new budget); update `app/lib/pages.test.ts` / `html.test.ts` for the embed and badge; full local gate.
 - **Out of scope:** The token burner panel (FEAT-1791988183). Editing the GitHub repository description of `my-website`.
 - **Bump:** major (removes a public feature; the owner decides when to cut a major)
-- **Status:** open
+- **Implementation:** Deleted `game/`, `e2e/game.spec.ts`, `e2e/visual-qa.spec.ts`, `e2e/support/` and `docs/game-design.md`; removed esbuild and the `build:game`/`dev:game` scripts (`build` is `next build`). `/projects` renders only the repository table, `page()`/`render()` no longer take scripts, and every footer reads "100% JavaScript free". `next.config.js` drops `GAME_SCRIPT`, the /projects `script-src 'self'` override and the `/game/main.js` immutable entry; the speculation rules prerender every page, /projects included. The handheld CSS left `public/retro.css` (12,766 to 4,167 bytes inlined on every page). Playwright drops the iphone/pixel projects; `site.spec` asserts zero scripts, a uniform CSP and a 404 for `/game/main.js`; `performance.spec` drops the bundle and long-task tests, asserts a /projects Prerender and lowers its budget to 2 requests / 24,000 bytes (measured 2 / 19,919, from 3 / 111,198). Vitest 38 tests in 3 files; Playwright 39 passed.
+- **Docs:** README, CLAUDE.md (stack note), VERIFICATION.md (scope, build step, projects, acceptance, budget row), `app/lib/projectPresentation.ts`, `/projects` meta description; `docs/game-design.md` deleted.
+- **Status:** shipped-pending-migration
 
 ### [FEAT-1791988182] Token-usage snapshot export
 - [ ] **Priority:** high
@@ -160,7 +162,7 @@ the end of their section, sorted by id on read.
 - **Test plan:** Vitest over fixture JSONL: Claude dedup, Codex delta handling, model pricing, 30- and 90-day windows, a privacy check that no fixture path or project string appears in the output, malformed-line tolerance, and validator rejection of a bad snapshot.
 - **Out of scope:** Rendering (FEAT-1791988183); scheduling and publishing (FEAT-1791988184); usage-limit percentages.
 - **Bump:** minor
-- **Status:** open
+- **Status:** in-progress
 
 ### [FEAT-1791988183] Token burner panel on /projects
 - [ ] **Priority:** high
@@ -182,7 +184,7 @@ the end of their section, sorted by id on read.
 - **Test plan:** Unit tests for formatting, SVG generation, escaping and missing-data omission in `pages.test.ts`; E2E in `site.spec.ts` for presence, no inline styles, no CSP violations (Chromium and WebKit); budget in `performance.spec.ts`.
 - **Out of scope:** Live or client-side updating; per-project breakdowns.
 - **Bump:** minor
-- **Status:** open
+- **Status:** in-progress
 
 ### [FEAT-1791988184] Daily auto-publish of token stats
 - [ ] **Priority:** med

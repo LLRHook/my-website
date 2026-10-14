@@ -8,5 +8,5 @@ export async function GET() {
   let repos: RepoSummary[];
   try { repos = await fetchRepoList(); }
   catch (error) { console.error("[projects] Repo list failed:", error); repos = []; }
-  return render("/projects", projectsBody(repos), 200, [process.env.GAME_SCRIPT ?? "/game/main.js"]);
+  return render("/projects", projectsBody(repos));
 }
