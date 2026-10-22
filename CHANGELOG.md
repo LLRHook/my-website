@@ -30,6 +30,8 @@ under each release/date heading.
 
 ### Security
 
+- [BUG-1791951243] Raise compatible Next.js/ESLint-config and Vitest security floors; refresh Vite, sharp, and source-map-js. Audit falls from 11 affected packages (1 critical, 8 high, 2 moderate) to 5 high development-tool findings in the unresolved upstream braces chain; production dependencies report zero. Ticket remains open. [patch]
+
 ## [v1.0.0] - 2026-10-14
 
 ### Verified

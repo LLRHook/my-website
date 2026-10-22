@@ -37,7 +37,7 @@ the end of their section, sorted by id on read.
 ---
 
 ## Open
-### [BUG-1791951243] npm audit reports seven high-severity advisories
+### [BUG-1791951243] npm audit reports dependency security advisories
 - [ ] **Severity:** med
 - **Area:** deps, security
 - **File(s):** package.json, package-lock.json
@@ -45,6 +45,7 @@ the end of their section, sorted by id on read.
 - **Expected:** `npm audit` reports no high-severity advisories, or each remaining one is documented as unreachable.
 - **Repro / Notes:** `npm ci && npm audit`. `npm audit fix` resolves `sharp` and `source-map-js` without a semver-major change. Its suggested fix for the `eslint-config-next` chain is a downgrade to 14.2.35, which is wrong for Next 16; check `docs/dependency-update.md` and the current `eslint-config-next` release instead. CI runs no audit gate.
 - **Bump:** patch
+- **October 22 follow-up:** Current baseline: 11 affected packages (1 critical, 8 high, 2 moderate). Raise Next.js and matching eslint-config-next to `^16.4.2`, Vitest to `^5.0.5`, and refresh compatible transitive resolutions (Vite 8.3.5, sharp 0.35.5, source-map-js 1.2.2). Audit now reports 5 high findings, all from the development-only braces chain; production audit reports zero. Official braces latest remains 3.0.3 with no patched release, including through current Next lint tooling. Keep this ticket open; do not downgrade Next's lint config to 14 or use an unofficial override. See [maintenance evidence and compatibility holds](docs/dependency-security-2026-10-22.md).
 - **Status:** open
 
 
