@@ -48,6 +48,42 @@ the end of their section, sorted by id on read.
 - **Status:** open
 
 
+### [BUG-1792699167] Public project fallback reuses rejected credentials and can list the token owner
+- [x] **Severity:** med
+- **Area:** github-api, frontend
+- **File(s):** app/lib/github.ts, app/lib/github.test.ts, README.md
+- **Observation:** The authenticated request uses `/user/repos`, which selects the token's owner rather than LLRHook. Its fallback calls the public endpoint with the same Authorization header, so an expired token produces a second 401 and hides otherwise public projects.
+- **Expected:** Always list LLRHook's public repositories; use an optional token for rate limits and omit credentials on fallback.
+- **Repro / Notes:** `npm test -- app/lib/github.test.ts`: the owner-endpoint assertion and anonymous recovery cases for 401/403 fail on the original implementation.
+- **Bump:** patch
+- **Status:** fixed-pending-migration
+- **Fix:** Always request LLRHook’s public endpoint and retry an empty authenticated result without Authorization. Owner-selection and 401/403 recovery regressions pass.
+
+
+### [BUG-1792699168] Repository body failures discard fetched pages and bypass the timeout
+- [x] **Severity:** med
+- **Area:** github-api, frontend
+- **File(s):** app/lib/github.ts, app/lib/github.test.ts
+- **Observation:** JSON decoding happens outside both the pagination catch and the request timeout. A truncated later response rejects the whole listing instead of preserving earlier pages, an unexpected non-array response throws, and a stalled response body is never aborted by the eight-second timeout.
+- **Expected:** Keep the timeout through body consumption and preserve already fetched repositories when a page fails to decode or has an invalid shape.
+- **Repro / Notes:** `npm test -- app/lib/github.test.ts`: invalid JSON, non-array response, and delayed-body regressions fail on the original implementation.
+- **Bump:** patch
+- **Status:** fixed-pending-migration
+- **Fix:** Read and validate each JSON page inside the timeout and pagination error boundary. Invalid JSON preserves earlier pages, non-array bodies degrade safely, and the timeout remains armed through body consumption; all 12 GitHub tests pass.
+
+
+### [BUG-1792699433] Overflowing project tables have no named keyboard scroll target
+- [x] **Severity:** med
+- **Area:** frontend, accessibility
+- **File(s):** app/lib/pages.ts, app/lib/pages.test.ts, e2e/site.spec.ts
+- **Observation:** Both `.table-wrap` containers lack an explicit tab stop and accessible name. Chromium's automatic focus exposes the daily table as an unnamed container; browsers without automatic scroll-container focus cannot reach it with Tab. At 240px its content is 249px wide inside a 216px viewport.
+- **Expected:** Keyboard users can focus each table's named scroll region and use arrow keys to reveal clipped columns, without client JavaScript.
+- **Repro / Notes:** The body-renderer regressions fail for both tables. A browser assertion against the production artifact confirms the daily table has no named region. The E2E case opens the daily disclosure with Enter, tabs into the region, and scrolls using ArrowRight.
+- **Bump:** patch
+- **Status:** fixed-pending-migration
+- **Fix:** Add explicit tab stops and regions named by the table captions. Both renderer regressions pass; a current-source Chromium smoke confirms Enter/Tab/ArrowRight navigation, a visible focus outline, both accessibility-tree names, and no document overflow at 320px. The full Playwright gate remains blocked by missing dependencies/browser downloads.
+
+
 ## Migrated to changelog
 
 Entries below have been ticked off and copied as a one-liner into `CHANGELOG.md`.

@@ -22,6 +22,10 @@ under each release/date heading.
 
 ### Fixed
 
+- [BUG-1792699167] Keep project listing bound to LLRHook and retry without rejected credentials. [patch]
+- [BUG-1792699168] Bound GitHub response-body parsing by the timeout and retain fetched pages after malformed responses. [patch]
+- [BUG-1792699433] Make project and token-usage tables named keyboard scroll regions. [patch]
+
 ### Removed
 
 ### Security

@@ -35,6 +35,9 @@ describe("page bodies", () => {
     expect(projectsBody([])).toContain('class="notice"');
     expect(projectsBody([])).toContain("github.com/LLRHook");
   });
+  it("makes the repository table a named keyboard scroll target", () => {
+    expect(projectsBody([repo()])).toContain('<div class="table-wrap" role="region" aria-labelledby="repositories-caption" tabindex="0"><table class="projects"><caption id="repositories-caption">Public repositories</caption>');
+  });
   it.each([homeBody, aboutBody, () => projectsBody([repo()]), resumeBody, offTheClockBody, contactBody, notFoundBody])("contains no script tags: %s", (body) => {
     expect(body()).not.toContain("<script");
   });
@@ -99,6 +102,9 @@ describe("token burner", () => {
     const html = tokenBurner(stats());
     expect(html).toContain("&lt;b&gt;x&lt;/b&gt;");
     expect(html).not.toContain("<b>x</b>");
+  });
+  it("makes the daily table a named keyboard scroll target", () => {
+    expect(tokenBurner(stats())).toContain('<div class="table-wrap" role="region" aria-labelledby="daily-caption" tabindex="0"><table class="projects"><caption id="daily-caption">Tokens per day</caption>');
   });
   it("omits the panel without a valid snapshot and keeps the table", () => {
     expect(tokenBurner(null)).toBe("");
