@@ -22,9 +22,15 @@ under each release/date heading.
 
 ### Fixed
 
+- [BUG-1792699167] Keep project listing bound to LLRHook and retry without rejected credentials. [patch]
+- [BUG-1792699168] Bound GitHub response-body parsing by the timeout and retain fetched pages after malformed responses. [patch]
+- [BUG-1792699433] Make project and token-usage tables named keyboard scroll regions. [patch]
+
 ### Removed
 
 ### Security
+
+- [BUG-1791951243] Raise compatible Next.js/ESLint-config and Vitest security floors; refresh Vite, sharp, and source-map-js. Audit falls from 11 affected packages (1 critical, 8 high, 2 moderate) to 5 high development-tool findings in the unresolved upstream braces chain; production dependencies report zero. Ticket remains open. [patch]
 
 ## [v1.0.0] - 2026-10-14
 

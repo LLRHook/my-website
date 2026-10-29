@@ -77,9 +77,12 @@ NEW label, disables both for reduced motion, and supplies print styles.
 The Projects table is generated on the server and revalidated hourly. It shows
 public, non-fork repositories with descriptions, excluding the profile repo.
 Rows sort by the most recent push and include language, stars, update date, and
-HTTP(S) demo links. Listing requests use the existing authenticated-to-public
-fallback. An unavailable list shows a direct GitHub link. No language, commit,
-or README requests are made per repository.
+HTTP(S) demo links. Requests always list LLRHook's public repositories; an optional
+token supplies rate-limit headroom. An empty or failed authenticated listing is
+retried without credentials, so an expired token does not hide public projects.
+Page timeouts include reading the response body, and a failed page preserves
+repositories already fetched. An unavailable list shows a direct GitHub link. No
+language, commit, or README requests are made per repository.
 
 ## Token stats
 

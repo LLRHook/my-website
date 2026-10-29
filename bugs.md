@@ -37,7 +37,7 @@ the end of their section, sorted by id on read.
 ---
 
 ## Open
-### [BUG-1791951243] npm audit reports seven high-severity advisories
+### [BUG-1791951243] npm audit reports dependency security advisories
 - [ ] **Severity:** med
 - **Area:** deps, security
 - **File(s):** package.json, package-lock.json
@@ -45,7 +45,44 @@ the end of their section, sorted by id on read.
 - **Expected:** `npm audit` reports no high-severity advisories, or each remaining one is documented as unreachable.
 - **Repro / Notes:** `npm ci && npm audit`. `npm audit fix` resolves `sharp` and `source-map-js` without a semver-major change. Its suggested fix for the `eslint-config-next` chain is a downgrade to 14.2.35, which is wrong for Next 16; check `docs/dependency-update.md` and the current `eslint-config-next` release instead. CI runs no audit gate.
 - **Bump:** patch
+- **October 22 follow-up:** Current baseline: 11 affected packages (1 critical, 8 high, 2 moderate). Raise Next.js and matching eslint-config-next to `^16.4.2`, Vitest to `^5.0.5`, and refresh compatible transitive resolutions (Vite 8.3.5, sharp 0.35.5, source-map-js 1.2.2). Audit now reports 5 high findings, all from the development-only braces chain; production audit reports zero. Official braces latest remains 3.0.3 with no patched release, including through current Next lint tooling. Keep this ticket open; do not downgrade Next's lint config to 14 or use an unofficial override. See [maintenance evidence and compatibility holds](docs/dependency-security-2026-10-22.md).
 - **Status:** open
+
+
+### [BUG-1792699167] Public project fallback reuses rejected credentials and can list the token owner
+- [x] **Severity:** med
+- **Area:** github-api, frontend
+- **File(s):** app/lib/github.ts, app/lib/github.test.ts, README.md
+- **Observation:** The authenticated request uses `/user/repos`, which selects the token's owner rather than LLRHook. Its fallback calls the public endpoint with the same Authorization header, so an expired token produces a second 401 and hides otherwise public projects.
+- **Expected:** Always list LLRHook's public repositories; use an optional token for rate limits and omit credentials on fallback.
+- **Repro / Notes:** `npm test -- app/lib/github.test.ts`: the owner-endpoint assertion and anonymous recovery cases for 401/403 fail on the original implementation.
+- **Bump:** patch
+- **Status:** fixed-pending-migration
+- **Fix:** Always request LLRHook’s public endpoint and retry an empty authenticated result without Authorization. Owner-selection and 401/403 recovery regressions pass.
+
+
+### [BUG-1792699168] Repository body failures discard fetched pages and bypass the timeout
+- [x] **Severity:** med
+- **Area:** github-api, frontend
+- **File(s):** app/lib/github.ts, app/lib/github.test.ts
+- **Observation:** JSON decoding happens outside both the pagination catch and the request timeout. A truncated later response rejects the whole listing instead of preserving earlier pages, an unexpected non-array response throws, and a stalled response body is never aborted by the eight-second timeout.
+- **Expected:** Keep the timeout through body consumption and preserve already fetched repositories when a page fails to decode or has an invalid shape.
+- **Repro / Notes:** `npm test -- app/lib/github.test.ts`: invalid JSON, non-array response, and delayed-body regressions fail on the original implementation.
+- **Bump:** patch
+- **Status:** fixed-pending-migration
+- **Fix:** Read and validate each JSON page inside the timeout and pagination error boundary. Invalid JSON preserves earlier pages, non-array bodies degrade safely, and the timeout remains armed through body consumption; all 12 GitHub tests pass.
+
+
+### [BUG-1792699433] Overflowing project tables have no named keyboard scroll target
+- [x] **Severity:** med
+- **Area:** frontend, accessibility
+- **File(s):** app/lib/pages.ts, app/lib/pages.test.ts, e2e/site.spec.ts
+- **Observation:** Both `.table-wrap` containers lack an explicit tab stop and accessible name. Chromium's automatic focus exposes the daily table as an unnamed container; browsers without automatic scroll-container focus cannot reach it with Tab. At 240px its content is 249px wide inside a 216px viewport.
+- **Expected:** Keyboard users can focus each table's named scroll region and use arrow keys to reveal clipped columns, without client JavaScript.
+- **Repro / Notes:** The body-renderer regressions fail for both tables. A browser assertion against the production artifact confirms the daily table has no named region. The E2E case opens the daily disclosure with Enter, tabs into the region, and scrolls using ArrowRight.
+- **Bump:** patch
+- **Status:** fixed-pending-migration
+- **Fix:** Add explicit tab stops and regions named by the table captions. Both renderer regressions pass; a current-source Chromium smoke confirms Enter/Tab/ArrowRight navigation, a visible focus outline, both accessibility-tree names, and no document overflow at 320px. The full Playwright gate remains blocked by missing dependencies/browser downloads.
 
 
 ## Migrated to changelog

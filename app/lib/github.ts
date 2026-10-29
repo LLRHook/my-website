@@ -4,64 +4,64 @@ const GITHUB_API = "https://api.github.com";
 const GITHUB_USERNAME = "LLRHook";
 const FETCH_TIMEOUT_MS = 8000;
 
-function getHeaders(): HeadersInit {
+function getHeaders(authenticate: boolean): HeadersInit {
   const headers: HeadersInit = {
     Accept: "application/vnd.github.v3+json",
   };
-  if (process.env.GITHUB_TOKEN) {
+  if (authenticate && process.env.GITHUB_TOKEN) {
     headers.Authorization = `Bearer ${process.env.GITHUB_TOKEN}`;
   }
   return headers;
 }
 
-async function fetchWithTimeout(
+async function fetchRepoPage(
   input: string,
   init: RequestInit = {},
   timeoutMs = FETCH_TIMEOUT_MS
-): Promise<Response> {
+): Promise<GitHubRepo[]> {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), timeoutMs);
 
   try {
-    return await fetch(input, {
+    const response = await fetch(input, {
       ...init,
       signal: controller.signal,
     });
+    if (!response.ok) {
+      throw new Error(`GitHub responded ${response.status} ${response.statusText}`);
+    }
+    const batch: unknown = await response.json();
+    if (!Array.isArray(batch)) {
+      throw new Error("GitHub repository response is not an array");
+    }
+    return batch;
   } finally {
     clearTimeout(timeout);
   }
 }
 
-async function fetchPaginatedRepos(url: string): Promise<GitHubRepo[]> {
+async function fetchPaginatedRepos(url: string, authenticate: boolean): Promise<GitHubRepo[]> {
   const repos: GitHubRepo[] = [];
   let page = 1;
 
   while (true) {
     const separator = url.includes("?") ? "&" : "?";
-    let res: Response;
+    let batch: GitHubRepo[];
     try {
-      res = await fetchWithTimeout(
+      batch = await fetchRepoPage(
         `${url}${separator}per_page=100&page=${page}&sort=pushed`,
         {
-          headers: getHeaders(),
+          headers: getHeaders(authenticate),
           next: { revalidate: 3600 },
         }
       );
     } catch (err) {
-      // A timeout/abort or network error must not crash the page render.
+      // A timeout, network error or invalid body must not discard earlier pages.
       // Return whatever was collected so far and degrade to the empty state.
       console.error(`[github] ${url} request failed (page ${page}):`, err);
       return repos;
     }
 
-    if (!res.ok) {
-      console.error(
-        `[github] ${url} responded ${res.status} ${res.statusText} (page ${page})`
-      );
-      return repos; // return whatever was collected so far
-    }
-
-    const batch: GitHubRepo[] = await res.json();
     if (batch.length === 0) break;
 
     repos.push(...batch);
@@ -74,31 +74,18 @@ async function fetchPaginatedRepos(url: string): Promise<GitHubRepo[]> {
 
 export async function fetchRepoList(): Promise<RepoSummary[]> {
   const publicReposUrl = `${GITHUB_API}/users/${GITHUB_USERNAME}/repos?type=owner`;
-  let repos: GitHubRepo[];
+  // The token supplies rate-limit headroom, never the identity being listed.
+  let repos = await fetchPaginatedRepos(publicReposUrl, !!process.env.GITHUB_TOKEN);
 
-  if (process.env.GITHUB_TOKEN) {
-    // Authenticated: can list all owned repos including private
-    repos = await fetchPaginatedRepos(
-      `${GITHUB_API}/user/repos?affiliation=owner`
-    );
-
-    if (repos.length === 0) {
-      // The token may be expired, missing scopes, or the request was rate
-      // limited. Fall back to the public endpoint so the portfolio still
-      // renders its public repos instead of an empty "No projects" state.
-      console.warn(
-        "[github] Authenticated repo fetch returned nothing — falling back to public repos for",
-        GITHUB_USERNAME
-      );
-      repos = await fetchPaginatedRepos(publicReposUrl);
-    }
-  } else {
-    // Fallback: list public repos for the known username
+  if (process.env.GITHUB_TOKEN && repos.length === 0) {
+    // The token may be expired, missing scopes, or the request was rate
+    // limited. Retry without credentials so the portfolio still
+    // renders its public repos instead of an empty "No projects" state.
     console.warn(
-      "[github] GITHUB_TOKEN is not set — falling back to public repos for",
+      "[github] Authenticated repo fetch returned nothing — falling back to public repos for",
       GITHUB_USERNAME
     );
-    repos = await fetchPaginatedRepos(publicReposUrl);
+    repos = await fetchPaginatedRepos(publicReposUrl, false);
   }
 
   if (repos.length === 0) {
