@@ -81,7 +81,7 @@ function dailyChart(stats: TokenStats): string {
   const rows = stats.daily.map((day) => `<tr><td><time datetime="${day.date}">${formatDay(day.date)}</time></td><td>${formatTokens(day.tokens)}</td><td>${formatUsd(day.costUsd)}</td></tr>`).join("");
   return `<h3>Last ${stats.daily.length} days</h3><figure class="burner-chart"><svg viewBox="0 0 ${CHART_WIDTH} ${CHART_HEIGHT}" width="${CHART_WIDTH}" height="${CHART_HEIGHT}" preserveAspectRatio="none" role="img" aria-label="${esc(summary)}">${rects}</svg>`
     + `<figcaption><span>${formatDay(first)}</span> <span>${formatDay(stats.asOf)}</span></figcaption></figure><p>${esc(summary)}</p>`
-    + `<details><summary>Daily numbers as a table</summary><div class="table-wrap"><table class="projects"><caption>Tokens per day</caption><thead><tr><th scope="col">Day</th><th scope="col">Tokens</th><th scope="col">API-equivalent cost</th></tr></thead><tbody>${rows}</tbody></table></div></details>`;
+    + `<details><summary>Daily numbers as a table</summary><div class="table-wrap" role="region" aria-labelledby="daily-caption" tabindex="0"><table class="projects"><caption id="daily-caption">Tokens per day</caption><thead><tr><th scope="col">Day</th><th scope="col">Tokens</th><th scope="col">API-equivalent cost</th></tr></thead><tbody>${rows}</tbody></table></div></details>`;
 }
 
 /** The "Token burner" panel on /projects; empty when there is no valid snapshot. */
@@ -109,7 +109,7 @@ export function projectsBody(repos: RepoSummary[], stats: TokenStats | null = nu
     const date = repo.pushedAt.slice(0, 10);
     return `<tr><td><a href="${esc(repo.htmlUrl)}" ${external}>${esc(repo.name)}</a>${demo}</td><td>${esc(repo.description!)}</td><td>${repo.language ? esc(repo.language) : "&mdash;"}</td><td>${esc(String(repo.stars))}</td><td><time datetime="${esc(repo.pushedAt)}">${esc(date)}</time></td></tr>`;
   }).join("");
-  return `<h1>Projects</h1><p>Products, developer tools, and the engineering behind them.</p>${tokenBurner(stats)}<h2>Repositories</h2><p>This list comes straight from my GitHub and refreshes every hour.</p>${projects.length ? `<div class="table-wrap"><table class="projects"><caption>Public repositories</caption><thead><tr><th scope="col">Project</th><th scope="col">What it is</th><th scope="col">Language</th><th scope="col">Stars</th><th scope="col">Updated</th></tr></thead><tbody>${rows}</tbody></table></div>` : `<p class="notice">The project list did not load. See all my work on <a href="${esc(GITHUB_HREF)}" ${external}>GitHub</a>.</p>`}<p>More on <a href="${esc(GITHUB_HREF)}" ${external}>github.com/LLRHook</a>.</p>`;
+  return `<h1>Projects</h1><p>Products, developer tools, and the engineering behind them.</p>${tokenBurner(stats)}<h2>Repositories</h2><p>This list comes straight from my GitHub and refreshes every hour.</p>${projects.length ? `<div class="table-wrap" role="region" aria-labelledby="repositories-caption" tabindex="0"><table class="projects"><caption id="repositories-caption">Public repositories</caption><thead><tr><th scope="col">Project</th><th scope="col">What it is</th><th scope="col">Language</th><th scope="col">Stars</th><th scope="col">Updated</th></tr></thead><tbody>${rows}</tbody></table></div>` : `<p class="notice">The project list did not load. See all my work on <a href="${esc(GITHUB_HREF)}" ${external}>GitHub</a>.</p>`}<p>More on <a href="${esc(GITHUB_HREF)}" ${external}>github.com/LLRHook</a>.</p>`;
 }
 
 export function offTheClockBody(): string {

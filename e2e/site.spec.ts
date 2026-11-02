@@ -118,3 +118,20 @@ test("projects shows the token burner panel without inline styles", async ({ pag
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
   expect(await panel.locator(".burner-chart svg").evaluate((element) => element.getBoundingClientRect().width)).toBeLessThanOrEqual(320);
 });
+
+test("the daily table can be reached and scrolled with the keyboard", async ({ page }) => {
+  // At this width the daily table overflows even without live GitHub data.
+  await page.setViewportSize({ width: 240, height: 700 });
+  await page.goto("/projects");
+  const summary = page.getByText("Daily numbers as a table");
+  await summary.focus();
+  await page.keyboard.press("Enter");
+  await page.keyboard.press("Tab");
+
+  const region = page.getByRole("region", { name: "Tokens per day", exact: true });
+  await expect(region).toBeFocused();
+  expect(await region.evaluate((element) => element.scrollWidth > element.clientWidth)).toBe(true);
+  await page.keyboard.press("ArrowRight");
+  await expect.poll(() => region.evaluate((element) => element.scrollLeft)).toBeGreaterThan(0);
+  await expect(region).toBeFocused();
+});
