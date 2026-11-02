@@ -38,7 +38,7 @@ Set production variables in Vercel; never commit secrets.
 - `npm run dev`: development server.
 - `npm run build`: Next.js production build.
 - `npm run start`: serve the production build.
-- `npm run token-stats`: rebuild `data/token-stats.json` from this machine's Claude Code (`~/.claude/projects`) and Codex (`~/.codex/sessions`) logs; see [Token stats](#token-stats).
+- `npm run token-stats`: rebuild `data/token-stats.json` from this machine's Claude Code (`~/.claude/projects`) and Codex (`~/.codex/sessions` and `~/.codex/archived_sessions`) logs; see [Token stats](#token-stats).
 - `npm run lint`: ESLint.
 - `npm test`: Vitest unit tests; `npm run test:watch` watches changes.
 - `npx tsc --noEmit`: standalone TypeScript check.
@@ -87,12 +87,16 @@ or README requests are made per repository.
 parsing: Claude Code assistant messages are counted once per message id, at the
 largest usage logged for that id (Claude Code logs partial usage while a message
 streams), and Codex token counts are summed as per-event deltas of each rollout's cumulative
-totals. Malformed lines are skipped. It writes `data/token-stats.json`: lifetime
+totals. Both plain `.jsonl` and Zstandard-compressed `.jsonl.zst` logs are read,
+including archived Codex sessions; duplicate plain/compressed or active/archived
+copies of a rollout count once. Malformed lines are skipped. It writes
+`data/token-stats.json`: lifetime
 and 30-day totals, a Claude Code / Codex split, the top six models, and 90 local
 days, each split into input, output, cache-write and cache-read tokens with an
 API-equivalent cost from the dated list-price table in the script. Only priced
 models are named; others count tokens, no cost, and appear as Other. It covers
-every Claude Code and Codex session on the machine. The file holds no paths, project
+all available Claude Code and Codex sessions on the machine; deleting source logs
+removes their usage from later exports. The file holds no paths, project
 names, session ids, prompts or tool names, and is rewritten only when it changes.
 `app/lib/tokenStats.ts` defines its type and validator.
 
