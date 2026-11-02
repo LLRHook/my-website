@@ -84,6 +84,17 @@ the end of their section, sorted by id on read.
 - **Status:** fixed-pending-migration
 - **Fix:** Add explicit tab stops and regions named by the table captions. Both renderer regressions pass; a current-source Chromium smoke confirms Enter/Tab/ArrowRight navigation, a visible focus outline, both accessibility-tree names, and no document overflow at 320px. The full Playwright gate remains blocked by missing dependencies/browser downloads.
 
+### [BUG-1793639077] Token stats omit compressed and archived coding-agent logs
+- [x] **Severity:** med
+- **Area:** scripts, docs
+- **File(s):** scripts/token-stats.mjs, scripts/token-stats.test.ts, data/token-stats.json, README.md
+- **Observation:** Refreshing the snapshot on 2026-11-02 reduced the Codex lifetime total from 2,015,498,014 to 1,791,949,463 tokens. The scanner only reads plain `.jsonl` files in `~/.codex/sessions`; this machine also has compressed `.jsonl.zst` rollouts there and in `~/.codex/archived_sessions`.
+- **Expected:** Refreshes include available historical usage from plain and compressed logs, including archived Codex sessions, without counting duplicate copies twice.
+- **Repro / Notes:** Run `npm run token-stats` after older sessions have been compressed or archived. Compare tool totals and historical daily rows with the committed snapshot.
+- **Bump:** patch
+- **Fix:** Read `.jsonl.zst` logs with Node's built-in Zstandard decompressor, scan archived Codex sessions, and count duplicate plain/compressed or active/archived rollouts once. Refreshed the public snapshot through 2026-11-02. Three regression tests added; the clean production checkout passes all 67 unit tests, lint, standalone TypeScript, production build and all 41 Chromium/WebKit browser tests.
+- **Notes (2026-11-02):** Some previously published daily totals still decrease because older source logs are no longer available locally. Claude Code is configured with 14-day log retention. The snapshot reflects available logs; no missing usage was estimated. Older unpriced Codex models count toward tokens and Other, with their costs excluded as before.
+- **Status:** fixed-pending-migration
 
 ## Migrated to changelog
 

@@ -1,13 +1,58 @@
-import { readFileSync } from "node:fs";
+import { cpSync, mkdtempSync, readFileSync, readdirSync, rmSync, unlinkSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { describe, it, expect } from "vitest";
+import { zstdCompressSync } from "node:zlib";
+import { afterEach, describe, it, expect } from "vitest";
 import { collect, modelLabel, normalizeModel, claudeUsage, codexUsage, DAILY_DAYS } from "./token-stats.mjs";
 import { parseTokenStats } from "../app/lib/tokenStats";
 
 const fixtures = join(__dirname, "fixtures", "token-stats");
 const run = () => collect({ claudeDir: join(fixtures, "claude"), codexDir: join(fixtures, "codex"), today: "2026-10-14" });
 
+const temporaryLogs: string[] = [];
+const copyLogs = () => {
+  const dir = mkdtempSync(join(tmpdir(), "token-stats-"));
+  temporaryLogs.push(dir);
+  cpSync(fixtures, dir, { recursive: true });
+  return dir;
+};
+const compressLogs = (dir: string, keepPlain = false) => {
+  for (const file of readdirSync(dir, { recursive: true }).map(String).filter((file) => file.endsWith(".jsonl"))) {
+    const path = join(dir, file);
+    writeFileSync(`${path}.zst`, zstdCompressSync(readFileSync(path)));
+    if (!keepPlain) unlinkSync(path);
+  }
+};
+afterEach(() => {
+  for (const dir of temporaryLogs.splice(0)) {
+    if (!dir.startsWith(join(tmpdir(), "token-stats-"))) throw new Error("Unexpected temporary log path");
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
 describe("token-stats export", () => {
+  it("reads Zstandard-compressed logs with the same usage as plain logs", () => {
+    const dir = copyLogs();
+    compressLogs(dir);
+    expect(collect({ claudeDir: join(dir, "claude"), codexDir: join(dir, "codex"), today: "2026-10-14" })).toEqual(run());
+  });
+
+  it("includes compressed archived Codex sessions when the active directory is absent", () => {
+    const dir = copyLogs();
+    const archive = join(dir, "archive");
+    cpSync(join(dir, "codex"), archive, { recursive: true });
+    compressLogs(archive);
+    expect(collect({ claudeDir: join(dir, "claude"), codexDir: join(dir, "absent"), codexArchiveDir: archive, today: "2026-10-14" })).toEqual(run());
+  });
+
+  it("counts a rollout once across plain, compressed and archived copies", () => {
+    const dir = copyLogs();
+    compressLogs(dir, true);
+    const archive = join(dir, "archive");
+    cpSync(join(dir, "codex"), archive, { recursive: true });
+    expect(collect({ claudeDir: join(dir, "claude"), codexDir: join(dir, "codex"), codexArchiveDir: archive, today: "2026-10-14" })).toEqual(run());
+  });
+
   it("counts each Claude message once at its final usage, skips malformed and zero lines, and prices by model", () => {
     const { snapshot, unpriced } = run();
     expect(snapshot.byTool.claudeCode.tokens).toEqual({ input: 51117, output: 2100, cacheWrite: 1000, cacheRead: 70000, total: 124217 });

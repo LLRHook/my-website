@@ -4,8 +4,9 @@
 // tool and model only: no paths, project names, session ids, prompts or tool names.
 import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { homedir } from "node:os";
-import { dirname, join } from "node:path";
+import { basename, dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { zstdDecompressSync } from "node:zlib";
 
 // API list prices in USD per million tokens, from
 // https://platform.claude.com/docs/en/about-claude/pricing and
@@ -103,14 +104,18 @@ export function codexUsage(model, usage) {
 }
 
 function jsonlFiles(dir, match) {
-  if (!existsSync(dir)) return [];
-  return readdirSync(dir, { recursive: true }).map(String).filter((file) => match.test(file.replace(/\\/g, "/"))).sort().map((file) => join(dir, file));
+  if (!dir || !existsSync(dir)) return [];
+  return readdirSync(dir, { recursive: true }).map(String).filter((file) => match.test(file.replace(/\\/g, "/"))).sort()
+    // Prefer a live plain log when its compressed copy is also present.
+    .filter((file) => !file.endsWith(".zst") || !existsSync(join(dir, file.slice(0, -4))))
+    .map((file) => join(dir, file));
 }
 
 // Yields only the lines that contain one of the markers. Searching the raw buffer
 // skips the large tool-result and transcript lines without decoding them.
 function* markedRecords(file, markers) {
-  const buffer = readFileSync(file);
+  const raw = readFileSync(file);
+  const buffer = file.endsWith(".zst") ? zstdDecompressSync(raw) : raw;
   const needles = markers.map((marker) => Buffer.from(marker));
   // Next match of each needle, searched again only once passed, so a rare marker
   // does not rescan the rest of the file on every line.
@@ -148,7 +153,7 @@ export function scanClaude(dir, add) {
   // Claude Code writes one line per content block of a message, each with the usage so
   // far, so a message id counts once, at its largest total.
   const byId = new Map();
-  for (const file of jsonlFiles(dir, /\.jsonl$/)) {
+  for (const file of jsonlFiles(dir, /\.jsonl(?:\.zst)?$/)) {
     for (const record of markedRecords(file, ['"usage"'])) {
       const message = record?.message;
       const usage = message?.usage;
@@ -167,7 +172,13 @@ export function scanClaude(dir, add) {
 }
 
 export function scanCodex(dir, add) {
-  for (const file of jsonlFiles(dir, /(^|\/)rollout-[^/]*\.jsonl$/)) {
+  const seen = new Set();
+  const dirs = Array.isArray(dir) ? dir : [dir];
+  for (const file of dirs.flatMap((root) => jsonlFiles(root, /(^|\/)rollout-[^/]*\.jsonl(?:\.zst)?$/))) {
+    // Moving a rollout to the archive must not count it again if a copy remains.
+    const name = basename(file).replace(/\.zst$/, "");
+    if (seen.has(name)) continue;
+    seen.add(name);
     let previous = null;
     let model = "";
     for (const record of markedRecords(file, ['"turn_context"', '"token_count"'])) {
@@ -200,7 +211,7 @@ function addUsage(target, { tokens, costUsd }) {
 const cents = (usage) => ({ tokens: usage.tokens, costUsd: Math.round(usage.costUsd * 100) / 100 });
 
 /** Collects both logs into the snapshot for `today` (a local YYYY-MM-DD). */
-export function collect({ claudeDir, codexDir, today }) {
+export function collect({ claudeDir, codexDir, codexArchiveDir = "", today }) {
   const rows = [];
   const unpriced = new Set();
   const add = (day, tool, model, usage) => {
@@ -208,7 +219,7 @@ export function collect({ claudeDir, codexDir, today }) {
     rows.push({ day, tool, model, usage });
   };
   scanClaude(claudeDir, add);
-  scanCodex(codexDir, add);
+  scanCodex([codexDir, codexArchiveDir], add);
   return { snapshot: buildSnapshot(rows, today), unpriced: [...unpriced].sort() };
 }
 
@@ -255,6 +266,7 @@ function main() {
   const { snapshot, unpriced } = collect({
     claudeDir: join(home, ".claude", "projects"),
     codexDir: join(home, ".codex", "sessions"),
+    codexArchiveDir: join(home, ".codex", "archived_sessions"),
     today: localDay(new Date()),
   });
   if (unpriced.length) console.warn(`No list price for ${unpriced.join(", ")}: tokens counted, cost excluded.`);
