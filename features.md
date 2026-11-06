@@ -95,7 +95,7 @@ the end of their section, sorted by id on read.
 - **Status:** open
 
 ### [FEAT-1791988185] Serve photos as AVIF and WebP at their display size
-- [ ] **Priority:** med
+- [x] **Priority:** med
 - **Area:** frontend, performance
 - **File(s):** scripts/optimize-images.mjs, public/*.avif, public/*.webp, app/lib/pages.ts, app/lib/pages.test.ts, e2e/site.spec.ts, e2e/performance.spec.ts, package.json, README.md
 - **Why:** Photos are the largest remaining bytes on slow connections: profile 10.8 KB (stored at 240 px, shown at 120 px), conference photo 27.7 KB (400 px, shown at 320 px), Peru photo 52.6 KB WebP (640x480, shown at 320x240). About 50 KB of savings comes to about 1 s on a 50 KB/s link.
@@ -110,7 +110,9 @@ the end of their section, sorted by id on read.
 - **Test plan:** E2E in `site.spec.ts` asserts the fetched content-type is `image/avif` per page in Chromium and WebKit; lower page budgets in `performance.spec.ts`; unit test for the `<picture>` markup.
 - **Out of scope:** The share card and favicons; art direction or crops.
 - **Bump:** minor
-- **Status:** open
+- **Status:** shipped-pending-migration
+- **Implementation:** Pinned Sharp 0.35.5 and generated twelve committed AVIF/WebP density variants, capped at source resolution and stripped of metadata. Original fallback/alt/dimensions/lazy/priority semantics remain. Chromium and WebKit 1x/2x/fallback checks pass; default-density image bytes fall 78–83% across image-bearing pages.
+- **Docs:** README.md, VERIFICATION.md
 
 ### [FEAT-1791988186] Short browser cache with background refresh for pages
 - [ ] **Priority:** med
@@ -129,7 +131,7 @@ the end of their section, sorted by id on read.
 - **Status:** open
 
 ### [FEAT-1791988187] Slow-network load budget test
-- [ ] **Priority:** med
+- [x] **Priority:** med
 - **Area:** tests, performance
 - **File(s):** e2e/performance.spec.ts, VERIFICATION.md
 - **Why:** Owner wants the site to load quickly on poor connections; nothing tests that today, so it could regress silently.
@@ -142,10 +144,12 @@ the end of their section, sorted by id on read.
 - **Test plan:** The test itself, run twice for stability; a temporary low budget confirms it fails.
 - **Out of scope:** WebKit network emulation; real-device testing.
 - **Bump:** minor
-- **Status:** open
+- **Status:** shipped-pending-migration
+- **Implementation:** Added cold-context CDP checks at 400 ms latency, 50 KiB/s down and 20 KiB/s up for all six pages. The six-page check completed in 7.062 s; an intentional 1 ms budget failed at 664 ms, then exact source bytes were restored. All 66 browser cases pass without skips/retries.
+- **Docs:** README.md, VERIFICATION.md
 
 ### [FEAT-1791991424] Regression test for the clearance wording on the About page and resume
-- [ ] **Priority:** low
+- [x] **Priority:** low
 - **Area:** tests
 - **File(s):** app/lib/pages.test.ts, e2e/site.spec.ts
 - **Why:** BUG-1791980560 fixed the clearance wording ("Active DoD Secret clearance", "Secret-cleared", "U.S. Citizen") with no test, so the outdated "Secret eligibility" wording could return unnoticed. Found by the `/protocol-v-and-v` coverage audit at 1344f04.
@@ -155,7 +159,24 @@ the end of their section, sorted by id on read.
 - **Test plan:** The test itself; temporarily restoring the old wording makes it fail.
 - **Out of scope:** Other resume content.
 - **Bump:** patch
-- **Status:** open
+- **Status:** shipped-pending-migration
+- **Implementation:** Added unit/browser checks for existing active-clearance/citizenship wording and current profile choices. Restoring the superseded wording deliberately caused both targeted unit cases to fail; exact source was restored. No new private facts were published.
+- **Docs:** README.md, VERIFICATION.md
+
+### [FEAT-1793986049] Port token-usage export to a streaming Rust CLI
+- [x] **Priority:** high
+- **Area:** scripts, performance, tests
+- **File(s):** tools/token-stats/, scripts/token-stats.mjs, scripts/token-stats-rust.test.ts, scripts/token-prices.json, package.json, .github/workflows/ci.yml, README.md, VERIFICATION.md
+- **Why:** Process large local JSONL/Zstandard logs without buffering complete files or retaining every usage row, while keeping the public snapshot contract.
+- **Approach:** Make the supported npm export command invoke Rust by default. Stream plain/compressed records, preserve message/rollout deduplication, local dates, counter resets, dated prices and privacy. Retain the JS implementation as a parity oracle and share its price table.
+- **Library / dependency notes:** Current primary crate APIs and stable releases checked November 6: serde_json 1.0.154, chrono 0.4.45, zstd 0.14.3, memchr 2.8.3. Existing Rust 1.93.1 can satisfy their declared MSRVs. Pin direct dependencies and commit Cargo.lock.
+- **Acceptance criteria:** Normal exporter executes Rust; generated snapshots match the JS oracle across plain/compressed/archive/dedup/privacy/date/counter fixtures; failed inputs preserve output; unchanged data preserves mtime; Rust formatting/lint/tests and existing website checks pass. Benchmark synthetic data with identical outputs and report measured runtime/memory without assuming an improvement.
+- **Test plan:** Rust unit tests plus native CLI/JS parity and wrapper checks on synthetic fixtures. Run production website checks to preserve its HTML/CSS-only behavior.
+- **Out of scope:** New model prices, browser/WASM rendering, reading conversation content for context, daemon/network collection, schedule/account/deployment changes.
+- **Bump:** major (export/test tooling now requires Rust/Cargo or a prebuilt native exporter; website/browser contracts remain unchanged)
+- **Status:** shipped-pending-migration
+- **Implementation:** The supported npm exporter now invokes the locked streaming Rust CLI, with an optional prebuilt binary path and no JS fallback. The unchanged dated price table is shared with the retained JS oracle. Five native unit tests and 97 JS tests (16 native parity/CLI cases) pass; Rustfmt/Clippy pass. On 64 MiB synthetic input with identical outputs, native collector median 17.48 ms / 6.41 MiB peak RSS versus JS 49.84 ms / 114.77 MiB; excludes compilation/npm/Cargo/launcher overhead. Inputs/output compatibility, atomic replacement, CRLF/mtime, privacy, Zstandard/archive dedup, counter resets and local-timezone cases are covered.
+- **Docs:** README.md, VERIFICATION.md
 
 ## Shipped
 

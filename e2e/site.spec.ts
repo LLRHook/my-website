@@ -36,6 +36,59 @@ test("public photos are cached and the retired game bundle is gone", async ({ re
   expect(photo.headers()["cache-control"]).toContain("max-age=86400");
 });
 
+const photos = [
+  { path: "/", name: "victor-profile", original: "victor-profile.jpg", width: 120, height: 120 },
+  { path: "/about", name: "conference-photo", original: "conference-photo.jpg", width: 320, height: 320 },
+  { path: "/off-the-clock", name: "peru-travel", original: "peru-travel.webp", width: 320, height: 240 },
+];
+
+for (const photo of photos) {
+  for (const density of [1, 2]) {
+    test(`${photo.name}: AVIF at ${density}x with reserved dimensions`, async ({ browser, baseURL }) => {
+      const context = await browser.newContext({ baseURL, deviceScaleFactor: density });
+      try {
+        const page = await context.newPage();
+        const response = page.waitForResponse((item) => new URL(item.url()).pathname === `/${photo.name}-${density}x.avif`);
+        await page.goto(photo.path);
+        const image = page.locator(`picture img[src="/${photo.original}"]`);
+        await image.scrollIntoViewIfNeeded();
+        await image.evaluate((element) => (element as HTMLImageElement).decode());
+        const result = await response;
+        expect(result.status()).toBe(200);
+        expect(result.headers()["content-type"]).toContain("image/avif");
+        expect(result.headers()["cache-control"]).toContain("max-age=86400");
+        expect(await image.evaluate((element) => (element as HTMLImageElement).currentSrc)).toContain(`/${photo.name}-${density}x.avif`);
+        await expect(image).toHaveAttribute("width", String(photo.width));
+        await expect(image).toHaveAttribute("height", String(photo.height));
+        const size = await image.evaluate((element) => ({ width: element.clientWidth, height: element.clientHeight }));
+        expect(size.width / size.height).toBeCloseTo(photo.width / photo.height, 2);
+      } finally {
+        await context.close();
+      }
+    });
+  }
+  test(`${photo.name}: original image remains a working fallback`, async ({ page }) => {
+    await page.goto(photo.path);
+    const picture = page.locator("picture").filter({ has: page.locator(`img[src="/${photo.original}"]`) });
+    await picture.locator("source").evaluateAll((elements) => elements.forEach((element) => element.remove()));
+    const image = picture.locator("img");
+    await image.scrollIntoViewIfNeeded();
+    await expect.poll(() => image.evaluate((element) => (element as HTMLImageElement).currentSrc)).toContain(`/${photo.original}`);
+    await image.evaluate((element) => (element as HTMLImageElement).decode());
+    expect(await image.evaluate((element) => (element as HTMLImageElement).naturalWidth)).toBeGreaterThan(0);
+  });
+}
+
+test("public profile pages retain approved wording without superseded selections", async ({ page }) => {
+  for (const path of ["/", "/about", "/resume"]) {
+    await page.goto(path);
+    expect(await page.locator("main").innerText()).not.toMatch(/Sterling|MailIt|Systems & Architecture/i);
+  }
+  await expect(page.locator("main")).toContainText("Revature");
+  await expect(page.locator("main")).toContainText("Active DoD Secret clearance");
+  await expect(page.locator("main")).toContainText("U.S. Citizen");
+});
+
 test("interests redirects to off the clock", async ({ page }) => {
   await page.goto("/interests");
   await expect(page).toHaveURL(/\/off-the-clock$/);
@@ -48,6 +101,15 @@ test("unknown routes return a readable 404", async ({ page }) => {
 });
 test("resume PDF remains available", async ({ request }) => {
   expect((await request.get("/Victor_Ivanov_Resume.pdf")).status()).toBe(200);
+});
+test("resume prints its content without the site's navigation or download control", async ({ page }) => {
+  await page.goto("/resume");
+  await page.emulateMedia({ media: "print" });
+  await expect(page.locator("header.masthead")).toBeHidden();
+  await expect(page.locator("footer")).toBeHidden();
+  await expect(page.getByRole("link", { name: "Download resume (PDF)" })).toBeHidden();
+  await expect(page.getByRole("heading", { name: "Victor Ivanov", exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Experience", exact: true })).toBeVisible();
 });
 test("reduced motion stops the marquee", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });

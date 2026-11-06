@@ -56,3 +56,17 @@ footer { text-align: center; font-size: 14px; }
 @media (max-width: 600px) { body { padding: 0; } .page { border-width: 0; padding: 10px 12px; } .site-name { font-size: 24px; } .portrait { width: 80px; height: 80px; } ul.columns { columns: 1; } }
 @media (prefers-reduced-motion: reduce) { .marquee span { display: block; animation: none; padding: 0 8px; overflow: hidden; text-overflow: ellipsis; text-align: center; } .new { animation: none; } }
 @media print { html { background: #fff; } .page { border: 0; } .marquee, nav, .buttons, .skip { display: none; } }
+@media print {
+  body:has(main.resume) { padding: 0; font-size: 9.5pt; line-height: 1.12; }
+  .page:has(main.resume) { max-width: none; margin: 0; padding: 0; }
+  .page:has(main.resume) > header, .page:has(main.resume) > footer, .page:has(main.resume) > hr,
+  .resume > h1, .resume > p:first-of-type { display: none; }
+  .resume h2 { color: #000; font-size: 11pt; margin: 6pt 0 3pt; border-color: #777; break-after: avoid; }
+  .resume h2:first-of-type { font-size: 18pt; margin-top: 0; border: 0; }
+  .resume h3 { font-size: 10pt; margin: 5pt 0 2pt; break-after: avoid; }
+  .resume p { margin: 2pt 0; }
+  .resume ul { margin: 2pt 0 3pt; padding-left: 14pt; }
+  .resume li { margin: 1pt 0; }
+  .resume article { break-inside: avoid; }
+  .resume a { color: #000; text-decoration: none; }
+}

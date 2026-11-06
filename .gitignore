@@ -24,3 +24,4 @@ tsconfig.tsbuildinfo
 
 # V&V run logs and reports
 .vv/
+/tools/token-stats/target/

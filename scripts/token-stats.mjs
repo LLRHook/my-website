@@ -1,37 +1,23 @@
 // Writes data/token-stats.json, the public "token burner" snapshot on /projects, from
-// local coding-agent logs (`npm run token-stats`). Ports the parsing in the owner's
+// local coding-agent logs (`npm run token-stats`, Rust by default). The JS functions
+// remain a compatibility/parity oracle. Ports the parsing in the owner's
 // usage-widget (widget.py scan_claude / scan_codex). The snapshot holds totals by day,
 // tool and model only: no paths, project names, session ids, prompts or tool names.
-import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
+import { spawnSync } from "node:child_process";
 import { homedir } from "node:os";
 import { basename, dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { zstdDecompressSync } from "node:zlib";
 
-// API list prices in USD per million tokens, from
-// https://platform.claude.com/docs/en/about-claude/pricing and
-// https://developers.openai.com/api/docs/pricing (standard tier, global routing).
-export const PRICES_AS_OF = "2026-10-14";
-const CLAUDE_PRICES = {
-  "claude-fable-5-1": { input: 10, write5m: 12.5, write1h: 20, read: 0.25, output: 50 },
-  "claude-fable-5": { input: 10, write5m: 12.5, write1h: 20, read: 1, output: 50 },
-  "claude-opus-5-5": { input: 4, write5m: 5, write1h: 8, read: 0.2, output: 20 },
-  "claude-opus-5": { input: 5, write5m: 6.25, write1h: 10, read: 0.5, output: 25 },
-  "claude-opus-4-8": { input: 5, write5m: 6.25, write1h: 10, read: 0.5, output: 25 },
-  "claude-sonnet-5-5": { input: 2, write5m: 2.5, write1h: 4, read: 0.1, output: 10 },
-  "claude-sonnet-5": { input: 2, write5m: 2.5, write1h: 4, read: 0.2, output: 10 },
-  "claude-haiku-5-5": { input: 0.1, write5m: 0.125, write1h: 0.2, read: 0.01, output: 0.5,
-    // Prompts over 100,000 tokens (input plus cache reads and writes) pay these instead.
-    long: { over: 100_000, input: 0.5, write5m: 0.625, write1h: 1, read: 0.05, output: 2.5 } },
-  "claude-haiku-4-5": { input: 1, write5m: 1.25, write1h: 2, read: 0.1, output: 5 },
-};
-// Requests over 272K input tokens pay the long-context row.
-const OPENAI_PRICES = {
-  "gpt-6.1-sol": { input: 2, read: 0.1, write: 2.5, output: 10, long: { over: 272_000, input: 4, read: 0.2, write: 5, output: 15 } },
-  "gpt-6-astra": { input: 10, read: 1, write: 12.5, output: 50, long: { over: 272_000, input: 20, read: 2, write: 25, output: 75 } },
-  "gpt-6-sol": { input: 2, read: 0.2, write: 2.5, output: 10, long: { over: 272_000, input: 4, read: 0.4, write: 5, output: 15 } },
-  "gpt-6-luna": { input: 0.1, read: 0.01, write: 0.125, output: 0.5, long: { over: 272_000, input: 0.2, read: 0.02, write: 0.25, output: 0.75 } },
-};
+// One dated price table is shared with the Rust exporter and the JS test oracle.
+// Sources for the frozen 2026-10-14 values:
+// https://platform.claude.com/docs/en/about-claude/pricing
+// https://developers.openai.com/api/docs/pricing
+import prices from "./token-prices.json" with { type: "json" };
+export const PRICES_AS_OF = prices.pricesAsOf;
+const CLAUDE_PRICES = prices.claude;
+const OPENAI_PRICES = prices.openai;
 
 export const DAILY_DAYS = 90;
 const LAST_DAYS = 30;
@@ -260,25 +246,22 @@ export function buildSnapshot(rows, today) {
 }
 
 function main() {
-  const started = Date.now();
-  const out = join(dirname(fileURLToPath(import.meta.url)), "..", "data", "token-stats.json");
+  const root = join(dirname(fileURLToPath(import.meta.url)), "..");
   const home = homedir();
-  const { snapshot, unpriced } = collect({
-    claudeDir: join(home, ".claude", "projects"),
-    codexDir: join(home, ".codex", "sessions"),
-    codexArchiveDir: join(home, ".codex", "archived_sessions"),
-    today: localDay(new Date()),
-  });
-  if (unpriced.length) console.warn(`No list price for ${unpriced.join(", ")}: tokens counted, cost excluded.`);
-  const text = `${JSON.stringify(snapshot, null, 2)}\n`;
-  // Compare without line endings: a Windows checkout may hold the committed file as CRLF.
-  const unchanged = existsSync(out) && readFileSync(out, "utf8").replace(/\r\n/g, "\n") === text;
-  if (!unchanged) {
-    mkdirSync(dirname(out), { recursive: true });
-    writeFileSync(out, text);
-  }
-  console.log(`${unchanged ? "Unchanged" : "Wrote"} data/token-stats.json: ${snapshot.lifetime.tokens.total.toLocaleString("en-US")} tokens, `
-    + `$${snapshot.lifetime.costUsd.toLocaleString("en-US")} API-equivalent, in ${((Date.now() - started) / 1000).toFixed(1)} s.`);
+  const args = [
+    "--claude-dir", join(home, ".claude", "projects"),
+    "--codex-dir", join(home, ".codex", "sessions"),
+    "--codex-archive-dir", join(home, ".codex", "archived_sessions"),
+    "--today", localDay(new Date()), ...process.argv.slice(2),
+  ];
+  // There is deliberately no JS fallback: the supported export path is Rust.
+  // A prebuilt native binary is optional; otherwise Cargo builds the locked CLI.
+  const native = process.env.TOKEN_STATS_RUST_BIN;
+  const command = native || "cargo";
+  const prefix = native ? [] : ["run", "--quiet", "--release", "--locked", "--manifest-path", join(root, "tools", "token-stats", "Cargo.toml"), "--"];
+  const result = spawnSync(command, [...prefix, ...args], { cwd: root, stdio: "inherit" });
+  if (result.error) console.error(`Cannot run the Rust exporter: ${result.error.message}. Install Rust/Cargo or set TOKEN_STATS_RUST_BIN to the compiled CLI.`);
+  process.exitCode = result.status ?? 1;
 }
 
 if (import.meta.main) main();

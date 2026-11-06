@@ -1,0 +1,5 @@
+[toolchain]
+# Match the compiler and lint components exercised by the native parity gate.
+channel = "1.93.1"
+profile = "minimal"
+components = ["rustfmt", "clippy"]

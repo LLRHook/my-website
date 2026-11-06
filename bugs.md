@@ -96,6 +96,30 @@ the end of their section, sorted by id on read.
 - **Notes (2026-11-02):** Some previously published daily totals still decrease because older source logs are no longer available locally. Claude Code is configured with 14-day log retention. The snapshot reflects available logs; no missing usage was estimated. Older unpriced Codex models count toward tokens and Other, with their costs excluded as before.
 - **Status:** fixed-pending-migration
 
+### [BUG-1793984590] Public HTML profile retains superseded location and resume selections
+- [x] **Severity:** med
+- **Area:** frontend, seo, docs, tests
+- **File(s):** app/lib/constants.ts, app/lib/html.ts, app/lib/pages.ts, scripts/render-assets.mjs, public/og-image.png, app/lib/pages.test.ts, app/lib/html.test.ts, e2e/site.spec.ts
+- **Observation:** Home/About/Resume, descriptions, Person microdata and the share-card authoring source still name an outdated city. The HTML resume still features the removed MailIt project and an obsolete specialization.
+- **Expected:** Remove superseded claims consistently across public HTML/metadata/share-card surfaces; preserve the existing approved public claims and Revature; leave the removed project slot unfilled. Use the already-public state rather than publishing a new city or private facts.
+- **Repro / Notes:** Render Home, About and Resume and inspect their metadata; the PDF is tracked separately below. Historical trackers and the automatic public-repository index are not curated resume claims.
+- **Bump:** patch
+- **Status:** fixed-pending-migration
+- **Fix:** Removed superseded city/project/specialization claims from HTML, descriptions, structured data and the regenerated share card; retained existing approved public claims and the empty project slot.
+- **Docs:** README.md, VERIFICATION.md
+
+### [BUG-1793984591] Public resume PDF needs a source-provenance check before content synchronization
+- [x] **Severity:** med
+- **Area:** docs, frontend
+- **File(s):** public/Victor_Ivanov_Resume.pdf
+- **Observation:** The downloadable resume is a separately generated artifact whose current authorized source is not recorded in this project. Its content cannot safely be inferred from unrelated in-flight resume sources.
+- **Expected:** Regenerate it from a confirmed authorized source using the same public profile choices, then check extracted text and layout against HTML.
+- **Repro / Notes:** Do not modify unrelated resume sources or hand-edit unsupported PDF claims. HTML and photo/performance work can proceed independently.
+- **Bump:** patch
+- **Status:** fixed-pending-migration
+- **Fix:** Made the locally served public HTML the repeatable PDF source via npm run resume:pdf; generated a tagged single-page Letter PDF, inspected its rendered page and extracted text, and preserved unrelated resume sources.
+- **Docs:** README.md, VERIFICATION.md
+
 ## Migrated to changelog
 
 Entries below have been ticked off and copied as a one-liner into `CHANGELOG.md`.
