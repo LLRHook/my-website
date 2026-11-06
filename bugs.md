@@ -120,6 +120,30 @@ the end of their section, sorted by id on read.
 - **Fix:** Made the locally served public HTML the repeatable PDF source via npm run resume:pdf; generated a tagged single-page Letter PDF, inspected its rendered page and extracted text, and preserved unrelated resume sources.
 - **Docs:** README.md, VERIFICATION.md
 
+### [BUG-1793990135] Deep tool payloads silently remove otherwise valid usage
+- [x] **Severity:** med
+- **Area:** scripts, tests
+- **File(s):** tools/token-stats/src/lib.rs, scripts/token-stats-rust.test.ts
+- **Observation:** Independent review reproduced a valid assistant record containing 140 nested tool-input arrays. The JS oracle counts 123 tokens; the whole-record Rust JSON parser skips it, exits successfully and can overwrite a prior correct snapshot. Plain and Zstandard records are affected.
+- **Expected:** Irrelevant tool payload nesting must not change accounting. A decoding limit in required accounting fields must fail before replacing an existing snapshot.
+- **Repro / Notes:** CLI parity fixtures cover deep plain/compressed records and preservation of output on a fatal accounting-field limit.
+- **Bump:** patch
+- **Status:** fixed-pending-migration
+- **Fix:** Validate raw records and decode only the Claude/Codex accounting envelope. Plain/compressed fixtures retain usage with tool/context metadata nested 140 and 4,096 levels; unsupported accounting-field decoding now fails before output replacement with a sanitized diagnostic. Malformed/truncated lines keep their historical skip behavior. The original code failed all eight defect regressions; the corrected full suite passes 108 tests, including 27 native CLI/parity cases.
+- **Docs:** README.md, VERIFICATION.md
+
+### [BUG-1793990136] Unchanged JavaScript snapshots are rewritten during Rust migration
+- [x] **Severity:** med
+- **Area:** scripts, tests
+- **File(s):** tools/token-stats/src/main.rs, scripts/token-stats-rust.test.ts
+- **Observation:** The output guard compares serialized bytes. JS insertion order and integer spellings differ from Rust's encoding, so equal snapshot data changes bytes and mtime on its first native export. Existing coverage seeds its reference with Rust and misses migration.
+- **Expected:** Equivalent snapshot data preserves the original bytes and mtime, including JS-generated LF/CRLF files and integer/float numeric equivalence. Actual usage changes must still replace output.
+- **Repro / Notes:** Seed output with the retained JS oracle's JSON.stringify result, set an old mtime and invoke the actual Rust CLI.
+- **Bump:** patch
+- **Status:** fixed-pending-migration
+- **Fix:** Compare parsed snapshot data before serializing, preserving object-order and integer/float equivalence with round-trip float parsing. JS-produced LF/CRLF snapshots retain exact bytes and mtime; a changed-usage control still replaces output. Rust static/unit checks, all 108 JS/native tests, lint and standalone types pass.
+- **Docs:** README.md, VERIFICATION.md
+
 ## Migrated to changelog
 
 Entries below have been ticked off and copied as a one-liner into `CHANGELOG.md`.

@@ -147,7 +147,10 @@ oracle and compatibility API. Both implementations use the unchanged dated
 The Rust collector streams plain and Zstandard input one record at a time and
 aggregates usage without buffering a complete file or retaining all event rows.
 Memory still scales with the largest record and the distinct Claude message IDs
-needed for deduplication.
+needed for deduplication. Only accounting fields are decoded into a value tree;
+irrelevant tool/context payloads are validated as raw JSON, so their nesting does
+not discard usage. If an accounting field itself exceeds decoding limits or uses
+an unsupported JSON value, export fails before replacing the previous snapshot.
 It reads Claude Code logs in `~/.claude/projects` and Codex logs in
 `~/.codex/sessions` and `~/.codex/archived_sessions`.
 Claude Code assistant messages are counted once per message id, at the
@@ -164,7 +167,8 @@ models are named; others count tokens, no cost, and appear as Other. It covers
 all available Claude Code and Codex sessions on the machine; deleting source logs
 removes their usage from later exports. The file holds no paths, project
 names, session ids, prompts or tool names, and is rewritten only when it changes.
-Replacement is atomic, unchanged files retain their bytes/mtime (including CRLF),
+Replacement is atomic, equivalent data retains its existing bytes/mtime (including
+legacy JavaScript key order, numeric spellings and CRLF),
 and input/decode failures leave the previous snapshot untouched. Numeric totals
 outside the public schema's safe-integer range fail instead of wrapping.
 `app/lib/tokenStats.ts` defines its type and validator.

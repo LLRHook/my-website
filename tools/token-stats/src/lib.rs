@@ -3,7 +3,7 @@
 //! private diagnostics may retain unpriced model identifiers locally.
 use chrono::{DateTime, Days, Local, NaiveDate, Timelike, Utc};
 use memchr::memmem;
-use serde_json::{Value, json};
+use serde_json::{Value, json, value::RawValue};
 use std::collections::{BTreeMap, BTreeSet, HashMap, HashSet};
 use std::fs::{self, File};
 use std::io::{self, BufRead, BufReader, Read};
@@ -282,7 +282,101 @@ fn files(root: &Path, codex: bool) -> io::Result<Vec<PathBuf>> {
     Ok(out)
 }
 
-fn records(path: &Path, markers: &[&[u8]], mut visit: impl FnMut(Value)) -> io::Result<()> {
+enum Field {
+    Value,
+    Object(&'static [(&'static str, Field)]),
+}
+
+const CLAUDE_FIELDS: &[(&str, Field)] = &[
+    ("timestamp", Field::Value),
+    (
+        "message",
+        Field::Object(&[
+            ("id", Field::Value),
+            ("model", Field::Value),
+            (
+                "usage",
+                Field::Object(&[
+                    ("input_tokens", Field::Value),
+                    ("output_tokens", Field::Value),
+                    ("cache_creation_input_tokens", Field::Value),
+                    ("cache_read_input_tokens", Field::Value),
+                    (
+                        "cache_creation",
+                        Field::Object(&[("ephemeral_1h_input_tokens", Field::Value)]),
+                    ),
+                ]),
+            ),
+        ]),
+    ),
+];
+const CODEX_FIELDS: &[(&str, Field)] = &[
+    ("timestamp", Field::Value),
+    ("type", Field::Value),
+    (
+        "payload",
+        Field::Object(&[
+            ("type", Field::Value),
+            ("model", Field::Value),
+            (
+                "info",
+                Field::Object(&[(
+                    "total_token_usage",
+                    Field::Object(&[
+                        ("input_tokens", Field::Value),
+                        ("cached_input_tokens", Field::Value),
+                        ("cache_write_input_tokens", Field::Value),
+                        ("output_tokens", Field::Value),
+                        ("total_tokens", Field::Value),
+                    ]),
+                )]),
+            ),
+        ]),
+    ),
+];
+
+fn project_fields(raw: &str, fields: &[(&str, Field)]) -> serde_json::Result<Value> {
+    if !raw.trim_start().starts_with('{') {
+        return serde_json::from_str(raw);
+    }
+    // RawValue validates skipped content iteratively and borrows its bytes.
+    // Tool input depth therefore cannot change otherwise valid accounting.
+    let values: HashMap<String, &RawValue> = serde_json::from_str(raw)?;
+    let mut selected = serde_json::Map::new();
+    for (key, field) in fields {
+        if let Some(value) = values.get(*key) {
+            let value = match field {
+                Field::Value => serde_json::from_str(value.get())?,
+                Field::Object(children) => project_fields(value.get(), children)?,
+            };
+            selected.insert((*key).into(), value);
+        }
+    }
+    Ok(Value::Object(selected))
+}
+
+fn accounting_record(line: &[u8], fields: &[(&str, Field)]) -> io::Result<Option<Value>> {
+    let text = String::from_utf8_lossy(line);
+    let Ok(raw) = serde_json::from_str::<&RawValue>(&text) else {
+        // The historical collector intentionally ignores malformed/truncated lines.
+        return Ok(None);
+    };
+    // A valid record that exceeds a required field's decoding limits is not a
+    // malformed line. Fail the export before writing any reduced usage totals.
+    project_fields(raw.get(), fields).map(Some).map_err(|_| {
+        io::Error::new(
+            io::ErrorKind::InvalidData,
+            "usage accounting fields exceed decoding limits or contain unsupported JSON values",
+        )
+    })
+}
+
+fn records(
+    path: &Path,
+    markers: &[&[u8]],
+    fields: &[(&str, Field)],
+    mut visit: impl FnMut(Value),
+) -> io::Result<()> {
     let file = File::open(path)?;
     let input: Box<dyn Read> = if path.extension().is_some_and(|ext| ext == "zst") {
         Box::new(zstd::stream::read::Decoder::new(file)?)
@@ -302,9 +396,7 @@ fn records(path: &Path, markers: &[&[u8]], mut visit: impl FnMut(Value)) -> io::
         {
             continue;
         }
-        let parsed = serde_json::from_slice(&line)
-            .or_else(|_| serde_json::from_str(&String::from_utf8_lossy(&line)));
-        if let Ok(value) = parsed {
+        if let Some(value) = accounting_record(&line, fields)? {
             visit(value);
         }
     }
@@ -433,7 +525,7 @@ pub fn collect(claude: &Path, codex: &Path, archive: &Path, today: NaiveDate) ->
     let mut by_id: HashMap<String, usize> = HashMap::new();
     let mut messages: Vec<(String, String, Usage)> = Vec::new();
     for path in files(claude, false)? {
-        records(&path, &[b"\"usage\""], |record| {
+        records(&path, &[b"\"usage\""], CLAUDE_FIELDS, |record| {
             let usage = &record["message"]["usage"];
             if !usage.is_object() && !usage.is_array() {
                 return;
@@ -481,6 +573,7 @@ pub fn collect(claude: &Path, codex: &Path, archive: &Path, today: NaiveDate) ->
             records(
                 &path,
                 &[b"\"turn_context\"", b"\"token_count\""],
+                CODEX_FIELDS,
                 |record| {
                     let payload = &record["payload"];
                     if record["type"] == "turn_context" {

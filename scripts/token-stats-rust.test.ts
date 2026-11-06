@@ -105,6 +105,49 @@ describe("Rust exporter parity", () => {
     writeFileSync(join(dir, "claude", "tail.jsonl"), `not json\n{"usage":\n${valid}`);
     expect(native(dir)).toEqual(collect(options(dir)));
   });
+  it.each([
+    ["plain", 140], ["compressed", 140], ["plain", 4096], ["compressed", 4096],
+  ] as const)("counts nested tool input without decoding its content: %s depth %i", (encoding, depth) => {
+    const dir = fixtures();
+    const baseline = collect(options(dir)).snapshot.lifetime.tokens.total;
+    const nested = "[".repeat(depth) + "0" + "]".repeat(depth);
+    // Construct the source directly: JSON.stringify itself has a stack limit,
+    // while the log producer and oracle can read this valid JSON without one.
+    writeFileSync(join(dir, "claude", "nested.jsonl"), `{"timestamp":"2026-10-14T12:00:00Z","message":{"id":"nested","model":"claude-opus-5-5","usage":{"input_tokens":123},"content":[{"type":"tool_use","input":{"document":${nested}}}]}}\n`);
+    if (encoding === "compressed") compress(dir);
+    const expected = collect(options(dir));
+    expect(expected.snapshot.lifetime.tokens.total).toBe(baseline + 123);
+    const out = join(dir, "snapshot.json");
+    writeFileSync(out, JSON.stringify(expected.snapshot, null, 2) + "\n");
+    expect(native(dir, ["--output", out])).toEqual(expected);
+    expect(JSON.parse(readFileSync(out, "utf8"))).toEqual(expected.snapshot);
+  });
+  it.each(["plain", "compressed"])("counts Codex usage despite nested context and unused counter metadata: %s", (encoding) => {
+    const dir = fixtures();
+    const baseline = collect(options(dir)).snapshot.lifetime.tokens.total;
+    const nested = "[".repeat(4096) + "0" + "]".repeat(4096);
+    writeFileSync(join(dir, "codex", "rollout-nested.jsonl"),
+      `{"type":"turn_context","payload":{"model":"gpt-6.1-sol","instructions":${nested}}}\n` +
+      `{"type":"event_msg","timestamp":"2026-10-14T12:00:00Z","payload":{"type":"token_count","info":{"trace":${nested},"total_token_usage":{"input_tokens":123,"output_tokens":4,"trace":${nested}}}}}\n`);
+    if (encoding === "compressed") compress(dir);
+    const expected = collect(options(dir));
+    expect(expected.snapshot.lifetime.tokens.total).toBe(baseline + 127);
+    expect(native(dir)).toEqual(expected);
+  });
+  it.each(["plain", "compressed"])("fails safely for unsupported accounting field nesting: %s", (encoding) => {
+    const dir = fixtures();
+    const nested = "[".repeat(140) + '"private-model"' + "]".repeat(140);
+    writeFileSync(join(dir, "claude", "nested-accounting.jsonl"), `{"timestamp":"2026-10-14T12:00:00Z","message":{"model":${nested},"usage":{"input_tokens":123}}}\n`);
+    if (encoding === "compressed") compress(dir);
+    const out = join(dir, "snapshot.json");
+    writeFileSync(out, "preserve me");
+    const result = spawnSync(binary, [...args(dir), "--output", out], { cwd: root, encoding: "utf8" });
+    expect(result.status).not.toBe(0);
+    expect(result.stderr).toMatch(/accounting fields/i);
+    expect(result.stderr).not.toContain("private-model");
+    expect(readFileSync(out, "utf8")).toBe("preserve me");
+    expect(readdirSync(dir).some((name) => name.endsWith(".tmp"))).toBe(false);
+  });
   it("keeps counter advancement for an invalid-date event and excludes future usage", () => {
     const dir = fixtures();
     const token = (input: number, timestamp: string) => ({ type: "event_msg", timestamp, payload: { type: "token_count", info: { total_token_usage: { input_tokens: input, output_tokens: 1 } } } });
@@ -125,6 +168,32 @@ describe("Rust exporter parity", () => {
     expect(readFileSync(out, "utf8")).toBe(crlf);
     expect(statSync(out).mtimeMs).toBe(old.getTime());
     expect(readdirSync(dir).some((name) => name.endsWith(".tmp"))).toBe(false);
+  });
+  it.each(["\n", "\r\n"])("preserves unchanged legacy JS output, including numeric spellings: %j", (newline) => {
+    const dir = fixtures();
+    const out = join(dir, "snapshot.json");
+    const legacy = (JSON.stringify(collect(options(dir)).snapshot, null, 2) + "\n").replace(/\n/g, newline);
+    writeFileSync(out, legacy);
+    const old = new Date("2000-01-01T00:00:00Z");
+    utimesSync(out, old, old);
+    native(dir, ["--output", out]);
+    expect(readFileSync(out, "utf8")).toBe(legacy);
+    expect(statSync(out).mtimeMs).toBe(old.getTime());
+    expect(readdirSync(dir).some((name) => name.endsWith(".tmp"))).toBe(false);
+  });
+  it("replaces legacy JS output when updated usage changes the data", () => {
+    const dir = fixtures();
+    const out = join(dir, "snapshot.json");
+    const legacy = JSON.stringify(collect(options(dir)).snapshot, null, 2) + "\n";
+    writeFileSync(out, legacy);
+    const old = new Date("2000-01-01T00:00:00Z");
+    utimesSync(out, old, old);
+    writeRecords(dir, [assistant({ input_tokens: 123 })]);
+    const expected = collect(options(dir));
+    expect(native(dir, ["--output", out])).toEqual(expected);
+    expect(JSON.parse(readFileSync(out, "utf8"))).toEqual(expected.snapshot);
+    expect(readFileSync(out, "utf8")).not.toBe(legacy);
+    expect(statSync(out).mtimeMs).not.toBe(old.getTime());
   });
   it.each(["invalid-date", "broken-zstd", "unsafe-totals"])("fails without replacing an existing output: %s", (problem) => {
     const dir = fixtures();

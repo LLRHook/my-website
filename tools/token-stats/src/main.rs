@@ -7,14 +7,36 @@ use std::path::{Path, PathBuf};
 use std::time::{Instant, SystemTime, UNIX_EPOCH};
 use website_token_stats::{collect, parse_day};
 
+fn same_snapshot(left: &Value, right: &Value) -> bool {
+    match (left, right) {
+        (Value::Number(a), Value::Number(b)) => {
+            a == b || ((a.is_f64() || b.is_f64()) && a.as_f64() == b.as_f64())
+        }
+        (Value::Array(a), Value::Array(b)) => {
+            a.len() == b.len() && a.iter().zip(b).all(|(a, b)| same_snapshot(a, b))
+        }
+        (Value::Object(a), Value::Object(b)) => {
+            a.len() == b.len()
+                && a.iter()
+                    .all(|(key, a)| b.get(key).is_some_and(|b| same_snapshot(a, b)))
+        }
+        _ => left == right,
+    }
+}
+
 fn write_snapshot(path: &Path, snapshot: &Value) -> io::Result<bool> {
-    let text = format!("{}\n", serde_json::to_string_pretty(snapshot)?);
     match fs::read(path) {
-        Ok(old) if String::from_utf8_lossy(&old).replace("\r\n", "\n") == text => return Ok(false),
+        Ok(old)
+            if serde_json::from_slice::<Value>(&old)
+                .is_ok_and(|old| same_snapshot(&old, snapshot)) =>
+        {
+            return Ok(false);
+        }
         Ok(_) => {}
         Err(error) if error.kind() == io::ErrorKind::NotFound => {}
         Err(error) => return Err(error),
     }
+    let text = format!("{}\n", serde_json::to_string_pretty(snapshot)?);
     let parent = path
         .parent()
         .filter(|p| !p.as_os_str().is_empty())

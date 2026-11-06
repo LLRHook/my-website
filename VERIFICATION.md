@@ -43,12 +43,18 @@ overwritten in place after each green run.
 | Types | TypeScript | zero errors | `npx tsc --noEmit` (local only; CI type-checks in `next build`) |
 | Rust static | Rustfmt / Clippy | no formatting differences or warnings | `npm run check:rust` |
 | Native unit | Cargo release tests | 5 tests, 0 failures/skips | `npm run test:rust` |
-| Unit / native parity | Vitest | 97 tests, 5 files; 16 native CLI/parity cases | `npm test` |
+| Unit / native parity | Vitest | 108 tests, 5 files; 27 native CLI/parity cases | `npm test` |
 | Build | Next.js | succeeds | `SITE_ORIGIN=http://localhost:3000 npm run build` |
 | E2E | Playwright | 66 run, 0 failed, skipped or flaky | `CI=1 npm run test:e2e` |
 
 Playwright projects: `chromium` runs every spec; `webkit-mobile` runs the site spec.
 Nothing is skipped.
+
+The November 6 review correction reran Rust static/unit checks, all 108 Vitest
+cases, lint and standalone types. The successful website build and 66 browser
+checks are retained from `a72e421`; the correction changes only the exporter,
+its tests and documentation, with no UI, npm dependency or committed snapshot
+change. No full release verification or new deployment is implied.
 
 ## Acceptance coverage
 
@@ -113,17 +119,21 @@ Nothing is skipped.
   single-page Letter document with the same public claims, no website chrome,
   no scripts or clipped content. Inspect rendered PNG and extracted text.
 - Native export (Rust CLI, `tools/token-stats`): `npm run token-stats` executes
-  Rust by default. The JS implementation remains a parity oracle. The 16 CLI
+  Rust by default. The JS implementation remains a parity oracle. The 27 CLI
   cases cover plain/Zstandard logs, active/archive copies, message maxima,
   anonymous rows, private model IDs, counter reset/invalid-date advancement,
   future exclusions, UTC/New York/Kathmandu day boundaries, atomic replacement,
   CRLF/unchanged mtime, invalid dates, broken compression and numeric overflow.
+  Deep plain/compressed tool/context payloads (140 and 4,096 levels) retain
+  usage. Unsupported nesting in a required accounting value fails explicitly
+  without replacing output. JS-generated LF/CRLF snapshots preserve bytes/mtime
+  across serializer key ordering and numeric spellings; changed data still writes.
   Failure must leave the prior output intact; the committed real snapshot is
   never modified by the synthetic tests. The frozen dated price table is shared.
 - `npm run benchmark:tokens -- 64` checks identical outputs on synthetic input,
   one warmup and three alternating measured runs per collector. On the local
-  Mac with Node 24.22.2, native median was 17.48 ms / 6.41 MiB peak RSS and JS
-  49.84 ms / 114.77 MiB. This is a collector-process comparison with compilation,
+  Mac with Node 24.22.2 after the review correction, native median was 14.09 ms /
+  6.50 MiB peak RSS and JS 39.87 ms / 114.72 MiB. This is a collector-process comparison with compilation,
   npm/Cargo/launcher overhead excluded; it is not a whole-site or real-log result.
 - `/interests` redirects permanently to `/off-the-clock`; unknown paths return 404
   with a link home.
