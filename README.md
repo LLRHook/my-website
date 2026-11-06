@@ -29,6 +29,11 @@ npm ci
 npm run dev
 ```
 
+The native token-usage exporter and its parity tests also require Rust/Cargo
+1.93 or later; `rust-toolchain.toml` pins the exercised 1.93.1 compiler and lint
+components for rustup users and CI. The website build and the browser pages remain Next.js and
+HTML/CSS; they do not run Rust or JavaScript in the browser.
+
 The site runs at `http://localhost:3000`. Copy [.env.example](.env.example) to
 `.env.local` to configure the optional GitHub token. Set production variables
 in Vercel; never commit secrets.
@@ -52,6 +57,11 @@ in Vercel; never commit secrets.
 | `npx tsc --noEmit` | Run the standalone TypeScript check. |
 | `npm run test:e2e` | Run Playwright site checks in Chromium and WebKit, plus Chromium performance checks. |
 | `npm run assets` | Regenerate the committed favicons and share card. |
+| `npm run images` | Generate committed AVIF/WebP photo variants from the original public images. |
+| `npm run resume:pdf -- http://localhost:3000` | Regenerate the public PDF from the locally served production resume. |
+| `npm run check:rust` | Check Rust formatting and Clippy, with warnings denied. |
+| `npm run test:rust` | Run the native exporter tests against the locked release build. |
+| `npm run benchmark:tokens -- 64` | Compare native and JS collector processes on 64 MiB of synthetic data. |
 | `npm run token-stats` | Rebuild the public token-usage snapshot from available local logs; see [Token stats](#token-stats). |
 
 Install browser engines with `npx playwright install chromium webkit` before
@@ -63,6 +73,8 @@ without starting a local server. For a fresh local production check, leave port
 ```sh
 npm run lint
 npx tsc --noEmit
+npm run check:rust
+npm run test:rust
 npm test
 npx playwright install chromium webkit
 SITE_ORIGIN=http://localhost:3000 npm run build
@@ -101,13 +113,14 @@ NEW label, disables both for reduced motion, and supplies print styles.
 - `app/lib/github.ts`: repository listing, pagination, authentication, public fallback.
 - `app/lib/projectPresentation.ts`: display names and descriptions for selected repos.
 - `public/retro.css`: the site's only stylesheet. `next.config.js` inlines it in a `<style>` element on every page, so first paint never waits on a CSS request, and the CSP `style-src` allows exactly that text by its SHA-256 hash.
-- Public images, icons and the resume PDF use a one-day cache with one week of stale-while-revalidate in production. The portrait and Peru photo are resized for their display sizes; below-the-fold photos load lazily.
+- Public images, icons and the resume PDF use a one-day cache with one week of stale-while-revalidate in production. Photos select AVIF, then WebP, at 1x/2x display density, capped at the original resolution. Original JPEG/WebP images remain fallbacks; dimensions reserve the layout, and below-the-fold photos load lazily.
+- `scripts/optimize-images.mjs`: generates the committed variants using the pinned authoring-only Sharp dependency. `npm run images` does not crop, upscale or preserve EXIF/XMP metadata. The server never performs this processing for a visitor.
 - `app/speculation-rules/route.ts`: speculation rules sent through a `Speculation-Rules` response header on every page (no `<script>`). Chromium prerenders a same-origin page when its link is hovered or pressed; other browsers ignore the header.
 - `scripts/render-assets.mjs`: regenerates the committed favicon set and 1200x630 share card (`npm run assets`).
 - `app/route.ts` and the route folders: Home, About, Projects, Resume, Off the Clock, Contact, and the catch-all 404.
 - `app/sitemap.ts` and `app/robots.ts`: crawler metadata.
 - `e2e/site.spec.ts`: HTML, navigation, headers, routing, narrow layouts, and reduced motion.
-- `e2e/performance.spec.ts` (Chromium, runs in CI): per-page cold-load request and byte budgets and prerendering of hovered links. Budgets are recorded in [VERIFICATION.md](VERIFICATION.md).
+- `e2e/performance.spec.ts` (Chromium, runs in CI): per-page cold-load request/byte budgets, a 400 ms / 50 KiB/s poor-connection check, and prerendering of hovered links. Budgets are recorded in [VERIFICATION.md](VERIFICATION.md).
 
 ## GitHub data
 
@@ -123,8 +136,22 @@ language, commit, or README requests are made per repository.
 
 ## Token stats
 
-`scripts/token-stats.mjs` (Node built-ins only) ports the owner's usage-widget
-parsing. It reads Claude Code logs in `~/.claude/projects` and Codex logs in
+`npm run token-stats` invokes the locked **Rust** collector in
+`tools/token-stats` through a small Node launcher. Cargo builds the release CLI
+on first use and reuses it on later runs; set `TOKEN_STATS_RUST_BIN` to a prebuilt
+native CLI to avoid Cargo at export time. A missing native toolchain is an error,
+with no silent JavaScript fallback. The JS collector functions remain as a test
+oracle and compatibility API. Both implementations use the unchanged dated
+`scripts/token-prices.json` table.
+
+The Rust collector streams plain and Zstandard input one record at a time and
+aggregates usage without buffering a complete file or retaining all event rows.
+Memory still scales with the largest record and the distinct Claude message IDs
+needed for deduplication. Only accounting fields are decoded into a value tree;
+irrelevant tool/context payloads are validated as raw JSON, so their nesting does
+not discard usage. If an accounting field itself exceeds decoding limits or uses
+an unsupported JSON value, export fails before replacing the previous snapshot.
+It reads Claude Code logs in `~/.claude/projects` and Codex logs in
 `~/.codex/sessions` and `~/.codex/archived_sessions`.
 Claude Code assistant messages are counted once per message id, at the
 largest usage logged for that id (Claude Code logs partial usage while a message
@@ -140,7 +167,26 @@ models are named; others count tokens, no cost, and appear as Other. It covers
 all available Claude Code and Codex sessions on the machine; deleting source logs
 removes their usage from later exports. The file holds no paths, project
 names, session ids, prompts or tool names, and is rewritten only when it changes.
+Replacement is atomic, equivalent data retains its existing bytes/mtime (including
+legacy JavaScript key order, numeric spellings and CRLF),
+and input/decode failures leave the previous snapshot untouched. Numeric totals
+outside the public schema's safe-integer range fail instead of wrapping.
 `app/lib/tokenStats.ts` defines its type and validator.
+
+For fixture checks or another explicit log root, pass `--claude-dir`,
+`--codex-dir`, `--codex-archive-dir`, `--today YYYY-MM-DD` and `--output PATH` after
+`npm run token-stats --`. `--json` prints `{snapshot, unpriced}` for diagnostics
+without writing unless `--output` is explicit. Unknown model IDs occur only in
+the private diagnostic result; the public snapshot groups them under `Other`.
+The input contract is ISO log timestamps with an offset, or UTC date-only strings.
+No network service is contacted by the collector.
+
+After `npm run test:rust`, `npm run benchmark:tokens -- 64` generates only its own
+temporary synthetic records, checks identical outputs, warms each process once,
+then alternates three runs per collector. It reports median wall time and peak
+process RSS where `/usr/bin/time` supports it. This measures the legacy JS
+collector against the native Rust collector; compilation and npm/Cargo/launcher
+overhead are excluded. It does not measure a website request or scan private logs.
 
 `/projects` imports the committed snapshot at build time and renders it as the
 token burner panel above the repository table: four stat tiles, the Claude Code /
@@ -154,9 +200,15 @@ Export and publication automation is tracked in
 
 ## Content and resume
 
-The HTML resume carries the October 2026 copy and links to
-`public/Victor_Ivanov_Resume.pdf`, a PDF export of the owner's resume with the
-phone number removed and the same public wording as the HTML. The portrait comes from the public GitHub
+The HTML resume and PDF share the project's public copy: the superseded city,
+removed project selection and obsolete specialization are absent, with no
+replacement claims added. The existing October copy date remains unchanged.
+`public/Victor_Ivanov_Resume.pdf` is generated from the local production `/resume`
+route, using its print styles and tagged Letter output. After building, start
+the local server, then run `npm run resume:pdf -- http://localhost:3000`; inspect
+the PDF text and rendered page before committing it. The generator accepts only
+loopback origins to avoid capturing an older deployment. No separate private
+resume source is read or modified. The portrait comes from the public GitHub
 profile. The conference photo and September 2026 Peru photograph were supplied
 by the owner and authorized for publication. Public copies have no EXIF or XMP
 metadata. The original source resume files remain unchanged.

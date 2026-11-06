@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import { homeBody, aboutBody, projectsBody, resumeBody, offTheClockBody, contactBody, notFoundBody, tokenBurner, formatTokens, formatUsd, formatDay } from "./pages";
 import type { TokenStats } from "./tokenStats";
 import type { RepoSummary } from "./types";
+import { PAGES, personMicrodata } from "./html";
 
 const repo = (overrides: Partial<RepoSummary> = {}): RepoSummary => ({ id: 1, name: "demo-project", owner: "owner", description: "A project", htmlUrl: "https://github.com/owner/demo-project", homepage: null, language: "Go", stars: 3, pushedAt: "2026-01-01T00:00:00Z", ...overrides });
 
@@ -55,6 +56,32 @@ describe("page bodies", () => {
   });
   it("links the downloadable resume PDF", () => {
     expect(resumeBody()).toContain('<a href="/Victor_Ivanov_Resume.pdf" download>');
+  });
+  it("keeps superseded claims out of public profile copy and metadata", () => {
+    const html = [homeBody(), aboutBody(), resumeBody(), personMicrodata(), ...PAGES.map((item) => item.description)].join("\n");
+    expect(html).not.toMatch(/Sterling|MailIt|Systems (?:&amp;|&) Architecture/i);
+    expect(personMicrodata()).not.toContain('itemprop="addressLocality"');
+    expect(resumeBody()).toContain("Revature");
+    expect(resumeBody()).toContain("M.S. Computer Science (online)");
+  });
+  it.each([aboutBody, resumeBody])("preserves the approved active-clearance wording: %s", (body) => {
+    expect(body()).toContain("Active DoD Secret clearance");
+    expect(body()).not.toMatch(/eligib/i);
+  });
+  it("preserves the public resume citizenship and cleared summary", () => {
+    expect(resumeBody()).toContain("U.S. Citizen");
+    expect(resumeBody()).toContain("Secret-cleared");
+  });
+  it.each([
+    [homeBody, "victor-profile", "victor-profile.jpg", 120, 120],
+    [aboutBody, "conference-photo", "conference-photo.jpg", 320, 320],
+    [offTheClockBody, "peru-travel", "peru-travel.webp", 320, 240],
+  ] as const)("serves density variants with original fallback: %s", (body, name, original, width, height) => {
+    const html = body();
+    expect(html).toContain(`<source type="image/avif" srcset="/${name}-1x.avif 1x, /${name}-2x.avif 2x">`);
+    expect(html).toContain(`<source type="image/webp" srcset="/${name}-1x.webp 1x, /${name}-2x.webp 2x">`);
+    expect(html).toContain(`<img src="/${original}"`);
+    expect(html).toContain(`width="${width}" height="${height}"`);
   });
 });
 

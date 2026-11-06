@@ -7,23 +7,29 @@ import type { RepoSummary } from "./types";
 const external = 'target="_blank" rel="noopener noreferrer"';
 const profile = 'target="_blank" rel="me noopener noreferrer"';
 const paragraph = (text: string) => `<p>${esc(text)}</p>`;
-const portrait = '<img class="portrait" decoding="async" fetchpriority="high" src="/victor-profile.jpg" width="120" height="120" alt="Victor\'s illustrated GitHub profile portrait">';
+// Density candidates are capped at the original image's dimensions by the
+// authoring script. The original remains a fallback for older browsers.
+function photo(name: string, fallback: string, attributes: string): string {
+  const sources = ["avif", "webp"].map((format) => `<source type="image/${format}" srcset="/${name}-1x.${format} 1x, /${name}-2x.${format} 2x">`).join("");
+  return `<picture>${sources}<img src="/${fallback}" ${attributes}></picture>`;
+}
+const portrait = photo("victor-profile", "victor-profile.jpg", 'class="portrait" decoding="async" fetchpriority="high" width="120" height="120" alt="Victor\'s illustrated GitHub profile portrait"');
 
 export function homeBody(): string {
   const lines = ["who I am and what I work on", "everything public on my GitHub, updated hourly", "experience, projects and education (PDF too)", "climbing, cards, books and travel", "email, GitHub and LinkedIn"];
-  return `<h1>Welcome to Victor Ivanov's Home Page!</h1>${portrait}${paragraph("Hi, I'm Victor, a Senior Full-Stack Engineer in Sterling, Virginia. I build web products and developer tools, work across the stack, and climb rocks.")}
+  return `<h1>Welcome to Victor Ivanov's Home Page!</h1>${portrait}${paragraph("Hi, I'm Victor, a Senior Full-Stack Engineer in Virginia. I build web products and developer tools, work across the stack, and climb rocks.")}
 <div class="construction"><p><b>This page is always under construction.</b></p></div><h2>What's New</h2><ul><li><span class="new">NEW!</span> October 2026: the site is now a hand-written HTML and CSS home page. No JavaScript.</li><li>September 2026: resume updated.</li></ul><h2>Start here</h2><ul>${PAGES.slice(1).map((item, index) => `<li><a href="${esc(item.path)}">${esc(item.label)}</a>: ${esc(lines[index])}</li>`).join("")}</ul>
 <div itemscope itemtype="https://schema.org/WebSite"><meta itemprop="name" content="${esc(SITE_NAME)}"><link itemprop="url" href="${esc(SITE_URL)}/"></div>${personMicrodata()}`;
 }
 
 export function aboutBody(): string {
   return `<h1>About Me</h1>${portrait}${paragraph("Hi, I'm Victor. A Senior Full-Stack Engineer with a habit of building useful things.")}
-${paragraph("Based in Sterling, Virginia · Active DoD Secret clearance")}
+${paragraph("Based in Virginia · Active DoD Secret clearance")}
 ${paragraph("I work on certification software at Paradigm Testing. That means APIs, multi-tenant systems, real-time exam workflows, and getting the details right before they reach production.")}
 ${paragraph("Most days, I work with Java, Spring Boot, React, and PostgreSQL. Outside of that, I build tools in Go and TypeScript and spend a lot of time exploring agentic development workflows.")}
 ${paragraph("I studied computer science at UMBC and I'm pursuing an M.S. in Computer Science at Georgia Tech, expected December 2027. Away from the desk, you'll usually find me climbing or thinking about the next project.")}
 <blockquote>Build fast. Always test.<br><small>A good test suite is part of the work.</small></blockquote><h2>Tools I use</h2><ul class="columns">${[...SKILLS, "Go"].map((skill) => `<li>${esc(skill)}</li>`).join("")}</ul>
-<figure><img loading="lazy" decoding="async" src="/conference-photo.jpg" alt="A moment at the conference podium" width="320" height="320"><figcaption>At the podium.</figcaption></figure><p><a href="/projects">See what I'm building &raquo;</a></p>
+<figure>${photo("conference-photo", "conference-photo.jpg", 'loading="lazy" decoding="async" alt="A moment at the conference podium" width="320" height="320"')}<figcaption>At the podium.</figcaption></figure><p><a href="/projects">See what I'm building &raquo;</a></p>
 <div itemscope itemtype="https://schema.org/ProfilePage">${personMicrodata('itemprop="mainEntity"')}</div>`;
 }
 
@@ -121,7 +127,7 @@ export function offTheClockBody(): string {
     ["Side projects", "Agentic workflows, deployment automation, and small developer tools."],
     ["Reading", "Pierce Brown’s Red Rising trilogy."],
   ];
-  return `<h1>Off the clock</h1>${paragraph("What I do when I'm not working.")}<dl class="interests">${interests.map(([heading, text], index) => `<dt>${esc(heading)}</dt><dd>${esc(text)}${index === 3 ? '<p><img loading="lazy" decoding="async" src="/peru-travel.webp" alt="Mountains and a river in Peru" width="320" height="240"></p>' : ""}</dd>`).join("")}</dl>`;
+  return `<h1>Off the clock</h1>${paragraph("What I do when I'm not working.")}<dl class="interests">${interests.map(([heading, text], index) => `<dt>${esc(heading)}</dt><dd>${esc(text)}${index === 3 ? `<p>${photo("peru-travel", "peru-travel.webp", 'loading="lazy" decoding="async" alt="Mountains and a river in Peru" width="320" height="240"')}</p>` : ""}</dd>`).join("")}</dl>`;
 }
 
 export function contactBody(): string {
@@ -135,7 +141,7 @@ export function notFoundBody(): string {
 export function resumeBody(): string {
   return `<h1>Resume</h1><p><a href="/Victor_Ivanov_Resume.pdf" download>Download resume (PDF)</a></p>      <h2>${esc("Victor Ivanov")}</h2>
       <p>${esc("Senior Full-Stack Engineer")}</p>
-      <p>${esc("\n        Sterling, Virginia · U.S. Citizen · Active DoD Secret clearance · ")}<a href="${esc(EMAIL_HREF)}">${esc("victor.n.ivanov@gmail.com")}</a><br />
+      <p>${esc("\n        Virginia · U.S. Citizen · Active DoD Secret clearance · ")}<a href="${esc(EMAIL_HREF)}">${esc("victor.n.ivanov@gmail.com")}</a><br />
         <a href="https://victorivanov.engineer" target="_blank" rel="noopener noreferrer">${esc("victorivanov.engineer")}</a>${esc(" · ")}<a href="${esc(GITHUB_HREF)}" rel="me">${esc("github.com/LLRHook")}</a>${esc(" · ")}<a href="${esc(SOCIAL_BY_ICON.linkedin.href)}" rel="me">${esc("LinkedIn")}</a>
       </p>
       <p>${esc("Secret-cleared, backend-leaning full-stack engineer with 4+ years shipping high-stakes certification SaaS. Owned a React/Spring Boot scheduling workflow end to end, carried a billing hotfix through live production validation, and built Next.js analytics and quiz experiences with explicit async, accessibility, and security controls. Open to on-site and hybrid roles and customer travel.")}</p>
@@ -167,11 +173,6 @@ export function resumeBody(): string {
       </article>
       <h2>${esc("Selected projects")}</h2>
       <article>
-        <h3><a href="https://github.com/LLRHook/mailit" target="_blank" rel="noopener noreferrer">${esc("MailIt")}</a></h3>
-        <p>${esc("Go, Next.js 16, PostgreSQL, Redis, Docker/Kubernetes")}</p>
-        <ul><li>${esc("REST APIs, async workers, inbound SMTP, and a Next.js dashboard; direct MX delivery, DKIM, replay-safe sends, signed webhooks, multi-arch releases, and 523 tests.")}</li></ul>
-      </article>
-      <article>
         <h3><a href="https://github.com/LLRHook/citybase" target="_blank" rel="noopener noreferrer">${esc("Citybase")}</a></h3>
         <p>${esc("Electron, React, Node.js")}</p>
         <ul><li>${esc("Desktop IDE mapping repositories into an isometric city and dispatching Claude/Codex through typed IPC; streamed, cancellable runs, persisted history, guarded Git operations, and 393 tests.")}</li></ul>
@@ -182,7 +183,7 @@ export function resumeBody(): string {
         <ul><li>${esc("Zero-dependency extension for SPA-aware Shorts redirects, feed filters, focus timers, watch history, and settings import/export; cross-browser CI and 15 tests.")}</li></ul>
       </article>
       <h2>${esc("Education")}</h2>
-      <div><div><h3>${esc("Georgia Institute of Technology")}</h3><p>${esc("M.S. Computer Science, Systems & Architecture (online)")}</p></div><span>${esc("Expected December 2027")}</span></div>
+      <div><div><h3>${esc("Georgia Institute of Technology")}</h3><p>${esc("M.S. Computer Science (online)")}</p></div><span>${esc("Expected December 2027")}</span></div>
       <div><div><h3>${esc("University of Maryland, Baltimore County")}</h3><p>${esc("B.S. Computer Science")}</p></div></div>
       <h2>${esc("Technical skills")}</h2>
       <p><strong>${esc("Frontend:")}</strong>${esc(" TypeScript/JavaScript, React, Next.js 16, Vite, HTML/CSS, React Query, Playwright, Vitest")}</p>

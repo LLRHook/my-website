@@ -31,6 +31,12 @@ jobs:
       - name: Lint
         run: npm run lint
 
+      - name: Rust exporter checks
+        run: |
+          rustup show active-toolchain
+          npm run check:rust
+          npm run test:rust
+
       - name: Unit tests
         run: npm test
 

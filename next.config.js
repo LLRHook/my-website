@@ -57,7 +57,7 @@ const nextConfig = {
       })),
       ...(process.env.NODE_ENV === "production" ? [
         {
-          source: "/:file*\\.(jpg|webp|png|svg|ico|pdf)",
+          source: "/:file*\\.(avif|jpg|webp|png|svg|ico|pdf)",
           headers: [...securityHeaders, {
             key: "Cache-Control",
             value: "public, max-age=86400, stale-while-revalidate=604800",

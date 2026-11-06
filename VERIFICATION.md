@@ -9,13 +9,18 @@ Run history lives in `CHANGELOG.md` (Verified entries); older evidence is in
 
 Last verified: 2026-10-14, SHA ff1ce0f (see `CHANGELOG.md` Verified).
 
+Local candidate checks on November 6, 2026 cover the native Rust exporter and
+public-profile/photo/print changes below. These checks do not establish a
+deployment, a full release, or Windows-native acceptance.
+
 ## Build and automated checks
 
 1. Record `git rev-parse HEAD` and inspect `git status --short`. Keep unrelated
    user changes out of the release.
 2. Use Node 24.15 or later within Node 24 (`.nvmrc`) and the committed npm lockfile.
    On a clean checkout, run `npm ci`.
-3. Run `npm run lint` (zero warnings), `npx tsc --noEmit`, `npm test`, and
+3. With Rust/Cargo 1.93+ available, run `npm run check:rust`, `npm run test:rust`,
+   `npm run lint` (zero warnings), `npx tsc --noEmit`, `npm test`, and
    `SITE_ORIGIN=http://localhost:3000 npm run build`. The build must work without
    `app/layout.tsx`. `SITE_ORIGIN` must match the origin the E2E
    suite serves, because page CSPs name `<origin>/speculation-rules`.
@@ -36,12 +41,20 @@ overwritten in place after each green run.
 |---|---|---|---|
 | Lint | ESLint 9 | zero warnings | `npm run lint` |
 | Types | TypeScript | zero errors | `npx tsc --noEmit` (local only; CI type-checks in `next build`) |
-| Unit | Vitest | 64 tests, 4 files | `npm test` |
+| Rust static | Rustfmt / Clippy | no formatting differences or warnings | `npm run check:rust` |
+| Native unit | Cargo release tests | 5 tests, 0 failures/skips | `npm run test:rust` |
+| Unit / native parity | Vitest | 108 tests, 5 files; 27 native CLI/parity cases | `npm test` |
 | Build | Next.js | succeeds | `SITE_ORIGIN=http://localhost:3000 npm run build` |
-| E2E | Playwright | 41 listed: 41 run, 0 skip | `CI=1 npm run test:e2e` |
+| E2E | Playwright | 66 run, 0 failed, skipped or flaky | `CI=1 npm run test:e2e` |
 
 Playwright projects: `chromium` runs every spec; `webkit-mobile` runs the site spec.
 Nothing is skipped.
+
+The November 6 review correction reran Rust static/unit checks, all 108 Vitest
+cases, lint and standalone types. The successful website build and 66 browser
+checks are retained from `a72e421`; the correction changes only the exporter,
+its tests and documentation, with no UI, npm dependency or committed snapshot
+change. No full release verification or new deployment is implied.
 
 ## Acceptance coverage
 
@@ -63,17 +76,31 @@ Nothing is skipped.
   when a cold load exceeds its budget against the local production server
   (`next start`: HTML uncompressed, static files gzip; headers included):
 
-  | Page | Requests (max) | Bytes (max) | Measured 2026-10-12 |
+  | Page | Requests (max) | Bytes (max) | Earlier baseline (2026-10-12 unless noted) |
   |---|---|---|---|
-  | / | 3 | 40,000 | 3 / 32,394 |
-  | /about | 4 | 75,000 | 4 / 61,888 |
+  | / | 3 | 32,000 | Previous baseline: 3 / 32,394; AVIF reduces the image transfer |
+  | /about | 4 | 48,000 | Previous baseline: 4 / 61,888; AVIF reduces the image transfers |
   | /projects | 2 | 44,000 | 2 / 38,536 (2026-10-14: game removed, token burner added) |
   | /resume | 2 | 32,000 | 2 / 24,469 |
-  | /off-the-clock | 3 | 85,000 | 3 / 72,423 |
+  | /off-the-clock | 3 | 48,000 | Previous baseline: 3 / 72,423; AVIF reduces the image transfer |
   | /contact | 2 | 26,000 | 2 / 18,913 |
 
   Raise a budget only deliberately,
   in the same change that explains why.
+- Poor-connection budget (FEAT-1791988187): every page gets a fresh Chromium
+  context with cache disabled, 400 ms latency, 50 KiB/s download and 20 KiB/s
+  upload. First contentful paint must be below 2,500 ms and load below 4,000 ms;
+  `/projects` has 3,500/5,000 ms headroom for its table and token panel. The six
+  pages completed in 7.062 s locally; measured paint was 620–648 ms and load
+  617–1,263 ms. Lowering the first page's budgets to 1 ms deliberately failed
+  at a measured 664 ms paint; the exact spec bytes were restored afterward.
+- Responsive photos (FEAT-1791988185): Chromium and WebKit fetch AVIF at 1x and
+  2x density, with the expected content type and cache headers. Removing both
+  sources loads the original fallback. Display dimensions/alt/priority/lazy
+  semantics remain; outputs never exceed source dimensions and have no EXIF/XMP.
+  Default-density image bytes are Home 1,876 (previously 10,788), About 8,337
+  (38,536), and Off the Clock 10,275 (52,578). These are image bytes, not total
+  page weight, and 2x images trade additional bytes for retained detail.
 - Token burner (FEAT-1791988183): /projects shows the panel above the repository
   table with four stat tiles, two tool rows, model bars, a 90-day SVG chart with an
   `aria-label` summary and a 90-row `<details>` table; no element has a `style`
@@ -83,7 +110,31 @@ Nothing is skipped.
 - Projects use hourly GitHub listing and show a table or a usable empty notice
   without `GITHUB_TOKEN`. Descriptions are escaped, profile and undescribed repos
   are filtered, rows sort newest first, and demo links use HTTP(S).
-- Resume HTML links the downloadable PDF; the PDF returns 200.
+- Profile HTML, descriptions, Person metadata and share card omit superseded
+  location/project/specialization claims while retaining approved public copy.
+  Reintroducing the superseded clearance wording deliberately failed both
+  targeted unit cases; the exact source bytes were restored.
+- Resume HTML links the downloadable PDF; the PDF returns 200. Generate it from
+  the local production `/resume` with `npm run resume:pdf`; it is a tagged,
+  single-page Letter document with the same public claims, no website chrome,
+  no scripts or clipped content. Inspect rendered PNG and extracted text.
+- Native export (Rust CLI, `tools/token-stats`): `npm run token-stats` executes
+  Rust by default. The JS implementation remains a parity oracle. The 27 CLI
+  cases cover plain/Zstandard logs, active/archive copies, message maxima,
+  anonymous rows, private model IDs, counter reset/invalid-date advancement,
+  future exclusions, UTC/New York/Kathmandu day boundaries, atomic replacement,
+  CRLF/unchanged mtime, invalid dates, broken compression and numeric overflow.
+  Deep plain/compressed tool/context payloads (140 and 4,096 levels) retain
+  usage. Unsupported nesting in a required accounting value fails explicitly
+  without replacing output. JS-generated LF/CRLF snapshots preserve bytes/mtime
+  across serializer key ordering and numeric spellings; changed data still writes.
+  Failure must leave the prior output intact; the committed real snapshot is
+  never modified by the synthetic tests. The frozen dated price table is shared.
+- `npm run benchmark:tokens -- 64` checks identical outputs on synthetic input,
+  one warmup and three alternating measured runs per collector. On the local
+  Mac with Node 24.22.2 after the review correction, native median was 14.09 ms /
+  6.50 MiB peak RSS and JS 39.87 ms / 114.72 MiB. This is a collector-process comparison with compilation,
+  npm/Cargo/launcher overhead excluded; it is not a whole-site or real-log result.
 - `/interests` redirects permanently to `/off-the-clock`; unknown paths return 404
   with a link home.
 - No page has horizontal document overflow at 320x700.

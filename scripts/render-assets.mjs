@@ -81,7 +81,7 @@ a { color: #0000ee; text-decoration: underline; }
 </style></head><body><div class="page">
 <div class="marquee">&#9733; Welcome to my home page! &#9733; Senior Full-Stack Engineer</div>
 <div class="body"><img class="portrait" src="${portrait}" alt=""><div>
-<h1>Victor Ivanov</h1><h2>Senior Full-Stack Engineer</h2><p>Sterling, Virginia &middot; <a>victorivanov.engineer</a></p>
+<h1>Victor Ivanov</h1><h2>Senior Full-Stack Engineer</h2><p>Virginia &middot; <a>victorivanov.engineer</a></p>
 </div></div>
 <div class="badges"><span class="badge">Best viewed with<b>ANY browser</b></span><span class="badge"><b>100%</b>JavaScript free</span><span class="badge">Served by<b>Next.js</b></span></div>
 </div></body></html>`;
