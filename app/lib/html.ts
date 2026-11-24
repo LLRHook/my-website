@@ -10,7 +10,7 @@ export const PAGES: readonly SitePage[] = [
   { path: "/about", label: "About Me", title: "About | Victor Ivanov", description: "Meet Victor Ivanov, a senior full-stack engineer in Virginia: biography and chronological work and project history." },
   { path: "/projects", label: "Projects", title: "Projects | Victor Ivanov", description: "Victor Ivanov's projects: web products, developer tools, and open-source repositories, plus how many tokens AI coding agents have burned on my machine." },
   { path: "/resume", label: "Resume", title: "Resume | Victor Ivanov", description: "Victor Ivanov's November 2026 resume: engineering experience, selected projects, education, technical skills, and a downloadable PDF." },
-  { path: "/off-the-clock", label: "Off the Clock", title: "Off the clock | Victor Ivanov", description: "Victor Ivanov away from the desk: rock climbing, Pokémon and Magic cards, books, travel, and side projects." },
+  { path: "/off-the-clock", label: "Off the Clock", title: "Off the clock | Victor Ivanov", description: "Victor Ivanov away from the desk: rock climbing, Pokémon and Magic cards, the GoStopTCG shop on TCGplayer and CardTrader, books, travel, and side projects." },
   { path: "/contact", label: "Contact", title: "Contact | Victor Ivanov", description: "Contact Victor Ivanov by email or connect on GitHub and LinkedIn. Based in Virginia, on Eastern time." },
 ];
 

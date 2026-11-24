@@ -33,6 +33,15 @@ dl.interests dt, dl.history dt { font-weight: bold; margin-top: 12px; color: #00
 dl.interests dd, dl.history dd { margin: 2px 0 0 24px; }
 dl.history ul { margin: 4px 0 0; padding-left: 18px; }
 dl.history li { margin: 2px 0; }
+.tcg-shop { margin: 22px 0 8px; padding: 12px 14px; background: #f4f1e6; border: 3px ridge #808000; }
+.tcg-shop h2 { margin: 0 0 8px; padding: 4px 8px; background: #000080; color: #ff0; border: 2px inset #dfdfdf; font: bold 18px/1.2 "Courier New", Courier, monospace; }
+.tcg-shop p { margin: 6px 0 10px; }
+.tcg-links { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 10px; list-style: none; padding: 0; margin: 10px 0 0; }
+.tcg-link, .tcg-link:visited { display: block; padding: 10px 12px; background: #e8e8e8; border: 3px outset #dfdfdf; text-decoration: none; color: #000; }
+.tcg-link:hover { background: #ffffe0; } .tcg-link:active { border-style: inset; }
+.tcg-tcgplayer { border-left: 6px solid #0b57d0; } .tcg-cardtrader { border-left: 6px solid #800000; }
+.tcg-name { display: block; font: bold 15px/1.2 Verdana, Geneva, sans-serif; color: #000080; text-decoration: underline; }
+.tcg-meta { display: block; margin-top: 4px; font-size: 13px; color: #222; }
 .big { font-size: 24px; margin: 0 0 8px; }
 nav.crumbs { text-align: left; font-weight: normal; font-size: 14px; margin: 0 0 10px; } .crumbs ol, .crumbs li { display: inline; margin: 0; padding: 0; } .crumbs li + li::before { content: " \00bb  "; }
 footer { text-align: center; font-size: 14px; }

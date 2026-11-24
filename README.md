@@ -12,7 +12,7 @@ no JavaScript in the browser.
 - About Me (`/about`): biography and work and project history.
 - Projects (`/projects`): the token burner (AI coding-agent token usage) and a table of public GitHub repositories.
 - Resume (`/resume`): experience, projects, education, skills, and a PDF download.
-- Off the Clock (`/off-the-clock`): climbing, cards, books, travel, and side projects.
+- Off the Clock (`/off-the-clock`): climbing, cards, the GoStopTCG shop (TCGplayer and CardTrader), books, travel, and side projects.
 - Contact (`/contact`): email, GitHub, LinkedIn, and an email guestbook.
 
 `/interests` permanently redirects to `/off-the-clock`. Unknown paths return

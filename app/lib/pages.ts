@@ -172,13 +172,32 @@ export function projectsBody(repos: RepoSummary[], stats: TokenStats | null = nu
 export function offTheClockBody(): string {
   const interests = [
     ["Climbing", "Rock climbing is my regular break from the screen."],
-    ["Cards", "I collect Pokémon cards and open packs with friends. Some Magic: The Gathering too."],
+    ["Cards", "I collect Pokémon cards and open packs with friends, play some Magic: The Gathering, and help run an online TCG singles shop."],
     ["Wings", "Buffalo Wild Wings after a long week."],
     ["Travel", "Most recently Peru, in September 2026."],
     ["Side projects", "Agentic workflows, deployment automation, and small developer tools."],
     ["Reading", "Pierce Brown’s Red Rising trilogy."],
   ];
-  return `<h1>Off the clock</h1>${paragraph("What I do when I'm not working.")}<dl class="interests">${interests.map(([heading, text], index) => `<dt>${esc(heading)}</dt><dd>${esc(text)}${index === 3 ? '<p><img loading="lazy" decoding="async" src="/peru-travel.webp" alt="Mountains and a river in Peru" width="320" height="240"></p>' : ""}</dd>`).join("")}</dl>`;
+  const shops = [
+    [
+      "tcg-tcgplayer",
+      "https://www.tcgplayer.com/search/all/product?seller=161abc55&view=grid",
+      "TCGplayer",
+      "gostoptcg · browse live singles on tcgplayer.com",
+    ],
+    [
+      "tcg-cardtrader",
+      "https://www.cardtrader.com/en-US/users/victor-ivanov",
+      "CardTrader",
+      "Gostop TCG · US and international listings on cardtrader.com",
+    ],
+  ] as const;
+  const shopLinks = shops.map(([modifier, href, name, meta]) =>
+    `<li><a class="tcg-link ${modifier}" href="${esc(href)}" ${external}><span class="tcg-name">${esc(name)} &raquo;</span><span class="tcg-meta">${esc(meta)}</span></a></li>`).join("");
+  return `<h1>Off the clock</h1>${paragraph("What I do when I'm not working.")}<dl class="interests">${interests.map(([heading, text], index) => `<dt>${esc(heading)}</dt><dd>${esc(text)}${index === 3 ? '<p><img loading="lazy" decoding="async" src="/peru-travel.webp" alt="Mountains and a river in Peru" width="320" height="240"></p>' : ""}</dd>`).join("")}</dl>`
+    + `<section class="tcg-shop" aria-labelledby="tcg-shop"><h2 id="tcg-shop">GoStopTCG Shop</h2>`
+    + `${paragraph("Outside of engineering, I help run GoStopTCG, an online trading-card shop listing Pokémon, Magic: The Gathering, One Piece, Riftbound, and other singles.")}`
+    + `<ul class="tcg-links">${shopLinks}</ul></section>`;
 }
 
 export function contactBody(): string {

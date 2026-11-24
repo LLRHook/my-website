@@ -67,7 +67,7 @@ Nothing is skipped.
   |---|---|---|---|
   | / | 3 | 40,000 | 3 / 32,394 |
   | /about | 4 | 75,000 | 4 / 61,888 |
-  | /projects | 2 | 44,000 | 2 / 38,536 (2026-10-14: game removed, token burner added) |
+  | /projects | 2 | 48,000 | 2 / 44,545 (2026-11-24: live GitHub repo growth, denser 90-day token-burner bars, and inlined `.tcg-shop` CSS; raised from 44,000) |
   | /resume | 2 | 32,000 | 2 / 24,469 |
   | /off-the-clock | 3 | 85,000 | 3 / 72,423 |
   | /contact | 2 | 26,000 | 2 / 18,913 |

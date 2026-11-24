@@ -206,6 +206,21 @@ the end of their section, sorted by id on read.
 - **Bump:** patch
 - **Status:** shipped-pending-migration
 
+### [FEAT-1795550000] Add TCG shop section with TCGplayer and CardTrader links to Off the Clock
+- [x] **Priority:** med
+- **Area:** content, frontend, ui, tests
+- **File(s):** app/lib/pages.ts, app/lib/html.ts, public/retro.css, app/lib/pages.test.ts, e2e/site.spec.ts, e2e/performance.spec.ts, VERIFICATION.md, README.md
+- **Why:** Owner requested featuring the GoStopTCG online shop on `/off-the-clock` with styled links to the TCGplayer and CardTrader storefronts.
+- **Approach:** Add a pure HTML/CSS `<section class="tcg-shop" aria-labelledby="tcg-shop">` panel to `offTheClockBody()` linking to the verified TCGplayer seller catalog (`seller=161abc55`) and CardTrader seller profile (`users/victor-ivanov`), with bespoke 1990s beveled card-link styling in `public/retro.css` (zero JS, zero inline styles, high contrast, responsive at 320px). Update `/off-the-clock` metadata, `README.md`, unit tests, and E2E checks.
+- **Library / dependency notes:** None.
+- **Acceptance criteria:** `/off-the-clock` renders the TCG shop panel with working external links to TCGplayer and CardTrader, styled via `retro.css` with no inline styles or scripts, no overflow at 320px, and all cold-load budgets green.
+- **Test plan:** Unit tests in `app/lib/pages.test.ts` plus Playwright `site.spec.ts` and `performance.spec.ts` across Chromium and WebKit.
+- **Out of scope:** Live inventory widgets, client-side JavaScript, or private business financials.
+- **Implementation:** Added `<section class="tcg-shop">` to `offTheClockBody()` with links to GoStopTCG on TCGplayer (`https://www.tcgplayer.com/search/all/product?seller=161abc55&view=grid`) and CardTrader (`https://www.cardtrader.com/en-US/users/victor-ivanov`), styled with dedicated `.tcg-shop` / `.tcg-links` / `.tcg-link` rules in `public/retro.css`. Raised `/projects` cold-load budget from 44,000 to 48,000 B (measured ~44.5 KB uncompressed on 2026-11-24 due to live GitHub repo additions, denser 90-day token-burner SVG bars, and inlined `.tcg-shop` CSS) in `e2e/performance.spec.ts` and `VERIFICATION.md`. Updated `/off-the-clock` metadata, `README.md`, unit tests, and Playwright E2E checks.
+- **Docs:** README.md (Off the Clock page summary), VERIFICATION.md (`/projects` cold-load budget).
+- **Bump:** minor
+- **Status:** shipped-pending-migration
+
 ## Shipped
 
 ### [FEAT-1781507205] Restore prominent interactive star/aurora background

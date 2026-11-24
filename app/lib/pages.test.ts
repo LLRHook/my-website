@@ -101,8 +101,14 @@ describe("page bodies", () => {
     for (const project of ["Linky", "Billington", "Citybase", "Fix YouTube"]) expect(resume).toContain(project);
     expect(resume).not.toContain("MailIt");
 
-    // Off the clock preserves temporary travel like Peru as requested.
-    expect(offTheClockBody()).toContain("Peru");
+    // Off the clock preserves temporary travel like Peru and features the TCG shop links.
+    const offTheClock = offTheClockBody();
+    expect(offTheClock).toContain("Peru");
+    expect(offTheClock).toContain('id="tcg-shop"');
+    expect(offTheClock).toContain('href="https://www.tcgplayer.com/search/all/product?seller=161abc55&amp;view=grid"');
+    expect(offTheClock).toContain('href="https://www.cardtrader.com/en-US/users/victor-ivanov"');
+    expect(offTheClock).not.toMatch(/style=/);
+    expect(offTheClock).not.toContain("\u2014");
   });
 });
 
