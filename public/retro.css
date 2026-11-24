@@ -30,8 +30,10 @@ table.projects th, table.projects td { border: 1px inset #c0c0c0; padding: 4px 6
 table.projects time { white-space: nowrap; }
 table.projects tbody tr:nth-child(even) { background: #eeeeee; }
 .notice { background: #ffffcc; border: 1px solid #808000; padding: 6px 10px; }
-dl.interests dt { font-weight: bold; margin-top: 12px; color: #000080; }
-dl.interests dd { margin: 2px 0 0 24px; }
+dl.interests dt, dl.history dt { font-weight: bold; margin-top: 12px; color: #000080; }
+dl.interests dd, dl.history dd { margin: 2px 0 0 24px; }
+dl.history ul { margin: 4px 0 0; padding-left: 18px; }
+dl.history li { margin: 2px 0; }
 .big { font-size: 24px; margin: 0 0 8px; }
 nav.crumbs { text-align: left; font-weight: normal; font-size: 14px; margin: 0 0 10px; } .crumbs ol, .crumbs li { display: inline; margin: 0; padding: 0; } .crumbs li + li::before { content: " \00bb  "; }
 footer { text-align: center; font-size: 14px; }
@@ -55,4 +57,4 @@ footer { text-align: center; font-size: 14px; }
 .burner details { margin: 8px 0; } .burner summary { cursor: pointer; color: #0000ee; text-decoration: underline; }
 @media (max-width: 600px) { body { padding: 0; } .page { border-width: 0; padding: 10px 12px; } .site-name { font-size: 24px; } .portrait { width: 80px; height: 80px; } ul.columns { columns: 1; } }
 @media (prefers-reduced-motion: reduce) { .marquee span { display: block; animation: none; padding: 0 8px; overflow: hidden; text-overflow: ellipsis; text-align: center; } .new { animation: none; } }
-@media print { html { background: #fff; } .page { border: 0; } .marquee, nav, .buttons, .skip { display: none; } }
+@media print { html { background: #fff; } body { padding: 0; font-size: 9.8px; line-height: 1.24; } .page { max-width: none; border: 0; padding: 0; } header, footer, hr, .marquee, nav, .buttons, .skip, .pdf-link, main.resume h1 { display: none; } main.resume h2 { font-size: 12px; margin: 6px 0 3px; } main.resume h3 { font-size: 10.5px; margin: 4px 0 1px; } main.resume p, main.resume ul { margin: 1px 0 3px; } main.resume ul { padding-left: 15px; } main.resume > div { display: flex; justify-content: space-between; align-items: baseline; } }

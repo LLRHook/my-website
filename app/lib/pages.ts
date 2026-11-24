@@ -7,22 +7,80 @@ import type { RepoSummary } from "./types";
 const external = 'target="_blank" rel="noopener noreferrer"';
 const profile = 'target="_blank" rel="me noopener noreferrer"';
 const paragraph = (text: string) => `<p>${esc(text)}</p>`;
+const extLink = (label: string, href: string) => `<a href="${esc(href)}" ${external}>${esc(label)}</a>`;
 const portrait = '<img class="portrait" decoding="async" fetchpriority="high" src="/victor-profile.jpg" width="120" height="120" alt="Victor\'s illustrated GitHub profile portrait">';
 
 export function homeBody(): string {
-  const lines = ["who I am and what I work on", "everything public on my GitHub, updated hourly", "experience, projects and education (PDF too)", "climbing, cards, books and travel", "email, GitHub and LinkedIn"];
-  return `<h1>Welcome to Victor Ivanov's Home Page!</h1>${portrait}${paragraph("Hi, I'm Victor, a Senior Full-Stack Engineer in Sterling, Virginia. I build web products and developer tools, work across the stack, and climb rocks.")}
-<div class="construction"><p><b>This page is always under construction.</b></p></div><h2>What's New</h2><ul><li><span class="new">NEW!</span> October 2026: the site is now a hand-written HTML and CSS home page. No JavaScript.</li><li>September 2026: resume updated.</li></ul><h2>Start here</h2><ul>${PAGES.slice(1).map((item, index) => `<li><a href="${esc(item.path)}">${esc(item.label)}</a>: ${esc(lines[index])}</li>`).join("")}</ul>
+  const lines = ["who I am, what I work on, and my work and project history", "everything public on my GitHub, updated hourly", "experience, projects and education (PDF too)", "climbing, cards, books and travel", "email, GitHub and LinkedIn"];
+  const updates = [
+    `<span class="new">NEW!</span> November 2026: porting hot-path cores across personal tools and apps to Rust, expanding TCG fulfillment and marketplace automation, and adding a full <a href="/about#history">work and project history</a>.`,
+    `October 2026: joined SCCI as a Software Developer in Virginia alongside remote backend work at Paradigm Testing, rebuilt this site as a hand-written HTML and CSS home page (no JavaScript), and added the <a href="/projects#burner">Token burner</a>.`,
+    `July to August 2026: completed the Revature Full-Stack Engineering Practicum, shipping Next.js analytics and FastAPI quiz workflows.`,
+    `Early to mid 2026: built ${extLink("Linky", "https://github.com/LLRHook/linky")}, ${extLink("Citybase", "https://github.com/LLRHook/citybase")}, ${extLink("Appshot", "https://github.com/LLRHook/appshot")}, ${extLink("Retrocast", "https://github.com/LLRHook/retrocast")}, ${extLink("Fix YouTube", "https://github.com/LLRHook/fix-youtube")}, and coding-agent tooling while continuing graduate CS coursework at Georgia Tech.`,
+    `2022 to present: building and leading multi-tenant certification SaaS platforms at Paradigm Testing.`,
+  ];
+  return `<h1>Welcome to Victor Ivanov's Home Page!</h1>${portrait}${paragraph("Hi, I'm Victor, a Senior Full-Stack Engineer in Virginia. I build certification software, web products, developer tools, and Rust utilities across the stack.")}
+<div class="construction"><p><b>This page is always under construction.</b></p></div><h2>What's New</h2><ul>${updates.map((item) => `<li>${item}</li>`).join("")}</ul><h2>Start here</h2><ul>${PAGES.slice(1).map((item, index) => `<li><a href="${esc(item.path)}">${esc(item.label)}</a>: ${esc(lines[index])}</li>`).join("")}</ul>
 <div itemscope itemtype="https://schema.org/WebSite"><meta itemprop="name" content="${esc(SITE_NAME)}"><link itemprop="url" href="${esc(SITE_URL)}/"></div>${personMicrodata()}`;
 }
 
+const WORK_HISTORY: readonly [string, readonly string[]][] = [
+  [
+    "October to November 2026",
+    [
+      "Started as a Software Developer at SCCI (Southeastern Computer Consultants, Inc.) in Virginia while continuing remote architecture and backend engineering at Paradigm Testing.",
+      `Focused on porting performance-sensitive cores in personal tools and apps to Rust, including native modules for ${extLink("Linky", "https://github.com/LLRHook/linky")}, ${extLink("Citybase", "https://github.com/LLRHook/citybase")}, ${extLink("Retrocast", "https://github.com/LLRHook/retrocast")}, and local coding-agent utilities, alongside ongoing work on ${extLink("Billington", "https://github.com/LLRHook/checksinmyhead")} and ${extLink("Appshot", "https://github.com/LLRHook/appshot")}.`,
+      `Built trading-card fulfillment and marketplace automation tooling, including a Chrome extension and print helpers for packing slips and 4x6 thermal labels (${extLink("tcg-order-printer", "https://github.com/LLRHook/tcg-order-printer")}), catalog software, and automated inventory and price synchronization.`,
+      `Rebuilt this site as a zero-JavaScript HTML and CSS home page and added the <a href="/projects#burner">Token burner</a> panel.`,
+    ],
+  ],
+  [
+    "July to August 2026",
+    [
+      "Completed the Revature Full-Stack Engineering Practicum, shipping 63 merged pull requests in 22 days across a server-driven Next.js trainer analytics dashboard and a Next.js/FastAPI quiz flow with Playwright E2E coverage.",
+    ],
+  ],
+  [
+    "Early to mid 2026",
+    [
+      `Built a wave of web products, browser extensions, and coding-agent developer tools in TypeScript, Go, Python, and Swift: ${extLink("Linky", "https://github.com/LLRHook/linky")} (hosted Discord social link-preview and translation bot at ${extLink("linkybot.dev", "https://linkybot.dev")}), ${extLink("Citybase", "https://github.com/LLRHook/citybase")} (isometric repo IDE that dispatches coding agents), ${extLink("Appshot", "https://github.com/LLRHook/appshot")} (local-first App Store screenshot studio), ${extLink("Retrocast", "https://github.com/LLRHook/retrocast")} (Go and WebSockets real-time chat), ${extLink("Fix YouTube", "https://github.com/LLRHook/fix-youtube")} (Manifest V3 browser extension), and agent usage utilities (${extLink("usage-widget", "https://github.com/LLRHook/usage-widget")}, ${extLink("claude-statusline", "https://github.com/LLRHook/claude-statusline")}, ${extLink("claude-usage-visualizer", "https://github.com/LLRHook/claude-usage-visualizer")}).`,
+      "Began graduate coursework in Georgia Tech's online M.S. in Computer Science (Artificial Intelligence track).",
+    ],
+  ],
+  [
+    "2025",
+    [
+      `Started building ${extLink("Billington", "https://github.com/LLRHook/checksinmyhead")}, a group expense-splitting platform with shared tabs, receipt scanning, and settlement tracking across Flutter, Next.js, Go, and PostgreSQL, along with smaller browser utilities including a client-side image-to-PDF Chrome extension.`,
+    ],
+  ],
+  [
+    "May 2024 to present",
+    [
+      "Senior Backend Engineer at Paradigm Testing (remote), leading architecture, priorities, and production readiness for three engineers across four certification SaaS products: monolith-to-microservices rewrite into five Spring Boot 3 services, real-time WebSocket/STOMP exam video delivery, React and Spring Boot scheduling workflows, and merge-gated CI/CD with 550+ automated tests.",
+    ],
+  ],
+  [
+    "June 2022 to May 2024",
+    [
+      "Software Developer at Paradigm Testing (Maryland), building a high-stakes oral-exam platform serving 4,800+ candidates annually, leading JPA adoption across 73 entities, and eliminating waiting-room errors at 200+ concurrent sessions.",
+    ],
+  ],
+  [
+    "2019 to May 2024",
+    [
+      "Earned a B.S. in Computer Science at the University of Maryland, Baltimore County (UMBC).",
+    ],
+  ],
+];
+
 export function aboutBody(): string {
+  const history = WORK_HISTORY.map(([period, items]) => `<dt>${esc(period)}</dt><dd><ul>${items.map((item) => `<li>${item}</li>`).join("")}</ul></dd>`).join("");
   return `<h1>About Me</h1>${portrait}${paragraph("Hi, I'm Victor. A Senior Full-Stack Engineer with a habit of building useful things.")}
-${paragraph("Based in Sterling, Virginia · Active DoD Secret clearance")}
-${paragraph("I work on certification software at Paradigm Testing. That means APIs, multi-tenant systems, real-time exam workflows, and getting the details right before they reach production.")}
-${paragraph("Most days, I work with Java, Spring Boot, React, and PostgreSQL. Outside of that, I build tools in Go and TypeScript and spend a lot of time exploring agentic development workflows.")}
-${paragraph("I studied computer science at UMBC and I'm pursuing an M.S. in Computer Science at Georgia Tech, expected December 2027. Away from the desk, you'll usually find me climbing or thinking about the next project.")}
-<blockquote>Build fast. Always test.<br><small>A good test suite is part of the work.</small></blockquote><h2>Tools I use</h2><ul class="columns">${[...SKILLS, "Go"].map((skill) => `<li>${esc(skill)}</li>`).join("")}</ul>
+${paragraph("Based in Virginia · Active DoD Secret clearance")}
+${paragraph("Professionally, I work as a Software Developer at SCCI in Virginia and as a Senior Backend Engineer at Paradigm Testing (remote), building multi-tenant certification software, APIs, and real-time exam workflows.")}
+${paragraph("Most days, I work with Java, Spring Boot, React, TypeScript, and PostgreSQL. Outside of work, I build products and developer tools in Go, Rust, Python, and TypeScript, with a focus on agentic development workflows.")}
+${paragraph("I earned a B.S. in Computer Science at UMBC (2019 to May 2024) and I am pursuing an online M.S. in Computer Science (Artificial Intelligence track) at Georgia Tech.")}
+<blockquote>Build fast. Always test.<br><small>A good test suite is part of the work.</small></blockquote><section aria-labelledby="history"><h2 id="history">Work and project history</h2><dl class="history">${history}</dl></section><h2>Tools I use</h2><ul class="columns">${SKILLS.map((skill) => `<li>${esc(skill)}</li>`).join("")}</ul>
 <figure><img loading="lazy" decoding="async" src="/conference-photo.jpg" alt="A moment at the conference podium" width="320" height="320"><figcaption>At the podium.</figcaption></figure><p><a href="/projects">See what I'm building &raquo;</a></p>
 <div itemscope itemtype="https://schema.org/ProfilePage">${personMicrodata('itemprop="mainEntity"')}</div>`;
 }
@@ -133,13 +191,19 @@ export function notFoundBody(): string {
 }
 
 export function resumeBody(): string {
-  return `<h1>Resume</h1><p><a href="/Victor_Ivanov_Resume.pdf" download>Download resume (PDF)</a></p>      <h2>${esc("Victor Ivanov")}</h2>
+  return `<h1>Resume</h1><p class="pdf-link"><a href="/Victor_Ivanov_Resume.pdf" download>Download resume (PDF)</a></p>      <h2>${esc("Victor Ivanov")}</h2>
       <p>${esc("Senior Full-Stack Engineer")}</p>
-      <p>${esc("\n        Sterling, Virginia · U.S. Citizen · Active DoD Secret clearance · ")}<a href="${esc(EMAIL_HREF)}">${esc("victor.n.ivanov@gmail.com")}</a><br />
+      <p>${esc("\n        Virginia · U.S. Citizen · Active DoD Secret clearance · ")}<a href="${esc(EMAIL_HREF)}">${esc("victor.n.ivanov@gmail.com")}</a><br />
         <a href="https://victorivanov.engineer" target="_blank" rel="noopener noreferrer">${esc("victorivanov.engineer")}</a>${esc(" · ")}<a href="${esc(GITHUB_HREF)}" rel="me">${esc("github.com/LLRHook")}</a>${esc(" · ")}<a href="${esc(SOCIAL_BY_ICON.linkedin.href)}" rel="me">${esc("LinkedIn")}</a>
       </p>
       <p>${esc("Secret-cleared, backend-leaning full-stack engineer with 4+ years shipping high-stakes certification SaaS. Owned a React/Spring Boot scheduling workflow end to end, carried a billing hotfix through live production validation, and built Next.js analytics and quiz experiences with explicit async, accessibility, and security controls. Open to on-site and hybrid roles and customer travel.")}</p>
       <h2>${esc("Experience")}</h2>
+      <article>
+        <h3>${esc("Software Developer")}</h3><p class="when">${esc("October 2026 – present")}<br>${esc("SCCI (Southeastern Computer Consultants, Inc.) · Virginia")}</p>
+        <ul>
+          <li>${esc("Software development and engineering delivery in Virginia.")}</li>
+        </ul>
+      </article>
       <article>
         <h3>${esc("Senior Backend Engineer")}</h3><p class="when">${esc("May 2024 – present")}<br>${esc("Paradigm Testing · Remote")}</p>
         <ul>
@@ -167,28 +231,33 @@ export function resumeBody(): string {
       </article>
       <h2>${esc("Selected projects")}</h2>
       <article>
-        <h3><a href="https://github.com/LLRHook/mailit" target="_blank" rel="noopener noreferrer">${esc("MailIt")}</a></h3>
-        <p>${esc("Go, Next.js 16, PostgreSQL, Redis, Docker/Kubernetes")}</p>
-        <ul><li>${esc("REST APIs, async workers, inbound SMTP, and a Next.js dashboard; direct MX delivery, DKIM, replay-safe sends, signed webhooks, multi-arch releases, and 523 tests.")}</li></ul>
+        <h3><a href="https://github.com/LLRHook/linky" target="_blank" rel="noopener noreferrer">${esc("Linky")}</a></h3>
+        <p>${esc("TypeScript, Rust, Discord API")}</p>
+        <ul><li>${esc("Hosted Discord bot (linkybot.dev) fixing social link previews across X, Instagram, TikTok, Bluesky, Reddit, and articles, with tweet and caption translation and native Rust tooling.")}</li></ul>
+      </article>
+      <article>
+        <h3><a href="https://github.com/LLRHook/checksinmyhead" target="_blank" rel="noopener noreferrer">${esc("Billington")}</a></h3>
+        <p>${esc("Flutter, Next.js, Go, PostgreSQL")}</p>
+        <ul><li>${esc("Group expense-splitting platform with shared tabs, receipt scanning, multi-currency support, and settlement tracking across mobile, web, and Go services.")}</li></ul>
       </article>
       <article>
         <h3><a href="https://github.com/LLRHook/citybase" target="_blank" rel="noopener noreferrer">${esc("Citybase")}</a></h3>
-        <p>${esc("Electron, React, Node.js")}</p>
-        <ul><li>${esc("Desktop IDE mapping repositories into an isometric city and dispatching Claude/Codex through typed IPC; streamed, cancellable runs, persisted history, guarded Git operations, and 393 tests.")}</li></ul>
+        <p>${esc("Electron, React, Node.js, Rust")}</p>
+        <ul><li>${esc("Desktop IDE mapping repositories into an isometric city and dispatching Claude/Codex through typed IPC; streamed, cancellable runs, persisted history, guarded Git operations, and native snapshot processing.")}</li></ul>
       </article>
       <article>
         <h3><a href="https://github.com/LLRHook/fix-youtube" target="_blank" rel="noopener noreferrer">${esc("Fix YouTube")}</a></h3>
         <p>${esc("JavaScript, Manifest V3")}</p>
-        <ul><li>${esc("Zero-dependency extension for SPA-aware Shorts redirects, feed filters, focus timers, watch history, and settings import/export; cross-browser CI and 15 tests.")}</li></ul>
+        <ul><li>${esc("Zero-dependency extension for SPA-aware Shorts redirects, feed filters, focus timers, watch history, and settings import/export with cross-browser CI.")}</li></ul>
       </article>
       <h2>${esc("Education")}</h2>
-      <div><div><h3>${esc("Georgia Institute of Technology")}</h3><p>${esc("M.S. Computer Science, Systems & Architecture (online)")}</p></div><span>${esc("Expected December 2027")}</span></div>
-      <div><div><h3>${esc("University of Maryland, Baltimore County")}</h3><p>${esc("B.S. Computer Science")}</p></div></div>
+      <div><div><h3>${esc("Georgia Institute of Technology")}</h3><p>${esc("M.S. Computer Science, Artificial Intelligence (online)")}</p></div><span>${esc("In progress")}</span></div>
+      <div><div><h3>${esc("University of Maryland, Baltimore County")}</h3><p>${esc("B.S. Computer Science")}</p></div><span>${esc("2019 – 2024")}</span></div>
       <h2>${esc("Technical skills")}</h2>
       <p><strong>${esc("Frontend:")}</strong>${esc(" TypeScript/JavaScript, React, Next.js 16, Vite, HTML/CSS, React Query, Playwright, Vitest")}</p>
-      <p><strong>${esc("Backend:")}</strong>${esc(" Java 21, Spring Boot 3, Spring Security, JPA/Hibernate, Python, FastAPI, Go, REST, WebSockets/STOMP")}</p>
+      <p><strong>${esc("Backend:")}</strong>${esc(" Java 21, Spring Boot 3, Spring Security, JPA/Hibernate, Python, FastAPI, Go, Rust, REST, WebSockets/STOMP")}</p>
       <p><strong>${esc("Data & cloud:")}</strong>${esc(" PostgreSQL, MariaDB, Redis/Valkey, AWS (EC2, S3, RDS), Docker, Kubernetes/Helm")}</p>
       <p><strong>${esc("Delivery & security:")}</strong>${esc(" Bitbucket Pipelines, GitHub Actions, CI/CD, OAuth2/JWT, JUnit/Mockito, Testcontainers, Pytest")}</p>
-      <p>${esc("Updated October 2026.")}</p>
+      <p>${esc("Updated November 2026.")}</p>
 `;
 }

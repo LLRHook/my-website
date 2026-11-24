@@ -56,6 +56,42 @@ describe("page bodies", () => {
   it("links the downloadable resume PDF", () => {
     expect(resumeBody()).toContain('<a href="/Victor_Ivanov_Resume.pdf" download>');
   });
+  it("keeps home, about, and resume aligned on work history, clearance, and general location", () => {
+    const home = homeBody();
+    const about = aboutBody();
+    const resume = resumeBody();
+    for (const html of [home, about, resume]) {
+      expect(html).not.toContain("Sterling");
+      expect(html).not.toContain("Expected December 2027");
+      expect(html).not.toContain("Systems &amp; Architecture");
+      expect(html).not.toMatch(/eligib/i);
+    }
+    expect(home).toContain('href="/about#history"');
+    expect(home).toContain("SCCI");
+    expect(home).toContain("Rust");
+    expect(home).not.toContain("\u2014");
+
+    expect(about).toContain('id="history"');
+    expect(about).toContain("Active DoD Secret clearance");
+    for (const topic of ["SCCI", "Paradigm Testing", "Revature", "Artificial Intelligence", "UMBC", "Billington", "Linky", "Citybase", "Appshot", "Retrocast", "Fix YouTube", "Rust", "tcg-order-printer"]) {
+      expect(about).toContain(topic);
+    }
+    expect(about).not.toContain("\u2014");
+
+    expect(resume).toContain("Active DoD Secret clearance");
+    expect(resume).toContain("Secret-cleared");
+    expect(resume).toContain("U.S. Citizen");
+    expect(resume).toContain("SCCI (Southeastern Computer Consultants, Inc.)");
+    expect(resume).toContain("Artificial Intelligence");
+    expect(resume).toContain("In progress");
+    expect(resume).toContain("2019 – 2024");
+    expect(resume).toContain("Updated November 2026.");
+    for (const project of ["Linky", "Billington", "Citybase", "Fix YouTube"]) expect(resume).toContain(project);
+    expect(resume).not.toContain("MailIt");
+
+    // Off the clock preserves temporary travel like Peru as requested.
+    expect(offTheClockBody()).toContain("Peru");
+  });
 });
 
 const usage = (input: number, output: number, cacheWrite: number, cacheRead: number, costUsd: number) =>

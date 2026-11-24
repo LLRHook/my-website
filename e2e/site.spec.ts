@@ -74,12 +74,14 @@ test("favicon set is served and linked", async ({ page, request }) => {
   for (const href of ["/favicon.ico", "/favicon.svg"]) await expect(page.locator(`link[rel="icon"][href="${href}"]`)).toHaveCount(1);
   await expect(page.locator('link[rel="apple-touch-icon"]')).toHaveAttribute("href", "/apple-touch-icon.png");
 });
-test("home and about carry Person structured data", async ({ page }) => {
+test("home and about carry Person structured data and the work history section", async ({ page }) => {
   for (const path of ["/", "/about"]) {
     await page.goto(path);
     await expect(page.locator('[itemtype="https://schema.org/Person"] > meta[itemprop="name"]')).toHaveAttribute("content", "Victor Ivanov");
+    await expect(page.locator("main")).not.toContainText("Sterling");
   }
   await expect(page.locator('[itemtype="https://schema.org/ProfilePage"] > [itemprop="mainEntity"]')).toHaveCount(1);
+  await expect(page.getByRole("heading", { name: "Work and project history" })).toBeVisible();
 });
 test("share card is served at 1200x630 and subpages show breadcrumbs", async ({ page, request }) => {
   const card = await request.get("/og-image.png");

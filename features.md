@@ -157,6 +157,26 @@ the end of their section, sorted by id on read.
 - **Bump:** patch
 - **Status:** open
 
+### [FEAT-1795547687] Update work and project history, generalize location, and align resume
+- [x] **Priority:** high
+- **Area:** content, frontend, seo, tests
+- **File(s):** app/lib/constants.ts, app/lib/html.ts, app/lib/pages.ts, app/lib/html.test.ts, app/lib/pages.test.ts, public/retro.css, scripts/render-assets.mjs, scripts/render-resume.mjs, public/og-image.png, public/Victor_Ivanov_Resume.pdf, package.json, README.md, e2e/site.spec.ts
+- **Why:** The site's home updates, About narrative, and Resume lagged behind Victor's current work and project history, listed an outdated city and Georgia Tech graduation target, still listed MailIt on the resume, and lacked a chronological engineering timeline.
+- **Approach:** Broaden location copy and schema.org address microdata from city-level to Virginia (leaving temporary travel such as Peru on /off-the-clock untouched). Refresh / intro and "What's New" with a work-focused snapshot linking into a new chronological "Work and project history" `<dl class="history">` section on /about covering SCCI, Paradigm Testing, Revature, UMBC (2019 to May 2024), Georgia Tech OMSCS (Artificial Intelligence track, in progress), major personal projects (Billington, Linky, Citybase, Appshot, Retrocast, Fix YouTube, coding-agent tools, Rust native-core ports), and technical TCG order-fulfillment/marketplace automation, with no personal-life or private business/employer internals. Align /resume HTML, regenerate `public/Victor_Ivanov_Resume.pdf` from the rendered `/resume` HTML via `scripts/render-resume.mjs`, and regenerate `public/og-image.png` via `scripts/render-assets.mjs`. Keep all pages HTML and CSS only with no client JS and within existing cold-load budgets.
+- **Library / dependency notes:** None; uses existing Playwright Chromium for asset and PDF generation scripts.
+- **Acceptance criteria:**
+  - Home `/` and About `/about` show accurate, engineering-focused history through November 2026 with `#history` anchor.
+  - No page, metadata, share card, or resume PDF exposes city-level location (`Sterling`), outdated `Expected December 2027` / `Systems & Architecture`, or `MailIt` on `/resume`.
+  - `/off-the-clock` stays unchanged (retaining temporary travel like Peru).
+  - `/resume` HTML and `public/Victor_Ivanov_Resume.pdf` match on SCCI, Paradigm Testing, Revature, updated Selected Projects, Education, and November 2026 date.
+  - All lint, typecheck, unit, production build, and Playwright E2E/performance budget checks pass.
+- **Test plan:** Unit tests in `app/lib/pages.test.ts` and `app/lib/html.test.ts` covering the updated copy, history entries, clearance wording, absence of city/stale claims, and microdata; Playwright `site.spec.ts` and `performance.spec.ts` across Chromium and WebKit.
+- **Out of scope:** Changing `/off-the-clock`, altering the 1990s layout/navigation count, adding client-side JavaScript, or exposing private personal/employer/financial details.
+- **Implementation:** Updated `/` intro and "What's New" to summarize recent work through November 2026 and link to `/about#history`; added a chronological "Work and project history" `<dl class="history">` timeline on `/about` covering SCCI, Paradigm Testing, Revature, UMBC (2019 to May 2024), Georgia Tech OMSCS (Artificial Intelligence track, in progress), major projects (Billington, Linky, Citybase, Appshot, Retrocast, Fix YouTube, coding-agent utilities, Rust native-core ports), and technical TCG fulfillment/marketplace automation. Generalized location to Virginia across pages, meta descriptions, `personMicrodata()` (adding SCCI alongside Paradigm Testing), and the regenerated `public/og-image.png`; left `/off-the-clock` unchanged. Aligned `/resume` HTML (adding SCCI, replacing MailIt with Linky and Billington, updating Education and Skills, dating November 2026) and added `scripts/render-resume.mjs` (`npm run resume-pdf`) to export `public/Victor_Ivanov_Resume.pdf` directly from `/resume`. Verified with `npm run lint` (0 warnings), `npx tsc --noEmit` (0 errors), `npm test` (76/76 across 4 files), production build, and `CI=1 npm run test:e2e` (43/43 across Chromium and mobile WebKit, all cold-load budgets green).
+- **Docs:** README.md (About Me summary, `npm run resume-pdf`, November 2026 resume copy).
+- **Bump:** minor
+- **Status:** shipped-pending-migration
+
 ## Shipped
 
 ### [FEAT-1781507205] Restore prominent interactive star/aurora background

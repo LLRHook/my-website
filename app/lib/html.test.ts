@@ -59,9 +59,18 @@ describe("HTML documents", () => {
     expect(html).not.toContain('rel="canonical"');
     expect(html).not.toContain('property="og:url"');
   });
-  it("escapes Person microdata attributes", () => {
-    expect(personMicrodata('itemprop="mainEntity"')).toMatch(/^<div itemprop="mainEntity" itemscope itemtype="https:\/\/schema\.org\/Person"/);
-    expect(personMicrodata()).toContain('<meta itemprop="name" content="University of Maryland, Baltimore County">');
+  it("escapes Person microdata attributes and uses state-level address", () => {
+    const microdata = personMicrodata('itemprop="mainEntity"');
+    expect(microdata).toMatch(/^<div itemprop="mainEntity" itemscope itemtype="https:\/\/schema\.org\/Person"/);
+    expect(microdata).toContain('<meta itemprop="name" content="University of Maryland, Baltimore County">');
+    expect(microdata).toContain('<meta itemprop="name" content="Southeastern Computer Consultants, Inc. (SCCI)">');
+    expect(microdata).toContain('<meta itemprop="name" content="Paradigm Testing">');
+    expect(microdata).toContain('<meta itemprop="addressRegion" content="VA">');
+    expect(microdata).not.toContain("Sterling");
+  });
+  it("keeps city-level location out of page metadata and dates the resume", () => {
+    for (const item of PAGES) expect(item.description).not.toContain("Sterling");
+    expect(PAGES.find((item) => item.path === "/resume")?.description).toContain("November 2026");
   });
   it("returns the supplied status and HTML content type", async () => {
     const response = render("/contact", "<h1>Contact</h1>", 202);

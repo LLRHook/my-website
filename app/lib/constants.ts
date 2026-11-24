@@ -1,8 +1,8 @@
 export const SITE_URL = "https://victorivanov.engineer";
-export const SITE_NAME = "Victor Ivanov — Senior Full-Stack Engineer";
+export const SITE_NAME = "Victor Ivanov | Senior Full-Stack Engineer";
 export const SITE_TITLE = "Victor Ivanov | Senior Full-Stack Engineer";
 export const SITE_DESCRIPTION =
-  "Victor Ivanov is a senior full-stack engineer in Sterling, Virginia, building web products and developer tools with Java, Spring Boot, React, and TypeScript.";
+  "Victor Ivanov is a senior full-stack engineer in Virginia building certification software, web products, and developer tools in Java, TypeScript, Go, and Rust.";
 
 export type SocialIcon = "github" | "linkedin" | "email";
 
@@ -35,6 +35,8 @@ export const SKILLS: readonly string[] = [
   "React",
   "Next.js",
   "Node.js",
+  "Go",
+  "Rust",
   "Python",
   "PostgreSQL",
   "Redis",
@@ -54,6 +56,8 @@ export const KNOWS_ABOUT: readonly string[] = [
   "React",
   "Next.js",
   "Node.js",
+  "Go",
+  "Rust",
   "Python",
   "PostgreSQL",
   "Full-Stack Development",
