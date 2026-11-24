@@ -96,6 +96,17 @@ the end of their section, sorted by id on read.
 - **Notes (2026-11-02):** Some previously published daily totals still decrease because older source logs are no longer available locally. Claude Code is configured with 14-day log retention. The snapshot reflects available logs; no missing usage was estimated. Older unpriced Codex models count toward tokens and Other, with their costs excluded as before.
 - **Status:** fixed-pending-migration
 
+### [BUG-1795549039] Employment dates show overlapping current roles on the public site
+- [x] **Severity:** med
+- **Area:** content, seo, resume
+- **File(s):** app/lib/pages.ts, app/lib/html.ts, app/lib/pages.test.ts, app/lib/html.test.ts, public/Victor_Ivanov_Resume.pdf
+- **Observation:** After FEAT-1795547687, `/`, `/about`, `/resume`, `public/Victor_Ivanov_Resume.pdf`, and schema.org `Person` microdata listed both SCCI (October 2026–present) and Paradigm Testing (May 2024–present) as current roles.
+- **Expected:** Present a clean sequential employment timeline on the website: SCCI (October 2026–present) as current employer and Paradigm Testing ending in October 2026, with `personMicrodata()` listing only SCCI under `worksFor`.
+- **Repro / Notes:** Inspect `/`, `/about`, `/resume`, `public/Victor_Ivanov_Resume.pdf`, and `worksFor` microdata.
+- **Bump:** patch
+- **Fix:** Updated `/`, `/about`, `/resume`, `personMicrodata()`, and the regenerated `public/Victor_Ivanov_Resume.pdf` so SCCI is listed as the current role (October 2026–present) and Paradigm Testing is listed as May 2024–October 2026. Added unit regressions in `app/lib/html.test.ts` and `app/lib/pages.test.ts`.
+- **Status:** fixed-pending-migration
+
 ## Migrated to changelog
 
 Entries below have been ticked off and copied as a one-liner into `CHANGELOG.md`.

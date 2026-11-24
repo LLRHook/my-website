@@ -11,8 +11,9 @@ import { zstdDecompressSync } from "node:zlib";
 // API list prices in USD per million tokens, from
 // https://platform.claude.com/docs/en/about-claude/pricing and
 // https://developers.openai.com/api/docs/pricing (standard tier, global routing).
-export const PRICES_AS_OF = "2026-10-14";
+export const PRICES_AS_OF = "2026-11-23";
 const CLAUDE_PRICES = {
+  "claude-fable-5-2": { input: 8, write5m: 10, write1h: 16, read: 0.2, output: 40 },
   "claude-fable-5-1": { input: 10, write5m: 12.5, write1h: 20, read: 0.25, output: 50 },
   "claude-fable-5": { input: 10, write5m: 12.5, write1h: 20, read: 1, output: 50 },
   "claude-opus-5-5": { input: 4, write5m: 5, write1h: 8, read: 0.2, output: 20 },
@@ -27,10 +28,15 @@ const CLAUDE_PRICES = {
 };
 // Requests over 272K input tokens pay the long-context row.
 const OPENAI_PRICES = {
+  "gpt-6.2-sol": { input: 2, read: 0.1, write: 2.5, output: 10, long: { over: 272_000, input: 4, read: 0.2, write: 5, output: 15 } },
   "gpt-6.1-sol": { input: 2, read: 0.1, write: 2.5, output: 10, long: { over: 272_000, input: 4, read: 0.2, write: 5, output: 15 } },
   "gpt-6-astra": { input: 10, read: 1, write: 12.5, output: 50, long: { over: 272_000, input: 20, read: 2, write: 25, output: 75 } },
   "gpt-6-sol": { input: 2, read: 0.2, write: 2.5, output: 10, long: { over: 272_000, input: 4, read: 0.4, write: 5, output: 15 } },
   "gpt-6-luna": { input: 0.1, read: 0.01, write: 0.125, output: 0.5, long: { over: 272_000, input: 0.2, read: 0.02, write: 0.25, output: 0.75 } },
+  "gpt-5.6-sol": { input: 4, read: 0.4, write: 5, output: 20, long: { over: 272_000, input: 8, read: 0.8, write: 10, output: 30 } },
+  "gpt-5.6-terra": { input: 2, read: 0.2, write: 2.5, output: 12, long: { over: 272_000, input: 4, read: 0.4, write: 5, output: 18 } },
+  "gpt-5.6-luna": { input: 0.2, read: 0.02, write: 0.25, output: 1.2, long: { over: 272_000, input: 0.4, read: 0.04, write: 0.5, output: 1.8 } },
+  "gpt-5.5": { input: 5, read: 0.5, write: 0, output: 30, long: { over: 272_000, input: 10, read: 1, write: 0, output: 45 } },
 };
 
 export const DAILY_DAYS = 90;

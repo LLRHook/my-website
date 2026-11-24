@@ -64,7 +64,7 @@ describe("HTML documents", () => {
     expect(microdata).toMatch(/^<div itemprop="mainEntity" itemscope itemtype="https:\/\/schema\.org\/Person"/);
     expect(microdata).toContain('<meta itemprop="name" content="University of Maryland, Baltimore County">');
     expect(microdata).toContain('<meta itemprop="name" content="Southeastern Computer Consultants, Inc. (SCCI)">');
-    expect(microdata).toContain('<meta itemprop="name" content="Paradigm Testing">');
+    expect(microdata).not.toContain('itemprop="worksFor" itemscope itemtype="https://schema.org/Organization"><meta itemprop="name" content="Paradigm Testing">');
     expect(microdata).toContain('<meta itemprop="addressRegion" content="VA">');
     expect(microdata).not.toContain("Sterling");
   });

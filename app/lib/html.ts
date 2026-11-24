@@ -7,10 +7,10 @@ export function esc(value: string): string {
 export interface SitePage { path: string; label: string; title: string; description: string }
 export const PAGES: readonly SitePage[] = [
   { path: "/", label: "Home", title: SITE_TITLE, description: SITE_DESCRIPTION },
-  { path: "/about", label: "About Me", title: "About | Victor Ivanov", description: "Meet Victor Ivanov, a senior full-stack engineer in Virginia: work and project history, certification software, developer tools, and technical stack." },
+  { path: "/about", label: "About Me", title: "About | Victor Ivanov", description: "Meet Victor Ivanov, a senior full-stack engineer in Virginia: biography and chronological work and project history." },
   { path: "/projects", label: "Projects", title: "Projects | Victor Ivanov", description: "Victor Ivanov's projects: web products, developer tools, and open-source repositories, plus how many tokens AI coding agents have burned on my machine." },
   { path: "/resume", label: "Resume", title: "Resume | Victor Ivanov", description: "Victor Ivanov's November 2026 resume: engineering experience, selected projects, education, technical skills, and a downloadable PDF." },
-  { path: "/off-the-clock", label: "Off the Clock", title: "Off the clock | Victor Ivanov", description: "Victor Ivanov away from the desk: rock climbing, Pokémon and Magic cards, books, travel, and side projects." },
+  { path: "/off-the-clock", label: "Off the Clock", title: "Off the clock | Victor Ivanov", description: "Victor Ivanov away from the desk: rock climbing, Pokémon and Magic cards, the GoStopTCG shop on TCGplayer and CardTrader, books, travel, and side projects." },
   { path: "/contact", label: "Contact", title: "Contact | Victor Ivanov", description: "Contact Victor Ivanov by email or connect on GitHub and LinkedIn. Based in Virginia, on Eastern time." },
 ];
 
@@ -21,7 +21,6 @@ export function personMicrodata(attributes = ""): string {
   const link = (property: string, href: string) => `<link itemprop="${property}" href="${esc(href)}">`;
   return `<div ${attributes ? `${attributes} ` : ""}itemscope itemtype="https://schema.org/Person" itemid="${esc(SITE_URL)}/#person">${meta("name", "Victor Ivanov")}${meta("jobTitle", "Senior Full-Stack Engineer")}${link("url", SITE_URL + "/")}${link("image", SITE_URL + "/victor-profile.jpg")}${SOCIAL_LINKS.filter((item) => item.external).map((item) => link("sameAs", item.href)).join("")}`
     + `<div itemprop="worksFor" itemscope itemtype="https://schema.org/Organization">${meta("name", "Southeastern Computer Consultants, Inc. (SCCI)")}</div>`
-    + `<div itemprop="worksFor" itemscope itemtype="https://schema.org/Organization">${meta("name", "Paradigm Testing")}</div>`
     + `<div itemprop="address" itemscope itemtype="https://schema.org/PostalAddress">${meta("addressRegion", "VA")}${meta("addressCountry", "US")}</div>`
     + `<div itemprop="alumniOf" itemscope itemtype="https://schema.org/CollegeOrUniversity">${meta("name", "University of Maryland, Baltimore County")}${link("sameAs", "https://umbc.edu")}</div>`
     + `${KNOWS_ABOUT.map((topic) => meta("knowsAbout", topic)).join("")}</div>`;

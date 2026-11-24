@@ -177,6 +177,50 @@ the end of their section, sorted by id on read.
 - **Bump:** minor
 - **Status:** shipped-pending-migration
 
+### [FEAT-1795549210] Remove Tools I use and conference photo section from About Me
+- [x] **Priority:** med
+- **Area:** content, frontend, tests
+- **File(s):** app/lib/pages.ts, app/lib/constants.ts, app/lib/html.ts, app/lib/pages.test.ts, public/retro.css, public/conference-photo.jpg, README.md
+- **Why:** Owner requested removing the "Tools I use" list and conference podium photo section from `/about` so the page stays focused on biography and work/project history.
+- **Approach:** Remove `<h2>Tools I use</h2>`, the `SKILLS` list, and the conference photo `<figure>` from `aboutBody()`, delete unused `SKILLS`, `ul.columns` CSS, and `public/conference-photo.jpg`, update `/about` metadata and README, and add unit regressions.
+- **Library / dependency notes:** None.
+- **Acceptance criteria:** `/about` omits "Tools I use", the skills list, and the conference photo; `/conference-photo.jpg` is removed; all lint, tsc, unit, build, and E2E checks pass.
+- **Test plan:** Unit regressions in `app/lib/pages.test.ts` plus full Playwright suite.
+- **Out of scope:** Technical skills section on `/resume` and `KNOWS_ABOUT` microdata.
+- **Implementation:** Removed `Tools I use` and the conference podium figure from `aboutBody()`, deleted unused `SKILLS` and `ul.columns` rules, removed `public/conference-photo.jpg`, updated `/about` metadata and `README.md`, and added unit assertions in `app/lib/pages.test.ts`.
+- **Docs:** README.md (About Me summary and public photo list).
+- **Bump:** minor
+- **Status:** shipped-pending-migration
+
+### [FEAT-1795549500] Refresh token burner snapshot and model price table through November 2026
+- [x] **Priority:** med
+- **Area:** scripts, content
+- **File(s):** scripts/token-stats.mjs, scripts/token-stats.test.ts, data/token-stats.json
+- **Why:** The committed token-burner snapshot stopped at 2026-11-02 and omitted newer priced models (`claude-fable-5-2`, `gpt-6.2-sol`) as well as older priced GPT-5.x models (`gpt-5.6-sol`, `gpt-5.6-terra`, `gpt-5.6-luna`, `gpt-5.5`), leaving over 40% of tokens grouped under Other with $0 cost.
+- **Approach:** Add the verified list prices (as of 2026-11-23) to `scripts/token-stats.mjs`, cover the new model labels in `scripts/token-stats.test.ts`, and run `npm run token-stats` to refresh `data/token-stats.json` through 2026-11-24.
+- **Library / dependency notes:** None.
+- **Acceptance criteria:** `data/token-stats.json` refreshes cleanly through 2026-11-24, passes `parseTokenStats` and all unit/E2E/budget tests, and prices the named Claude/GPT models accurately.
+- **Test plan:** `npm run lint`, `npx tsc --noEmit`, `npm test`, production build, and `CI=1 npm run test:e2e`.
+- **Out of scope:** Estimating usage from expired Claude Code logs beyond local retention.
+- **Implementation:** Updated `scripts/token-stats.mjs` (`PRICES_AS_OF = "2026-11-23"`) with list prices for `claude-fable-5-2`, `gpt-6.2-sol`, `gpt-5.6-sol`, `gpt-5.6-terra`, `gpt-5.6-luna`, and `gpt-5.5`, extended `scripts/token-stats.test.ts`, and refreshed `data/token-stats.json` through 2026-11-24.
+- **Bump:** patch
+- **Status:** shipped-pending-migration
+
+### [FEAT-1795550000] Add TCG shop section with TCGplayer and CardTrader links to Off the Clock
+- [x] **Priority:** med
+- **Area:** content, frontend, ui, tests
+- **File(s):** app/lib/pages.ts, app/lib/html.ts, public/retro.css, app/lib/pages.test.ts, e2e/site.spec.ts, e2e/performance.spec.ts, VERIFICATION.md, README.md
+- **Why:** Owner requested featuring the GoStopTCG online shop on `/off-the-clock` with styled links to the TCGplayer and CardTrader storefronts.
+- **Approach:** Add a pure HTML/CSS `<section class="tcg-shop" aria-labelledby="tcg-shop">` panel to `offTheClockBody()` linking to the verified TCGplayer seller catalog (`seller=161abc55`) and CardTrader seller profile (`users/victor-ivanov`), with bespoke 1990s beveled card-link styling in `public/retro.css` (zero JS, zero inline styles, high contrast, responsive at 320px). Update `/off-the-clock` metadata, `README.md`, unit tests, and E2E checks.
+- **Library / dependency notes:** None.
+- **Acceptance criteria:** `/off-the-clock` renders the TCG shop panel with working external links to TCGplayer and CardTrader, styled via `retro.css` with no inline styles or scripts, no overflow at 320px, and all cold-load budgets green.
+- **Test plan:** Unit tests in `app/lib/pages.test.ts` plus Playwright `site.spec.ts` and `performance.spec.ts` across Chromium and WebKit.
+- **Out of scope:** Live inventory widgets, client-side JavaScript, or private business financials.
+- **Implementation:** Added `<section class="tcg-shop">` to `offTheClockBody()` with links to GoStopTCG on TCGplayer (`https://www.tcgplayer.com/search/all/product?seller=161abc55&view=grid`) and CardTrader (`https://www.cardtrader.com/en-US/users/victor-ivanov`), styled with dedicated `.tcg-shop` / `.tcg-links` / `.tcg-link` rules in `public/retro.css`. Raised `/projects` cold-load budget from 44,000 to 48,000 B (measured ~44.5 KB uncompressed on 2026-11-24 due to live GitHub repo additions, denser 90-day token-burner SVG bars, and inlined `.tcg-shop` CSS) in `e2e/performance.spec.ts` and `VERIFICATION.md`. Updated `/off-the-clock` metadata, `README.md`, unit tests, and Playwright E2E checks.
+- **Docs:** README.md (Off the Clock page summary), VERIFICATION.md (`/projects` cold-load budget).
+- **Bump:** minor
+- **Status:** shipped-pending-migration
+
 ## Shipped
 
 ### [FEAT-1781507205] Restore prominent interactive star/aurora background

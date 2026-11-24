@@ -103,6 +103,16 @@ test("no page reports a Content Security Policy violation", async ({ page }) => 
   }
   expect(errors.filter((text) => /Content Security Policy/i.test(text))).toEqual([]);
 });
+test("off the clock features the GoStopTCG shop links without inline styles", async ({ page }) => {
+  await page.goto("/off-the-clock");
+  const shop = page.locator("section.tcg-shop");
+  await expect(shop.getByRole("heading", { name: "GoStopTCG Shop" })).toBeVisible();
+  await expect(shop.getByRole("link", { name: /TCGplayer/ })).toHaveAttribute("href", "https://www.tcgplayer.com/search/all/product?seller=161abc55&view=grid");
+  await expect(shop.getByRole("link", { name: /CardTrader/ })).toHaveAttribute("href", "https://www.cardtrader.com/en-US/users/victor-ivanov");
+  await expect(page.locator("[style]")).toHaveCount(0);
+  expect(await shop.evaluate((element) => getComputedStyle(element).backgroundColor)).toBe("rgb(244, 241, 230)");
+});
+
 test("projects shows the token burner panel without inline styles", async ({ page }) => {
   await page.goto("/projects");
   const panel = page.locator("section.burner");

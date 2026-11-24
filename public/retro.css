@@ -21,7 +21,6 @@ figcaption { font-style: italic; font-size: 14px; }
 .new { color: #f00; font-weight: bold; font-family: Arial, Helvetica, sans-serif; font-size: 13px; animation: blink 1s steps(1, end) infinite; }
 @keyframes blink { 50% { visibility: hidden; } }
 blockquote { margin: 16px 24px; padding: 8px 12px; background: #ffffe0; border: 1px dashed #808080; font-style: italic; }
-ul.columns { columns: 2; }
 .table-wrap { overflow-x: auto; }
 table.projects { border-collapse: collapse; width: 100%; border: 2px outset #dfdfdf; }
 table.projects caption { text-align: left; font-weight: bold; padding: 4px 0; }
@@ -34,6 +33,15 @@ dl.interests dt, dl.history dt { font-weight: bold; margin-top: 12px; color: #00
 dl.interests dd, dl.history dd { margin: 2px 0 0 24px; }
 dl.history ul { margin: 4px 0 0; padding-left: 18px; }
 dl.history li { margin: 2px 0; }
+.tcg-shop { margin: 22px 0 8px; padding: 12px 14px; background: #f4f1e6; border: 3px ridge #808000; }
+.tcg-shop h2 { margin: 0 0 8px; padding: 4px 8px; background: #000080; color: #ff0; border: 2px inset #dfdfdf; font: bold 18px/1.2 "Courier New", Courier, monospace; }
+.tcg-shop p { margin: 6px 0 10px; }
+.tcg-links { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 10px; list-style: none; padding: 0; margin: 10px 0 0; }
+.tcg-link, .tcg-link:visited { display: block; padding: 10px 12px; background: #e8e8e8; border: 3px outset #dfdfdf; text-decoration: none; color: #000; }
+.tcg-link:hover { background: #ffffe0; } .tcg-link:active { border-style: inset; }
+.tcg-tcgplayer { border-left: 6px solid #0b57d0; } .tcg-cardtrader { border-left: 6px solid #800000; }
+.tcg-name { display: block; font: bold 15px/1.2 Verdana, Geneva, sans-serif; color: #000080; text-decoration: underline; }
+.tcg-meta { display: block; margin-top: 4px; font-size: 13px; color: #222; }
 .big { font-size: 24px; margin: 0 0 8px; }
 nav.crumbs { text-align: left; font-weight: normal; font-size: 14px; margin: 0 0 10px; } .crumbs ol, .crumbs li { display: inline; margin: 0; padding: 0; } .crumbs li + li::before { content: " \00bb  "; }
 footer { text-align: center; font-size: 14px; }
@@ -55,6 +63,6 @@ footer { text-align: center; font-size: 14px; }
 .burner-chart { margin: 8px 0 0; } .burner-chart svg { display: block; width: 100%; height: 120px; background: #000; border: 2px inset #dfdfdf; }
 .burner-chart rect { fill: #0f0; } .burner-chart figcaption { display: flex; justify-content: space-between; font-style: normal; font-size: 13px; }
 .burner details { margin: 8px 0; } .burner summary { cursor: pointer; color: #0000ee; text-decoration: underline; }
-@media (max-width: 600px) { body { padding: 0; } .page { border-width: 0; padding: 10px 12px; } .site-name { font-size: 24px; } .portrait { width: 80px; height: 80px; } ul.columns { columns: 1; } }
+@media (max-width: 600px) { body { padding: 0; } .page { border-width: 0; padding: 10px 12px; } .site-name { font-size: 24px; } .portrait { width: 80px; height: 80px; } }
 @media (prefers-reduced-motion: reduce) { .marquee span { display: block; animation: none; padding: 0 8px; overflow: hidden; text-overflow: ellipsis; text-align: center; } .new { animation: none; } }
 @media print { html { background: #fff; } body { padding: 0; font-size: 9.8px; line-height: 1.24; } .page { max-width: none; border: 0; padding: 0; } header, footer, hr, .marquee, nav, .buttons, .skip, .pdf-link, main.resume h1 { display: none; } main.resume h2 { font-size: 12px; margin: 6px 0 3px; } main.resume h3 { font-size: 10.5px; margin: 4px 0 1px; } main.resume p, main.resume ul { margin: 1px 0 3px; } main.resume ul { padding-left: 15px; } main.resume > div { display: flex; justify-content: space-between; align-items: baseline; } }

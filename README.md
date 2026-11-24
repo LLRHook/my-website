@@ -9,10 +9,10 @@ no JavaScript in the browser.
 ## Pages
 
 - Home (`/`): welcome and updates.
-- About Me (`/about`): biography, work and project history, tools, and conference photo.
+- About Me (`/about`): biography and work and project history.
 - Projects (`/projects`): the token burner (AI coding-agent token usage) and a table of public GitHub repositories.
 - Resume (`/resume`): experience, projects, education, skills, and a PDF download.
-- Off the Clock (`/off-the-clock`): climbing, cards, books, travel, and side projects.
+- Off the Clock (`/off-the-clock`): climbing, cards, the GoStopTCG shop (TCGplayer and CardTrader), books, travel, and side projects.
 - Contact (`/contact`): email, GitHub, LinkedIn, and an email guestbook.
 
 `/interests` permanently redirects to `/off-the-clock`. Unknown paths return
@@ -158,7 +158,7 @@ Export and publication automation is tracked in
 The HTML resume carries the November 2026 copy and links to
 `public/Victor_Ivanov_Resume.pdf`, a PDF export rendered from `/resume` with the
 phone number omitted and the same public wording as the HTML. The portrait comes from the public GitHub
-profile. The conference photo and September 2026 Peru photograph were supplied
+profile. The September 2026 Peru photograph was supplied
 by the owner and authorized for publication. Public copies have no EXIF or XMP
 metadata. The original source resume files remain unchanged.
 
