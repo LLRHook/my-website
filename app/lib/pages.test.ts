@@ -84,6 +84,9 @@ describe("page bodies", () => {
       expect(about).toContain(topic);
     }
     expect(about).not.toContain("\u2014");
+    expect(about).not.toContain("Tools I use");
+    expect(about).not.toContain("conference-photo.jpg");
+    expect(about).not.toContain("At the podium");
 
     expect(resume).toContain("Active DoD Secret clearance");
     expect(resume).toContain("Secret-cleared");

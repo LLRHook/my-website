@@ -7,7 +7,7 @@ export function esc(value: string): string {
 export interface SitePage { path: string; label: string; title: string; description: string }
 export const PAGES: readonly SitePage[] = [
   { path: "/", label: "Home", title: SITE_TITLE, description: SITE_DESCRIPTION },
-  { path: "/about", label: "About Me", title: "About | Victor Ivanov", description: "Meet Victor Ivanov, a senior full-stack engineer in Virginia: work and project history, certification software, developer tools, and technical stack." },
+  { path: "/about", label: "About Me", title: "About | Victor Ivanov", description: "Meet Victor Ivanov, a senior full-stack engineer in Virginia: biography and chronological work and project history." },
   { path: "/projects", label: "Projects", title: "Projects | Victor Ivanov", description: "Victor Ivanov's projects: web products, developer tools, and open-source repositories, plus how many tokens AI coding agents have burned on my machine." },
   { path: "/resume", label: "Resume", title: "Resume | Victor Ivanov", description: "Victor Ivanov's November 2026 resume: engineering experience, selected projects, education, technical skills, and a downloadable PDF." },
   { path: "/off-the-clock", label: "Off the Clock", title: "Off the clock | Victor Ivanov", description: "Victor Ivanov away from the desk: rock climbing, Pokémon and Magic cards, books, travel, and side projects." },

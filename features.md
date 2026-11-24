@@ -177,6 +177,21 @@ the end of their section, sorted by id on read.
 - **Bump:** minor
 - **Status:** shipped-pending-migration
 
+### [FEAT-1795549210] Remove Tools I use and conference photo section from About Me
+- [x] **Priority:** med
+- **Area:** content, frontend, tests
+- **File(s):** app/lib/pages.ts, app/lib/constants.ts, app/lib/html.ts, app/lib/pages.test.ts, public/retro.css, public/conference-photo.jpg, README.md
+- **Why:** Owner requested removing the "Tools I use" list and conference podium photo section from `/about` so the page stays focused on biography and work/project history.
+- **Approach:** Remove `<h2>Tools I use</h2>`, the `SKILLS` list, and the conference photo `<figure>` from `aboutBody()`, delete unused `SKILLS`, `ul.columns` CSS, and `public/conference-photo.jpg`, update `/about` metadata and README, and add unit regressions.
+- **Library / dependency notes:** None.
+- **Acceptance criteria:** `/about` omits "Tools I use", the skills list, and the conference photo; `/conference-photo.jpg` is removed; all lint, tsc, unit, build, and E2E checks pass.
+- **Test plan:** Unit regressions in `app/lib/pages.test.ts` plus full Playwright suite.
+- **Out of scope:** Technical skills section on `/resume` and `KNOWS_ABOUT` microdata.
+- **Implementation:** Removed `Tools I use` and the conference podium figure from `aboutBody()`, deleted unused `SKILLS` and `ul.columns` rules, removed `public/conference-photo.jpg`, updated `/about` metadata and `README.md`, and added unit assertions in `app/lib/pages.test.ts`.
+- **Docs:** README.md (About Me summary and public photo list).
+- **Bump:** minor
+- **Status:** shipped-pending-migration
+
 ## Shipped
 
 ### [FEAT-1781507205] Restore prominent interactive star/aurora background

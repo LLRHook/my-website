@@ -1,4 +1,4 @@
-import { EMAIL_HREF, GITHUB_HREF, SITE_NAME, SITE_URL, SKILLS, SOCIAL_BY_ICON } from "./constants";
+import { EMAIL_HREF, GITHUB_HREF, SITE_NAME, SITE_URL, SOCIAL_BY_ICON } from "./constants";
 import { esc, PAGES, personMicrodata } from "./html";
 import { presentProject } from "./projectPresentation";
 import type { TokenStats } from "./tokenStats";
@@ -80,8 +80,7 @@ ${paragraph("Based in Virginia · Active DoD Secret clearance")}
 ${paragraph("Professionally, I work as a Software Developer at SCCI in Virginia. Previously, I spent over four years at Paradigm Testing building and leading multi-tenant certification software, APIs, and real-time exam workflows.")}
 ${paragraph("Most days, I work with Java, Spring Boot, React, TypeScript, and PostgreSQL. Outside of work, I build products and developer tools in Go, Rust, Python, and TypeScript, with a focus on agentic development workflows.")}
 ${paragraph("I earned a B.S. in Computer Science at UMBC (2019 to May 2024) and I am pursuing an online M.S. in Computer Science (Artificial Intelligence track) at Georgia Tech.")}
-<blockquote>Build fast. Always test.<br><small>A good test suite is part of the work.</small></blockquote><section aria-labelledby="history"><h2 id="history">Work and project history</h2><dl class="history">${history}</dl></section><h2>Tools I use</h2><ul class="columns">${SKILLS.map((skill) => `<li>${esc(skill)}</li>`).join("")}</ul>
-<figure><img loading="lazy" decoding="async" src="/conference-photo.jpg" alt="A moment at the conference podium" width="320" height="320"><figcaption>At the podium.</figcaption></figure><p><a href="/projects">See what I'm building &raquo;</a></p>
+<blockquote>Build fast. Always test.<br><small>A good test suite is part of the work.</small></blockquote><section aria-labelledby="history"><h2 id="history">Work and project history</h2><dl class="history">${history}</dl></section><p><a href="/projects">See what I'm building &raquo;</a></p>
 <div itemscope itemtype="https://schema.org/ProfilePage">${personMicrodata('itemprop="mainEntity"')}</div>`;
 }
 
