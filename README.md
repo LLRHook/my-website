@@ -9,7 +9,7 @@ no JavaScript in the browser.
 ## Pages
 
 - Home (`/`): welcome and updates.
-- About Me (`/about`): biography, tools, and conference photo.
+- About Me (`/about`): biography, work and project history, tools, and conference photo.
 - Projects (`/projects`): the token burner (AI coding-agent token usage) and a table of public GitHub repositories.
 - Resume (`/resume`): experience, projects, education, skills, and a PDF download.
 - Off the Clock (`/off-the-clock`): climbing, cards, books, travel, and side projects.
@@ -52,6 +52,7 @@ in Vercel; never commit secrets.
 | `npx tsc --noEmit` | Run the standalone TypeScript check. |
 | `npm run test:e2e` | Run Playwright site checks in Chromium and WebKit, plus Chromium performance checks. |
 | `npm run assets` | Regenerate the committed favicons and share card. |
+| `npm run resume-pdf` | Regenerate `public/Victor_Ivanov_Resume.pdf` from a local `/resume` server. |
 | `npm run token-stats` | Rebuild the public token-usage snapshot from available local logs; see [Token stats](#token-stats). |
 
 Install browser engines with `npx playwright install chromium webkit` before
@@ -154,9 +155,9 @@ Export and publication automation is tracked in
 
 ## Content and resume
 
-The HTML resume carries the October 2026 copy and links to
-`public/Victor_Ivanov_Resume.pdf`, a PDF export of the owner's resume with the
-phone number removed and the same public wording as the HTML. The portrait comes from the public GitHub
+The HTML resume carries the November 2026 copy and links to
+`public/Victor_Ivanov_Resume.pdf`, a PDF export rendered from `/resume` with the
+phone number omitted and the same public wording as the HTML. The portrait comes from the public GitHub
 profile. The conference photo and September 2026 Peru photograph were supplied
 by the owner and authorized for publication. Public copies have no EXIF or XMP
 metadata. The original source resume files remain unchanged.

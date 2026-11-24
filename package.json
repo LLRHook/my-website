@@ -11,6 +11,7 @@
     "test:watch": "vitest",
     "test:e2e": "npx playwright test",
     "assets": "node scripts/render-assets.mjs",
+    "resume-pdf": "node scripts/render-resume.mjs",
     "token-stats": "node scripts/token-stats.mjs"
   },
   "dependencies": {
