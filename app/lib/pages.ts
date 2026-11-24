@@ -14,10 +14,10 @@ export function homeBody(): string {
   const lines = ["who I am, what I work on, and my work and project history", "everything public on my GitHub, updated hourly", "experience, projects and education (PDF too)", "climbing, cards, books and travel", "email, GitHub and LinkedIn"];
   const updates = [
     `<span class="new">NEW!</span> November 2026: porting hot-path cores across personal tools and apps to Rust, expanding TCG fulfillment and marketplace automation, and adding a full <a href="/about#history">work and project history</a>.`,
-    `October 2026: joined SCCI as a Software Developer in Virginia alongside remote backend work at Paradigm Testing, rebuilt this site as a hand-written HTML and CSS home page (no JavaScript), and added the <a href="/projects#burner">Token burner</a>.`,
+    `October 2026: joined SCCI as a Software Developer in Virginia, rebuilt this site as a hand-written HTML and CSS home page (no JavaScript), and added the <a href="/projects#burner">Token burner</a>.`,
     `July to August 2026: completed the Revature Full-Stack Engineering Practicum, shipping Next.js analytics and FastAPI quiz workflows.`,
     `Early to mid 2026: built ${extLink("Linky", "https://github.com/LLRHook/linky")}, ${extLink("Citybase", "https://github.com/LLRHook/citybase")}, ${extLink("Appshot", "https://github.com/LLRHook/appshot")}, ${extLink("Retrocast", "https://github.com/LLRHook/retrocast")}, ${extLink("Fix YouTube", "https://github.com/LLRHook/fix-youtube")}, and coding-agent tooling while continuing graduate CS coursework at Georgia Tech.`,
-    `2022 to present: building and leading multi-tenant certification SaaS platforms at Paradigm Testing.`,
+    `2022 to October 2026: built and led multi-tenant certification SaaS platforms at Paradigm Testing.`,
   ];
   return `<h1>Welcome to Victor Ivanov's Home Page!</h1>${portrait}${paragraph("Hi, I'm Victor, a Senior Full-Stack Engineer in Virginia. I build certification software, web products, developer tools, and Rust utilities across the stack.")}
 <div class="construction"><p><b>This page is always under construction.</b></p></div><h2>What's New</h2><ul>${updates.map((item) => `<li>${item}</li>`).join("")}</ul><h2>Start here</h2><ul>${PAGES.slice(1).map((item, index) => `<li><a href="${esc(item.path)}">${esc(item.label)}</a>: ${esc(lines[index])}</li>`).join("")}</ul>
@@ -28,7 +28,7 @@ const WORK_HISTORY: readonly [string, readonly string[]][] = [
   [
     "October to November 2026",
     [
-      "Started as a Software Developer at SCCI (Southeastern Computer Consultants, Inc.) in Virginia while continuing remote architecture and backend engineering at Paradigm Testing.",
+      "Joined SCCI (Southeastern Computer Consultants, Inc.) as a Software Developer in Virginia.",
       `Focused on porting performance-sensitive cores in personal tools and apps to Rust, including native modules for ${extLink("Linky", "https://github.com/LLRHook/linky")}, ${extLink("Citybase", "https://github.com/LLRHook/citybase")}, ${extLink("Retrocast", "https://github.com/LLRHook/retrocast")}, and local coding-agent utilities, alongside ongoing work on ${extLink("Billington", "https://github.com/LLRHook/checksinmyhead")} and ${extLink("Appshot", "https://github.com/LLRHook/appshot")}.`,
       `Built trading-card fulfillment and marketplace automation tooling, including a Chrome extension and print helpers for packing slips and 4x6 thermal labels (${extLink("tcg-order-printer", "https://github.com/LLRHook/tcg-order-printer")}), catalog software, and automated inventory and price synchronization.`,
       `Rebuilt this site as a zero-JavaScript HTML and CSS home page and added the <a href="/projects#burner">Token burner</a> panel.`,
@@ -54,7 +54,7 @@ const WORK_HISTORY: readonly [string, readonly string[]][] = [
     ],
   ],
   [
-    "May 2024 to present",
+    "May 2024 to October 2026",
     [
       "Senior Backend Engineer at Paradigm Testing (remote), leading architecture, priorities, and production readiness for three engineers across four certification SaaS products: monolith-to-microservices rewrite into five Spring Boot 3 services, real-time WebSocket/STOMP exam video delivery, React and Spring Boot scheduling workflows, and merge-gated CI/CD with 550+ automated tests.",
     ],
@@ -77,7 +77,7 @@ export function aboutBody(): string {
   const history = WORK_HISTORY.map(([period, items]) => `<dt>${esc(period)}</dt><dd><ul>${items.map((item) => `<li>${item}</li>`).join("")}</ul></dd>`).join("");
   return `<h1>About Me</h1>${portrait}${paragraph("Hi, I'm Victor. A Senior Full-Stack Engineer with a habit of building useful things.")}
 ${paragraph("Based in Virginia · Active DoD Secret clearance")}
-${paragraph("Professionally, I work as a Software Developer at SCCI in Virginia and as a Senior Backend Engineer at Paradigm Testing (remote), building multi-tenant certification software, APIs, and real-time exam workflows.")}
+${paragraph("Professionally, I work as a Software Developer at SCCI in Virginia. Previously, I spent over four years at Paradigm Testing building and leading multi-tenant certification software, APIs, and real-time exam workflows.")}
 ${paragraph("Most days, I work with Java, Spring Boot, React, TypeScript, and PostgreSQL. Outside of work, I build products and developer tools in Go, Rust, Python, and TypeScript, with a focus on agentic development workflows.")}
 ${paragraph("I earned a B.S. in Computer Science at UMBC (2019 to May 2024) and I am pursuing an online M.S. in Computer Science (Artificial Intelligence track) at Georgia Tech.")}
 <blockquote>Build fast. Always test.<br><small>A good test suite is part of the work.</small></blockquote><section aria-labelledby="history"><h2 id="history">Work and project history</h2><dl class="history">${history}</dl></section><h2>Tools I use</h2><ul class="columns">${SKILLS.map((skill) => `<li>${esc(skill)}</li>`).join("")}</ul>
@@ -205,9 +205,9 @@ export function resumeBody(): string {
         </ul>
       </article>
       <article>
-        <h3>${esc("Senior Backend Engineer")}</h3><p class="when">${esc("May 2024 – present")}<br>${esc("Paradigm Testing · Remote")}</p>
+        <h3>${esc("Senior Backend Engineer")}</h3><p class="when">${esc("May 2024 – October 2026")}<br>${esc("Paradigm Testing · Remote")}</p>
         <ul>
-          <li>${esc("Lead architecture, priorities, and production readiness for three engineers across four certification SaaS products.")}</li>
+          <li>${esc("Led architecture, priorities, and production readiness for three engineers across four certification SaaS products.")}</li>
           <li>${esc("Owned a React/Spring Boot written-exam scheduling workflow end to end: create/edit wizards, dirty state, an ADA accommodation picker, structured 409 conflict handling, tenant-scoped CRUD, and 10 dedicated test files/classes.")}</li>
           <li>${esc("Owned a billing hotfix from root cause through protected production deployment; live reconciliation corrected an undercharge and restored accurate invoicing across a large document batch.")}</li>
           <li>${esc("Diagnosed a three-month multithreaded AWS file-lock failure; cut errors from 80% to near-zero for 10 organizations.")}</li>

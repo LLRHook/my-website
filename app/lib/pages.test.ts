@@ -65,14 +65,21 @@ describe("page bodies", () => {
       expect(html).not.toContain("Expected December 2027");
       expect(html).not.toContain("Systems &amp; Architecture");
       expect(html).not.toMatch(/eligib/i);
+      expect(html).not.toContain("2022 to present");
+      expect(html).not.toContain("May 2024 to present");
+      expect(html).not.toContain("May 2024 – present");
+      expect(html).not.toContain("alongside remote backend work");
+      expect(html).not.toContain("while continuing remote architecture");
     }
     expect(home).toContain('href="/about#history"');
     expect(home).toContain("SCCI");
+    expect(home).toContain("2022 to October 2026");
     expect(home).toContain("Rust");
     expect(home).not.toContain("\u2014");
 
     expect(about).toContain('id="history"');
     expect(about).toContain("Active DoD Secret clearance");
+    expect(about).toContain("May 2024 to October 2026");
     for (const topic of ["SCCI", "Paradigm Testing", "Revature", "Artificial Intelligence", "UMBC", "Billington", "Linky", "Citybase", "Appshot", "Retrocast", "Fix YouTube", "Rust", "tcg-order-printer"]) {
       expect(about).toContain(topic);
     }
@@ -82,6 +89,8 @@ describe("page bodies", () => {
     expect(resume).toContain("Secret-cleared");
     expect(resume).toContain("U.S. Citizen");
     expect(resume).toContain("SCCI (Southeastern Computer Consultants, Inc.)");
+    expect(resume).toContain("October 2026 – present");
+    expect(resume).toContain("May 2024 – October 2026");
     expect(resume).toContain("Artificial Intelligence");
     expect(resume).toContain("In progress");
     expect(resume).toContain("2019 – 2024");

@@ -21,7 +21,6 @@ export function personMicrodata(attributes = ""): string {
   const link = (property: string, href: string) => `<link itemprop="${property}" href="${esc(href)}">`;
   return `<div ${attributes ? `${attributes} ` : ""}itemscope itemtype="https://schema.org/Person" itemid="${esc(SITE_URL)}/#person">${meta("name", "Victor Ivanov")}${meta("jobTitle", "Senior Full-Stack Engineer")}${link("url", SITE_URL + "/")}${link("image", SITE_URL + "/victor-profile.jpg")}${SOCIAL_LINKS.filter((item) => item.external).map((item) => link("sameAs", item.href)).join("")}`
     + `<div itemprop="worksFor" itemscope itemtype="https://schema.org/Organization">${meta("name", "Southeastern Computer Consultants, Inc. (SCCI)")}</div>`
-    + `<div itemprop="worksFor" itemscope itemtype="https://schema.org/Organization">${meta("name", "Paradigm Testing")}</div>`
     + `<div itemprop="address" itemscope itemtype="https://schema.org/PostalAddress">${meta("addressRegion", "VA")}${meta("addressCountry", "US")}</div>`
     + `<div itemprop="alumniOf" itemscope itemtype="https://schema.org/CollegeOrUniversity">${meta("name", "University of Maryland, Baltimore County")}${link("sameAs", "https://umbc.edu")}</div>`
     + `${KNOWS_ABOUT.map((topic) => meta("knowsAbout", topic)).join("")}</div>`;
