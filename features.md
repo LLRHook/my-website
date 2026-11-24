@@ -192,6 +192,20 @@ the end of their section, sorted by id on read.
 - **Bump:** minor
 - **Status:** shipped-pending-migration
 
+### [FEAT-1795549500] Refresh token burner snapshot and model price table through November 2026
+- [x] **Priority:** med
+- **Area:** scripts, content
+- **File(s):** scripts/token-stats.mjs, scripts/token-stats.test.ts, data/token-stats.json
+- **Why:** The committed token-burner snapshot stopped at 2026-11-02 and omitted newer priced models (`claude-fable-5-2`, `gpt-6.2-sol`) as well as older priced GPT-5.x models (`gpt-5.6-sol`, `gpt-5.6-terra`, `gpt-5.6-luna`, `gpt-5.5`), leaving over 40% of tokens grouped under Other with $0 cost.
+- **Approach:** Add the verified list prices (as of 2026-11-23) to `scripts/token-stats.mjs`, cover the new model labels in `scripts/token-stats.test.ts`, and run `npm run token-stats` to refresh `data/token-stats.json` through 2026-11-24.
+- **Library / dependency notes:** None.
+- **Acceptance criteria:** `data/token-stats.json` refreshes cleanly through 2026-11-24, passes `parseTokenStats` and all unit/E2E/budget tests, and prices the named Claude/GPT models accurately.
+- **Test plan:** `npm run lint`, `npx tsc --noEmit`, `npm test`, production build, and `CI=1 npm run test:e2e`.
+- **Out of scope:** Estimating usage from expired Claude Code logs beyond local retention.
+- **Implementation:** Updated `scripts/token-stats.mjs` (`PRICES_AS_OF = "2026-11-23"`) with list prices for `claude-fable-5-2`, `gpt-6.2-sol`, `gpt-5.6-sol`, `gpt-5.6-terra`, `gpt-5.6-luna`, and `gpt-5.5`, extended `scripts/token-stats.test.ts`, and refreshed `data/token-stats.json` through 2026-11-24.
+- **Bump:** patch
+- **Status:** shipped-pending-migration
+
 ## Shipped
 
 ### [FEAT-1781507205] Restore prominent interactive star/aurora background

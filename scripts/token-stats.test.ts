@@ -70,7 +70,7 @@ describe("token-stats export", () => {
 
   it("builds lifetime, 30-day and 90-day windows anchored on the run date", () => {
     const { snapshot } = run();
-    expect(snapshot).toMatchObject({ asOf: "2026-10-14", since: "2026-05-01", pricesAsOf: "2026-10-14" });
+    expect(snapshot).toMatchObject({ asOf: "2026-10-14", since: "2026-05-01", pricesAsOf: "2026-11-23" });
     expect(snapshot.lifetime.tokens.total).toBe(427877);
     expect(snapshot.lifetime.costUsd).toBe(6.05);
     expect(snapshot.last30.tokens.total).toBe(425777);
@@ -107,9 +107,13 @@ describe("token-stats export", () => {
   it("names and normalizes model ids", () => {
     expect(normalizeModel("claude-opus-5-5[1m]")).toBe("claude-opus-5-5");
     expect(normalizeModel("claude-haiku-4-5-20251001")).toBe("claude-haiku-4-5");
+    expect(modelLabel("claude-fable-5-2")).toBe("Claude Fable 5.2");
     expect(modelLabel("claude-fable-5-1")).toBe("Claude Fable 5.1");
     expect(modelLabel("claude-opus-5")).toBe("Claude Opus 5");
+    expect(modelLabel("gpt-6.2-sol")).toBe("GPT-6.2 Sol");
     expect(modelLabel("gpt-6.1-sol")).toBe("GPT-6.1 Sol");
+    expect(modelLabel("gpt-5.6-sol")).toBe("GPT-5.6 Sol");
+    expect(modelLabel("gpt-5.5")).toBe("GPT-5.5");
     expect(modelLabel("<synthetic>")).toBeNull();
     expect(modelLabel("opus")).toBeNull();
     // Unpriced or prototype ids are never published by name.
