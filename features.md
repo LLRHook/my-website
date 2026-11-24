@@ -221,6 +221,25 @@ the end of their section, sorted by id on read.
 - **Bump:** minor
 - **Status:** shipped-pending-migration
 
+### [FEAT-1795550744] Authentic 1990s sidebar structure and dedicated TCG Shop page
+- [x] **Priority:** high
+- **Area:** frontend, ui, content, seo, tests
+- **File(s):** app/lib/constants.ts, app/lib/html.ts, app/lib/pages.ts, app/shop/route.ts, app/off-the-clock/route.ts (delete), public/peru-travel.webp (delete), public/retro.css, next.config.js, app/lib/html.test.ts, app/lib/pages.test.ts, e2e/site.spec.ts, e2e/performance.spec.ts, README.md, VERIFICATION.md
+- **Why:** Align the page structure more closely with authentic late-1990s personal home pages (beveled left directory sidebar, quick links, retro status/odometer box, webring footer navigation, dithered backdrop) while replacing the sparse `/off-the-clock` page with a full `/shop` ("TCG Shop") page dedicated to GoStopTCG and its marketplace storefronts.
+- **Approach:** Convert the shell in `app/lib/html.ts` and `public/retro.css` to a pure-CSS 2-column desktop layout (beveled left sidebar with `Directory` nav, `Links`, and `000000` JS-bytes odometer; collapses cleanly to a compact top bar on mobile `<= 680px` and hides on `@media print`) plus a classic site-ring footer bar. Replace `/off-the-clock` with `/shop` (`app/shop/route.ts`, `shopBody()`) featuring GoStopTCG overview, TCGplayer and CardTrader storefront cards, stocked games table, fulfillment workflow, and open-source shop tooling (`tcg-order-printer`). Permanently redirect `/off-the-clock` and `/interests` to `/shop` in `next.config.js`, remove retired `app/off-the-clock/route.ts` and `public/peru-travel.webp`, update tests/budgets/docs, and preserve 100% zero client JS and strict CSP.
+- **Library / dependency notes:** None; pure HTML and CSS only.
+- **Acceptance criteria:**
+  - All 6 routes (`/`, `/about`, `/projects`, `/resume`, `/shop`, `/contact`) render with the 1990s two-column sidebar layout on desktop, zero horizontal overflow at 320px, zero `<script>` tags, zero inline styles, and strict CSP hash match.
+  - `/shop` presents GoStopTCG details plus verified TCGplayer and CardTrader storefront links; `/off-the-clock` and `/interests` return 308 redirects to `/shop`.
+  - `/resume` print layout remains a clean single-page PDF without sidebar chrome.
+  - All lint, typecheck, unit, build, E2E, and cold-load budget checks pass.
+- **Test plan:** Update unit tests in `app/lib/html.test.ts` and `app/lib/pages.test.ts`; update Playwright `e2e/site.spec.ts` and `e2e/performance.spec.ts` across Chromium and mobile WebKit.
+- **Out of scope:** Client-side JavaScript, fake dynamic visitor counters, external GIF assets, or private business financial/member disclosures.
+- **Implementation:** Rebuilt the HTML/CSS shell (`app/lib/html.ts`, `public/retro.css`) with a dithered grey backdrop, beveled 2-column `.layout` sidebar (`Directory` nav, `Links` box with TCGplayer/CardTrader/GitHub/LinkedIn/Email, and `Site Info` with a `000000` JS-bytes odometer), and a footer `Victor's Home Page Ring` cycling Prev/Home/Next across all 6 routes; sidebar collapses into compact horizontal buttons at `<= 680px` and hides on `@media print` (verified single-page PDF unchanged at 105,264 B). Replaced `/off-the-clock` with `/shop` (`app/shop/route.ts`, `shopBody()`), removed `app/off-the-clock/route.ts` and `public/peru-travel.webp`, redirected `/off-the-clock` and `/interests` (308) to `/shop` in `next.config.js`, and updated unit tests, Playwright E2E/budgets, `README.md`, and `VERIFICATION.md`. Verified desktop (1280×900) and mobile (390×844) screenshots; lint (0 warnings), tsc (0 errors), 76/76 unit, production build, and 45/45 E2E checks pass.
+- **Docs:** README.md, VERIFICATION.md.
+- **Bump:** minor
+- **Status:** shipped-pending-migration
+
 ## Shipped
 
 ### [FEAT-1781507205] Restore prominent interactive star/aurora background

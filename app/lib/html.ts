@@ -1,4 +1,4 @@
-import { EMAIL_HREF, GITHUB_HREF, KNOWS_ABOUT, SITE_NAME, SITE_URL, SITE_TITLE, SITE_DESCRIPTION, SOCIAL_BY_ICON, SOCIAL_LINKS } from "./constants";
+import { CARDTRADER_SHOP_URL, EMAIL_HREF, GITHUB_HREF, KNOWS_ABOUT, SITE_NAME, SITE_URL, SITE_TITLE, SITE_DESCRIPTION, SOCIAL_BY_ICON, SOCIAL_LINKS, TCGPLAYER_SHOP_URL } from "./constants";
 
 export function esc(value: string): string {
   return value.replace(/[&<>"']/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[character]!);
@@ -10,7 +10,7 @@ export const PAGES: readonly SitePage[] = [
   { path: "/about", label: "About Me", title: "About | Victor Ivanov", description: "Meet Victor Ivanov, a senior full-stack engineer in Virginia: biography and chronological work and project history." },
   { path: "/projects", label: "Projects", title: "Projects | Victor Ivanov", description: "Victor Ivanov's projects: web products, developer tools, and open-source repositories, plus how many tokens AI coding agents have burned on my machine." },
   { path: "/resume", label: "Resume", title: "Resume | Victor Ivanov", description: "Victor Ivanov's November 2026 resume: engineering experience, selected projects, education, technical skills, and a downloadable PDF." },
-  { path: "/off-the-clock", label: "Off the Clock", title: "Off the clock | Victor Ivanov", description: "Victor Ivanov away from the desk: rock climbing, Pokémon and Magic cards, the GoStopTCG shop on TCGplayer and CardTrader, books, travel, and side projects." },
+  { path: "/shop", label: "TCG Shop", title: "TCG Shop | Victor Ivanov", description: "GoStopTCG online trading-card shop: browse Pokémon, Magic: The Gathering, One Piece, and Riftbound singles on TCGplayer and CardTrader." },
   { path: "/contact", label: "Contact", title: "Contact | Victor Ivanov", description: "Contact Victor Ivanov by email or connect on GitHub and LinkedIn. Based in Virginia, on Eastern time." },
 ];
 
@@ -41,14 +41,34 @@ export function page(options: { path: string; title: string; description: string
   const description = esc(options.description);
   const known = PAGES.some((item) => item.path === options.path);
   const now = new Date();
-  const current = PAGES.find((item) => item.path === options.path);
+  const currentIndex = PAGES.findIndex((item) => item.path === options.path);
+  const current = currentIndex >= 0 ? PAGES[currentIndex] : undefined;
   const crumb = (position: number, name: string, href?: string) => `<li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">${href ? `<a itemprop="item" href="${esc(href)}"><span itemprop="name">${esc(name)}</span></a>` : `<span itemprop="name">${esc(name)}</span>`}<meta itemprop="position" content="${position}"></li>`;
   const breadcrumbs = current && current.path !== "/"
     ? `<nav class="crumbs" aria-label="Breadcrumb">You are here: <ol itemscope itemtype="https://schema.org/BreadcrumbList">${crumb(1, "Home", "/")}${crumb(2, current.label)}</ol></nav>`
     : "";
   const navigation = PAGES.map((item) => item.path === options.path
-    ? `<strong aria-current="page">${esc(item.label)}</strong>`
-    : `<a href="${esc(item.path)}">${esc(item.label)}</a>`).join(" | ");
+    ? `<li><strong aria-current="page">${esc(item.label)}</strong></li>`
+    : `<li><a href="${esc(item.path)}">${esc(item.label)}</a></li>`).join("");
+  const ext = 'target="_blank" rel="noopener noreferrer"';
+  const sidebar = `<aside class="sidebar"><nav class="side-box" aria-label="Site"><p class="side-title">Directory</p><ul class="side-nav">${navigation}</ul></nav>`
+    + `<section class="side-box" aria-label="Quick links"><p class="side-title">Links</p><ul class="side-links">`
+    + `<li><a href="${esc(TCGPLAYER_SHOP_URL)}" ${ext}>TCGplayer Shop</a></li>`
+    + `<li><a href="${esc(CARDTRADER_SHOP_URL)}" ${ext}>CardTrader Shop</a></li>`
+    + `<li><a href="${esc(GITHUB_HREF)}" ${ext}>GitHub</a></li>`
+    + `<li><a href="${esc(SOCIAL_BY_ICON.linkedin.href)}" ${ext}>LinkedIn</a></li>`
+    + `<li><a href="${esc(EMAIL_HREF)}">Email Me</a></li></ul></section>`
+    + `<section class="side-box side-status" aria-label="Site info"><p class="side-title">Site Info</p>`
+    + `<p>Region: Virginia<br>Client JS: <b>0 bytes</b><br>Stack: HTML + CSS</p>`
+    + `<div class="odometer" aria-label="Zero bytes of client JavaScript"><span>0</span><span>0</span><span>0</span><span>0</span><span>0</span><span>0</span></div>`
+    + `<p class="odo-label">JS BYTES SERVED</p></section></aside>`;
+  const ring = currentIndex >= 0
+    ? (() => {
+      const prev = PAGES[(currentIndex - 1 + PAGES.length) % PAGES.length];
+      const next = PAGES[(currentIndex + 1) % PAGES.length];
+      return `<nav class="webring" aria-label="Site ring"><span class="webring-title">&#9733; Victor's Home Page Ring &#9733;</span>[ <a href="${esc(prev.path)}">&laquo; ${esc(prev.label)}</a> | <a href="/">Home</a> | <a href="${esc(next.path)}">${esc(next.label)} &raquo;</a> ]</nav>`;
+    })()
+    : "";
   return `<!DOCTYPE html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>${title}</title><meta name="description" content="${description}"><meta name="author" content="Victor Ivanov">${known ? `<meta name="robots" content="index,follow,max-image-preview:large"><link rel="canonical" href="${url}">` : '<meta name="robots" content="noindex">'}
@@ -57,9 +77,9 @@ export function page(options: { path: string; title: string; description: string
 <link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48"><link rel="icon" href="/favicon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><style>${style()}</style></head>
 <body><a class="skip" href="#main">Skip to content</a><div class="page">
 <header class="masthead"><p class="site-name"><a href="/">Victor Ivanov's Home Page</a></p>
-<div class="marquee" aria-hidden="true"><span>&#9733; Welcome to my home page! &#9733; Senior Full-Stack Engineer &#9733; Java &middot; Spring Boot &middot; React &middot; TypeScript &#9733; Open to on-site and hybrid roles &#9733;</span></div>
-<nav aria-label="Site">[ ${navigation} ]</nav></header><hr><main id="main"${options.path === "/resume" ? ' class="resume"' : ""}>${breadcrumbs}${options.body}</main><hr>
-<footer><p class="buttons"><span class="badge badge-any">Best viewed with<br><b>ANY</b> browser</span><span class="badge badge-nojs"><b>100%</b><br>JavaScript free</span><span class="badge badge-next">Served by<br><b>Next.js</b></span></p>
+<div class="marquee" aria-hidden="true"><span>&#9733; Welcome to my home page! &#9733; Senior Full-Stack Engineer &#9733; Java &middot; Spring Boot &middot; TypeScript &middot; Go &middot; Rust &#9733; Visit the GoStopTCG Shop! &#9733;</span></div></header><hr>
+<div class="layout">${sidebar}<main id="main"${options.path === "/resume" ? ' class="resume"' : ""}>${breadcrumbs}${options.body}</main></div><hr>
+<footer>${ring}<p class="buttons"><span class="badge badge-any">Best viewed with<br><b>ANY</b> browser</span><span class="badge badge-nojs"><b>100%</b><br>JavaScript free</span><span class="badge badge-next">Served by<br><b>Next.js</b></span></p>
 <p>&copy; ${esc(String(now.getFullYear()))} Victor Ivanov &middot; <a href="${esc(EMAIL_HREF)}">victor.n.ivanov@gmail.com</a> &middot; <a href="${esc(GITHUB_HREF)}" rel="me">GitHub</a> &middot; <a href="${esc(SOCIAL_BY_ICON.linkedin.href)}" rel="me">LinkedIn</a> &middot; <a href="mailto:victor.n.ivanov@gmail.com?subject=Guestbook">Sign my guestbook</a></p>
 <p class="updated">Last updated: ${esc(now.toLocaleDateString("en-US", { month: "long", year: "numeric" }))}</p></footer>
 </div></body></html>`;

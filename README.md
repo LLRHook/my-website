@@ -2,9 +2,10 @@
 
 [victorivanov.engineer](https://victorivanov.engineer)
 
-A 1990s personal home page with blue links, a CSS marquee, an under-construction
-notice, and browser badges. Pages ship hand-written HTML and one CSS file, with
-no JavaScript in the browser.
+A 1990s personal home page with a beveled directory sidebar, quick links, a
+0-JS-bytes odometer, blue links, a CSS marquee, an under-construction notice, a
+site-ring footer, and browser badges. Pages ship hand-written HTML and one CSS
+file, with no JavaScript in the browser.
 
 ## Pages
 
@@ -12,10 +13,10 @@ no JavaScript in the browser.
 - About Me (`/about`): biography and work and project history.
 - Projects (`/projects`): the token burner (AI coding-agent token usage) and a table of public GitHub repositories.
 - Resume (`/resume`): experience, projects, education, skills, and a PDF download.
-- Off the Clock (`/off-the-clock`): climbing, cards, the GoStopTCG shop (TCGplayer and CardTrader), books, travel, and side projects.
+- TCG Shop (`/shop`): GoStopTCG overview, stocked games, fulfillment info, and direct TCGplayer and CardTrader storefront links.
 - Contact (`/contact`): email, GitHub, LinkedIn, and an email guestbook.
 
-`/interests` permanently redirects to `/off-the-clock`. Unknown paths return
+`/interests` and `/off-the-clock` permanently redirect to `/shop`. Unknown paths return
 an HTML 404 with a link home.
 
 ## Run locally
@@ -105,7 +106,7 @@ NEW label, disables both for reduced motion, and supplies print styles.
 - Public images, icons and the resume PDF use a one-day cache with one week of stale-while-revalidate in production. The portrait and Peru photo are resized for their display sizes; below-the-fold photos load lazily.
 - `app/speculation-rules/route.ts`: speculation rules sent through a `Speculation-Rules` response header on every page (no `<script>`). Chromium prerenders a same-origin page when its link is hovered or pressed; other browsers ignore the header.
 - `scripts/render-assets.mjs`: regenerates the committed favicon set and 1200x630 share card (`npm run assets`).
-- `app/route.ts` and the route folders: Home, About, Projects, Resume, Off the Clock, Contact, and the catch-all 404.
+- `app/route.ts` and the route folders: Home, About, Projects, Resume, TCG Shop, Contact, and the catch-all 404.
 - `app/sitemap.ts` and `app/robots.ts`: crawler metadata.
 - `e2e/site.spec.ts`: HTML, navigation, headers, routing, narrow layouts, and reduced motion.
 - `e2e/performance.spec.ts` (Chromium, runs in CI): per-page cold-load request and byte budgets and prerendering of hovered links. Budgets are recorded in [VERIFICATION.md](VERIFICATION.md).
@@ -158,8 +159,7 @@ Export and publication automation is tracked in
 The HTML resume carries the November 2026 copy and links to
 `public/Victor_Ivanov_Resume.pdf`, a PDF export rendered from `/resume` with the
 phone number omitted and the same public wording as the HTML. The portrait comes from the public GitHub
-profile. The September 2026 Peru photograph was supplied
-by the owner and authorized for publication. Public copies have no EXIF or XMP
+profile. Public copies have no EXIF or XMP
 metadata. The original source resume files remain unchanged.
 
 ## Project records

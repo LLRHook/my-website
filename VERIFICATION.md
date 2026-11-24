@@ -63,14 +63,14 @@ Nothing is skipped.
   when a cold load exceeds its budget against the local production server
   (`next start`: HTML uncompressed, static files gzip; headers included):
 
-  | Page | Requests (max) | Bytes (max) | Measured 2026-10-12 |
+  | Page | Requests (max) | Bytes (max) | Notes |
   |---|---|---|---|
-  | / | 3 | 40,000 | 3 / 32,394 |
-  | /about | 4 | 75,000 | 4 / 61,888 |
-  | /projects | 2 | 48,000 | 2 / 44,545 (2026-11-24: live GitHub repo growth, denser 90-day token-burner bars, and inlined `.tcg-shop` CSS; raised from 44,000) |
-  | /resume | 2 | 32,000 | 2 / 24,469 |
-  | /off-the-clock | 3 | 85,000 | 3 / 72,423 |
-  | /contact | 2 | 26,000 | 2 / 18,913 |
+  | / | 3 | 42,000 | 1990s sidebar shell + portrait |
+  | /about | 3 | 46,000 | Lowered from 75,000 after removing conference photo |
+  | /projects | 2 | 52,000 | Live GitHub repo table, 90-day token burner, 1990s sidebar shell |
+  | /resume | 2 | 34,000 | HTML resume + 1990s sidebar shell (hidden on print) |
+  | /shop | 2 | 32,000 | Replaces /off-the-clock (85,000 B); GoStopTCG storefronts & games table |
+  | /contact | 2 | 28,000 | Contact page + 1990s sidebar shell |
 
   Raise a budget only deliberately,
   in the same change that explains why.
@@ -84,7 +84,7 @@ Nothing is skipped.
   without `GITHUB_TOKEN`. Descriptions are escaped, profile and undescribed repos
   are filtered, rows sort newest first, and demo links use HTTP(S).
 - Resume HTML links the downloadable PDF; the PDF returns 200.
-- `/interests` redirects permanently to `/off-the-clock`; unknown paths return 404
+- `/interests` and `/off-the-clock` redirect permanently to `/shop`; unknown paths return 404
   with a link home.
 - No page has horizontal document overflow at 320x700.
   Capture all six pages at desktop 1280x900 and phone 390x844 for visual
@@ -96,11 +96,11 @@ Nothing is skipped.
 
 ## Runtime and deployment checks
 
-- GET /, /about, /projects, /resume, /off-the-clock, /contact, /robots.txt,
+- GET /, /about, /projects, /resume, /shop, /contact, /robots.txt,
   /sitemap.xml, /retro.css, /favicon.svg, /favicon.ico, /apple-touch-icon.png,
-  /og-image.png, the resume PDF and public photos return 200; /game/main.js returns 404.
-- No page contains a `<script>` element; every response allows only `script-src https://victorivanov.engineer/speculation-rules`. /interests redirects (308)
-  to /off-the-clock; unknown paths return the HTML 404 page.
+  /og-image.png, the resume PDF and public portrait return 200; /game/main.js returns 404.
+- No page contains a `<script>` element; every response allows only `script-src https://victorivanov.engineer/speculation-rules`. /interests and /off-the-clock redirect (308)
+  to /shop; unknown paths return the HTML 404 page.
 - The 404 page links back to the home page.
 - Run mobile Lighthouse against the production artifact/domain. Existing targets
   are Performance>=90, Accessibility>=95, and LCP<2.5s. Report the measured LCP

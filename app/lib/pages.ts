@@ -1,4 +1,4 @@
-import { EMAIL_HREF, GITHUB_HREF, SITE_NAME, SITE_URL, SOCIAL_BY_ICON } from "./constants";
+import { CARDTRADER_SHOP_URL, EMAIL_HREF, GITHUB_HREF, SITE_NAME, SITE_URL, SOCIAL_BY_ICON, TCGPLAYER_SHOP_URL } from "./constants";
 import { esc, PAGES, personMicrodata } from "./html";
 import { presentProject } from "./projectPresentation";
 import type { TokenStats } from "./tokenStats";
@@ -11,9 +11,9 @@ const extLink = (label: string, href: string) => `<a href="${esc(href)}" ${exter
 const portrait = '<img class="portrait" decoding="async" fetchpriority="high" src="/victor-profile.jpg" width="120" height="120" alt="Victor\'s illustrated GitHub profile portrait">';
 
 export function homeBody(): string {
-  const lines = ["who I am, what I work on, and my work and project history", "everything public on my GitHub, updated hourly", "experience, projects and education (PDF too)", "climbing, cards, books and travel", "email, GitHub and LinkedIn"];
+  const lines = ["who I am, what I work on, and my work and project history", "everything public on my GitHub, updated hourly", "experience, projects and education (PDF too)", "GoStopTCG singles on TCGplayer and CardTrader", "email, GitHub and LinkedIn"];
   const updates = [
-    `<span class="new">NEW!</span> November 2026: porting hot-path cores across personal tools and apps to Rust, expanding TCG fulfillment and marketplace automation, and adding a full <a href="/about#history">work and project history</a>.`,
+    `<span class="new">NEW!</span> November 2026: added a dedicated <a href="/shop">TCG Shop</a> page for GoStopTCG, ported hot-path cores in personal tools to Rust, and added a full <a href="/about#history">work and project history</a>.`,
     `October 2026: joined SCCI as a Software Developer in Virginia, rebuilt this site as a hand-written HTML and CSS home page (no JavaScript), and added the <a href="/projects#burner">Token burner</a>.`,
     `July to August 2026: completed the Revature Full-Stack Engineering Practicum, shipping Next.js analytics and FastAPI quiz workflows.`,
     `Early to mid 2026: built ${extLink("Linky", "https://github.com/LLRHook/linky")}, ${extLink("Citybase", "https://github.com/LLRHook/citybase")}, ${extLink("Appshot", "https://github.com/LLRHook/appshot")}, ${extLink("Retrocast", "https://github.com/LLRHook/retrocast")}, ${extLink("Fix YouTube", "https://github.com/LLRHook/fix-youtube")}, and coding-agent tooling while continuing graduate CS coursework at Georgia Tech.`,
@@ -169,39 +169,46 @@ export function projectsBody(repos: RepoSummary[], stats: TokenStats | null = nu
   return `<h1>Projects</h1><p>Products, developer tools, and the engineering behind them.</p>${tokenBurner(stats)}<h2>Repositories</h2><p>This list comes straight from my GitHub and refreshes every hour.</p>${projects.length ? `<div class="table-wrap" role="region" aria-labelledby="repositories-caption" tabindex="0"><table class="projects"><caption id="repositories-caption">Public repositories</caption><thead><tr><th scope="col">Project</th><th scope="col">What it is</th><th scope="col">Language</th><th scope="col">Stars</th><th scope="col">Updated</th></tr></thead><tbody>${rows}</tbody></table></div>` : `<p class="notice">The project list did not load. See all my work on <a href="${esc(GITHUB_HREF)}" ${external}>GitHub</a>.</p>`}<p>More on <a href="${esc(GITHUB_HREF)}" ${external}>github.com/LLRHook</a>.</p>`;
 }
 
-export function offTheClockBody(): string {
-  const interests = [
-    ["Climbing", "Rock climbing is my regular break from the screen."],
-    ["Cards", "I collect Pokémon cards and open packs with friends, play some Magic: The Gathering, and help run an online TCG singles shop."],
-    ["Wings", "Buffalo Wild Wings after a long week."],
-    ["Travel", "Most recently Peru, in September 2026."],
-    ["Side projects", "Agentic workflows, deployment automation, and small developer tools."],
-    ["Reading", "Pierce Brown’s Red Rising trilogy."],
-  ];
+export function shopBody(): string {
   const shops = [
     [
       "tcg-tcgplayer",
-      "https://www.tcgplayer.com/search/all/product?seller=161abc55&view=grid",
+      TCGPLAYER_SHOP_URL,
       "TCGplayer",
-      "gostoptcg · browse live singles on tcgplayer.com",
+      "gostoptcg · browse live US singles on tcgplayer.com",
     ],
     [
       "tcg-cardtrader",
-      "https://www.cardtrader.com/en-US/users/victor-ivanov",
+      CARDTRADER_SHOP_URL,
       "CardTrader",
       "Gostop TCG · US and international listings on cardtrader.com",
     ],
   ] as const;
   const shopLinks = shops.map(([modifier, href, name, meta]) =>
     `<li><a class="tcg-link ${modifier}" href="${esc(href)}" ${external}><span class="tcg-name">${esc(name)} &raquo;</span><span class="tcg-meta">${esc(meta)}</span></a></li>`).join("");
-  return `<h1>Off the clock</h1>${paragraph("What I do when I'm not working.")}<dl class="interests">${interests.map(([heading, text], index) => `<dt>${esc(heading)}</dt><dd>${esc(text)}${index === 3 ? '<p><img loading="lazy" decoding="async" src="/peru-travel.webp" alt="Mountains and a river in Peru" width="320" height="240"></p>' : ""}</dd>`).join("")}</dl>`
-    + `<section class="tcg-shop" aria-labelledby="tcg-shop"><h2 id="tcg-shop">GoStopTCG Shop</h2>`
-    + `${paragraph("Outside of engineering, I help run GoStopTCG, an online trading-card shop listing Pokémon, Magic: The Gathering, One Piece, Riftbound, and other singles.")}`
-    + `<ul class="tcg-links">${shopLinks}</ul></section>`;
+  const games = [
+    ["Pokémon TCG", "Modern and collector singles, ex/illustration pulls, reverse holos, and playable staples."],
+    ["Magic: The Gathering", "Commander and constructed singles, foils, tokens, and set staples."],
+    ["One Piece Card Game", "Foil and non-foil singles across current sets."],
+    ["Riftbound", "Origins, Spiritforged, and Unleashed rares, foils, and deck staples."],
+    ["Other TCGs", "Additional singles listed as new lots and collections are processed."],
+  ];
+  const gameRows = games.map(([game, notes]) => `<tr><td><b>${esc(game)}</b></td><td>${esc(notes)}</td></tr>`).join("");
+  return `<h1>GoStopTCG Shop</h1>`
+    + `${paragraph("Outside of day-job engineering, I help run GoStopTCG, an online trading-card shop listing thousands of singles across TCGplayer and CardTrader.")}`
+    + `<section class="tcg-shop" aria-labelledby="storefronts"><h2 id="storefronts">Shop Storefronts</h2>`
+    + `${paragraph("Browse live inventory, current market prices, shipping options, and checkout directly on either marketplace:")}`
+    + `<ul class="tcg-links">${shopLinks}</ul></section>`
+    + `<h2>Games &amp; Catalog</h2><div class="table-wrap" role="region" aria-labelledby="games-caption" tabindex="0"><table class="projects"><caption id="games-caption">Games stocked at GoStopTCG</caption><thead><tr><th scope="col">Game</th><th scope="col">What you'll find</th></tr></thead><tbody>${gameRows}</tbody></table></div>`
+    + `<h2>How Orders Work</h2><ul>`
+    + `<li><b>Direct marketplace checkout:</b> Live quantities, pricing, buyer protection, and order messaging all run directly through TCGplayer and CardTrader.</li>`
+    + `<li><b>Synchronized stock and pricing:</b> Automated multi-channel checks run every few minutes to keep inventory counts and market pricing aligned across marketplaces.</li>`
+    + `<li><b>Packed for collectors:</b> Singles are inspected, sleeved, and protected for standard letter or tracked package shipment.</li></ul>`
+    + `<h2>Shop Tooling</h2><p>Running an online card shop has also inspired open-source fulfillment tools, including ${extLink("tcg-order-printer", "https://github.com/LLRHook/tcg-order-printer")} (a Chrome extension for one-click TCGplayer packing slips and 4x6 thermal labels). See more on <a href="/projects">Projects &raquo;</a></p>`;
 }
 
 export function contactBody(): string {
-  return `<h1>Contact</h1><p class="big">Let's make something <em>good.</em></p>${paragraph("Have a project in mind, a question about my work, or a particularly good climbing route?")}<p>&#9993; <a href="${esc(EMAIL_HREF)}">victor.n.ivanov@gmail.com</a></p><ul><li><a href="${esc(GITHUB_HREF)}" ${profile}>GitHub</a></li><li><a href="${esc(SOCIAL_BY_ICON.linkedin.href)}" ${profile}>LinkedIn</a></li></ul><p>Virginia &middot; Eastern time</p><p>Or <a href="mailto:victor.n.ivanov@gmail.com?subject=Guestbook">sign my guestbook</a> by email.</p>`;
+  return `<h1>Contact</h1><p class="big">Let's make something <em>good.</em></p>${paragraph("Have a project in mind, a question about my work, or a question about the card shop?")}<p>&#9993; <a href="${esc(EMAIL_HREF)}">victor.n.ivanov@gmail.com</a></p><ul><li><a href="${esc(GITHUB_HREF)}" ${profile}>GitHub</a></li><li><a href="${esc(SOCIAL_BY_ICON.linkedin.href)}" ${profile}>LinkedIn</a></li></ul><p>Virginia &middot; Eastern time</p><p>Or <a href="mailto:victor.n.ivanov@gmail.com?subject=Guestbook">sign my guestbook</a> by email.</p>`;
 }
 
 export function notFoundBody(): string {

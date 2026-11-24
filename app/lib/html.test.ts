@@ -20,13 +20,18 @@ describe("HTML documents", () => {
     expect(html).not.toContain('rel="stylesheet"');
     expect(html).not.toContain("<script");
   });
-  it("marks only the current page and links every other page", () => {
+  it("marks only the current page, renders sidebar links, and adds the site ring", () => {
     const html = page({ path: "/about", title: "About", description: "About", body: "" });
     expect(html.match(/aria-current=/g)).toHaveLength(1);
     expect(html).toContain('<strong aria-current="page">About Me</strong>');
     for (const item of PAGES.filter((item) => item.path !== "/about")) {
       expect(html).toContain(`<a href="${item.path}">${item.label}</a>`);
     }
+    expect(html).toContain('class="sidebar"');
+    expect(html).toContain('class="odometer"');
+    expect(html).toContain('class="webring"');
+    expect(html).toContain("TCGplayer Shop");
+    expect(html).toContain("CardTrader Shop");
   });
   it("emits share-card and indexing metadata", () => {
     const html = page({ path: "/", title: "Home", description: "Home", body: "" });

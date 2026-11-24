@@ -25,6 +25,8 @@ export const SOCIAL_BY_ICON: Record<SocialIcon, SocialLink> = Object.fromEntries
 
 export const EMAIL_HREF = SOCIAL_BY_ICON.email.href;
 export const GITHUB_HREF = SOCIAL_BY_ICON.github.href;
+export const TCGPLAYER_SHOP_URL = "https://www.tcgplayer.com/search/all/product?seller=161abc55&view=grid";
+export const CARDTRADER_SHOP_URL = "https://www.cardtrader.com/en-US/users/victor-ivanov";
 
 // Curated structured-data topics for schema.org Person microdata.
 export const KNOWS_ABOUT: readonly string[] = [

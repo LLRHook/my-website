@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { homeBody, aboutBody, projectsBody, resumeBody, offTheClockBody, contactBody, notFoundBody, tokenBurner, formatTokens, formatUsd, formatDay } from "./pages";
+import { homeBody, aboutBody, projectsBody, resumeBody, shopBody, contactBody, notFoundBody, tokenBurner, formatTokens, formatUsd, formatDay } from "./pages";
 import type { TokenStats } from "./tokenStats";
 import type { RepoSummary } from "./types";
 
@@ -38,7 +38,7 @@ describe("page bodies", () => {
   it("makes the repository table a named keyboard scroll target", () => {
     expect(projectsBody([repo()])).toContain('<div class="table-wrap" role="region" aria-labelledby="repositories-caption" tabindex="0"><table class="projects"><caption id="repositories-caption">Public repositories</caption>');
   });
-  it.each([homeBody, aboutBody, () => projectsBody([repo()]), resumeBody, offTheClockBody, contactBody, notFoundBody])("contains no script tags: %s", (body) => {
+  it.each([homeBody, aboutBody, () => projectsBody([repo()]), resumeBody, shopBody, contactBody, notFoundBody])("contains no script tags: %s", (body) => {
     expect(body()).not.toContain("<script");
   });
   it("marks up the home page as a WebSite and Victor as a Person", () => {
@@ -101,14 +101,15 @@ describe("page bodies", () => {
     for (const project of ["Linky", "Billington", "Citybase", "Fix YouTube"]) expect(resume).toContain(project);
     expect(resume).not.toContain("MailIt");
 
-    // Off the clock preserves temporary travel like Peru and features the TCG shop links.
-    const offTheClock = offTheClockBody();
-    expect(offTheClock).toContain("Peru");
-    expect(offTheClock).toContain('id="tcg-shop"');
-    expect(offTheClock).toContain('href="https://www.tcgplayer.com/search/all/product?seller=161abc55&amp;view=grid"');
-    expect(offTheClock).toContain('href="https://www.cardtrader.com/en-US/users/victor-ivanov"');
-    expect(offTheClock).not.toMatch(/style=/);
-    expect(offTheClock).not.toContain("\u2014");
+    // Dedicated TCG Shop page features GoStopTCG, stocked games, and both storefronts.
+    const shop = shopBody();
+    expect(shop).toContain("GoStopTCG Shop");
+    expect(shop).toContain('id="storefronts"');
+    expect(shop).toContain('href="https://www.tcgplayer.com/search/all/product?seller=161abc55&amp;view=grid"');
+    expect(shop).toContain('href="https://www.cardtrader.com/en-US/users/victor-ivanov"');
+    expect(shop).toContain("tcg-order-printer");
+    expect(shop).not.toMatch(/style=/);
+    expect(shop).not.toContain("\u2014");
   });
 });
 
