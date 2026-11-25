@@ -4,17 +4,16 @@ import { test, expect } from "@playwright/test";
 test.skip(({ browserName }) => browserName !== "chromium", "Chromium only");
 
 // Cold-load budgets against the local production server (`next start` sends HTML
-// uncompressed and static files gzipped; production brotli is smaller). Measured
-// 2026-10-12 (/projects raised to 48,000 B on 2026-11-24 after new public GitHub
-// repos, denser 90-day token-burner bars, and inlined .tcg-shop CSS pushed it to
-// ~44.5 KB uncompressed) and recorded in VERIFICATION.md; raise a budget only on purpose.
+// uncompressed and static files gzipped; production brotli is smaller). Updated
+// 2026-11-24 for the 1990s sidebar shell, /shop replacing /off-the-clock, and
+// live GitHub repo growth on /projects; raise a budget only on purpose.
 const PAGE_BUDGETS: Record<string, { requests: number; bytes: number }> = {
-  "/": { requests: 3, bytes: 40_000 },
-  "/about": { requests: 4, bytes: 75_000 },
-  "/projects": { requests: 2, bytes: 48_000 },
-  "/resume": { requests: 2, bytes: 32_000 },
-  "/off-the-clock": { requests: 3, bytes: 85_000 },
-  "/contact": { requests: 2, bytes: 26_000 },
+  "/": { requests: 3, bytes: 42_000 },
+  "/about": { requests: 3, bytes: 46_000 },
+  "/projects": { requests: 2, bytes: 52_000 },
+  "/resume": { requests: 2, bytes: 34_000 },
+  "/shop": { requests: 2, bytes: 32_000 },
+  "/contact": { requests: 2, bytes: 28_000 },
 };
 
 for (const [path, budget] of Object.entries(PAGE_BUDGETS)) {

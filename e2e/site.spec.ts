@@ -20,9 +20,10 @@ for (const item of PAGES) {
     const hash = await page.locator("head style").evaluate(async (element) => btoa(String.fromCharCode(
       ...new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(element.textContent!))))));
     expect(policy).toContain(`style-src 'sha256-${hash}'`);
-    expect(await page.locator('nav[aria-label="Site"]').evaluate((element) => getComputedStyle(element).textAlign)).toBe("center");
+    expect(await page.locator(".site-name").evaluate((element) => getComputedStyle(element).textAlign)).toBe("center");
     expect(stylesheets).toEqual([]);
-    await expect(page.locator('nav [aria-current="page"]')).toHaveText(item.label);
+    await expect(page.locator('nav[aria-label="Site"] [aria-current="page"]')).toHaveText(item.label);
+    await expect(page.locator(".webring")).toBeVisible();
     await page.setViewportSize({ width: 320, height: 700 });
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
     if (item.path === "/projects") await expect(page.getByRole("table", { name: "Public repositories" }).or(page.locator(".notice"))).toBeVisible();
@@ -31,14 +32,16 @@ for (const item of PAGES) {
 
 test("public photos are cached and the retired game bundle is gone", async ({ request }) => {
   expect((await request.get("/game/main.js")).status()).toBe(404);
-  const photo = await request.get("/peru-travel.webp");
+  const photo = await request.get("/victor-profile.jpg");
   expect(photo.status()).toBe(200);
   expect(photo.headers()["cache-control"]).toContain("max-age=86400");
 });
 
-test("interests redirects to off the clock", async ({ page }) => {
-  await page.goto("/interests");
-  await expect(page).toHaveURL(/\/off-the-clock$/);
+test("retired personal routes redirect to TCG Shop", async ({ page }) => {
+  for (const oldPath of ["/interests", "/off-the-clock"]) {
+    await page.goto(oldPath);
+    await expect(page).toHaveURL(/\/shop$/);
+  }
 });
 test("unknown routes return a readable 404", async ({ page }) => {
   expect((await page.goto("/nope"))?.status()).toBe(404);
@@ -103,12 +106,13 @@ test("no page reports a Content Security Policy violation", async ({ page }) => 
   }
   expect(errors.filter((text) => /Content Security Policy/i.test(text))).toEqual([]);
 });
-test("off the clock features the GoStopTCG shop links without inline styles", async ({ page }) => {
-  await page.goto("/off-the-clock");
+test("TCG Shop page features GoStopTCG storefronts and games without inline styles", async ({ page }) => {
+  await page.goto("/shop");
   const shop = page.locator("section.tcg-shop");
-  await expect(shop.getByRole("heading", { name: "GoStopTCG Shop" })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1, name: "GoStopTCG Shop" })).toBeVisible();
   await expect(shop.getByRole("link", { name: /TCGplayer/ })).toHaveAttribute("href", "https://www.tcgplayer.com/search/all/product?seller=161abc55&view=grid");
   await expect(shop.getByRole("link", { name: /CardTrader/ })).toHaveAttribute("href", "https://www.cardtrader.com/en-US/users/victor-ivanov");
+  await expect(page.getByRole("table", { name: "Games stocked at GoStopTCG" })).toBeVisible();
   await expect(page.locator("[style]")).toHaveCount(0);
   expect(await shop.evaluate((element) => getComputedStyle(element).backgroundColor)).toBe("rgb(244, 241, 230)");
 });

@@ -42,7 +42,10 @@ const nextConfig = {
     STYLE_CSS,
   },
   async redirects() {
-    return [{ source: "/interests", destination: "/off-the-clock", permanent: true }];
+    return [
+      { source: "/interests", destination: "/shop", permanent: true },
+      { source: "/off-the-clock", destination: "/shop", permanent: true },
+    ];
   },
   async headers() {
     return [
@@ -51,7 +54,7 @@ const nextConfig = {
         headers: securityHeaders,
       },
       // Instant navigation: Chromium prerenders hovered links (see app/speculation-rules).
-      ...["/", "/about", "/projects", "/resume", "/off-the-clock", "/contact"].map((source) => ({
+      ...["/", "/about", "/projects", "/resume", "/shop", "/contact"].map((source) => ({
         source,
         headers: [{ key: "Speculation-Rules", value: '"/speculation-rules"' }],
       })),
