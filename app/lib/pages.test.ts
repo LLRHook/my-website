@@ -68,8 +68,9 @@ describe("page bodies", () => {
     const home = homeBody();
     const about = aboutBody();
     const resume = resumeBody();
+    // Home and About keep a state-level location; the resume shows Sterling, VA (owner, 2026-11-27).
+    for (const html of [home, about]) expect(html).not.toContain("Sterling");
     for (const html of [home, about, resume]) {
-      expect(html).not.toContain("Sterling");
       expect(html).not.toContain("Expected December 2027");
       expect(html).not.toContain("Systems &amp; Architecture");
       expect(html).not.toMatch(/eligib/i);
@@ -96,7 +97,9 @@ describe("page bodies", () => {
     expect(about).not.toContain("conference-photo.jpg");
     expect(about).not.toContain("At the podium");
 
-    expect(resume).toContain("Active DoD Secret clearance");
+    expect(resume).toContain("Active DoD Secret Clearance");
+    expect(resume).toContain("Sterling,&nbsp;VA");
+    expect(resume).toContain("(SCCI) | Dahlgren,&nbsp;VA | ");
     expect(resume).toContain("Secret-cleared");
     expect(resume).toContain("U.S. Citizen");
     expect(resume).toContain("Southeastern Computer Consultants, Inc. (SCCI)");
@@ -105,7 +108,6 @@ describe("page bodies", () => {
     expect(resume).not.toContain("May 2024–Present");
     expect(resume).toContain("Artificial Intelligence");
     expect(resume).toContain("in progress");
-    expect(resume).toContain("2019–2024");
     expect(resume).toContain("Updated November 2026.");
     for (const project of ["Linky", "Billington", "Citybase", "Fix YouTube"]) expect(resume).toContain(project);
     expect(resume).not.toContain("MailIt");

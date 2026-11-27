@@ -110,12 +110,12 @@ the end of their section, sorted by id on read.
 ### [BUG-1795799183] Resume page and PDF do not match the owner's resume and render poorly
 - [x] **Severity:** med
 - **Area:** content, frontend, resume
-- **File(s):** app/lib/pages.ts, app/lib/pages.test.ts, public/retro.css, scripts/render-resume.mjs, public/Victor_Ivanov_Resume.pdf
+- **File(s):** app/lib/pages.ts, app/lib/pages.test.ts, public/retro.css, public/Victor_Ivanov_Resume.pdf, scripts/render-resume.mjs, package.json, README.md
 - **Observation:** `/resume` rendered as a generic retro article (Times, dates and education years on their own lines, skills last, a placeholder SCCI bullet), and `public/Victor_Ivanov_Resume.pdf` was a scaled print of that page, so neither looked like or matched the owner's one-page application resume (Arial, header lines `Title | Company | Location | Dates`, skills first).
-- **Expected:** `/resume` and the PDF follow the application resume's layout, section order and wording, keeping the site's public rules: no phone number, Virginia-level location, no internal product names, no MailIt, Georgia Tech Artificial Intelligence track.
-- **Repro / Notes:** Compare `/resume` and the downloaded PDF with the owner's current `VI_Resume.pdf`.
+- **Expected:** The site serves the public copy of the owner's resume as the PDF, and `/resume` shows the same content in the same layout.
+- **Repro / Notes:** Compare `/resume` and the downloaded PDF with the owner's current `VI_Resume.pdf`. Owner decisions 2026-11-27: the public copy keeps Sterling, VA and drops the phone number (this supersedes FEAT-1795547687's no-Sterling rule for the resume only; home, about, metadata and microdata stay at Virginia); MailIt stays off and the resume lists Linky, Billington, Citybase and Fix YouTube; Georgia Tech is the Artificial Intelligence track, in progress.
 - **Bump:** patch
-- **Fix:** `resumeBody()` renders the resume as an Arial letter sheet with the application resume's order (skills, experience, practicum, projects, education), header lines, SCCI bullets and Citybase/Fix YouTube wording. `public/retro.css` styles the sheet on screen (desktop and phone) and prints it with the source resume's point sizes on a Letter page. `scripts/render-resume.mjs` uses the CSS page size and refuses a PDF that is not one page; the PDF was regenerated. Unit tests cover section order, header format, and no phone or internal names.
+- **Fix:** The owner's resume source now also builds `VI_Resume_Public` (no phone, no internal product names); that one-page PDF is `public/Victor_Ivanov_Resume.pdf`. `resumeBody()` renders the same content as an Arial letter sheet, styled for desktop, phone and print in `public/retro.css`. `scripts/render-resume.mjs` and `npm run resume-pdf` are removed so the HTML can no longer overwrite the owner's PDF. Unit tests cover section order, header format, Sterling only on the resume, and no phone or internal names.
 - **Status:** fixed-pending-migration
 
 ### [BUG-1795799184] WebKit mobile cannot keyboard-scroll the token burner daily table

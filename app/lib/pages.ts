@@ -215,9 +215,9 @@ export function notFoundBody(): string {
   return '<h1>404: Page Not Found</h1><p>This page has moved, or it never existed.</p><p><a href="/">Back to the home page</a></p>';
 }
 
-// Mirrors the owner's one-page application resume (letter, Arial): same section
-// order, header lines and bullets. Public copy omits the phone number, uses
-// "Virginia" for location, and keeps internal product names out.
+// Mirrors public/Victor_Ivanov_Resume.pdf, the public copy of the owner's resume
+// (VI_Resume_Public from the owner's build_resume.py): same sections, header lines
+// and bullets. The public copy omits the phone number and internal product names.
 const RESUME_SKILLS: readonly (readonly [string, string])[] = [
   ["Frontend", "TypeScript/JavaScript, React, Next.js 16, Vite, HTML/CSS, React Query, Playwright, Vitest"],
   ["Backend", "Java 21, Spring Boot 3, Spring Security, JPA/Hibernate, Python, FastAPI, Go, REST, WebSockets/STOMP"],
@@ -226,7 +226,7 @@ const RESUME_SKILLS: readonly (readonly [string, string])[] = [
 ];
 
 const RESUME_JOBS: readonly (readonly [string, readonly string[]])[] = [
-  ["Software Developer | Southeastern Computer Consultants, Inc. (SCCI) | Virginia | Oct 2026–Present", [
+  ["Software Developer | Southeastern Computer Consultants, Inc. (SCCI) | Dahlgren, VA | Oct 2026–Present", [
     "Design, develop, integrate, test, and deploy software for a DoD program on a Secret-cleared Agile engineering team.",
     "Contribute to system design; write and run test cases, analyze test data, debug anomalies, and document results.",
   ]],
@@ -259,14 +259,15 @@ const RESUME_PROJECTS: readonly (readonly [string, string, string, string])[] = 
 
 const RESUME_EDUCATION: readonly (readonly [string, string])[] = [
   ["Georgia Institute of Technology", "M.S. Computer Science, Artificial Intelligence (online; in progress)"],
-  ["University of Maryland, Baltimore County", "B.S. Computer Science (2019–2024)"],
+  ["University of Maryland, Baltimore County", "B.S. Computer Science"],
 ];
 
 export function resumeBody(): string {
   const bar = "&nbsp;&nbsp;|&nbsp; "; // lines wrap only after a bar, never before one
+  const place = (text: string) => esc(text).replace(/, VA\b/g, ",&nbsp;VA"); // never split "Sterling, VA"
   const job = ([header, bullets]: readonly [string, readonly string[]]) => {
     const split = header.lastIndexOf(" | ");
-    return `<h4 class="job">${esc(header.slice(0, split + 3))}<span class="dates">${esc(header.slice(split + 3))}</span></h4><ul>${bullets.map((bullet) => `<li>${esc(bullet)}</li>`).join("")}</ul>`;
+    return `<h4 class="job">${place(header.slice(0, split + 3))}<span class="dates">${esc(header.slice(split + 3))}</span></h4><ul>${bullets.map((bullet) => `<li>${esc(bullet)}</li>`).join("")}</ul>`;
   };
   const contact = [
     `<a href="${esc(EMAIL_HREF)}">victor.n.ivanov@gmail.com</a>`,
@@ -278,7 +279,7 @@ export function resumeBody(): string {
     + `<article class="sheet" aria-label="Resume of Victor Ivanov">`
     + `<h2 class="name">VICTOR IVANOV</h2>`
     + `<p class="contact">${contact}</p>`
-    + `<p class="contact">${["U.S. Citizen", "Active DoD Secret clearance", "Virginia", "Open to on-site/hybrid work and customer travel"].map(esc).join(bar)}</p>`
+    + `<p class="contact">${["U.S. Citizen", "Active DoD Secret Clearance", "Sterling, VA", "Open to on-site/hybrid work and customer travel"].map(place).join(bar)}</p>`
     + `<p class="summary">${esc("Secret-cleared, backend-leaning full-stack engineer with 4+ years shipping high-stakes certification SaaS. Owned a React/Spring Boot scheduling workflow end to end, carried a billing hotfix through live production validation, and built Next.js analytics and quiz experiences with explicit async, accessibility, and security controls.")}</p>`
     + `<h3>TECHNICAL SKILLS</h3>${RESUME_SKILLS.map(([label, value]) => `<p class="skill"><b>${esc(label)}:</b> ${esc(value)}</p>`).join("")}`
     + `<h3>EXPERIENCE</h3>${RESUME_JOBS.map(job).join("")}`
