@@ -81,4 +81,22 @@ footer { text-align: center; font-size: 14px; }
 .burner details { margin: 8px 0; } .burner summary { cursor: pointer; color: #0000ee; text-decoration: underline; }
 @media (max-width: 680px) { body { padding: 0; } .page { border-width: 0; box-shadow: none; padding: 10px 12px; } .site-name { font-size: 24px; } .portrait { width: 80px; height: 80px; } .layout { grid-template-columns: minmax(0, 1fr); gap: 10px; } .side-nav { display: flex; flex-wrap: wrap; gap: 4px; } .side-nav li { margin: 0; } .side-links { display: flex; flex-wrap: wrap; gap: 4px 10px; } .side-status { display: none; } }
 @media (prefers-reduced-motion: reduce) { .marquee span { display: block; animation: none; padding: 0 8px; overflow: hidden; text-overflow: ellipsis; text-align: center; } .new { animation: none; } }
-@media print { html { background: #fff; background-image: none; } body { padding: 0; font-size: 9.8px; line-height: 1.24; } .page { max-width: none; border: 0; box-shadow: none; padding: 0; } .layout { display: block; } .sidebar, .webring, header, footer, hr, .marquee, nav, .buttons, .skip, .pdf-link, main.resume h1 { display: none; } main.resume h2 { font-size: 12px; margin: 6px 0 3px; } main.resume h3 { font-size: 10.5px; margin: 4px 0 1px; } main.resume p, main.resume ul { margin: 1px 0 3px; } main.resume ul { padding-left: 15px; } main.resume > div { display: flex; justify-content: space-between; align-items: baseline; } }
+.pdf-link { margin: 0 0 12px; }
+.sheet { box-sizing: border-box; max-width: 816px; margin: 0 auto; padding: 28px 34px 20px; background: #fff; color: #000; border: 1px solid #808080; box-shadow: 4px 4px 0 #808080; font: 14px/1.253 Arial, "Helvetica Neue", Helvetica, sans-serif; }
+.sheet a, .sheet a:visited { color: inherit; }
+.sheet h2, .sheet h3, .sheet h4, .sheet p, .sheet ul { margin: 0; color: #000; }
+.sheet .name { font-size: 2.263em; line-height: 1.116; text-align: center; border: 0; }
+.sheet .contact { font-size: 0.947em; line-height: 1.233; text-align: center; text-wrap: balance; }
+.sheet .dates { white-space: nowrap; }
+.sheet .summary { margin-top: 0.379em; line-height: 1.247; }
+.sheet h3 { font-size: 1.053em; line-height: 1.2; margin: 0.82em 0 0.53em; padding-bottom: 0.16em; border-bottom: 1px solid #000; }
+.sheet .skill { margin-bottom: 0.3em; }
+.sheet .job { font-size: 0.947em; line-height: 1.222; margin-bottom: 0.244em; }
+.sheet ul { list-style: none; padding: 0; margin-bottom: 0.379em; }
+.sheet li { position: relative; padding-left: 1.305em; margin-bottom: 0.368em; }
+.sheet li::before { content: "\2022"; position: absolute; left: 0.632em; }
+.sheet .proj { line-height: 1.232; margin-bottom: 0.368em; }
+.sheet .proj a { font-weight: bold; }
+.sheet .edu { line-height: 1.358; }
+@media (max-width: 680px) { .sheet { padding: 16px 12px 12px; font-size: 13.5px; box-shadow: none; } .sheet .name { font-size: 1.8em; } }
+@media print { html { background: #fff; background-image: none; } body { padding: 0; } .page { max-width: none; border: 0; box-shadow: none; padding: 0; } .layout { display: block; } .sidebar, .webring, header, footer, hr, .marquee, nav, .buttons, .skip, .pdf-link, main.resume h1 { display: none; } @page { size: letter; margin: 0; } main.resume .sheet { max-width: none; width: 8.5in; margin: 0; padding: 30.9pt 46pt 0 44.8pt; border: 0; box-shadow: none; font-size: 9.5pt; } main.resume .sheet h3 { margin: 7pt 0 4.5pt; border-bottom-width: 1pt; } main.resume .sheet li { margin-bottom: 2.4pt; } main.resume .sheet .skill { margin-bottom: 2pt; } }

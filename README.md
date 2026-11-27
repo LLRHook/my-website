@@ -156,8 +156,9 @@ Export and publication automation is tracked in
 
 ## Content and resume
 
-The HTML resume carries the November 2026 copy and links to
-`public/Victor_Ivanov_Resume.pdf`, a PDF export rendered from `/resume` with the
+The HTML resume carries the November 2026 copy, laid out like the owner's one-page
+application resume (Arial letter sheet, same section order and header lines), and links to
+`public/Victor_Ivanov_Resume.pdf`, a one-page PDF export rendered from `/resume` with the
 phone number omitted and the same public wording as the HTML. The portrait comes from the public GitHub
 profile. Public copies have no EXIF or XMP
 metadata. The original source resume files remain unchanged.

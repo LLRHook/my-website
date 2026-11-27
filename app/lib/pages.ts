@@ -215,74 +215,75 @@ export function notFoundBody(): string {
   return '<h1>404: Page Not Found</h1><p>This page has moved, or it never existed.</p><p><a href="/">Back to the home page</a></p>';
 }
 
+// Mirrors the owner's one-page application resume (letter, Arial): same section
+// order, header lines and bullets. Public copy omits the phone number, uses
+// "Virginia" for location, and keeps internal product names out.
+const RESUME_SKILLS: readonly (readonly [string, string])[] = [
+  ["Frontend", "TypeScript/JavaScript, React, Next.js 16, Vite, HTML/CSS, React Query, Playwright, Vitest"],
+  ["Backend", "Java 21, Spring Boot 3, Spring Security, JPA/Hibernate, Python, FastAPI, Go, REST, WebSockets/STOMP"],
+  ["Data & cloud", "PostgreSQL, MariaDB, Redis/Valkey, AWS (EC2, S3, RDS), Docker, Kubernetes/Helm"],
+  ["Delivery & security", "Bitbucket Pipelines, GitHub Actions, CI/CD, OAuth2/JWT, JUnit/Mockito, Testcontainers, Pytest"],
+];
+
+const RESUME_JOBS: readonly (readonly [string, readonly string[]])[] = [
+  ["Software Developer | Southeastern Computer Consultants, Inc. (SCCI) | Virginia | Oct 2026–Present", [
+    "Design, develop, integrate, test, and deploy software for a DoD program on a Secret-cleared Agile engineering team.",
+    "Contribute to system design; write and run test cases, analyze test data, debug anomalies, and document results.",
+  ]],
+  ["Senior Backend Engineer | Paradigm Testing | Remote | May 2024–Oct 2026", [
+    "Led architecture, priorities, and production readiness for three engineers across four certification SaaS products.",
+    "Owned a React/Spring Boot written-exam scheduling workflow end to end: create/edit wizards, dirty state, an ADA accommodation picker, structured 409 conflict handling, tenant-scoped CRUD, and 10 dedicated test files/classes.",
+    "Owned a billing hotfix from root cause through protected production deployment; live reconciliation corrected an undercharge and restored accurate invoicing across a large document batch.",
+    "Diagnosed a three-month multithreaded AWS file-lock failure; cut errors from 80% to near-zero for 10 organizations.",
+    "Led a monolith-to-microservices rewrite into five Spring Boot 3 services for oral/written exams, plagiarism detection, AI proctoring, and results review; the MVP serves production traffic.",
+    "Architected secure real-time exam video delivery with WebSockets/STOMP, direct-to-S3 uploads, JWT role controls, audit logs, and Valkey-backed refresh tokens.",
+    "Built merge-gated CI/CD and 550+ automated tests from zero; containerized Playwright auth, admin CRUD, and impersonation flows in Bitbucket Pipelines, supporting six releases without covered-workflow regressions.",
+    "Turned live V&V and demo findings into a fail-closed, 10-stage pilot gate spanning tenant onboarding, candidate disconnect/resume, scoring, and audit reconstruction; exposed an answer-key leak before go-live.",
+  ]],
+  ["Software Developer | Paradigm Testing | Maryland | Jun 2022–May 2024", [
+    "Built a high-stakes oral-exam platform serving 4,800+ candidates annually; led JPA adoption across 73 entities and eliminated peak-load waiting-room errors at 200+ concurrent sessions.",
+  ]],
+];
+
+const RESUME_PRACTICUM: readonly [string, readonly string[]] = ["Revature | Full-Stack Engineering Practicum | Jul–Aug 2026", [
+  "Delivered 63 merged pull requests in 22 days, including a Next.js trainer analytics dashboard with server-driven filters/paging, an accessible table equivalent for SVG analytics, independent async states, retry UX, and 27 Vitest cases.",
+  "Rebuilt the quiz flow as a server-rendered Next.js route backed by FastAPI sessions: one request per question, zero-request history navigation, ownership-checked resume, token redaction, and Playwright E2E through nginx.",
+]];
+
+const RESUME_PROJECTS: readonly (readonly [string, string, string, string])[] = [
+  ["Linky", "https://github.com/LLRHook/linky", "TypeScript, Rust, Discord API", "Hosted Discord bot (linkybot.dev) fixing social link previews across X, Instagram, TikTok, Bluesky, Reddit, and articles, with tweet and caption translation and native Rust tooling."],
+  ["Billington", "https://github.com/LLRHook/checksinmyhead", "Flutter, Next.js, Go, PostgreSQL", "Group expense-splitting platform with shared tabs, receipt scanning, multi-currency support, and settlement tracking across mobile, web, and Go services."],
+  ["Citybase", "https://github.com/LLRHook/citybase", "Electron, React, Node.js, Git, Vitest", "Desktop IDE mapping repositories into an isometric city and dispatching Claude/Codex through typed IPC; streamed, cancellable runs, persisted history, guarded Git operations, and 393 tests."],
+  ["Fix YouTube", "https://github.com/LLRHook/fix-youtube", "JavaScript, Manifest V3, Chrome/Firefox", "Zero-dependency extension for SPA-aware Shorts redirects, feed filters, focus timers, watch history, and settings import/export; validated settings, cross-browser CI, and 15 tests."],
+];
+
+const RESUME_EDUCATION: readonly (readonly [string, string])[] = [
+  ["Georgia Institute of Technology", "M.S. Computer Science, Artificial Intelligence (online; in progress)"],
+  ["University of Maryland, Baltimore County", "B.S. Computer Science (2019–2024)"],
+];
+
 export function resumeBody(): string {
-  return `<h1>Resume</h1><p class="pdf-link"><a href="/Victor_Ivanov_Resume.pdf" download>Download resume (PDF)</a></p>      <h2>${esc("Victor Ivanov")}</h2>
-      <p>${esc("Senior Full-Stack Engineer")}</p>
-      <p>${esc("\n        Virginia · U.S. Citizen · Active DoD Secret clearance · ")}<a href="${esc(EMAIL_HREF)}">${esc("victor.n.ivanov@gmail.com")}</a><br />
-        <a href="https://victorivanov.engineer" target="_blank" rel="noopener noreferrer">${esc("victorivanov.engineer")}</a>${esc(" · ")}<a href="${esc(GITHUB_HREF)}" rel="me">${esc("github.com/LLRHook")}</a>${esc(" · ")}<a href="${esc(SOCIAL_BY_ICON.linkedin.href)}" rel="me">${esc("LinkedIn")}</a>
-      </p>
-      <p>${esc("Secret-cleared, backend-leaning full-stack engineer with 4+ years shipping high-stakes certification SaaS. Owned a React/Spring Boot scheduling workflow end to end, carried a billing hotfix through live production validation, and built Next.js analytics and quiz experiences with explicit async, accessibility, and security controls. Open to on-site and hybrid roles and customer travel.")}</p>
-      <h2>${esc("Experience")}</h2>
-      <article>
-        <h3>${esc("Software Developer")}</h3><p class="when">${esc("October 2026 – present")}<br>${esc("SCCI (Southeastern Computer Consultants, Inc.) · Virginia")}</p>
-        <ul>
-          <li>${esc("Software development and engineering delivery in Virginia.")}</li>
-        </ul>
-      </article>
-      <article>
-        <h3>${esc("Senior Backend Engineer")}</h3><p class="when">${esc("May 2024 – October 2026")}<br>${esc("Paradigm Testing · Remote")}</p>
-        <ul>
-          <li>${esc("Led architecture, priorities, and production readiness for three engineers across four certification SaaS products.")}</li>
-          <li>${esc("Owned a React/Spring Boot written-exam scheduling workflow end to end: create/edit wizards, dirty state, an ADA accommodation picker, structured 409 conflict handling, tenant-scoped CRUD, and 10 dedicated test files/classes.")}</li>
-          <li>${esc("Owned a billing hotfix from root cause through protected production deployment; live reconciliation corrected an undercharge and restored accurate invoicing across a large document batch.")}</li>
-          <li>${esc("Diagnosed a three-month multithreaded AWS file-lock failure; cut errors from 80% to near-zero for 10 organizations.")}</li>
-          <li>${esc("Led a monolith-to-microservices rewrite into five Spring Boot 3 services for oral/written exams, plagiarism detection, AI proctoring, and results review; the MVP serves production traffic.")}</li>
-          <li>${esc("Architected secure real-time exam video delivery with WebSockets/STOMP, direct-to-S3 uploads, JWT role controls, audit logs, and Valkey-backed refresh tokens.")}</li>
-          <li>${esc("Partnered with a proctoring vendor and InfoSec to integrate proctoring across oral and written exam flows; authored cross-role acceptance steps and completed validation.")}</li>
-          <li>${esc("Built merge-gated CI/CD and 550+ automated tests from zero; containerized Playwright auth, admin CRUD, and impersonation flows in Bitbucket Pipelines, supporting six releases without covered-workflow regressions.")}</li>
-          <li>${esc("Turned live V&V and demo findings into a fail-closed, 10-stage pilot gate spanning tenant onboarding, candidate disconnect/resume, scoring, and audit reconstruction; exposed an answer-key leak before go-live.")}</li>
-        </ul>
-      </article>
-      <article>
-        <h3>${esc("Software Developer")}</h3><p class="when">${esc("June 2022 – May 2024")}<br>${esc("Paradigm Testing · Maryland")}</p>
-        <ul><li>${esc("Built a high-stakes oral-exam platform serving 4,800+ candidates annually; led JPA adoption across 73 entities and eliminated peak-load waiting-room errors at 200+ concurrent sessions.")}</li></ul>
-      </article>
-      <article>
-        <h3>${esc("Full-Stack Engineering Practicum")}</h3><p class="when">${esc("July – August 2026")}<br>${esc("Revature")}</p>
-        <ul>
-          <li>${esc("Delivered 63 merged pull requests in 22 days, including a Next.js trainer analytics dashboard with server-driven filters/paging, an accessible table equivalent for SVG analytics, independent async states, retry UX, and 27 Vitest cases.")}</li>
-          <li>${esc("Rebuilt the quiz flow as a server-rendered Next.js route backed by FastAPI sessions: one request per question, zero-request history navigation, ownership-checked resume, token redaction, and Playwright E2E through nginx.")}</li>
-        </ul>
-      </article>
-      <h2>${esc("Selected projects")}</h2>
-      <article>
-        <h3><a href="https://github.com/LLRHook/linky" target="_blank" rel="noopener noreferrer">${esc("Linky")}</a></h3>
-        <p>${esc("TypeScript, Rust, Discord API")}</p>
-        <ul><li>${esc("Hosted Discord bot (linkybot.dev) fixing social link previews across X, Instagram, TikTok, Bluesky, Reddit, and articles, with tweet and caption translation and native Rust tooling.")}</li></ul>
-      </article>
-      <article>
-        <h3><a href="https://github.com/LLRHook/checksinmyhead" target="_blank" rel="noopener noreferrer">${esc("Billington")}</a></h3>
-        <p>${esc("Flutter, Next.js, Go, PostgreSQL")}</p>
-        <ul><li>${esc("Group expense-splitting platform with shared tabs, receipt scanning, multi-currency support, and settlement tracking across mobile, web, and Go services.")}</li></ul>
-      </article>
-      <article>
-        <h3><a href="https://github.com/LLRHook/citybase" target="_blank" rel="noopener noreferrer">${esc("Citybase")}</a></h3>
-        <p>${esc("Electron, React, Node.js, Rust")}</p>
-        <ul><li>${esc("Desktop IDE mapping repositories into an isometric city and dispatching Claude/Codex through typed IPC; streamed, cancellable runs, persisted history, guarded Git operations, and native snapshot processing.")}</li></ul>
-      </article>
-      <article>
-        <h3><a href="https://github.com/LLRHook/fix-youtube" target="_blank" rel="noopener noreferrer">${esc("Fix YouTube")}</a></h3>
-        <p>${esc("JavaScript, Manifest V3")}</p>
-        <ul><li>${esc("Zero-dependency extension for SPA-aware Shorts redirects, feed filters, focus timers, watch history, and settings import/export with cross-browser CI.")}</li></ul>
-      </article>
-      <h2>${esc("Education")}</h2>
-      <div><div><h3>${esc("Georgia Institute of Technology")}</h3><p>${esc("M.S. Computer Science, Artificial Intelligence (online)")}</p></div><span>${esc("In progress")}</span></div>
-      <div><div><h3>${esc("University of Maryland, Baltimore County")}</h3><p>${esc("B.S. Computer Science")}</p></div><span>${esc("2019 – 2024")}</span></div>
-      <h2>${esc("Technical skills")}</h2>
-      <p><strong>${esc("Frontend:")}</strong>${esc(" TypeScript/JavaScript, React, Next.js 16, Vite, HTML/CSS, React Query, Playwright, Vitest")}</p>
-      <p><strong>${esc("Backend:")}</strong>${esc(" Java 21, Spring Boot 3, Spring Security, JPA/Hibernate, Python, FastAPI, Go, Rust, REST, WebSockets/STOMP")}</p>
-      <p><strong>${esc("Data & cloud:")}</strong>${esc(" PostgreSQL, MariaDB, Redis/Valkey, AWS (EC2, S3, RDS), Docker, Kubernetes/Helm")}</p>
-      <p><strong>${esc("Delivery & security:")}</strong>${esc(" Bitbucket Pipelines, GitHub Actions, CI/CD, OAuth2/JWT, JUnit/Mockito, Testcontainers, Pytest")}</p>
-      <p>${esc("Updated November 2026.")}</p>
-`;
+  const bar = "&nbsp;&nbsp;|&nbsp; "; // lines wrap only after a bar, never before one
+  const job = ([header, bullets]: readonly [string, readonly string[]]) => {
+    const split = header.lastIndexOf(" | ");
+    return `<h4 class="job">${esc(header.slice(0, split + 3))}<span class="dates">${esc(header.slice(split + 3))}</span></h4><ul>${bullets.map((bullet) => `<li>${esc(bullet)}</li>`).join("")}</ul>`;
+  };
+  const contact = [
+    `<a href="${esc(EMAIL_HREF)}">victor.n.ivanov@gmail.com</a>`,
+    `<a href="${esc(SOCIAL_BY_ICON.linkedin.href)}" rel="me">LinkedIn</a>`,
+    `<a href="${esc(GITHUB_HREF)}" rel="me">GitHub</a>`,
+    `<a href="${esc(SITE_URL)}/">victorivanov.engineer</a>`,
+  ].join(bar);
+  return `<h1>Resume</h1><p class="pdf-link"><a href="/Victor_Ivanov_Resume.pdf" download>Download resume (PDF)</a> &middot; Updated November 2026.</p>`
+    + `<article class="sheet" aria-label="Resume of Victor Ivanov">`
+    + `<h2 class="name">VICTOR IVANOV</h2>`
+    + `<p class="contact">${contact}</p>`
+    + `<p class="contact">${["U.S. Citizen", "Active DoD Secret clearance", "Virginia", "Open to on-site/hybrid work and customer travel"].map(esc).join(bar)}</p>`
+    + `<p class="summary">${esc("Secret-cleared, backend-leaning full-stack engineer with 4+ years shipping high-stakes certification SaaS. Owned a React/Spring Boot scheduling workflow end to end, carried a billing hotfix through live production validation, and built Next.js analytics and quiz experiences with explicit async, accessibility, and security controls.")}</p>`
+    + `<h3>TECHNICAL SKILLS</h3>${RESUME_SKILLS.map(([label, value]) => `<p class="skill"><b>${esc(label)}:</b> ${esc(value)}</p>`).join("")}`
+    + `<h3>EXPERIENCE</h3>${RESUME_JOBS.map(job).join("")}`
+    + `<h3>FULL-STACK ENGINEERING PRACTICUM</h3>${job(RESUME_PRACTICUM)}`
+    + `<h3>SELECTED PROJECTS</h3>${RESUME_PROJECTS.map(([name, href, stack, text]) => `<p class="proj"><a href="${esc(href)}">${esc(name)}</a><b> | ${esc(stack)}:</b> ${esc(text)}</p>`).join("")}`
+    + `<h3>EDUCATION</h3>${RESUME_EDUCATION.map(([school, degree]) => `<p class="edu"><b>${esc(school)}</b> | ${esc(degree)}</p>`).join("")}`
+    + `</article>`;
 }

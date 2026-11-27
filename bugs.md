@@ -107,6 +107,27 @@ the end of their section, sorted by id on read.
 - **Fix:** Updated `/`, `/about`, `/resume`, `personMicrodata()`, and the regenerated `public/Victor_Ivanov_Resume.pdf` so SCCI is listed as the current role (October 2026–present) and Paradigm Testing is listed as May 2024–October 2026. Added unit regressions in `app/lib/html.test.ts` and `app/lib/pages.test.ts`.
 - **Status:** fixed-pending-migration
 
+### [BUG-1795799183] Resume page and PDF do not match the owner's resume and render poorly
+- [x] **Severity:** med
+- **Area:** content, frontend, resume
+- **File(s):** app/lib/pages.ts, app/lib/pages.test.ts, public/retro.css, scripts/render-resume.mjs, public/Victor_Ivanov_Resume.pdf
+- **Observation:** `/resume` rendered as a generic retro article (Times, dates and education years on their own lines, skills last, a placeholder SCCI bullet), and `public/Victor_Ivanov_Resume.pdf` was a scaled print of that page, so neither looked like or matched the owner's one-page application resume (Arial, header lines `Title | Company | Location | Dates`, skills first).
+- **Expected:** `/resume` and the PDF follow the application resume's layout, section order and wording, keeping the site's public rules: no phone number, Virginia-level location, no internal product names, no MailIt, Georgia Tech Artificial Intelligence track.
+- **Repro / Notes:** Compare `/resume` and the downloaded PDF with the owner's current `VI_Resume.pdf`.
+- **Bump:** patch
+- **Fix:** `resumeBody()` renders the resume as an Arial letter sheet with the application resume's order (skills, experience, practicum, projects, education), header lines, SCCI bullets and Citybase/Fix YouTube wording. `public/retro.css` styles the sheet on screen (desktop and phone) and prints it with the source resume's point sizes on a Letter page. `scripts/render-resume.mjs` uses the CSS page size and refuses a PDF that is not one page; the PDF was regenerated. Unit tests cover section order, header format, and no phone or internal names.
+- **Status:** fixed-pending-migration
+
+### [BUG-1795799184] WebKit mobile cannot keyboard-scroll the token burner daily table
+- [ ] **Severity:** low
+- **Area:** frontend, a11y, tests
+- **File(s):** app/lib/pages.ts, public/retro.css, e2e/site.spec.ts
+- **Observation:** `e2e/site.spec.ts` "the daily table can be reached and scrolled with the keyboard" fails on `webkit-mobile`: the region's `scrollLeft` stays 0 (line 151). It fails on unmodified `main` at `c5ed402` too; the other 44 E2E tests pass.
+- **Expected:** The focused table region scrolls horizontally with the arrow keys on mobile WebKit, as on Chromium.
+- **Repro / Notes:** `npx playwright test -g "daily table"` against a local production build.
+- **Bump:** patch
+- **Status:** open
+
 ## Migrated to changelog
 
 Entries below have been ticked off and copied as a one-liner into `CHANGELOG.md`.

@@ -17,13 +17,13 @@ try {
     throw new Error("The local build did not return the resume page; PDF left unchanged.");
   }
   await page.emulateMedia({ media: "print" });
-  const pdf = await page.pdf({
-    format: "Letter",
-    scale: 0.94,
-    printBackground: false,
-    tagged: true,
-    margin: { top: "0.35in", bottom: "0.35in", left: "0.4in", right: "0.4in" },
-  });
+  // Letter size and margins come from the print stylesheet (@page), which lays the
+  // sheet out like the owner's one-page application resume.
+  const pdf = await page.pdf({ preferCSSPageSize: true, printBackground: false, tagged: true });
+  const pages = (pdf.toString("latin1").match(/\/Type\s*\/Page[^s]/g) ?? []).length;
+  if (pages !== 1) {
+    throw new Error(`The resume PDF must be one page; it rendered ${pages}. PDF left unchanged.`);
+  }
   const output = fileURLToPath(new URL("../public/Victor_Ivanov_Resume.pdf", import.meta.url));
   await writeFile(output, pdf);
   console.log(`Generated public/Victor_Ivanov_Resume.pdf from local /resume HTML (${pdf.length} bytes).`);
