@@ -53,6 +53,14 @@ describe("page bodies", () => {
   it("marks up About as a ProfilePage whose main entity is Victor", () => {
     expect(aboutBody()).toMatch(/itemtype="https:\/\/schema\.org\/ProfilePage"><div itemprop="mainEntity" itemscope itemtype="https:\/\/schema\.org\/Person"/);
   });
+  it("lays the resume out like the one-page application resume", () => {
+    const resume = resumeBody();
+    expect(resume).toContain('<article class="sheet" aria-label="Resume of Victor Ivanov"><h2 class="name">VICTOR IVANOV</h2>');
+    const sections = [...resume.matchAll(/<h3>([^<]+)<\/h3>/g)].map((match) => match[1]);
+    expect(sections).toEqual(["TECHNICAL SKILLS", "EXPERIENCE", "FULL-STACK ENGINEERING PRACTICUM", "SELECTED PROJECTS", "EDUCATION"]);
+    expect(resume).toContain('<h4 class="job">Senior Backend Engineer | Paradigm Testing | Remote | <span class="dates">May 2024–Oct 2026</span></h4>');
+    expect(resume).not.toMatch(/style=/);
+  });
   it("links the downloadable resume PDF", () => {
     expect(resumeBody()).toContain('<a href="/Victor_Ivanov_Resume.pdf" download>');
   });
@@ -60,8 +68,9 @@ describe("page bodies", () => {
     const home = homeBody();
     const about = aboutBody();
     const resume = resumeBody();
+    // Home and About keep a state-level location; the resume shows Sterling, VA (owner, 2026-11-27).
+    for (const html of [home, about]) expect(html).not.toContain("Sterling");
     for (const html of [home, about, resume]) {
-      expect(html).not.toContain("Sterling");
       expect(html).not.toContain("Expected December 2027");
       expect(html).not.toContain("Systems &amp; Architecture");
       expect(html).not.toMatch(/eligib/i);
@@ -88,18 +97,23 @@ describe("page bodies", () => {
     expect(about).not.toContain("conference-photo.jpg");
     expect(about).not.toContain("At the podium");
 
-    expect(resume).toContain("Active DoD Secret clearance");
+    expect(resume).toContain("Active DoD Secret Clearance");
+    expect(resume).toContain("Sterling,&nbsp;VA");
+    expect(resume).toContain("(SCCI) | Dahlgren,&nbsp;VA | ");
     expect(resume).toContain("Secret-cleared");
     expect(resume).toContain("U.S. Citizen");
-    expect(resume).toContain("SCCI (Southeastern Computer Consultants, Inc.)");
-    expect(resume).toContain("October 2026 – present");
-    expect(resume).toContain("May 2024 – October 2026");
+    expect(resume).toContain("Southeastern Computer Consultants, Inc. (SCCI)");
+    expect(resume).toContain("Oct 2026–Present");
+    expect(resume).toContain("May 2024–Oct 2026");
+    expect(resume).not.toContain("May 2024–Present");
     expect(resume).toContain("Artificial Intelligence");
-    expect(resume).toContain("In progress");
-    expect(resume).toContain("2019 – 2024");
+    expect(resume).toContain("in progress");
     expect(resume).toContain("Updated November 2026.");
     for (const project of ["Linky", "Billington", "Citybase", "Fix YouTube"]) expect(resume).toContain(project);
     expect(resume).not.toContain("MailIt");
+    expect(resume).not.toContain("Vantage");
+    expect(resume).not.toMatch(/\d{3}-\d{3}-\d{4}/);
+    expect(resume).not.toContain("\u2014");
 
     // Dedicated TCG Shop page features GoStopTCG, stocked games, and both storefronts.
     const shop = shopBody();
